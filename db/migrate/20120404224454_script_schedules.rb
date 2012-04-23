@@ -1,7 +1,8 @@
 class ScriptSchedules < ActiveRecord::Migration
   def up
     sql <<-SQL
-      create table script_affinities
+      create schema script_scheduler;
+      create table script_scheduler.affinities
       (
           id                   serial not null primary key,
           created_at           timestamp not null default now(),
@@ -9,8 +10,8 @@ class ScriptSchedules < ActiveRecord::Migration
           selectable           boolean not null default true,
           affinity_name        text not null unique
       );
-      insert into script_affinities (affinity_name) values ('normal'), ('canary'), ('perenial');
-      create table script_affinity_slots
+      insert into script_scheduler.affinities (affinity_name) values ('normal'), ('canary'), ('perenial');
+      create table script_scheduler.affinity_slots
       (
           id                               serial not null primary key,
           created_at                       timestamp not null default now(),
@@ -18,16 +19,16 @@ class ScriptSchedules < ActiveRecord::Migration
           selectable                       boolean not null default true,
           affinity_slot_name               text not null unique
       );
-      create table script_affinity_slot_pieces
+      create table script_scheduler.affinity_slot_pieces
       (
           id                                        serial not null primary key,
           created_at                                timestamp not null default now(),
-          script_affinity_slot_id                   integer not null references script_affinity_slots,
-          script_affinity_id                        integer not null references script_affinities,
+          affinity_slot_id    		            integer not null references script_scheduler.affinity_slots,
+          affinity_id                        	    integer not null references script_scheduler.affinities,
           required                                  boolean not null default false,
-          unique (script_affinity_slot_id, script_affinity_id)
+          unique (script_scheduler.affinity_slot_id, script_scheduler.affinity_id)
       );
-      create table script_affinity_tabs
+      create table script_scheduler.affinity_tabs
       (
           id                               serial not null primary key,
           created_at                       timestamp not null default now(),
@@ -35,15 +36,15 @@ class ScriptSchedules < ActiveRecord::Migration
           selectable                       boolean not null default true,
           affinity_tab_name                text not null unique
       );
-      create table script_affinity_tab_pieces
+      create table script_scheduler.affinity_tab_pieces
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
-          script_affinity_tab_id             integer not null references script_affinity_tabs,
-          script_affinity_id                 integer not null references script_affinities,
-          unique (script_affinity_tab_id, script_affinity_id)
+          affinity_tab_id	             integer not null references script_scheduler.affinity_tabs,
+          affinity_id           	     integer not null references script_scheduler.affinities,
+          unique (affinity_tab_id, affinity_id)
       );
-      create table script_machines
+      create table script_scheduler.machines
       (
           id                         serial not null primary key,
           created_at                 timestamp not null default now(),
@@ -53,27 +54,27 @@ class ScriptSchedules < ActiveRecord::Migration
           server_note                text,
           available_for_use          boolean not null default true
       );
-      create table script_runner_machine_configurations
+      create table script_scheduler.runner_machine_configurations
       (
           id                         serial not null primary key,
           created_at                 timestamp not null default now(),
           updated_at                 timestamp,
-          script_machine_id          integer not null references script_machines,
-          script_affinity_slot_id    integer not null script_affinity_slots,
+          machine_id 		     integer not null references script_scheduler.machines,
+          affinity_slot_id    	     integer not null references script_scheduler.affinity_slots,
           enabled                    boolean not null default true,
           thread_pool_size           integer not null default 5,
           extra_arguments            text
       );
-      create table script_scheduler_machine_configurations
+      create table script_scheduler.scheduler_machine_configurations
       (
           id                         serial not null primary key,
           created_at                 timestamp not null default now(),
           updated_at                 timestamp,
-          script_machine_id          integer not null references script_machines,
+          machine_id	             integer not null references script_scheduler.machines,
           enabled                    boolean not null default false,
           extra_arguments            text
       );
-      create table script_application_tags
+      create table script_scheduler.application_tags
       (
           id                   serial not null primary key,
           created_at           timestamp not null default now(),
@@ -81,7 +82,7 @@ class ScriptSchedules < ActiveRecord::Migration
           selectable           boolean not null default true,
           application_tag_name text not null unique
       );
-      create table script_application_types
+      create table script_scheduler.application_types
       (
           id                  serial not null primary key,
           created_at          timestamp not null default now(),
@@ -91,44 +92,44 @@ class ScriptSchedules < ActiveRecord::Migration
           description         text,
           invocation_class    text not null
       );
-      create table script_applications
+      create table script_scheduler.applications
       (
           id                              serial not null primary key,
           created_at                      timestamp not null default now(),
           updated_at                      timestamp,
           deleted                         boolean not null default false,
-          script_application_type_id      integer not null references script_application_types,
+          application_type_id	          integer not null references script_scheduler.application_types,
           command                         text not null,
           title                           text not null
       );
-      create table script_application_run_groups
+      create table script_scheduler.application_run_groups
       (
           id                              serial not null primary key,
           created_at                      timestamp not null default now(),
           application_run_group_name      text unique not null
       );
-      create table script_application_run_group_restrictions
+      create table script_scheduler.application_run_group_restrictions
       (
           id                  serial not null primary key,
           created_at          timestamp not null default now(),
           restriction_name    text unique not null
       );
-      create table script_application_schedules
+      create table script_scheduler.application_schedules
       (
-          id                                serial not null primary key,
-          created_at                        timestamp not null default now(),
-          updated_at                        timestamp,
-          enabled                           boolean not null default true,
-          visible                           boolean not null default true,
-          script_application_id             integer not null references scripts,
-          script_affinity_tab_id            integer not null references script_affinity_tabs,
-          script_run_group_id               integer not null references script_run_groups,
-          script_run_group_restriction_id   integer not null references script_run_group_restrictions,
-          run_interval                      integer not null,
-          priority                          integer,
+          id                                    serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          enabled                                boolean not null default true,
+          visible                                boolean not null default true,
+          application_id                         integer not null references scheduler_scheduler.scripts,
+          affinity_tab_id                        integer not null references scheduler_scheduler.affinity_tabs,
+          application_run_group_id               integer not null references scheduler_scheduler.application_run_groups,
+          application_run_group_restriction_id   integer not null references scheduler_scheduler.application_run_group_restrictions,
+          run_interval                           integer not null,
+          priority                               integer,
           check (visible = true or enabled = false)
       );
-      create table script_application_run_history
+      create table script_scheduler.application_run_history
       (
           id                  serial not null primary key,
           created_at          timestamp not null default now(),
@@ -144,7 +145,7 @@ class ScriptSchedules < ActiveRecord::Migration
           run_requested_by    text not null,
           run_requested_from  inet not null,
           started_at          timestamp not null default now(),
-          started_on_server   integer not null references script_runner_machine_configurations,
+          started_on_server   integer not null references script_scheduler.runner_machine_configurations,
           thread_number       integer not null,
           pid                 integer not null,
           finished_at         timestamp null,
