@@ -116,7 +116,7 @@ class ScriptSchedules < ActiveRecord::Migration
       );
       create table script_scheduler.application_schedules
       (
-          id                                    serial not null primary key,
+          id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
           enabled                                boolean not null default true,
