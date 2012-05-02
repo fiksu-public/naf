@@ -1,0 +1,21 @@
+machine_configurations lists the machines and who is the top watchdog and script scheudler
+
+top machine
+  schedule new tasks
+  watch if any machine goes down
+   if any machine goes down, mark its scripts as dead, ensure if it comes back it stops its scripts
+  run applications
+   mark applications as running when run
+   mark applications as completed when completed
+
+seconady machines
+  watch top to see if it goes down
+   if it goes down, select a a new top machine, ensure top machine does not consider itself top anymore
+  run applications
+   mark applications as running when run
+   mark applications as completed when completed
+
+could there be a list of must run processes (the scheduler) and
+that it should be run on the first runner machine that can
+handle it.
+
