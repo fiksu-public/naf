@@ -6,15 +6,8 @@ gem 'rails', '3.2.3'
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
 gem 'pg', '0.13.2'
-
-gem 'json'
-gem 'formtastic', '1.2.4'
-gem 'jquery-rails', '1.0.13'
-gem 'rails3-jquery-autocomplete', '0.9.0'
-gem 'will_paginate', '3.0.pre4'
-gem 'execjs'
-gem 'therubyracer', :platforms => :ruby
-gem 'awesome_print', '0.2.1', :require => 'ap'
+gem 'log4r', '1.1.10'
+gem 'daemons'
 
 # Gems used only for assets and not required
 # in production environments by default.

@@ -1,5 +1,5 @@
 module Process::Naf
-  class Runner < Application
+  class Runner < Af::DaemonProcess
     def work
       # scheduler rope
     end

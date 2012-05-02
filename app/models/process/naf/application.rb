@@ -1,18 +1,6 @@
 module Process::Naf
-  class Application
-    def initialize
-    end
-
-    def self.run
-      new.run
-    end
-
-    def run
-      work
-    end
-
+  class Application < Af::DaemonProcess
     def work
     end
-
   end
 end

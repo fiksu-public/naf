@@ -34,7 +34,7 @@ class NafApplications < ActiveRecord::Migration
           application_run_group_restriction_name    text unique not null
       );
       insert into naf.application_run_group_restrictions (application_run_group_restriction_name) values
-         ('one at a time', 'one per machine');
+         ('no restrictions', 'one at a time', 'one per machine');
       create table naf.application_schedules
       (
           id                                     serial not null primary key,
