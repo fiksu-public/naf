@@ -1,8 +1,6 @@
 module Process:ScriptManager
   class Scheduler
     def work
-      thread_scheduling
-      thread_listener
     end
 
     def schedule_updater
