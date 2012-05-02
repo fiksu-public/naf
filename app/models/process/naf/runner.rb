@@ -1,8 +1,11 @@
 module Process::Naf
   class Runner < Af::DaemonProcess
     def initialize
-      @primary_runner = false
       @thread_pool_size = 10
+      @check_schedules_period = 1.minute
+      @check_schedules_alarm = 10.minutes
+      @check_runners_period = 5.minutes
+      @check_runners_alarm = 15.minutes
     end
 
     def work
@@ -15,31 +18,30 @@ module Process::Naf
       end
       
       while true
-        if is_primary_runner?
-          schedule_tasks
+        time = last_time_schedules_were_check
+        if time < Time.zone.now - @check_schedules_period
+          if try_lock_schedules
+            schedule_tasks
+            mark_schedules_checked
+            unlock_schedules
+          else
+            if time < Time.zone.now - @check_schedules_alarm
+              # XXX assume a machine is down and the lock is still held
+              alarm
+              unlock_schedules
+            end
+          end
+        end
+
+        time = last_time_runners_were_check
+        if check_runners
+          # XXX make sure a bunch of don't clog up if this routine takes long
           check_if_runners_are_alive
-        else
-          check_if_primary_alive
         end
         sleep(60)
       end
 
       pool.join()
     end
-
-    def is_primary_runner?
-      # lock table
-      # is there a primary runner?
-      #   yes
-      #     are we it?
-      #      yes - return true
-      #      no - ensure we don't think we are the primary; return false
-      #   no
-      #     do we think we are primary?
-      #       yes - ensure we are running as primary; return true
-      #       no - start running as primary; return true
-      # unlock table
-    end
-
   end
 end
