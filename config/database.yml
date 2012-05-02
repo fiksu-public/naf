@@ -19,19 +19,19 @@ arch_server: &arch_server
 development:
   <<: *common
   <<: *local
-  database: ss_development
+  database: naf_development
 
 staging:
   <<: *common
   <<: *local
-  database: ss_development
+  database: naf_development
 
 production:
   <<: *common
   <<: *local
-  database: ss_development
+  database: naf_development
 
 test:
   <<: *common
   <<: *local
-  database: ss_test
+  database: naf_test

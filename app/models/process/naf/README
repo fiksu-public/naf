@@ -1,4 +1,5 @@
-machine_configurations lists the machines and who is the top watchdog and script scheudler
+machine_configurations lists the machines and who is the top watchdog
+and script scheudler
 
 top machine
   schedule new tasks
