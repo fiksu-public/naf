@@ -1,11 +1,16 @@
 module Process::Naf
   class Runner < Af::DaemonProcess
+    include ::Af::QThread::Interface
+
+    attr_reader :queue
+
     def initialize
       super
       @thread_pool_size = 10
       @check_schedules_period = 1.minute
       @runner_stale_period = 10.minutes
       @loop_sleep_time = 5
+      @queue = Queue.new
     end
 
     def work
@@ -14,7 +19,7 @@ module Process::Naf
 
       logger.info "working: #{machine.inspect}"
 
-      pool = ::Af::ThreadPool.new(@thread_pool_size, ::Af::QThread)
+      pool = ::Af::ThreadPool.new(@thread_pool_size, ::Af::QThread::Base)
 
       (1..@thread_pool_size).each do |n|
         pool.process do
@@ -25,7 +30,12 @@ module Process::Naf
           end
         end
       end
-      
+
+      logger.info "kick starting"
+      pool.workers.each do |worker|
+        worker.thread.kick_start(self)
+      end
+
       while true
         machine = ::Naf::Machine.current
         if machine.nil? || !machine.enabled
@@ -62,8 +72,10 @@ module Process::Naf
           end
         end
 
-        logger.info "posting"
-        pool.workers.first.thread.post_data_message("foo bar baz")
+        while has_message?
+          message = read_message
+          logger.info "message from child: #{message.data}"
+        end
 
         sleep(@loop_sleep_time)
       end
@@ -71,7 +83,7 @@ module Process::Naf
       logger.info "runner quitting"
 
       pool.workers.each do |worker|
-        worker.request_termination
+        worker.thread.request_termination(self)
       end
 
       pool.join()
