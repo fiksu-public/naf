@@ -3,9 +3,6 @@ module Process::Naf
     def initialize
       @thread_pool_size = 10
       @check_schedules_period = 1.minute
-      @check_schedules_alarm = 10.minutes
-      @check_runners_period = 5.minutes
-      @check_runners_alarm = 15.minutes
     end
 
     def work
@@ -18,27 +15,42 @@ module Process::Naf
       end
       
       while true
-        time = last_time_schedules_were_check
-        if time < Time.zone.now - @check_schedules_period
-          if try_lock_schedules
+        machine = Naf::Machine.current
+        break unless machine.present?
+        break unless machine.enabled
+
+        time = Naf::Machine.last_time_schedules_were_checked
+        if time.nil? || time < Time.zone.now - @check_schedules_period
+          if Naf::Schedule.try_lock_schedules
+            # check scheduled tasks
+            machine.last_checked_schedules_at = Time.zone.now
+            machine.save
+            Naf::Schedule.unlock_schedules
+
             schedule_tasks
-            mark_schedules_checked
-            unlock_schedules
-          else
-            if time < Time.zone.now - @check_schedules_alarm
-              # XXX assume a machine is down and the lock is still held
-              alarm
-              unlock_schedules
+
+            # check the runner machines
+            Naf::Machine.where('enabled').each do |enabled_machine|
+              unless enabled_machine.runner_alive
+                enabled_machine.set_alive
+                enabled_machine.save
+              end
+
+              if enabled_machine.stale
+                logger.alarm "runner down #{enabled_machine.inspect}"
+                enabled_machine.enabled = false
+                enabled_machine.save
+                enabled_machine.mark_processes_as_dead
+              end
             end
           end
         end
 
-        time = last_time_runners_were_check
-        if check_runners
-          # XXX make sure a bunch of don't clog up if this routine takes long
-          check_if_runners_are_alive
-        end
         sleep(60)
+      end
+
+      pool.workers.each do |worker|
+        worker.request_termination
       end
 
       pool.join()

@@ -6,9 +6,9 @@ require 'thread'
 module Af
   class ThreadPool
     class Worker
-      def initialize
+      def initialize(thread_class = Thread)
         @mutex = Mutex.new
-        @thread = Thread.new do
+        @thread = thread_class.new do
           while true
             sleep 0.001
             block = get_block
@@ -40,13 +40,14 @@ module Af
       end
     end
 
-    attr_accessor :max_size
+    attr_accessor :max_size, :thread_class
     attr_reader :workers
 
-    def initialize(max_size = 10)
+    def initialize(max_size = 10, thread_class = Thread)
       @max_size = max_size
       @workers = []
       @mutex = Mutex.new
+      @thread_class = thread_class
     end
 
     def size
@@ -91,7 +92,7 @@ module Af
 
     def create_worker
       return nil if @workers.size >= @max_size
-      worker = Worker.new
+      worker = Worker.new(@thread_class)
       @workers << worker
       worker
     end

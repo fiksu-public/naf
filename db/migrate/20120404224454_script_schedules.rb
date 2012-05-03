@@ -14,7 +14,7 @@ class ScriptSchedules < ActiveRecord::Migration
           affinity_classification_name   text not null unique
       );
       insert into naf.affinity_classifications (affinity_classification_name) values
-        ('purpose'), ('identity'), ('application');
+        ('purpose'), ('location'), ('application');
       create table naf.affinities
       (
           id                            serial not null primary key,
@@ -71,15 +71,83 @@ class ScriptSchedules < ActiveRecord::Migration
           server_name                text,
           server_note                text,
           enabled                    boolean not null default true,
-          available_for_use          boolean not null default true,
           machine_affinity_slot_id   integer not null references naf.machine_affinity_slots,
           thread_pool_size           integer not null default 5,
-          is_primary_server          boolean not null default true
+          last_checked_schedules_at  timestamp null
       );
-      create unique index one_primary_server_udx on naf.machines (is_primary_server) where is_primary_server = true;
+      create table naf.application_types
+      (
+          id                  serial not null primary key,
+          created_at          timestamp not null default now(),
+          updated_at          timestamp,
+          enabled             boolean not null default true,
+          script_type_name    text unique not null,
+          description         text,
+          invocation_class    text not null
+      );
+      insert into naf.application_types (script_type_name, description, invocation_class) values
+        ('rails', 'ruby on rails NAF application', '::Naf::ApplicationType.rails_invocator'),
+        ('bash command', 'bash command', '::Naf::ApplicationType.bash_command_invocator'),
+        ('bash script', 'bash script', '::Naf::ApplicationType.bash_script_invocator'),
+        ('ruby', 'ruby script', '::Naf::ApplicationType.ruby_script_invocator');
+      create table naf.applications
+      (
+          id                              serial not null primary key,
+          created_at                      timestamp not null default now(),
+          updated_at                      timestamp,
+          deleted                         boolean not null default false,
+          application_type_id	          integer not null references naf.application_types,
+          command                         text not null,
+          title                           text not null
+      );
+      create table naf.application_run_groups
+      (
+          id                              serial not null primary key,
+          created_at                      timestamp not null default now(),
+          application_run_group_name      text unique not null
+      );
+      create table naf.application_run_group_restrictions
+      (
+          id                                        serial not null primary key,
+          created_at                                timestamp not null default now(),
+          application_run_group_restriction_name    text unique not null
+      );
+      insert into naf.application_run_group_restrictions (application_run_group_restriction_name) values
+         ('no restrictions', 'one at a time', 'one per machine');
+      create table naf.application_schedules
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          enabled                                boolean not null default true,
+          visible                                boolean not null default true,
+          application_id                         integer not null references naf.applications,
+          application_affinity_tab_id            integer not null references naf.application_affinity_tabs,
+          application_run_group_id               integer not null references naf.application_run_groups,
+          application_run_group_restriction_id   integer not null references naf.application_run_group_restrictions,
+          run_interval                           integer not null,
+          priority                               integer not null default 0,
+          check (visible = true or enabled = false)
+      );
+      create unique index applications_have_one_schedule_udx on naf.application_schedules (application_id) where enabled = true;
     SQL
   end
 
   def down
+    sql <<-SQL
+      drop table naf.application_schedules;
+      drop table naf.application_run_group_restrictions;
+      drop table naf.application_run_groups;
+      drop table naf.applications;
+      drop table naf.application_types;
+      drop table naf.machines;
+      drop table naf.application_affinity_tab_pieces;
+      drop table naf.application_affinity_tabs;
+      drop table naf.machine_affinity_slot_pieces;
+      drop table naf.machine_affinity_slots;
+      drop table naf.affinities;
+      drop table naf.affinity_classifications;
+      drop schema naf;
+    SQL
   end
 end

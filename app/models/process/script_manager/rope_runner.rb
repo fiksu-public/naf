@@ -37,5 +37,9 @@ module Process:ScriptManager
     def post_to_thread(thread, message)
       thread.post_message(message)
     end
+
+    def request_termination
+      post_message(Message.new(:terminate))
+    end
   end
 end
