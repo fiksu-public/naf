@@ -7,14 +7,13 @@ module Naf
 
     scope :enabled, where(:enabled => true)
     scope :local_machine, where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
-    scope :max_last_checked_schedules_at, maximum(:last_checked_schedules_at)
 
     def self.current
       return local_machine.first
     end
 
     def self.last_time_schedules_were_checked
-      return max_last_checked_schedules_at.first.last_checked_schedules_at
+      return self.maximum(:last_checked_schedules_at)
     end
 
     def mark_checked_schedule

@@ -1,4 +1,5 @@
 require 'log4r/configurator'
+#require 'log4r/formatter/patternformatter'
 
 module Af
   class DaemonProcess
@@ -30,12 +31,32 @@ module Af
       return self.class.name
     end
 
+    def log4r_custum_levels
+      Log4r::Configurator.custom_levels(:DEBUG, :INFO, :WARN, :ALARM, :ERROR, :FATAL)
+    end
+
+    def log4r_pattern_formatter_format
+      return "%l %C %M"
+    end
+
+    def log4r_formatter
+      return Log4r::PatternFormatter.new(:pattern => log4r_pattern_formatter_format)
+    end
+
+    def log4r_outputter
+      return Log4r::StdoutOutputter.new("stdout", :formatter => log4r_formatter)
+    end
+
+    def logger_level
+      return Log4r::INFO
+    end
+
     def logger
       unless @logger
-        Log4r::Configurator.custom_levels(:DEBUG, :INFO, :WARN, :ALARM, :ERROR, :FATAL)
-
+        log4r_custum_levels
         @logger = Log4r::Logger.new(name)
-        @logger.outputters = Log4r::Outputter.stdout
+        @logger.outputters = log4r_outputter
+        @logger.level = logger_level
       end
       return @logger
     end

@@ -1,9 +1,15 @@
 module Process::Naf
+  class X
+    def run
+      system("echo hi; sleep 10")
+    end
+  end
+
   class RunnerThread
     include ::Af::DaemonProcess::Proxy
 
     def self.run
-      new.run
+      return self.new.run
     end
 
     def run
@@ -18,7 +24,7 @@ module Process::Naf
     end
 
     def pick_something_off_queue
-      return nil
+      return Process::Naf::X.new
     end
   end
 end

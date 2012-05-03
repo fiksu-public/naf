@@ -18,7 +18,12 @@ module Process::Naf
 
       (1..@thread_pool_size).each do |n|
         pool.process do
-          RunnerThread.run
+          begin
+            puts "xxx"
+            Process::Naf::RunnerThread.run
+          rescue Exception => e
+            puts e.inspect
+          end
         end
       end
       
