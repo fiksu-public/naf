@@ -1,6 +1,6 @@
 module Naf
   class MachineAffinitySlot < NafBase
-    has_many :machine_affinity_slot_pieces, :class_name => '::Naf::MachineAffinitySlotPiece'
-    has_many :affinities, :through => :machine_affinity_slot_pieces
+    belongs_to :machine, :class_name => '::Naf::Machine'
+    belongs_to :affinity, :class_name => '::Naf::Affinity'
   end
 end

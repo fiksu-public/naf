@@ -29,39 +29,6 @@ class Naf < ActiveRecord::Migration
          ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'normal'),
          ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'canary'),
          ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial');
-      create table naf.machine_affinity_slots
-      (
-          id                               serial not null primary key,
-          created_at                       timestamp not null default now(),
-          updated_at                       timestamp,
-          selectable                       boolean not null default true,
-          machine_affinity_slot_name       text not null unique
-      );
-      create table naf.machine_affinity_slot_pieces
-      (
-          id                                        serial not null primary key,
-          created_at                                timestamp not null default now(),
-          machine_affinity_slot_id	            integer not null references naf.machine_affinity_slots,
-          affinity_id                        	    integer not null references naf.affinities,
-          required                                  boolean not null default false,
-          unique (machine_affinity_slot_id, affinity_id)
-      );
-      create table naf.application_affinity_tabs
-      (
-          id                               serial not null primary key,
-          created_at                       timestamp not null default now(),
-          updated_at                       timestamp,
-          selectable                       boolean not null default true,
-          application_affinity_tab_name    text not null unique
-      );
-      create table naf.application_affinity_tab_pieces
-      (
-          id                                 serial not null primary key,
-          created_at                         timestamp not null default now(),
-          application_affinity_tab_id        integer not null references naf.application_affinity_tabs,
-          affinity_id           	     integer not null references naf.affinities,
-          unique (application_affinity_tab_id, affinity_id)
-      );
       create table naf.machines
       (
           id                         serial not null primary key,
@@ -71,9 +38,18 @@ class Naf < ActiveRecord::Migration
           server_name                text,
           server_note                text,
           enabled                    boolean not null default true,
-          machine_affinity_slot_id   integer not null references naf.machine_affinity_slots,
           thread_pool_size           integer not null default 5,
-          last_checked_schedules_at  timestamp null
+          last_checked_schedules_at  timestamp null,
+          last_seen_alive_at         timestamp null
+      );
+      create table naf.machine_affinity_slots
+      (
+          id                                        serial not null primary key,
+          created_at                                timestamp not null default now(),
+          machine_id			            integer not null references naf.machines,
+          affinity_id                        	    integer not null references naf.affinities,
+          required                                  boolean not null default false,
+          unique (machine_id, affinity_id)
       );
       create table naf.application_types
       (
@@ -113,7 +89,7 @@ class Naf < ActiveRecord::Migration
           application_run_group_restriction_name    text unique not null
       );
       insert into naf.application_run_group_restrictions (application_run_group_restriction_name) values
-         ('no restrictions', 'one at a time', 'one per machine');
+         ('no restrictions'), ('one at a time'), ('one per machine');
       create table naf.application_schedules
       (
           id                                     serial not null primary key,
@@ -122,7 +98,6 @@ class Naf < ActiveRecord::Migration
           enabled                                boolean not null default true,
           visible                                boolean not null default true,
           application_id                         integer not null references naf.applications,
-          application_affinity_tab_id            integer not null references naf.application_affinity_tabs,
           application_run_group_id               integer not null references naf.application_run_groups,
           application_run_group_restriction_id   integer not null references naf.application_run_group_restrictions,
           run_interval                           integer not null,
@@ -130,24 +105,20 @@ class Naf < ActiveRecord::Migration
           check (visible = true or enabled = false)
       );
       create unique index applications_have_one_schedule_udx on naf.application_schedules (application_id) where enabled = true;
+      create table naf.application_schedule_affinity_tabs
+      (
+          id                                 serial not null primary key,
+          created_at                         timestamp not null default now(),
+          application_schedule_id 	     integer not null references naf.application_schedules,
+          affinity_id           	     integer not null references naf.affinities,
+          unique (application_schedule_id, affinity_id)
+      );
     SQL
   end
 
   def down
     sql <<-SQL
-      drop table naf.application_schedules;
-      drop table naf.application_run_group_restrictions;
-      drop table naf.application_run_groups;
-      drop table naf.applications;
-      drop table naf.application_types;
-      drop table naf.machines;
-      drop table naf.application_affinity_tab_pieces;
-      drop table naf.application_affinity_tabs;
-      drop table naf.machine_affinity_slot_pieces;
-      drop table naf.machine_affinity_slots;
-      drop table naf.affinities;
-      drop table naf.affinity_classifications;
-      drop schema naf;
+      drop schema naf cascade;
     SQL
   end
 end

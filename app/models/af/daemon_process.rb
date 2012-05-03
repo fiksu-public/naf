@@ -1,8 +1,19 @@
 module Af
   class DaemonProcess
-    include Af::CommandLineToolMixin
+    include ::Af::CommandLineToolMixin
 
     attr_accessor :has_errors, :daemon
+
+    @@singleton = nil
+
+    def self.singleton
+      fail("@@singleton not initialized! Maybe you are using a Proxy before creating an instance?") unless @@singleton
+      @@singleton
+    end
+
+    def initialize
+      @@singleton = self
+    end
 
     COMMAND_LINE_OPTIONS = {
       "--daemon" => {
@@ -59,6 +70,16 @@ module Af
     def cleanup_after_fork
       ActiveRecord::Base.connection.disconnect!
       ActiveRecord::Base.establish_connection
+    end
+
+    module Proxy
+      def logger
+        return ::Af::DaemonProcess.singleton.logger
+      end
+
+      def name
+        return ::Af::DaemonProcess.singleton.name
+      end
     end
   end
 end

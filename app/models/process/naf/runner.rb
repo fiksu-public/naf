@@ -1,12 +1,15 @@
 module Process::Naf
   class Runner < Af::DaemonProcess
     def initialize
+      super
       @thread_pool_size = 10
       @check_schedules_period = 1.minute
+      @runner_stale_period = 10.minutes
+      @loop_sleep_time = 1.minute
     end
 
     def work
-      pool = Af::ThreadPool.new(@thread_pool_size)
+      pool = ::Af::ThreadPool.new(@thread_pool_size)
 
       (1..@thread_pool_size).each do |n|
         pool.process do
@@ -15,43 +18,38 @@ module Process::Naf
       end
       
       while true
-        machine = Naf::Machine.current
+        machine = ::Naf::Machine.current
         break unless machine.present?
         break unless machine.enabled
 
-        time = Naf::Machine.last_time_schedules_were_checked
-        if time.nil? || time < Time.zone.now - @check_schedules_period
-          if Naf::Schedule.try_lock_schedules
-            # check scheduled tasks
-            machine.last_checked_schedules_at = Time.zone.now
-            machine.save
-            Naf::Schedule.unlock_schedules
+        if ::Naf::Machine.it_is_time_to_check_schedules?(@check_schedules_period)
+          if ::Naf::Schedule.try_lock_schedules
+            machine.mark_checked_schedule
+            ::Naf::Schedule.unlock_schedules
 
-            schedule_tasks
+            # check scheduled tasks
+            ::Naf::ApplicationSchedule.should_be_queued do |application_schedule|
+              logger.info "schedule application: #{application_schedule.inspect}"
+            end
 
             # check the runner machines
-            Naf::Machine.where('enabled').each do |enabled_machine|
-              unless enabled_machine.runner_alive
-                enabled_machine.set_alive
-                enabled_machine.save
-              end
+            ::Naf::Machine.enabled.each do |runner_to_check|
+              runner_to_check.mark_alive if runner_to_check.runner_alive
 
-              if enabled_machine.stale
-                logger.alarm "runner down #{enabled_machine.inspect}"
-                enabled_machine.enabled = false
-                enabled_machine.save
-                enabled_machine.mark_processes_as_dead
+              if runner_to_check.is_stale?(@runner_stale_period)
+                logger.alarm "runner down #{runner_to_check.inspect}"
+                runner_to_check.mark_machine_dead
               end
             end
           end
         end
 
-        sleep(60)
+        sleep(@loop_sleep_time)
       end
 
-      pool.workers.each do |worker|
-        worker.request_termination
-      end
+#      pool.workers.each do |worker|
+#        worker.request_termination
+#      end
 
       pool.join()
     end
