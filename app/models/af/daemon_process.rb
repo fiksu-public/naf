@@ -48,7 +48,7 @@ module Af
     end
 
     def logger_level
-      return Log4r::INFO
+      return Log4r::ALL
     end
 
     def logger

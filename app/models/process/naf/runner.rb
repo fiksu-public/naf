@@ -14,15 +14,14 @@ module Process::Naf
 
       logger.info "working: #{machine.inspect}"
 
-      pool = ::Af::ThreadPool.new(@thread_pool_size)
+      pool = ::Af::ThreadPool.new(@thread_pool_size, ::Af::QThread)
 
       (1..@thread_pool_size).each do |n|
         pool.process do
           begin
-            puts "xxx"
-            Process::Naf::RunnerThread.run
+            Process::Naf::RunnerThreadMessageHandler.run
           rescue Exception => e
-            puts e.inspect
+            logger.alarm e
           end
         end
       end
@@ -63,16 +62,19 @@ module Process::Naf
           end
         end
 
+        logger.info "posting"
+        pool.workers.first.thread.post_data_message("foo bar baz")
+
         sleep(@loop_sleep_time)
       end
 
       logger.info "runner quitting"
 
-#      pool.workers.each do |worker|
-#        worker.request_termination
-#      end
+      pool.workers.each do |worker|
+        worker.request_termination
+      end
 
-#      pool.join()
+      pool.join()
     end
   end
 end

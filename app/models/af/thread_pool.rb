@@ -6,6 +6,8 @@ require 'thread'
 module Af
   class ThreadPool
     class Worker
+      attr_reader :thread
+
       def initialize(thread_class = Thread)
         @mutex = Mutex.new
         @thread = thread_class.new do
