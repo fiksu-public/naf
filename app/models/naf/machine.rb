@@ -2,19 +2,28 @@ require 'socket'
 
 module Naf
   class Machine < NafBase
-    belongs_to :machine_affinity_slot, :class_name => '::Naf::MachineAffinitySlot'
+    has_many :machine_affinity_slot, :class_name => '::Naf::MachineAffinitySlot'
+    has_many :affinities, :through => :machine_affinity_slot
 
     scope :enabled, where(:enabled => true)
-    scope :current, where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]).first
-    scope :last_time_schedules_were_checked, maximum(:last_checked_schedules_at)
+    scope :local_machine, where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
+    scope :max_last_checked_schedules_at, maximum(:last_checked_schedules_at)
+
+    def self.current
+      return local_machine.first
+    end
+
+    def self.last_time_schedules_were_checked
+      return max_last_checked_schedules_at.first.last_checked_schedules_at
+    end
 
     def mark_checked_schedule
-      last_checked_schedules_at = Time.zone.now
+      self.last_checked_schedules_at = Time.zone.now
       save
     end
 
     def mark_alive
-      last_seen_alive_at = Time.zone.now
+      self.last_seen_alive_at = Time.zone.now
       save
     end
 
@@ -23,13 +32,13 @@ module Naf
       return true
     end
 
-    def self.it_is_time_to_check_schedules?(check_period)
+    def self.is_it_time_to_check_schedules?(check_period)
       time = Naf::Machine.last_time_schedules_were_checked
       return time.nil? || time < (Time.zone.now - check_period)
     end
 
     def is_stale?(period)
-      return last_seen_alive_at.nil? || last_seen_alive_at < (Time.zone.now - check_period)
+      return self.last_seen_alive_at.nil? || self.last_seen_alive_at < (Time.zone.now - period)
     end
 
     def mark_processes_as_dead
@@ -37,7 +46,7 @@ module Naf
     end
 
     def mark_machine_dead
-      enabled = false
+      self.enabled = false
       save
       mark_processes_as_dead
     end

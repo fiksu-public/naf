@@ -5,10 +5,15 @@ module Process::Naf
       @thread_pool_size = 10
       @check_schedules_period = 1.minute
       @runner_stale_period = 10.minutes
-      @loop_sleep_time = 1.minute
+      @loop_sleep_time = 5
     end
 
     def work
+      machine = ::Naf::Machine.current
+      machine.mark_alive if machine.present?
+
+      logger.info "working: #{machine.inspect}"
+
       pool = ::Af::ThreadPool.new(@thread_pool_size)
 
       (1..@thread_pool_size).each do |n|
@@ -19,13 +24,17 @@ module Process::Naf
       
       while true
         machine = ::Naf::Machine.current
-        break unless machine.present?
-        break unless machine.enabled
+        if machine.nil? || !machine.enabled
+          logger.warn "this machine is down #{machine.inspect}"
+          break
+        end
 
-        if ::Naf::Machine.it_is_time_to_check_schedules?(@check_schedules_period)
-          if ::Naf::Schedule.try_lock_schedules
+        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period)
+          logger.debug "it's time"
+          if ::Naf::ApplicationSchedule.try_lock_schedules
+            logger.info "checking schedules"
             machine.mark_checked_schedule
-            ::Naf::Schedule.unlock_schedules
+            ::Naf::ApplicationSchedule.unlock_schedules
 
             # check scheduled tasks
             ::Naf::ApplicationSchedule.should_be_queued do |application_schedule|
@@ -34,7 +43,12 @@ module Process::Naf
 
             # check the runner machines
             ::Naf::Machine.enabled.each do |runner_to_check|
-              runner_to_check.mark_alive if runner_to_check.runner_alive
+              if runner_to_check.runner_alive
+                logger.info "runner alive #{runner_to_check.inspect}"
+                runner_to_check.mark_alive
+              else
+                logger.warn "runner not alive #{runner_to_check.inspect}"
+              end
 
               if runner_to_check.is_stale?(@runner_stale_period)
                 logger.alarm "runner down #{runner_to_check.inspect}"
@@ -47,11 +61,13 @@ module Process::Naf
         sleep(@loop_sleep_time)
       end
 
+      logger.info "runner quitting"
+
 #      pool.workers.each do |worker|
 #        worker.request_termination
 #      end
 
-      pool.join()
+#      pool.join()
     end
   end
 end

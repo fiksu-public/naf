@@ -3,11 +3,10 @@ module Naf
     include ::Af::AdvisoryLocker
 
     belongs_to :application, :class_name => '::Naf::Application'
-    belongs_to :application_affinty_tab, :class_name => '::Naf::ApplicationAffinityTab'
     belongs_to :application_run_group, :class_name => '::Naf::ApplicationRunGroup'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
-    has_many :application_affinity_tab_pieces, :through => :application_affinty_tab
-    has_many :affinities, :through => :application_affinity_tab_pieces
+    has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab'
+    has_many :affinities, :through => :application_schedule_affinity_tabs
 
     SCHEDULES_LOCK_ID = 0
 

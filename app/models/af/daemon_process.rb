@@ -1,3 +1,5 @@
+require 'log4r/configurator'
+
 module Af
   class DaemonProcess
     include ::Af::CommandLineToolMixin
@@ -13,6 +15,7 @@ module Af
 
     def initialize
       @@singleton = self
+      @logger = nil
     end
 
     COMMAND_LINE_OPTIONS = {
@@ -29,6 +32,8 @@ module Af
 
     def logger
       unless @logger
+        Log4r::Configurator.custom_levels(:DEBUG, :INFO, :WARN, :ALARM, :ERROR, :FATAL)
+
         @logger = Log4r::Logger.new(name)
         @logger.outputters = Log4r::Outputter.stdout
       end
