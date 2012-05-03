@@ -1,4 +1,4 @@
-class ScriptSchedules < ActiveRecord::Migration
+class Naf < ActiveRecord::Migration
   def up
     # affinities
     #  names: normal, canary, perennial
