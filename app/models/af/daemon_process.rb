@@ -1,5 +1,4 @@
 require 'log4r/configurator'
-#require 'log4r/formatter/patternformatter'
 
 module Af
   class DaemonProcess
