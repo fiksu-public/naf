@@ -14,7 +14,7 @@ class Naf < ActiveRecord::Migration
           affinity_classification_name   text not null unique
       );
       insert into naf.affinity_classifications (affinity_classification_name) values
-        ('purpose'), ('location'), ('application');
+        ('location'), ('purpose');
       create table naf.affinities
       (
           id                            serial not null primary key,
