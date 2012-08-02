@@ -1,5 +1,5 @@
 module Process::Naf
-  class Runner < Af::DaemonProcess
+  class Runner < ::Af::Application
     include ::Af::QThread::Interface
 
     attr_reader :queue
