@@ -1,6 +1,8 @@
 module Naf
   class NafBase < ActiveRecord::Base
-    self.table_name_prefix = 'naf.'
+    def self.full_table_name_prefix 
+      "#{JOB_SYSTEM_SCHEMA_NAME}."
+    end
     self.abstract_class = true
   end
 end

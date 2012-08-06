@@ -1,35 +1,40 @@
-class Naf < ActiveRecord::Migration
+class CreateJobSystem < ActiveRecord::Migration
+  SCHEMA_NAME = '<%= schema_name %>'
+
   def up
+    # Define a schema_name, the scheduling tables fall under:
+    schema_name = SCHEMA_NAME
+
     # affinities
     #  names: normal, canary, perennial
     #  location: ip address
     #  application/release on machine: application-release-number
     sql <<-SQL
-      create schema naf;
-      create table naf.affinity_classifications
+      create schema #{schema_name};
+      create table #{schema_name}.affinity_classifications
       (
           id                             serial not null primary key,
           created_at                     timestamp not null default now(),
           updated_at                     timestamp,
           affinity_classification_name   text not null unique
       );
-      insert into naf.affinity_classifications (affinity_classification_name) values
+      insert into #{schema_name}.affinity_classifications (affinity_classification_name) values
         ('location'), ('purpose');
-      create table naf.affinities
+      create table #{schema_name}.affinities
       (
           id                            serial not null primary key,
           created_at                    timestamp not null default now(),
           updated_at                    timestamp,
           selectable                    boolean not null default true,
-          affinity_classification_id    integer not null references naf.affinity_classifications,
+          affinity_classification_id    integer not null references #{schema_name}.affinity_classifications,
           affinity_name                 text not null,
           unique (affinity_classification_id, affinity_name)
       );
-      insert into naf.affinities (affinity_classification_id, affinity_name) values
-         ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'normal'),
-         ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'canary'),
-         ((select id from naf.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial');
-      create table naf.machines
+      insert into #{schema_name}.affinities (affinity_classification_id, affinity_name) values
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'normal'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'canary'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial');
+      create table #{schema_name}.machines
       (
           id                         serial not null primary key,
           created_at                 timestamp not null default now(),
@@ -42,16 +47,16 @@ class Naf < ActiveRecord::Migration
           last_checked_schedules_at  timestamp null,
           last_seen_alive_at         timestamp null
       );
-      create table naf.machine_affinity_slots
+      create table #{schema_name}.machine_affinity_slots
       (
           id                                        serial not null primary key,
           created_at                                timestamp not null default now(),
-          machine_id			            integer not null references naf.machines,
-          affinity_id                        	    integer not null references naf.affinities,
+          machine_id			            integer not null references #{schema_name}.machines,
+          affinity_id                        	    integer not null references #{schema_name}.affinities,
           required                                  boolean not null default false,
           unique (machine_id, affinity_id)
       );
-      create table naf.application_types
+      create table #{schema_name}.application_types
       (
           id                  serial not null primary key,
           created_at          timestamp not null default now(),
@@ -61,64 +66,91 @@ class Naf < ActiveRecord::Migration
           description         text,
           invocation_class    text not null
       );
-      insert into naf.application_types (script_type_name, description, invocation_class) values
+      insert into #{schema_name}.application_types (script_type_name, description, invocation_class) values
         ('rails', 'ruby on rails NAF application', '::Naf::ApplicationType.rails_invocator'),
         ('bash command', 'bash command', '::Naf::ApplicationType.bash_command_invocator'),
         ('bash script', 'bash script', '::Naf::ApplicationType.bash_script_invocator'),
         ('ruby', 'ruby script', '::Naf::ApplicationType.ruby_script_invocator');
-      create table naf.applications
+      create table #{schema_name}.applications
       (
           id                              serial not null primary key,
           created_at                      timestamp not null default now(),
           updated_at                      timestamp,
           deleted                         boolean not null default false,
-          application_type_id	          integer not null references naf.application_types,
+          application_type_id	          integer not null references #{schema_name}.application_types,
           command                         text not null,
           title                           text not null
       );
-      create table naf.application_run_groups
+      create table #{schema_name}.application_run_groups
       (
           id                              serial not null primary key,
           created_at                      timestamp not null default now(),
           application_run_group_name      text unique not null
       );
-      create table naf.application_run_group_restrictions
+      create table #{schema_name}.application_run_group_restrictions
       (
           id                                        serial not null primary key,
           created_at                                timestamp not null default now(),
           application_run_group_restriction_name    text unique not null
       );
-      insert into naf.application_run_group_restrictions (application_run_group_restriction_name) values
+      insert into #{schema_name}.application_run_group_restrictions (application_run_group_restriction_name) values
          ('no restrictions'), ('one at a time'), ('one per machine');
-      create table naf.application_schedules
+      create table #{schema_name}.application_schedules
       (
           id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
           enabled                                boolean not null default true,
           visible                                boolean not null default true,
-          application_id                         integer not null references naf.applications,
-          application_run_group_id               integer not null references naf.application_run_groups,
-          application_run_group_restriction_id   integer not null references naf.application_run_group_restrictions,
+          application_id                         integer not null references #{schema_name}.applications,
+          application_run_group_id               integer not null references #{schema_name}.application_run_groups,
+          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           run_interval                           integer not null,
           priority                               integer not null default 0,
           check (visible = true or enabled = false)
       );
-      create unique index applications_have_one_schedule_udx on naf.application_schedules (application_id) where enabled = true;
-      create table naf.application_schedule_affinity_tabs
+      create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
+      create table #{schema_name}.application_schedule_affinity_tabs
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
-          application_schedule_id 	     integer not null references naf.application_schedules,
-          affinity_id           	     integer not null references naf.affinities,
+          application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
+          affinity_id           	     integer not null references #{schema_name}.affinities,
           unique (application_schedule_id, affinity_id)
       );
     SQL
   end
 
   def down
+    schema_name = SCHEMA_NAME
     sql <<-SQL
-      drop schema naf cascade;
+      drop schema #{schema_name} cascade;
     SQL
+
+=begin
+    sql <<-SQL
+      drop table #{schema_name}.affinities cascade;
+      drop table #{schema_name}.affinity_classifications cascade;
+      drop table #{schema_name}.machines cascade;
+      drop table #{schema_name}.machine_affinity_slots cascade;
+      drop table #{schema_name}.applications cascade;
+      drop table #{schema_name}.application_types cascade;
+      drop table #{schema_name}.applications_run_groups cascade;
+      drop table #{schema_name}.applications_run_group_restrictions cascade;
+      drop table #{schema_name}.application_schedules cascade;
+      drop_table #{schema_name}.affinity_tabs cascade;
+      do LANGUAGE plpgsql $$
+        begin
+          if (SELECT COUNT(*) FROM pg_tables WHERE schemaname = '#{schema_name}') > 0 THEN
+            raise notice 'Keeping Schema #{schema_name}, still has some tables';
+          else 
+            raise notice 'Removing Schema #{schema_name}, since it has no tables';
+            drop schema #{schema_name} cascade;
+          end if;
+        end;
+      $$;
+    SQL
+=end
+
   end
 end

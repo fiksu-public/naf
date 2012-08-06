@@ -10,17 +10,17 @@ Gem::Specification.new do |s|
   s.license     = 'New BSD License'
   s.date        = '2012-08-02'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
-  s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable for any Rails app"
+  s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
   s.authors     = ["Keith Gabryelski", "Nathaniel Lim"]
   s.email       = ['keith@fiksu.com', 'nlim@fiksu.com']
   s.files       = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.homepage    = 'http://github.com/fiksu/naf'
 
-  s.add_dependency "rails", "~> 3.2.5"
+  s.add_dependency "rails", ">= 3.2.5"
   s.add_dependency "jquery-rails"
   s.add_development_dependency "pg"
   s.add_dependency "rspec-rails"
   s.add_dependency "foreigner"
-  s.add_dependency "af", :git => "git@github.com:fiksu/af.git"
+#  s.add_dependency "af", :git => "git@github.com:fiksu/af.git"
 end
