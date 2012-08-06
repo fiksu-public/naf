@@ -1,6 +1,6 @@
 module Process::Naf
   class RunnerThreadMessageHandler < ::Af::QThread::MessageHandler
-    include ::Af::DaemonProcess::Proxy
+    include ::Af::Application::Proxy
 
     def process_message(message)
       if message.data == :kick_start
