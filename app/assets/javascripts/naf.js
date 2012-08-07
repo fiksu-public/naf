@@ -13,6 +13,5 @@
 //= require jquery
 //= require jquery_ujs
 //= require_tree './naf'
-//= require dataTables/jquery.dataTables
 //= require_tree .
 
