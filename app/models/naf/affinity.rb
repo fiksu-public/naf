@@ -1,5 +1,5 @@
 module Naf
   class Affinity < NafBase
-    belongs_to :affinity_classification, :class_name => '::Naf::AffintyClassification'
+    belongs_to :affinity_classification, :class_name => '::Naf::AffinityClassification'
   end
 end
