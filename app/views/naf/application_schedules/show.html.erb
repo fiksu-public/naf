@@ -1,0 +1,4 @@
+<% @cols.each do |c| %>
+  <h4> <%= c %> </h4>
+  <p><%=  @application_schedule.send(c) %> </p>
+<% end %>
