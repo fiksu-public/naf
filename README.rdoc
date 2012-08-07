@@ -1,1 +1,58 @@
-== Naf, a distributed application framework for Rails
+= Naf, a Job Scheduling Rails Engine
+
+== Getting Started
+
+=== Creating Postgres-backed Rails App
+
+1. Create a new rails application (call it whatever you want, for my example it's: myapp), and enter
+
+    rails new myapp
+    
+    cd myapp
+
+2. Create a new Postgres development database
+
+    createdb -O postgres myapp_development
+
+3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem
+
+    gem 'pg'
+
+3. Edit your config/database.yml file
+
+    development:
+        username: postgres
+        host: localhost
+        database: myapp_development
+
+=== Importing Naf
+
+4. Now add Naf, and it's dependency Af to your Gemfile
+
+    gem 'af',  :git => "git@github.com:fiksu/af.git"
+    gem 'naf', :git => "git@github.com:fiksu/naf.git"
+
+5. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
+   You can provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
+
+    rails generate naf_system myapp_job_system
+
+6. This has created/edited the following files:
+
+    config/initializers/job_system_schema_initializer.rb  (Loads the schema_name)
+    config/job_system_schema_config.yml (specfies the schema_name)
+    config/initializers/extensions_migration.rb (an extension to help with migrations)
+    db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
+    config/routes.rb  (This file is edited to mount Naf as a rails engine, at the location "/job_system")
+
+7. All you have to do is to run this new migration, and you have your database all set up.
+
+    rake db:migrate
+
+8. Try running the Rails console, and see that you have the Naf models loaded.
+
+    rails console
+    Naf::Affinity.all
+
+== Using Naf
+  
