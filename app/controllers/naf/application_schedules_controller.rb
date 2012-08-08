@@ -4,7 +4,8 @@ module Naf
     before_filter :set_cols
   
     def index
-      @application_schedules = Naf::ApplicationSchedule.all
+      @rows = Naf::ApplicationSchedule.all
+      render :template => 'naf/datatable'
     end
     
     def show

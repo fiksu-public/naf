@@ -1,0 +1,106 @@
+.jTPS .sortedColumn {
+        background: #add8e6;
+}
+.jTPS tfoot .pagination .pageSelector {
+	cursor: pointer;
+	border: 1px solid #808080;
+	padding-left: 5px;
+	padding-right: 5px;
+	margin-left: 5px;
+	text-align: center;
+	float: left;
+	background: #fff;
+}
+.jTPS tfoot .pagination .pageSelectorSeperator {
+	text-align: center;
+	margin-left: 7px;
+	color: #808080;
+	float: left;
+	padding-left: 5px;
+	padding-right: 5px;
+	border-width: 1px;
+	cursor: default;
+}
+.jTPS tfoot .pagination .pageSelector:hover {
+	border: 1px solid #f90;
+}
+.jTPS tfoot .pagination .hilightPageSelector {
+	border: 1px solid #069 !important;
+	background: #069 !important;
+	color: #fff !important;
+	cursor: default !important;
+}
+.jTPS .hideTR {
+	display: none;
+}
+.jTPS .hidePageSelector {
+	display: none;
+}
+.jTPS .hilightRow {
+	background: #eee;
+	cursor: pointer;
+}
+.jTPS tfoot .selectPerPage .perPageSelector {
+	cursor: pointer;
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.jTPS tfoot .selectPerPage .perPageSelected {
+	border-bottom: 2px solid #069;
+}
+.jTPS tfoot .selectPerPage .perPageHilight {
+	border-bottom: 2px solid #f90;
+}
+.jTPS tfoot .pagination, tfoot .paginationTitle, tfoot .selectPerPage {
+	float: right;
+	white-space: nowrap;
+	line-height: 25px;
+	vertical-align: middle;
+}
+.jTPS tfoot .status {
+	white-space: nowrap;
+	line-height: 25px;
+	vertical-align: middle;
+}
+.jTPS tfoot .paginationTitle {
+	padding-left:20px;
+}
+.jTPS .sortableHeader:hover {
+	cursor: pointer;
+        background: #333;
+}
+.jTPS .sortAsc {
+	background: #069 url(bullet_arrow_up.png) center -4px no-repeat;
+}
+.jTPS .sortDesc {
+	background: #069 url(bullet_arrow_down.png) center -4px no-repeat;
+}
+.jTPS tfoot td {
+	padding: 5px;
+        background: #888;
+        color: #fff;
+}
+.jTPS thead th {
+	color: #fff;
+        background: #888;
+	border: 1px solid #000;
+	padding: 6px !important;
+}
+.jTPS tbody td {
+        margin: 0px;
+	border-bottom: 1px solid #000;
+        text-align: left;
+        padding: 5px 15px 5px 15px;
+}
+
+
+.jTPS tbody tr:hover {
+        background:  #FFFFAA;
+}
+
+.jTPS tbody tr td:not(:last-of-type):hover {
+        cursor: pointer;
+}
+
+.jTPS tr:nth-child(even) { background: #eee }
+.jTPS tr:nth-child(odd)  { background: #fff }

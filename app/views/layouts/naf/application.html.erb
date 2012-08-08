@@ -1,14 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fiksu Scheduling System</title>
+  <title>Fiksu&trade; | Job Scheduling System</title>
   <%= stylesheet_link_tag    "application", :media => "all" %>
   <%= javascript_include_tag "application" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
 
-<%= yield %>
+<table width="100%" border="0" cellspacing="0">
+
+  <tr>
+    <td colspan="2" id="header">
+      <h3>Fiksu&trade; | Job Scheduling System</h3>
+    </td>
+  </tr>
+
+<tr>
+  <td id="tabs">
+    <span id="create">  <%= generate_create_link %> </span>
+    <ul>
+      <% tabs.each do |tab| %>
+        <% if current_page? :controller => tab %>
+          <li id="on">
+        <% else %>
+          <li>
+        <% end %>
+
+          <%= generate_index_link(tab) %>
+        </li>
+      <% end %>
+    </ul>
+  </td>
+</tr>
+
+  <tr valign="top">
+    <td id="main">
+      <%= yield %>
+    </td>
+  </tr>
+
+  <tr>
+    <td colspan="2" id="footer">
+    <%= link_to "Back to your Application", "/" %>
+    </td>
+
+  </tr>
+
+</table>
+
+
+
+
 
 </body>
 </html>
