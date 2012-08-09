@@ -1,0 +1,24 @@
+<%= form_for(@classification) do |f| %>
+  
+  <% if @classification.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@classification.errors.count, "error") %> prohibited Affinity Classification from being saved:</h2>
+    
+    <ul>
+      <% @classification.errors.full_messages.each do |msg| %> 
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+ 
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :affinity_classification_name %>
+  </div>
+
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

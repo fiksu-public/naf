@@ -13,6 +13,39 @@ module Naf
       render :template => 'naf/record'
     end
     
+    def destroy
+      @run_group = Naf::ApplicationRunGroup.find(params[:id])
+      @run_group.destroy
+      redirect_to :action => 'index'
+    end
+
+    def new
+      @run_group = Naf::ApplicationRunGroup.new
+    end
+
+    def create
+     @run_group = Naf::ApplicationRunGroup.new(params[:application_run_group])
+      if @run_group.save
+        redirect_to(@run_group, :notice => 'Application Run Group  was successfully created.') 
+      else
+        render :action => "new"
+      end
+    end
+
+    def edit
+      @run_group = Naf::ApplicationRunGroup.find(params[:id])
+    end
+
+    def update
+      @run_group = Naf::ApplicationRunGroup.find(params[:id])
+      if @run_group.update_attributes(params[:application_run_group])
+        redirect_to(@run_group, :notice => 'Application Run Group was successfully updated.') 
+      else
+        render :action => "edit"
+      end
+    end
+
+
     private
     
     def set_cols_and_attributes

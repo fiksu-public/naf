@@ -1,6 +1,7 @@
-
 module Naf
   module ApplicationHelper
+
+    READ_ONLY_MODELS = ["application_types", "application_run_group_restrictions"]
     
     def tabs
       [ "applications", "application_types", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
@@ -12,7 +13,7 @@ module Naf
     end
 
     def generate_create_link
-      return "" if controller_name == "application_types"
+      return "" if READ_ONLY_MODELS.include?(controller_name)
       link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
     end
 
@@ -27,7 +28,17 @@ module Naf
     end
 
     def generate_edit_link
-      link_to "Edit", {:controller => controller_name, :action => 'edit', :id => params[:id] }
+      return "" if READ_ONLY_MODELS.include?(controller_name)
+      link_to "Edit", {:controller => controller_name, :action => 'edit', :id => params[:id] }, :class => 'edit'
+    end
+
+    def generate_back_link
+      link_to "Back", {:controller => controller_name, :action => 'index'}, :class => 'back'
+    end
+
+    def generate_destroy_link
+      return "" if READ_ONLY_MODELS.include?(controller_name)
+      link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this record", :method => :delete, :class => 'destroy'}
     end
 
   end

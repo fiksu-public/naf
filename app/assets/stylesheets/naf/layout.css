@@ -19,6 +19,21 @@ div#record {
     border: 1px solid black;
     font-size: 12px;
     padding: 20px;
+    position: relative;
+}
+
+div#record a.back {
+    float: left;
+    display: inline;
+}
+
+div#record a.edit {
+    float: right;
+}
+
+div#record a.destroy {
+    float: right;
+    display: inline;
 }
 
 h3#record_name {
@@ -92,6 +107,10 @@ td#tabs {
   border: 1px #000 solid;
   font-size: 12px;
 }
+
+div.field input[type=text] { 
+    width: 500px; 
+} 
 
 body {
   margin: 0px;

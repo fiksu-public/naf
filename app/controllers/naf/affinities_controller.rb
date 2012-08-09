@@ -12,6 +12,39 @@ module Naf
       @record = Naf::Affinity.find(params[:id])
       render :template => 'naf/record'
     end
+
+    def destroy
+      @affinity = Naf::Affinity.find(params[:id])
+      @affinity.destroy
+      redirect_to :action => 'index'
+    end
+    
+    def new
+      @affinity = Naf::Affinity.new
+    end
+    
+    def create
+      @affinity = Naf::Affinity.new(params[:affinity])
+      if  @affinity.save
+        redirect_to(@affinity, :notice => 'Affinity was successfully created.') 
+      else
+        render :action => "new"
+      end
+    end
+
+    def edit
+      @affinity = Naf::Affinity.find(params[:id])
+    end
+
+    def update
+      @affinity = Naf::Affinity.find(params[:id])
+      if @affinity.update_attributes(params[:affinity])
+        redirect_to(@affinity, :notice => 'Affinity was successfully updated.') 
+      else
+        render :action => "edit"
+      end
+    end
+    
     
     private
     

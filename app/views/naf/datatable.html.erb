@@ -2,8 +2,13 @@
 
   <thead>
     <tr>
-      <% @cols.each do |col| %>
-        <th sort="<%= col %>"><%= make_header(col) %></th>
+      
+      <% if @cols.size == 1 %>
+        <th sort="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
+      <% else %>
+        <% @cols.each do |col| %>
+          <th sort="<%= col %>"><%= make_header(col) %></th>
+        <% end %>
       <% end %>
       
       <% if current_page? :controller => 'applications', :action => 'index' %> <th width="100px"> Actions </th> <% end %>

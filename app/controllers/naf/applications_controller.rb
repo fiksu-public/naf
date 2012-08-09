@@ -14,6 +14,12 @@ module Naf
       render :template => 'naf/record'
     end
 
+    def destroy
+      @application = Naf::Application.find(params[:id])
+      @application.destroy
+      redirect_to :action => 'index'
+    end
+
     def new
       @application = Naf::Application.new
     end
@@ -30,6 +36,16 @@ module Naf
     def edit
       @application = Naf::Application.find(params[:id])
     end
+
+    def update
+      @application = Naf::Application.find(params[:id])
+      if @application.update_attributes(params[:application])
+        redirect_to(@application, :notice => 'Application was successfully updated.') 
+      else
+        render :action => "edit"
+      end
+    end
+
 
     private
 

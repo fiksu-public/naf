@@ -12,6 +12,39 @@ module Naf
       @record = Naf::AffinityClassification.find(params[:id])
       render :template => 'naf/record'
     end
+
+    def destroy
+      @classification = Naf::AffinityClassification.find(params[:id])
+      @classification.destroy
+      redirect_to :action => 'index'
+    end
+
+    def new
+      @classification = Naf::AffinityClassification.new
+    end
+    
+    def create
+      @classification = Naf::AffinityClassification.new(params[:affinity_classification])
+      if  @classification.save
+        redirect_to(@classification, :notice => 'Affinity Classification was successfully created.') 
+      else
+        render :action => "new"
+      end
+    end
+
+    def edit
+      @classification = Naf::AffinityClassification.find(params[:id])
+    end
+
+    def update
+      @classification = Naf::AffinityClassification.find(params[:id])
+      if @classification.update_attributes(params[:affinity_classification])
+        redirect_to(@classification, :notice => 'Affinity Classification was successfully updated.') 
+      else
+        render :action => "edit"
+      end
+    end
+
     
     private
     

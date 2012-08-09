@@ -2,11 +2,23 @@ require 'socket'
 
 module Naf
   class Machine < NafBase
-    has_many :machine_affinity_slot, :class_name => '::Naf::MachineAffinitySlot'
+    IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
+
+    validates :server_address, :presence => true
+    validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
+    validates :server_address, :uniqueness => true, :if => :correct_server_address?
+
+    has_many :machine_affinity_slot, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
     has_many :affinities, :through => :machine_affinity_slot
+
+    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size 
 
     scope :enabled, where(:enabled => true)
     scope :local_machine, where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
+
+    def correct_server_address?
+      server_address.present? and IP_REGEX =~ server_address
+    end
 
     def self.current
       return local_machine.first
