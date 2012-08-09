@@ -67,6 +67,9 @@
 		for ( ; stubCount < stubs && stubs != perPage; stubCount++ )
 			$('>tbody>tr:last', this).after( '<tr class="stubCell"><td colspan="' + cols + '" style="height: ' + stubHeight + ';">&nbsp;</td></tr>' );
 
+                // nlim:
+                $('.stubCell', this).remove();
+
 		// paginate the result
 		if ( rowCount > perPage && perPage != 0 )
 			$('>tbody>tr:gt(' + (perPage - 1) + ')', this).addClass('hideTR');
@@ -332,11 +335,14 @@
 			// remove the old table
 			$('>tbody.jtpstemp', target).remove();
 			// redraw stub rows
+                        /*
 			var stubCount=0, cols = $('>thead>tr:last th', target).length, 
 				stubs = ( perPage - ( $('>tbody>tr', target).length % perPage ) ), 
 				stubHeight = $('>tbody>tr:first>td:first', target).css('height');
 			for ( ; stubCount < stubs && stubs != perPage; stubCount++ )
-				$('>tbody>tr:last', target).after( '<tr class="stubCell"><td colspan="' + cols + '" style="height: ' + stubHeight + ';">&nbsp;</td></tr>' );
+				$('>tbody>tr:last', target).after( '<tr class="stubCell"><td colspan="' + cols + '" style="height: ' + stubHeight + ';">&nbsp;</td></tr>' );  
+                        */
+                        
 		}
 		// chainable
 		return this;

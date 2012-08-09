@@ -66,9 +66,9 @@
 	padding-left:20px;
 }
 .jTPS .sortableHeader:hover {
-	cursor: pointer;
-        background: #333;
+    cursor: pointer;
 }
+
 .jTPS .sortAsc {
 	background: #069 url(bullet_arrow_up.png) center -4px no-repeat;
 }
@@ -85,6 +85,7 @@
         background: #888;
 	border: 1px solid #000;
 	padding: 6px !important;
+        font-weight: normal;
 }
 .jTPS tbody td {
         margin: 0px;
@@ -98,7 +99,7 @@
         background:  #FFFFAA;
 }
 
-.jTPS tbody tr td:not(:last-of-type):hover {
+.jTPS tbody tr td:not(#action) {
         cursor: pointer;
 }
 

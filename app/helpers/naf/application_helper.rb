@@ -1,8 +1,9 @@
+
 module Naf
   module ApplicationHelper
     
     def tabs
-      [ "applications", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
+      [ "applications", "application_types", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
               "affinities", "affinity_classifications","application_run_groups", "application_run_group_restrictions"]
     end
 
@@ -11,10 +12,22 @@ module Naf
     end
 
     def generate_create_link
+      return "" if controller_name == "application_types"
+      link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
+    end
+
+    def model_name
       name_pieces = controller_name.split('_')
       name_pieces[name_pieces.size - 1] = name_pieces.last.singularize
-      link_text = "Create New " << name_pieces.map(&:capitalize).join(' ')
-      link_to link_text, {:controller => controller_name, :action => 'new'}
+      name_pieces.map(&:capitalize).join(' ')
+    end
+
+    def make_header(attribute)
+      attribute.to_s.split('_').map(&:capitalize).join(' ')
+    end
+
+    def generate_edit_link
+      link_to "Edit", {:controller => controller_name, :action => 'edit', :id => params[:id] }
     end
 
   end

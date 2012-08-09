@@ -18,16 +18,16 @@
 
 <tr>
   <td id="tabs">
-    <span id="create">  <%= generate_create_link %> </span>
     <ul>
       <% tabs.each do |tab| %>
-        <% if current_page? :controller => tab %>
+        <% if controller_name == tab %>
           <li id="on">
         <% else %>
           <li>
         <% end %>
 
           <%= generate_index_link(tab) %>
+
         </li>
       <% end %>
     </ul>
@@ -36,13 +36,16 @@
 
   <tr valign="top">
     <td id="main">
+      <% if current_page? :action => 'index' %>
+        <span id="create">  <%= generate_create_link %> </span>
+      <% end %>
       <%= yield %>
     </td>
   </tr>
 
   <tr>
     <td colspan="2" id="footer">
-    <%= link_to "Back to your Application", "/" %>
+    <%= link_to "Back to the main Rails Application", "/" %>
     </td>
 
   </tr>

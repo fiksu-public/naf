@@ -3,7 +3,7 @@
   <thead>
     <tr>
       <% @cols.each do |col| %>
-        <th sort="<%= col %>"><%= col %></th>
+        <th sort="<%= col %>"><%= make_header(col) %></th>
       <% end %>
       
       <% if current_page? :controller => 'applications', :action => 'index' %> <th width="100px"> Actions </th> <% end %>

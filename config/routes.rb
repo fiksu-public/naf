@@ -1,6 +1,7 @@
 Naf::Engine.routes.draw do
   resources :application_schedules
   resources :application_schedule_affinity_tabs
+  resources :application_types
   resources :machines
   resources :machine_affinity_slots
   resources :affinities

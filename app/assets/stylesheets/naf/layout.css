@@ -8,15 +8,26 @@
 }
 
 #main {
-  padding: 5px 0px 5px 0px;
+  padding: 5px 10px 20px 10px;
   text-align: top;
   background-color:#eeeeee;
 }
 
-#tabs span#create {
-  position: absolute;
-  right: 5px;
-  bottom: 2px;
+div#record {
+    width: 70%;
+    margin: auto;
+    border: 1px solid black;
+    font-size: 12px;
+    padding: 20px;
+}
+
+h3#record_name {
+    font-size: 20px;
+    margin: 0px;
+    text-align: center;
+}
+
+#main span#create {
   display: inline;
   font-size: 12px;
 }
@@ -41,7 +52,7 @@ td#tabs {
 
 #tabs li {
   float: left;
-  margin: 0px 5px 0px 5px;
+  margin: 0px 5px 0px 0px;
   padding: 5px;
   display: block;
   border: 1px solid black;
@@ -76,6 +87,7 @@ td#tabs {
 
 #datatable {
   margin: auto;
+  margin-top: 10px;
   background-color: #ffffff;
   border: 1px #000 solid;
   font-size: 12px;
