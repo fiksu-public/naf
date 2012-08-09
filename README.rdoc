@@ -14,23 +14,26 @@
 
     createdb -O postgres myapp_development
 
-3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem
+3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem, and the Fiksu Af gem
 
     gem 'pg'
+    gem 'af',  :git => "git@github.com:fiksu/af.git"
 
 3. Edit your config/database.yml file
 
     development:
+        adapter: postgresql
+        encoding: UTF8
         username: postgres
         host: localhost
         database: myapp_development
 
 === Importing Naf
 
-4. Now add Naf, and it's dependency Af to your Gemfile
+4. Now add Naf dependency to your Gemfile, under the :assets group
 
-    gem 'af',  :git => "git@github.com:fiksu/af.git"
-    gem 'naf', :git => "git@github.com:fiksu/naf.git"
+    gem 'naf', :git => 'git@github.com:fiksu/naf.git'
+
 
 5. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
    You can provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
@@ -53,6 +56,16 @@
 
     rails console
     Naf::Affinity.all
+
+9. Add the Naf javascript files to the asset pipeline.  In app/assets/javascripts/application.js, insert:
+    
+    //= require naf
+
+10. Add the Naf stylesheet files to the asset pipeline.  In app/assets/stylesheets/application.css, insert:
+
+     *= require naf
+
+11.  Now the Naf Job System engine should be mounted at '/job_system'
 
 == Using Naf
   

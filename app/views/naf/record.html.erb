@@ -1,0 +1,15 @@
+<div id="record">
+
+<%= generate_back_link %>
+<%= generate_edit_link %>
+
+<h3 id="record_name"><%= model_name %> </h3>
+<p id="notice"><%= notice %></p>
+
+
+<% @attributes.each do |a| %>
+  <b><%= a.to_s + ": " %> </b>  <%= @record.send(a) %><br /><br /> 
+<% end %>
+
+<%= generate_destroy_link %>
+</div>

@@ -19,7 +19,7 @@ class CreateJobSystem < ActiveRecord::Migration
           affinity_classification_name   text not null unique
       );
       insert into #{schema_name}.affinity_classifications (affinity_classification_name) values
-        ('location'), ('purpose');
+        ('location'), ('purpose'), ('application');
       create table #{schema_name}.affinities
       (
           id                            serial not null primary key,

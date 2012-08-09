@@ -1,0 +1,51 @@
+<table id="datatable" cellspacing="0">
+
+  <thead>
+    <tr>
+      
+      <% if @cols.size == 1 %>
+        <th sort="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
+      <% else %>
+        <% @cols.each do |col| %>
+          <th sort="<%= col %>"><%= make_header(col) %></th>
+        <% end %>
+      <% end %>
+      
+      <% if current_page? :controller => 'applications', :action => 'index' %> <th width="100px"> Actions </th> <% end %>
+    </tr>
+  </thead>
+
+
+  <tbody>
+    <% @rows.each do |row| %>
+      <tr data-url="<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>" >
+        <% @cols.each do |col| %>
+          <td> <%= row.send(col) %> </td>
+        <% end %>
+
+        <% if current_page? :controller => 'applications', :action => 'index' %>
+          <td id="action"> 
+            <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
+            <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Schedule Now'), "#" %>
+          </td> 
+        <% end %>
+     </tr>
+    <% end %>
+  </tbody>
+
+  <tfoot class="nav">
+    <tr>
+      <% if current_page? :controller => 'applications', :action => 'index' %> 
+        <td colspan=<%= @cols.size + 1 %>>
+      <% else %>
+        <td colspan=<%= @cols.size %>>
+      <% end %>
+        <div class="pagination"></div>
+        <div class="paginationTitle">Page</div>
+        <div class="selectPerPage"></div>
+        <div class="status"></div>
+      </td>
+    </tr>
+  </tfoot>
+
+</table>

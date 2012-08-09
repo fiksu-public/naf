@@ -1,0 +1,40 @@
+<%= form_for(@slot) do |f| %>
+  
+  <% if @slot.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@slot.errors.count, "error") %> prohibited this Machine Affinity Slot from being saved:</h2>
+    
+    <ul>
+      <% @slot.errors.full_messages.each do |msg| %> 
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+ 
+
+  <div class="field">
+    <%= f.label :machine %><br />
+    <%= f.select(:machine_id, ::Naf::Machine.all.map{ |a| 
+        [ (a.server_name and a.server_name.length > 0) ? a.server_name : a.server_address  , a.id]}, 
+        {:include_blank => true}
+    ) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :affinity %><br />
+    <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :required %>  <br />
+    <%= f.check_box :required %>
+  </div>
+    
+
+
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -22,7 +22,7 @@ class NafSystemGenerator < Rails::Generators::Base
   def add_job_system_config
     path = "#{Rails.root}/config/job_system_schema_config.yml"
     if File.exists?(path)
-      puts "Skipping config/config/job_system_schema_config.yml creation, as file already exists!"
+      puts "Skipping config/job_system_schema_config.yml creation, as file already exists!"
     else
       puts "Adding job_system_schema_config.yml initializer (config/job_system_schema_config.yml)..."
       template 'job_system_schema_config.yml', path
