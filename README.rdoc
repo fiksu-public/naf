@@ -62,6 +62,7 @@
     //= require naf
 
 10. Add the Naf stylesheet files to the asset pipeline.  In app/assets/stylesheets/application.css, insert:
+
     *= require naf
 
 11.  Now the Naf Job System engine should be mounted at '/job_system'
