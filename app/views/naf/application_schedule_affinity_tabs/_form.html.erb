@@ -14,7 +14,7 @@
  
   <div class="field">
     <%= f.label :script_title %><br />
-    <%= f.select(:application_schedule_id, ::Naf::ApplicationSchedule.all.map{ |a| [a.title, a.id]}, :include_blank => true) %>
+    <%= f.select(:application_schedule_id, ::Naf::ApplicationSchedule.where(:enabled => true).map{ |a| [a.title, a.id]}, :include_blank => true) %>
   </div>
   <div class="field">
     <%= f.label :affinity %><br />
