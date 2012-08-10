@@ -9,5 +9,5 @@ Naf::Engine.routes.draw do
   resources :application_run_groups
   resources :application_run_group_restrictions
   resources :applications
-  root :to => redirect("/job_system/applications")
+  root :to => "applications#index"
 end
