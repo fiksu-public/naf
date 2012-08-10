@@ -30,49 +30,49 @@
 
 === Importing Naf
 
-4. Now add Naf dependency to your Gemfile, under the :assets group
+1. Now add Naf dependency to your Gemfile, under the :assets group
 
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
 
-5. Now import these new gems
+2. Now import these new gems
     
     bundle install
 
-6. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
+3. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
    You can provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
 
     rails generate naf_system myapp_job_system
 
-7. This has created/edited the following files:
+4. This has created/edited the following files:
 
     config/initializers/job_system_schema_initializer.rb  (Loads the schema_name)
     config/job_system_schema_config.yml (specfies the schema_name)
     config/initializers/extensions_migration.rb (an extension to help with migrations)
     db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
-    config/routes.rb  (This file is edited to mount Naf as a rails engine, at the default location "/job_system")
+    config/routes.rb  (This file is edited to mount Naf as a rails engine, at the default path "/job_system")
 
-8. All you have to do is to run this new migration, and you have your database all set up.
+5. All you have to do is to run this new migration, and you have your database all set up.
 
     rake db:migrate
 
-9. Try running the Rails console, and see that you have the Naf models loaded.
+6. Try running the Rails console, and see that you have the Naf models loaded.
 
     rails console
     Naf::Affinity.all
 
-10.  If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_schema_initializer.rb
+7. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_schema_initializer.rb
 
     CONTROLLER_NAME_STR = "::ApplicationController"
 
-11. Add the Naf javascript files to the asset pipeline.  In app/assets/javascripts/application.js, insert:
+8. Add the Naf javascript files to the asset pipeline.  In app/assets/javascripts/application.js, insert:
     
     //= require naf
 
-12. Add the Naf stylesheet files to the asset pipeline.  In app/assets/stylesheets/application.css, insert:
+9. Add the Naf stylesheet files to the asset pipeline.  In app/assets/stylesheets/application.css, insert:
 
-     *= require naf
+    *= require naf
 
-13.  Now the Naf Job System engine should be mounted at '/job_system'
+10. Now the Naf Job System engine should be mounted at the default path '/job_system' (change this in config/routes.rb)
 
 == Using Naf
   
