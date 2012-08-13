@@ -1,5 +1,5 @@
 module Naf
-  class AffinityClassificationsController < ApplicationController
+  class AffinityClassificationsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
   
