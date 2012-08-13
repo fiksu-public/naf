@@ -1,21 +1,20 @@
+require File.expand_path(File.dirname(__FILE__) +  '/naf_generator_helper')
 require 'rails/generators'
-require 'rails/generators/migration'
 
 class NafSystemGenerator < Rails::Generators::Base
-
-  include Rails::Generators::Migration
+  include NafGeneratorHelper
 
   source_root File.expand_path("../templates", __FILE__)
 
-  argument :schema_name, :type => :string, :default => Rails.application.class.parent_name.split(/([[:upper:]][[:lower:]]*)/).delete_if(&:empty?).map(&:downcase).join('_') + '_job_system'
+  argument :schema_name, :type => :string, :default => default_postgres_schema
 
   def add_job_system_intializer
-    path = "#{Rails.root}/config/initializers/job_system_schema_initializer.rb"
+    path = "#{Rails.root}/config/initializers/job_system_initializer.rb"
     if File.exists?(path)
-      puts "Skipping config/initializers/job_system_schema_initializer.rb creation, as file already exists!"
+      puts "Skipping config/initializers/job_system_initializer.rb creation, as file already exists!"
     else
-      puts "Adding job system initializer (config/initializers/job_system_schema_initializer.rb)..."
-      template 'job_system_schema_initializer.rb', path
+      puts "Adding job system initializer (config/initializers/job_system_initializer.rb)..."
+      template 'job_system_initializer.rb', path
     end
   end
 
@@ -37,14 +36,6 @@ class NafSystemGenerator < Rails::Generators::Base
       puts "Adding migration extension for executing raw sql (config/initializers/extensions_migration.rb)..."
       template 'extensions_migration.rb', path
     end
-  end
-
-  def self.next_migration_number(path)
-    Time.now.utc.strftime("%Y%m%d%H%M%S")
-  end
-
-  def create_migration
-    migration_template('naf_schema.rb', 'db/migrate/create_job_system.rb')
   end
 
   def mount_engine

@@ -131,7 +131,7 @@ class CreateJobSystem < ActiveRecord::Migration
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text unique not null,
 
-          priorty                                integer not null default 0,
+          priority                                integer not null default 0,
           
           failed_to_start                        boolean null,
           started_at                             timestamp null,
@@ -161,31 +161,5 @@ class CreateJobSystem < ActiveRecord::Migration
     sql <<-SQL
       drop schema #{schema_name} cascade;
     SQL
-
-=begin
-    sql <<-SQL
-      drop table #{schema_name}.affinities cascade;
-      drop table #{schema_name}.affinity_classifications cascade;
-      drop table #{schema_name}.machines cascade;
-      drop table #{schema_name}.machine_affinity_slots cascade;
-      drop table #{schema_name}.applications cascade;
-      drop table #{schema_name}.application_types cascade;
-      drop table #{schema_name}.applications_run_groups cascade;
-      drop table #{schema_name}.applications_run_group_restrictions cascade;
-      drop table #{schema_name}.application_schedules cascade;
-      drop_table #{schema_name}.affinity_tabs cascade;
-      do LANGUAGE plpgsql $$
-        begin
-          if (SELECT COUNT(*) FROM pg_tables WHERE schemaname = '#{schema_name}') > 0 THEN
-            raise notice 'Keeping Schema #{schema_name}, still has some tables';
-          else 
-            raise notice 'Removing Schema #{schema_name}, since it has no tables';
-            drop schema #{schema_name} cascade;
-          end if;
-        end;
-      $$;
-    SQL
-=end
-
   end
 end

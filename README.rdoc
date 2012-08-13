@@ -41,15 +41,17 @@
 3. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
    You can provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
 
-    rails generate naf_system myapp_job_system
+    rails generate naf_system {myapp_job_system}
+    rails generate naf_system_schema
 
 4. This has created/edited the following files:
 
-    config/initializers/job_system_schema_initializer.rb  (Loads the schema_name)
+    config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/job_system_schema_config.yml (specfies the schema_name)
     config/initializers/extensions_migration.rb (an extension to help with migrations)
-    db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
     config/routes.rb  (This file is edited to mount Naf as a rails engine, at the default path "/job_system")
+
+    db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
 
 5. All you have to do is to run this new migration, and you have your database all set up.
 
