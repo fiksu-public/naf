@@ -81,12 +81,6 @@ class CreateJobSystem < ActiveRecord::Migration
           command                         text not null,
           title                           text not null
       );
-      create table #{schema_name}.application_run_groups
-      (
-          id                              serial not null primary key,
-          created_at                      timestamp not null default now(),
-          application_run_group_name      text unique not null
-      );
       create table #{schema_name}.application_run_group_restrictions
       (
           id                                        serial not null primary key,
@@ -95,6 +89,13 @@ class CreateJobSystem < ActiveRecord::Migration
       );
       insert into #{schema_name}.application_run_group_restrictions (application_run_group_restriction_name) values
          ('no restrictions'), ('one at a time'), ('one per machine');
+      create table #{schema_name}.application_run_groups
+      (
+          id                                   serial not null primary key,
+          created_at                           timestamp not null default now(),
+          application_run_group_restriction_id integer not null references application_run_group_restrictions,
+          application_run_group_name           text unique not null
+      );
       create table #{schema_name}.application_schedules
       (
           id                                     serial not null primary key,
@@ -104,7 +105,6 @@ class CreateJobSystem < ActiveRecord::Migration
           visible                                boolean not null default true,
           application_id                         integer not null references #{schema_name}.applications,
           application_run_group_id               integer not null references #{schema_name}.application_run_groups,
-          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           run_interval                           integer not null,
           priority                               integer not null default 0,
           check (visible = true or enabled = false)
@@ -117,6 +117,41 @@ class CreateJobSystem < ActiveRecord::Migration
           application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
           affinity_id           	     integer not null references #{schema_name}.affinities,
           unique (application_schedule_id, affinity_id)
+      );
+      create table #{schema_name}.jobs
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+
+          application_id                         integer not null references #{schema_name}.applications
+          application_type_id	                 integer not null references #{schema_name}.application_types,
+          command                                text not null,
+
+          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name             text unique not null,
+
+          priorty                                integer not null default 0,
+          
+          failed_to_start                        boolean null,
+          started_at                             timestamp null,
+          pid                                    integer null,
+          finished_at                            timestamp null,
+          exit_status                            integer null,
+
+          request_to_terminate                   boolean not null default false,
+          signaled_to_terminate                  boolean null,
+          termination_signal                     integer null,
+
+          started_on_machine_id                  integer not null references machines
+      );
+      create table #{schema_name}.job_affinity_tabs
+      (
+          id                                 serial not null primary key,
+          created_at                         timestamp not null default now(),
+          job_id		 	     integer not null references #{schema_name}.jobs,
+          affinity_id           	     integer not null references #{schema_name}.affinities,
+          unique (job_id, affinity_id)
       );
     SQL
   end
