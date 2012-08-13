@@ -1,5 +1,5 @@
 module Naf
-  class ApplicationRunGroupsController < ApplicationController
+  class ApplicationRunGroupsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
   

@@ -2,6 +2,8 @@ module Naf
   class Application < NafBase
     
     validates :application_type_id, :command, :title, :presence => true
+
+    validates :title, :uniqueness => true
    
     attr_accessible :title, :command, :application_type_id
 

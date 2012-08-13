@@ -1,5 +1,5 @@
 module Naf
-  class ApplicationsController < ApplicationController
+  class ApplicationsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
 

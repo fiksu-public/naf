@@ -1,5 +1,5 @@
 module Naf
-  class MachineAffinitySlotsController < ApplicationController
+  class MachineAffinitySlotsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
     
