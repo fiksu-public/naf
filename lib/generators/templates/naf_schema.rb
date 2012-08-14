@@ -93,7 +93,7 @@ class CreateJobSystem < ActiveRecord::Migration
       (
           id                                   serial not null primary key,
           created_at                           timestamp not null default now(),
-          application_run_group_restriction_id integer not null references application_run_group_restrictions,
+          application_run_group_restriction_id integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name           text unique not null
       );
       create table #{schema_name}.application_schedules
@@ -124,7 +124,7 @@ class CreateJobSystem < ActiveRecord::Migration
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
 
-          application_id                         integer not null references #{schema_name}.applications
+          application_id                         integer null references #{schema_name}.applications,
           application_type_id	                 integer not null references #{schema_name}.application_types,
           command                                text not null,
 
@@ -143,7 +143,7 @@ class CreateJobSystem < ActiveRecord::Migration
           signaled_to_terminate                  boolean null,
           termination_signal                     integer null,
 
-          started_on_machine_id                  integer not null references machines
+          started_on_machine_id                  integer null references #{schema_name}.machines
       );
       create table #{schema_name}.job_affinity_tabs
       (
