@@ -11,6 +11,11 @@
     </ul>
   </div>
   <% end %>
+
+  <div class="field">
+    <%= f.label :run_group_restriction %><br />
+    <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
+  </div>
  
   <div class="field">
     <%= f.label :name %><br />

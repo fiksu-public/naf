@@ -1,0 +1,47 @@
+<%= form_for(@job) do |f| %>
+  
+  <% if @job.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@job.errors.count, "error") %> prohibited this application from being saved:</h2>
+    
+    <ul>
+      <% @job.errors.full_messages.each do |msg| %> 
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :application_type %></br />
+    <%= f.select(:application_type_id, ::Naf::ApplicationType.all.map{ |a| [a.script_type_name, a.id]}, {:include_blank => true} )%>
+  </div>
+
+
+
+  <div class="field">
+    <%= f.label :application %></br />
+    <%= f.select(:application_id, ::Naf::Application.all.map{ |a| [a.title, a.id]}, {:include_blank => true} )%>
+  </div>
+
+  <div class="field">
+    <%= f.label :application_run_group_restriction %></br />
+    <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id]}, {:include_blank => true} )%>
+  </div>
+
+  <div class="field">
+    <%= f.label :run_group %><br />
+    <%= f.text_field :application_run_group_name %>
+  </div>
+
+
+  <div class="field">
+    <%= f.label :command %><br />
+    <%= f.text_field :command %>
+  </div>
+
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

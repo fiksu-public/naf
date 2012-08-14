@@ -50,7 +50,7 @@ module Naf
     
     def set_cols_and_attributes
       @attributes = Naf::ApplicationRunGroup.attribute_names.map(&:to_sym)
-      @cols = [:application_run_group_name]
+      @cols = [:application_run_group_name, :application_run_group_restriction_name]
     end
 
   end

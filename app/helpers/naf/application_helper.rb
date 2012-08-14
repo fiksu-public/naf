@@ -4,7 +4,7 @@ module Naf
     READ_ONLY_MODELS = ["application_types", "application_run_group_restrictions"]
     
     def tabs
-      [ "applications", "application_types", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
+      [ "jobs", "job_affinity_tabs", "applications", "application_types", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
               "affinities", "affinity_classifications","application_run_groups", "application_run_group_restrictions"]
     end
 

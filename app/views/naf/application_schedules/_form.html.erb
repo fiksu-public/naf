@@ -22,11 +22,6 @@
   </div>
 
   <div class="field">
-    <%= f.label :run_group_restriction %><br />
-    <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
-  </div>
-
-  <div class="field">
     <%= f.label "Run Interval (minutes)" %></br />
     <%= f.text_field :run_interval %>
   </div>

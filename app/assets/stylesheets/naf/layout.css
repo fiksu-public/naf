@@ -13,13 +13,46 @@
   background-color:#eeeeee;
 }
 
+div#errorExplanation {
+    text-align: center;
+    color: red;
+}
+
+div#errorExplanation h2{
+    font-size: 12px;
+}
+
+div#errorExplanation ul {
+    display: inline-block;
+    text-align: left;
+    width: 50%;
+    margin: auto;
+}
+
+div#errorExplanation ul li {
+    text-align: left;
+    margin-left: 100px;
+}
+
+div#record form {
+    text-align: center;
+}
+
+div#record div.field {
+    text-align: left;
+}
+
 div#record {
     width: 70%;
     margin: auto;
-    border: 1px solid black;
     font-size: 12px;
     padding: 20px;
     position: relative;
+}
+
+div#record p#notice {
+    text-align: center;
+    color: green;
 }
 
 div#record a.back {
@@ -41,6 +74,34 @@ h3#record_name {
     margin: 0px;
     text-align: center;
 }
+
+div#record table#record {
+    margin: auto;
+    border: 1px solid black;
+    font-size: 13px;
+    border-collapse: collapse;
+}
+
+div#record table#record th {
+    background: #333;
+    color: white;
+}
+
+div#record table#record td, th {
+    padding: 5px 20px 5px 20px;
+    margin: 0px;
+    border: none;
+}
+
+div#record table#record tr:nth-child(even){
+    background: #eee;
+}
+
+
+div#record table#record tr:nth-child(odd){
+    background: #fff;
+}
+
 
 #main span#create {
   display: inline;
