@@ -20,17 +20,27 @@ module Naf
       redirect_to :action => 'index'
     end
 
-    def new
-      @job = Naf::Job.new
-    end
-
     def create
      @job = Naf::Job.new(params[:job])
-      if @job.save
-        redirect_to(@job, :notice => 'Job was successfully created.') 
-      else
-        render :action => "new"
+     
+      respond_to do |format|
+        format.json do
+          response = {:title => Naf::Application.find(params[:job][:application_id]).title}
+          if @job.save
+            response[:msg] = "Saved"
+          else
+            response[:msg] = "Not Saved"
+          end
+          render :json => response.to_json
+        end
       end
+
+#     render :nothing => true
+#      if @job.save
+#        redirect_to(@job, :notice => 'Job was successfully created.') 
+#      else
+#        render :action => "new"
+#      end
     end
 
     def edit
@@ -50,9 +60,9 @@ module Naf
     private
 
     def set_cols_and_attributes
-      more_attributes = [:application_name, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
+      more_attributes = [:title, :command, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
       @attributes = Naf::Job.attribute_names.map(&:to_sym) + more_attributes
-      @cols = [:application_name, :script_type_name, :command, :application_run_group_name, :application_run_group_restriction_name, :priority, :failed_to_start, :started_at, :finished_at, :pid, :exit_status, :request_to_terminate, :termination_signal, :machine_started_on_server_name, :machine_started_on_server_address]
+      @cols = [:title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :priority, :failed_to_start, :started_at, :finished_at, :pid, :exit_status, :request_to_terminate, :termination_signal, :machine_started_on_server_name, :machine_started_on_server_address]
     end
 
   end

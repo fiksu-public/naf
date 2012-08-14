@@ -124,9 +124,7 @@ class CreateJobSystem < ActiveRecord::Migration
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
 
-          application_id                         integer null references #{schema_name}.applications,
-          application_type_id	                 integer not null references #{schema_name}.application_types,
-          command                                text not null,
+          application_id                         integer not null references #{schema_name}.applications,
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text not null,

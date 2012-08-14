@@ -12,13 +12,7 @@
   </div>
   <% end %>
 
-  <div class="field">
-    <%= f.label :application_type %></br />
-    <%= f.select(:application_type_id, ::Naf::ApplicationType.all.map{ |a| [a.script_type_name, a.id]}, {:include_blank => true} )%>
-  </div>
-
-
-
+ 
   <div class="field">
     <%= f.label :application %></br />
     <%= f.select(:application_id, ::Naf::Application.all.map{ |a| [a.title, a.id]}, {:include_blank => true} )%>
@@ -34,11 +28,6 @@
     <%= f.text_field :application_run_group_name %>
   </div>
 
-
-  <div class="field">
-    <%= f.label :command %><br />
-    <%= f.text_field :command %>
-  </div>
 
   <br />
   <div class="actions">

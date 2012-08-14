@@ -13,6 +13,19 @@
   background-color:#eeeeee;
 }
 
+
+td#main div#status {
+  font-size: 12px;
+  color: green;
+  margin: 2px 0px 2px 0px;
+  width: 400px;
+  margin: auto;
+}
+
+td#main div#status p {
+   margin: 2px 0px 2px 0px;
+}
+
 div#errorExplanation {
     text-align: center;
     color: red;

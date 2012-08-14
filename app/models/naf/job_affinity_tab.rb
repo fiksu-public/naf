@@ -8,10 +8,12 @@ module Naf
     belongs_to :job, :class_name => "::Naf::Job"
     belongs_to :affinity, :class_name => "::Naf::Affinity"
 
-    delegate :application_name, :script_type_name, :command, :to => :job
+    delegate :title, :script_type_name, :command, :to => :job
     delegate :affinity_name, :to => :affinity
 
     delegate :affinity_classification_name, :to => :affinity
+
+    attr_accessible :job_id, :affinity_id
 
   end
 end

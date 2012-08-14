@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require_tree './naf'
-//= require_true './jtps'
+//= require_tree './jtps'
+//= require_tree './blockUI'
 //= require_tree .
 

@@ -1,11 +1,15 @@
 module Naf
   module ApplicationHelper
 
-    READ_ONLY_MODELS = ["application_types", "application_run_group_restrictions"]
-    
+    DESTROY_BLOCKED_RESOURCES = ["jobs"]
+    READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
+    CREATE_BLOCKED_RESOURCES = ["jobs"]
+    ALL_RESOURCES = [ "jobs", "job_affinity_tabs", "applications", "application_schedules", "application_schedule_affinity_tabs",
+                      "machines", "machine_affinity_slots", "affinities", "affinity_classifications","application_run_groups", 
+                      "application_run_group_restrictions", "application_types"]
+
     def tabs
-      [ "jobs", "job_affinity_tabs", "applications", "application_types", "application_schedules", "application_schedule_affinity_tabs", "machines", "machine_affinity_slots",
-              "affinities", "affinity_classifications","application_run_groups", "application_run_group_restrictions"]
+      ALL_RESOURCES
     end
 
     def generate_index_link(name)
@@ -13,7 +17,7 @@ module Naf
     end
 
     def generate_create_link
-      return "" if READ_ONLY_MODELS.include?(controller_name)
+      return "" if READ_ONLY_RESOURCES.include?(controller_name) or CREATE_BLOCKED_RESOURCES.include?(controller_name)
       link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
     end
 
@@ -28,7 +32,7 @@ module Naf
     end
 
     def generate_edit_link
-      return "" if READ_ONLY_MODELS.include?(controller_name)
+      return "" if READ_ONLY_RESOURCES.include?(controller_name)
       link_to "Edit", {:controller => controller_name, :action => 'edit', :id => params[:id] }, :class => 'edit'
     end
 
@@ -37,8 +41,13 @@ module Naf
     end
 
     def generate_destroy_link
-      return "" if READ_ONLY_MODELS.include?(controller_name)
-      link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this record", :method => :delete, :class => 'destroy'}
+      return "" if READ_ONLY_RESOURCES.include?(controller_name) or DESTROY_BLOCKED_RESOURCES.include?(controller_name)
+      link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+    end
+
+    def include_actions_in_table?
+      current_page?(:controller => 'applications', :action => 'index') or
+        current_page?(:controller => 'jobs', :action => 'index')
     end
 
   end

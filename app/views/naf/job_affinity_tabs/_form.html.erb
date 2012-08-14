@@ -15,7 +15,7 @@
   <div class="field">
     <%= f.label :Job %><br />
     <%= f.select(:job_id, ::Naf::Job.all.map{ |a| 
-         [a.application ? a.application_name : a.command, a.id]
+         [a.title, a.id]
         }, :include_blank => true) %>
   </div>
   <div class="field">
