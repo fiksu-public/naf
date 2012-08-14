@@ -129,21 +129,20 @@ class CreateJobSystem < ActiveRecord::Migration
           command                                text not null,
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
-          application_run_group_name             text unique not null,
+          application_run_group_name             text not null,
 
-          priority                                integer not null default 0,
-          
+          priority                               integer not null default 0,
+
+          started_on_machine_id                  integer null references #{schema_name}.machines,
+
           failed_to_start                        boolean null,
           started_at                             timestamp null,
           pid                                    integer null,
           finished_at                            timestamp null,
           exit_status                            integer null,
-
-          request_to_terminate                   boolean not null default false,
-          signaled_to_terminate                  boolean null,
           termination_signal                     integer null,
 
-          started_on_machine_id                  integer null references #{schema_name}.machines
+          request_to_terminate                   boolean not null default false
       );
       create table #{schema_name}.job_affinity_tabs
       (
