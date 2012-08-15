@@ -6,10 +6,20 @@
 <h3 id="record_name"><%= model_name %> </h3>
 <p id="notice"><%= notice %></p>
 
+<table id="record">
 
-<% @attributes.each do |a| %>
-  <b><%= a.to_s + ": " %> </b>  <%= @record.send(a) %><br /><br /> 
-<% end %>
+ <tr>
+   <th>Attribute</th>
+   <th>Value </th>
+ </tr>
+
+ <% @attributes.each do |a| %>
+   <tr>
+     <td scope="row"><%= a.to_s %></td>
+     <td> <%= @record.send(a) %></td>
+   </tr>
+ <% end %>
+</table>
 
 <%= generate_destroy_link %>
 </div>

@@ -11,7 +11,7 @@
         <% end %>
       <% end %>
       
-      <% if current_page? :controller => 'applications', :action => 'index' %> <th width="100px"> Actions </th> <% end %>
+      <% if include_actions_in_table? %> <th width="100px"> Actions </th> <% end %>
     </tr>
   </thead>
 
@@ -23,10 +23,13 @@
           <td> <%= row.send(col) %> </td>
         <% end %>
 
-        <% if current_page? :controller => 'applications', :action => 'index' %>
+        <% if include_actions_in_table? %>
           <td id="action"> 
-            <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
-            <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Schedule Now'), "#" %>
+            <% if current_page?(:controller => 'applications') %> 
+              <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => row.id} %>
+            <% elsif current_page?(:controller => 'jobs') %>
+               <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
+            <% end %>
           </td> 
         <% end %>
      </tr>
@@ -35,7 +38,7 @@
 
   <tfoot class="nav">
     <tr>
-      <% if current_page? :controller => 'applications', :action => 'index' %> 
+      <% if include_actions_in_table? %>
         <td colspan=<%= @cols.size + 1 %>>
       <% else %>
         <td colspan=<%= @cols.size %>>
@@ -49,3 +52,25 @@
   </tfoot>
 
 </table>
+
+
+<form id="enqueue_form" style="display:none; cursor: default">
+    <input type="hidden" name="job[application_id]" id="application_id" value="" />
+    <b> Run Group Restriction </b></br />
+    <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect{ |a| [a.application_run_group_restriction_name, a.id] }, {:include_blank => true}) %> <br />
+
+    <b> Run Group Name </b> <br />
+    <%= text_field(:job, :application_run_group_name) %> <br /> <br />
+    
+    <input type="button" id="cancel" value="Cancel" /> 
+    <input type="submit" id="add" value="Add" /> 
+
+</form>
+
+
+
+<div id="enqueue_confirm" style="display:none; cursor: default"> 
+        <h3>Are you sure you want to add this application to the job queue?</h3> 
+        <input type="button" id="yes" value="Yes" /> 
+        <input type="button" id="no" value="No" /> 
+</div> 
