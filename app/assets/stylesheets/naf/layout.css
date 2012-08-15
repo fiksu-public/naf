@@ -121,6 +121,16 @@ div#record table#record tr:nth-child(odd){
   font-size: 12px;
 }
 
+#main span#job_search {
+  display: inline;
+  font-size: 12px;
+  float: right;
+}
+
+p.clear {
+    clear: both;
+}
+
 img.action {
   float: left;
   display: inline;
@@ -190,4 +200,9 @@ body {
   margin: 0px;
   padding: 0px;
   font-family: "Verdana", Times, serif;
+}
+
+form#job_search {
+  font-size: 12px;
+  text-align: left;
 }

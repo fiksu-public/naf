@@ -1,4 +1,4 @@
-<%= form_for(@tab) do |f| %>
+<%= form_for([@job, @tab]) do |f| %>
   
   <% if @tab.errors.any? %>
   <div id="errorExplanation">
@@ -11,13 +11,9 @@
     </ul>
   </div>
   <% end %>
- 
-  <div class="field">
-    <%= f.label :Job %><br />
-    <%= f.select(:job_id, ::Naf::Job.all.map{ |a| 
-         [a.title, a.id]
-        }, :include_blank => true) %>
-  </div>
+
+  <%= f.hidden_field :job_id, :value => @job.id %>
+
   <div class="field">
     <%= f.label :affinity %><br />
     <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>

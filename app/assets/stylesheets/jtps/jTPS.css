@@ -9,7 +9,8 @@
 	margin-left: 5px;
 	text-align: center;
 	float: left;
-	background: #fff;
+        color: black;
+        background: #ADD8E6;
 }
 .jTPS tfoot .pagination .pageSelectorSeperator {
 	text-align: center;

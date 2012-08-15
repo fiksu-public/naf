@@ -20,7 +20,7 @@
   <td id="tabs">
     <ul>
       <% tabs.each do |tab| %>
-        <% if controller_name == tab %>
+        <% if highlight_tab?(tab) %>
           <li id="on">
         <% else %>
           <li>
@@ -39,6 +39,10 @@
       <div id="status"></div>
       <% if current_page? :action => 'index' %>
         <span id="create">  <%= generate_create_link %> </span>
+      <% end %>
+      <% if display_job_search_link? %>
+        <span id="job_search"> <%= link_to "Search for Job", "#", {:class => "job_search"} %> </span>
+        <p class="clear"></p>
       <% end %>
       <%= yield %>
     </td>

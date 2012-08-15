@@ -1,5 +1,5 @@
-<%= form_for(@tab) do |f| %>
-  
+<%= form_for([@application_schedule, @tab]) do |f| %>
+
   <% if @tab.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@tab.errors.count, "error") %> prohibited this application schedule affinity tab from being saved:</h2>
@@ -12,10 +12,9 @@
   </div>
   <% end %>
  
-  <div class="field">
-    <%= f.label :script_title %><br />
-    <%= f.select(:application_schedule_id, ::Naf::ApplicationSchedule.where(:enabled => true).map{ |a| [a.title, a.id]}, :include_blank => true) %>
-  </div>
+
+  <%= f.hidden_field :application_schedule_id, :value => @application_schedule.id %>
+
   <div class="field">
     <%= f.label :affinity %><br />
     <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>

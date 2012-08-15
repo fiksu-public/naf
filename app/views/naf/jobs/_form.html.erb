@@ -11,11 +11,14 @@
     </ul>
   </div>
   <% end %>
-
- 
   <div class="field">
-    <%= f.label :application %></br />
-    <%= f.select(:application_id, ::Naf::Application.all.map{ |a| [a.title, a.id]}, {:include_blank => true} )%>
+    <%= f.label :script_type %> <br />
+    <%= f.select(:application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :command %>
+    <%= f.text_field :command %>
   </div>
 
   <div class="field">
@@ -26,6 +29,12 @@
   <div class="field">
     <%= f.label :run_group %><br />
     <%= f.text_field :application_run_group_name %>
+  </div>
+
+  <a name="terminate"></a>
+  <div class="field">
+    <%= f.label :request_to_terminate %> <br />
+    <%= f.check_box :request_to_terminate %>
   </div>
 
 

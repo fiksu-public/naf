@@ -2,22 +2,23 @@ module Naf
   class ApplicationSchedule < NafBase
     include ::Af::AdvisoryLocker
 
-    validates_presence_of :application_run_group_id,  :message => "can't be blank, choose one, or create a new one"
     validates :run_interval, :priority, :numericality => {:only_integer => true}
     validate :visible_enabled_check
     validate :enabled_application_id_unique
+    validates :application_run_group_restriction_id, :presence => true
+    validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
 
     belongs_to :application, :class_name => '::Naf::Application'
-    belongs_to :application_run_group, :class_name => '::Naf::ApplicationRunGroup'
+    belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
 
     has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
     has_many :affinities, :through => :application_schedule_affinity_tabs
 
     delegate :title, :to => :application
-    delegate :application_run_group_name, :application_run_group_restriction_name, :to => :application_run_group
 
+    delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
-    attr_accessible :application_id, :application_run_group_id,  :run_interval, :priority, :visible, :enabled
+    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled
 
     SCHEDULES_LOCK_ID = 0
 

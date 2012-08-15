@@ -2,8 +2,8 @@ module Naf
   class Job < NafBase
     include ::Af::Application::SafeProxy
 
-    validates  :application_id, :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, {:presence => true, :length => {:minimum => 3}}
+    validates  :application_type_id, :application_run_group_restriction_id, :presence => true
+    validates :application_run_group_name, :command,  {:presence => true, :length => {:minimum => 3}}
     
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
     belongs_to :started_on_machine, :class_name => '::Naf::Machine'
@@ -12,9 +12,13 @@ module Naf
     has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
-    delegate :command, :script_type_name, :title, :to => :application
+    delegate :script_type_name, :to => :application_type
 
-    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name
+    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
+
+    def title
+      return application.try(:title)
+    end
 
     def machine_started_on_server_name
       return started_on_machine.try(:server_name)

@@ -1,5 +1,5 @@
 <div id="record">
-  <%= link_to 'Back', @tab %>
+  <%= link_to 'Back', controller => 'job_affinity_tabs', :action => 'show', :id => @tab.id, :job_id => @job.id %>
 
   <h3 id="record_name">Editing Job Affinity Tab</h3>
  

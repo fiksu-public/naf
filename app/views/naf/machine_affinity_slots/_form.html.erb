@@ -1,4 +1,4 @@
-<%= form_for(@slot) do |f| %>
+<%= form_for([@machine, @slot]) do |f| %>
   
   <% if @slot.errors.any? %>
   <div id="errorExplanation">
@@ -12,14 +12,7 @@
   </div>
   <% end %>
  
-
-  <div class="field">
-    <%= f.label :machine %><br />
-    <%= f.select(:machine_id, ::Naf::Machine.all.map{ |a| 
-        [ (a.server_name and a.server_name.length > 0) ? a.server_name : a.server_address  , a.id]}, 
-        {:include_blank => true}
-    ) %>
-  </div>
+  <%= f.hidden_field :machine_id, :value => @machine.id %>
 
   <div class="field">
     <%= f.label :affinity %><br />

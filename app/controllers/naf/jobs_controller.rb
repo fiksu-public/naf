@@ -5,8 +5,16 @@ module Naf
 
  
     def index
-      @rows = Naf::Job.all
-      render :template => 'naf/datatable'
+      respond_to do |format|
+        format.html do 
+          @rows = Naf::Job.all
+          render :template => 'naf/datatable'
+        end
+        format.json do
+          @rows = Naf::Job.limit(10)
+          render :json => @rows.to_json
+        end
+      end
     end
 
     def show
@@ -22,25 +30,27 @@ module Naf
 
     def create
      @job = Naf::Job.new(params[:job])
-     
+     if params[:job][:application_id] and app = Naf::Application.find(params[:job][:application_id])
+       @job.command = app.command
+       @job.application_type_id = app.application_type_id
+       post_source = "Application: #{app.title}"
+     else
+       post_source = "Job"
+     end
       respond_to do |format|
         format.json do
-          response = {:title => Naf::Application.find(params[:job][:application_id]).title}
+          response = {}
           if @job.save
-            response[:msg] = "Saved"
+            response[:saved] = true
+            response[:messages] = ["#{post_source} was added to the job queue"]
           else
-            response[:msg] = "Not Saved"
+            response[:saved] = false
+            response[:messages] = @job.errors.full_messages.map{|m| "#{post_source}: #{m}"} 
           end
+          puts response
           render :json => response.to_json
         end
       end
-
-#     render :nothing => true
-#      if @job.save
-#        redirect_to(@job, :notice => 'Job was successfully created.') 
-#      else
-#        render :action => "new"
-#      end
     end
 
     def edit

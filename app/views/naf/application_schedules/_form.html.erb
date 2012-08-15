@@ -16,9 +16,15 @@
     <%= f.label :application %><br />
     <%= f.select(:application_id, ::Naf::Application.all.map{ |a| [a.title, a.id]}, :include_blank => true) %>
   </div>
+
   <div class="field">
-    <%= f.label :run_group %><br />
-    <%= f.select(:application_run_group_id, ::Naf::ApplicationRunGroup.all.map{ |a| [a.application_run_group_name, a.id] }, :include_blank => true) %>
+    <%= f.label :run_group_restriction %><br />
+    <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
+  </div>
+
+   <div class="field">
+    <%= f.label :run_group_name %></br />
+    <%= f.text_field :application_run_group_name %>
   </div>
 
   <div class="field">

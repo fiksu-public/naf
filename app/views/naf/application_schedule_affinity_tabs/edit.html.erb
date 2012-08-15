@@ -1,5 +1,6 @@
 <div id="record">
-  <%= link_to 'Back', @tab %>
+
+   <%= link_to 'Back', {:action => 'show', :id => @tab.id, :application_schedule_id => @application_schedule.id} %>
 
   <h3 id="record_name">Editing an Application Schedule Affinity Tab</h3>
  

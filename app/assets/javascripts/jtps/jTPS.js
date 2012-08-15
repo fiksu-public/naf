@@ -1,6 +1,6 @@
 /*
  * jTPS - table sorting, pagination, and animated page scrolling
- *	version 0.5.1
+ * version 0.5.1
  * Author: Jim Palmer
  * Released under MIT license.
  */
@@ -8,16 +8,15 @@
 
 	// apply table controls + setup initial jTPS namespace within jQuery
 	$.fn.jTPS = function ( opt ) {
-
 		$(this).data('tableSettings', $.extend({
-			perPages:			[5, 6, 10, 20, 50, 'ALL'],				// the "show per page" selection
-			perPageText:		'Show per page:',						// text that appears before perPages links
-			perPageDelim:		'<span style="color:#ccc;">|</span>',	// text or dom node that deliminates each perPage link 
-			perPageSeperator:	'..',									// text or dom node that deliminates split in select page links
-			scrollDelay:		30,										// delay (in ms) between steps in anim. - IE has trouble showing animation with < 30ms delay
-			scrollStep:			2,										// how many tr's are scrolled per step in the animated vertical pagination scrolling
-			fixedLayout:		true,									// autoset the width/height on each cell and set table-layout to fixed after auto layout
-			clickCallback:		function () {}							// callback function after clicks on sort, perpage and pagination
+			perPages: [5, 6, 10, 20, 50, 'ALL'],
+			perPageText:  'Results Per Page:',
+			perPageDelim:  '<span style="color:#ccc;">|</span>',
+			perPageSeperator: '..',	
+			scrollDelay: 30,
+			scrollStep: 5,
+			fixedLayout: true,
+			clickCallback:	function () {}
 		}, opt));
 		
 		// generic pass-through object + other initial variables
@@ -334,14 +333,6 @@
 					tf.appendChild( rows[ parseInt( procRow[ nr ].split(nullChar).pop() ) ] );
 			// remove the old table
 			$('>tbody.jtpstemp', target).remove();
-			// redraw stub rows
-                        /*
-			var stubCount=0, cols = $('>thead>tr:last th', target).length, 
-				stubs = ( perPage - ( $('>tbody>tr', target).length % perPage ) ), 
-				stubHeight = $('>tbody>tr:first>td:first', target).css('height');
-			for ( ; stubCount < stubs && stubs != perPage; stubCount++ )
-				$('>tbody>tr:last', target).after( '<tr class="stubCell"><td colspan="' + cols + '" style="height: ' + stubHeight + ';">&nbsp;</td></tr>' );  
-                        */
                         
 		}
 		// chainable
