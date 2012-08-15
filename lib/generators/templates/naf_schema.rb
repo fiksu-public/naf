@@ -89,13 +89,6 @@ class CreateJobSystem < ActiveRecord::Migration
       );
       insert into #{schema_name}.application_run_group_restrictions (application_run_group_restriction_name) values
          ('no restrictions'), ('one at a time'), ('one per machine');
-      create table #{schema_name}.application_run_groups
-      (
-          id                                   serial not null primary key,
-          created_at                           timestamp not null default now(),
-          application_run_group_restriction_id integer not null references #{schema_name}.application_run_group_restrictions,
-          application_run_group_name           text unique not null
-      );
       create table #{schema_name}.application_schedules
       (
           id                                     serial not null primary key,
@@ -104,7 +97,8 @@ class CreateJobSystem < ActiveRecord::Migration
           enabled                                boolean not null default true,
           visible                                boolean not null default true,
           application_id                         integer not null references #{schema_name}.applications,
-          application_run_group_id               integer not null references #{schema_name}.application_run_groups,
+          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name             text null,
           run_interval                           integer not null,
           priority                               integer not null default 0,
           check (visible = true or enabled = false)
@@ -129,7 +123,7 @@ class CreateJobSystem < ActiveRecord::Migration
           command                                text not null,
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
-          application_run_group_name             text not null,
+          application_run_group_name             text null,
 
           priority                               integer not null default 0,
 
