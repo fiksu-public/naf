@@ -1,6 +1,5 @@
 module Process::Naf
   class Runner < ::Af::Application
-    opt :ask_processes_to_terminate, :default => false
     opt :wait_time_for_processes_to_terminate, :default => 120
     opt :num_processes, :default => 10
 
@@ -125,72 +124,42 @@ module Process::Naf
     end
 
     def terminate_old_processes
-      # be polite
-      jobs_hanging_around = 0
-      ::Naf::Machine.assigned_jobs.each do |job|
-        if send_signal_and_maybe_clean_up(job, 0)
-          jobs_hanging_around += 1
-        else
-          if @ask_processes_to_terminate == true && job.request_to_terminate == false
-            logger.warn "politely asking process: pid=#{job.pid} to terminate itself"
-            job.request_to_terminate = true
-            job.save!
-          end
-        end
-      end
+      # check if any processes are hanging around and ask them
+      # politely if they will please terminate
 
-      if jobs_hanging_around > 0
-        return
+      jobs = assigned_jobs
+      return jobs.length == 0
+      jobs.each do |job|
+        if job.request_to_terminate == false
+          logger.warn "politely asking process: pid=#{job.pid} to terminate itself"
+          job.request_to_terminate = true
+          job.save!
+        end
       end
 
       # wait
       (1..@wait_time_for_processes_to_terminate).each do
-        jobs_hanging_around = 0
-        ::Naf::Machine.assigned_jobs.each do |job|
-          if send_signal_and_maybe_clean_up(job, 0)
-            jobs_hanging_around += 1
-          end
-        end
-
-        if jobs_hanging_around > 0
-          return
-        end
-
+        return if assigned_jobs.length == 0
         sleep(1)
       end
 
       # nudge them to terminate
-      jobs_hanging_around = 0
-      ::Naf::Machine.assigned_jobs.each do |job|
-        logger.warn "sending SIG_TERM to #{job.pid}: #{job.command}"
-        if send_signal_and_maybe_clean_up(job, "TERM")
-          jobs_hanging_around += 1
-        end
-      end
-
-      if jobs_hanging_around > 0
-        return
+      jobs = assigned_jobs
+      return jobs.length == 0
+      jobs.each do |job|
+        logger.warn "sending SIG_TERM to process: pid=#{job.pid}, command=#{job.command}"
+        send_signal_and_maybe_clean_up(job, "TERM")
       end
 
       # wait
       (1..5).each do
-        jobs_hanging_around = 0
-        ::Naf::Machine.assigned_jobs.each do |job|
-          if send_signal_and_maybe_clean_up(job, "TERM")
-            jobs_hanging_around += 1
-          end
-        end
-
-        if jobs_hanging_around > 0
-          return
-        end
-
+        return if assigned_jobs.length == 0
         sleep(1)
       end
 
-      # kill them with fire
-      ::Naf::Machine.assigned_jobs.each do |job|
-        logger.warn "sending SIG_KILL to #{job.pid}: #{job.command}"
+      # kill with fire
+      assigned_jobs.each do |job|
+        logger.warn "sending SIG_KILL to process: pid=#{job.pid}, command=#{job.command}"
         send_signal_and_maybe_clean_up(job, "KILL")
       end
     end
@@ -205,6 +174,12 @@ module Process::Naf
         return false
       end
       return true
+    end
+
+    def assigned_job
+      return ::Naf::Machine.assigned_jobs.select do |job|
+        send_signal_and_maybe_clean_up(job, 0)
+      end.map(&:pid)
     end
   end
 end
