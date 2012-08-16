@@ -63,6 +63,10 @@ module Naf
       return select("(select array(affinity_id) from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids")
     end
 
+    def self.possible_jobs
+      return recently_queued.not_started
+    end
+
     #
 
     def title
@@ -82,8 +86,8 @@ module Naf
     end
 
     def self.fetch_next_job(machine)
-      select("*").select_affinity_ids.recently_queued.not_started.order_by_priority.each do |possible_job|
-        job_affinity_ids = possible_jobs.affinity_ids[1..-2].split(',').map(&:to_i)
+      possible_jobs.select("*").select_affinity_ids.order_by_priority.each do |possible_job|
+        job_affinity_ids = possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
 
         # eliminate job if it can't run on this machine
         unless machine.machine_affinty_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
