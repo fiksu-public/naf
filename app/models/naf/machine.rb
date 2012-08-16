@@ -62,8 +62,12 @@ module Naf
       mark_processes_as_dead
     end
 
+    def assigned_jobs
+      return ::Naf::Job.fetch_assigned_jobs(self)
+    end
+
     def fetch_next_job
-      return ::Naf::Jab.fetch_next_job(self)
+      return ::Naf::Job.fetch_next_job(self)
     end
   end
 end

@@ -16,6 +16,22 @@ module Naf
 
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
 
+    def self.created_at_between(start_time, end_time)
+      return where(["created_at >= ? AND created_at <= ?", start_time, end_time)]).
+    end
+
+    def self.recently_created_at
+      return created_at_between(Time.zone.now - 1.week, Time.zone.now)
+    end
+
+    def self.not_finished_yet
+      return where({:finished_at => nil})
+    end
+
+    def self.started_on_machine(machine)
+      return where({:started_on_machine_id => machine.id})
+    end
+
     def title
       return application.try(:title)
     end
@@ -26,6 +42,10 @@ module Naf
 
     def machine_started_on_server_address
       return started_on_machine.try(:server_address)
+    end
+
+    def self.fetch_assigned_jobs(machine)
+      return recently_created_at.not_finished_yet.started_on_machine(machine)
     end
 
     def self.fetch_next_job(machine)

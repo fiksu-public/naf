@@ -1,8 +1,10 @@
 module Process::Naf
   class Runner < ::Af::Application
     include ::Af::QThread::Interface
-
     attr_reader :queue
+
+    opt :ask_processes_to_terminate, :default => false
+    opt :wait_time_for_processes_to_terminate, :default => 120
 
     def initialize
       super
@@ -15,7 +17,16 @@ module Process::Naf
 
     def work
       machine = ::Naf::Machine.current
-      machine.mark_alive if machine.present?
+
+      unless machine.present?
+        logger.fatal "this machine is not configued correctly"
+      end
+
+      machine.mark_alive
+
+      # make sure no processes are thought to be running on
+      # this machine
+      terminate_old_processes
 
       logger.info "working: #{machine.inspect}"
 
@@ -87,6 +98,50 @@ module Process::Naf
       end
 
       pool.join()
+    end
+
+    def terminate_old_processes
+      assinged_jobs = ::Naf::Machine.assigned_jobs
+      if assigned_jobs.length > 0
+        if @ask_processes_to_terminate
+          logger.warn "terminating old processes #{assigned_jobs.length}"
+          assigned_jobs.each do |job|
+            if job.finished_at.nil? && job.request_to_terminate == false
+              logger.warn "politely asking process: pid=#{job.pid} to terminate itself"
+              job.request_to_terminate = true
+              job.save!
+            end
+          end
+          logger.warn "waiting for processes to terminate"
+          (1..@wait_time_for_processes_to_terminate).each do
+            sleep(1)
+            break if ::Naf::Machine.assigned_jobs.length == 0
+          end
+        end
+
+        assinged_jobs = ::Naf::Machine.assigned_jobs
+        if assigned_jobs.length > 0
+          logger.warn "terminating processes manually (SIG_TERM)"
+          ::Naf::Machine.assigned_jobs.each do |job|
+            logger.warn "sending SIG_TERM to #{job.pid}: #{job.command}"
+            Process.kill("TERM", job.pid)
+          end
+
+          (1..5).each do
+            sleep(1)
+            break if ::Naf::Machine.assigned_jobs.length == 0
+          end
+
+          assinged_jobs = ::Naf::Machine.assigned_jobs
+          if assigned_jobs.length > 0
+            logger.warn "terminating processes manually (forcing with SIG_KILL)"
+            ::Naf::Machine.assigned_jobs.each do |job|
+              logger.warn "sending SIG_KILL to #{job.pid}: #{job.command}"
+              Process.kill("KILL", job.pid)
+            end
+          end
+        end
+      end
     end
   end
 end
