@@ -105,16 +105,18 @@
 			);
 
 		// add perPage selection link + delim dom node
-		$('>.nav .selectPerPage', this).empty();
+	        //$('>.nav .selectPerPage', this).empty();
+                /*
 		var pageSel = perPages.length;
 		while ( pageSel-- ) 
 			$('>.nav .selectPerPage', this).prepend( ( (pageSel > 0) ? $(this).data('tableSettings').perPageDelim : '' ) + 
 				'<span class="perPageSelector">' + perPages[pageSel] + '</span>' );
-
+                */
 		// now draw the page selectors
-		drawPageSelectors( this, page || 1 );
+		// drawPageSelectors( this, page || 1 );
 
 		// prepend the instructions and attach select hover and click events
+                /*
 		$('>.nav .selectPerPage', this).prepend( $(this).data('tableSettings').perPageText ).find('.perPageSelector').each(
 			function () {
 				if ( ( parseInt($(this).html()) || rowCount ) == perPage )
@@ -149,7 +151,7 @@
 						// update status bar
 						var cPos = $('>tbody>tr:not(.hideTR):first', pT).prevAll().length,
 							ePos = $('>tbody>tr:not(.hideTR):not(.stubCell)', pT).length;
-						$('>.nav .status', pT).html( 'Showing ' + ( cPos + 1 ) + ' - ' + ( cPos + ePos ) + ' of ' + rowCount + '' );
+						// $('>.nav .status', pT).html( 'Showing ' + ( cPos + 1 ) + ' - ' + ( cPos + ePos ) + ' of ' + rowCount + '' );
 						clearSelection();
 						// callback function after pagination renderd
 						$(pT).data('tableSettings').clickCallback();
@@ -157,11 +159,11 @@
 				);
 			}
 		);
-		
+		*/
 		// show the correct paging status
 		var cPos = $('>tbody>tr:not(.hideTR):first', this).prevAll().length, 
 			ePos = $('>tbody>tr:not(.hideTR):not(.stubCell)', this).length;
-		$('>.nav .status', this).html( 'Showing ' + ( cPos + 1 ) + ' - ' + ( cPos + ePos ) + ' of ' + rowCount );
+	        // $('>.nav .status', this).html( 'Showing ' + ( cPos + 1 ) + ' - ' + ( cPos + ePos ) + ' of ' + rowCount );
 
 		// clear selected text function
 		function clearSelection () {
@@ -192,11 +194,12 @@
 			});
 
 			// remove the pager title if no pages necessary
+                        /*
 			if ( perPage >= rowCount )
 				$('>.nav .paginationTitle', target).css('display','none');
 			else
 				$('>.nav .paginationTitle', target).css('display','');
-			
+			*/
 			// bind the pagination onclick
 			$('>.nav .pagination .pageSelector', target).each(
 				function () {
@@ -268,7 +271,7 @@
 							}
 							
 							// redraw the pagination
-							drawPageSelectors( pT, parseInt( $(this).html() ) );
+							//drawPageSelectors( pT, parseInt( $(this).html() ) );
 							
 							// callback function after pagination renderd
 							$(pT).data('tableSettings').clickCallback();

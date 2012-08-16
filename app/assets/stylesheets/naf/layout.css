@@ -127,6 +127,12 @@ div#record table#record tr:nth-child(odd){
   float: right;
 }
 
+#main span#parent {
+  display: inline;
+  font-size: 12px;
+  float: right;
+}
+
 p.clear {
     clear: both;
 }

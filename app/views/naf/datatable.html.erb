@@ -1,4 +1,4 @@
-<h3 id="record_name"><%= make_header(controller_name) %> </h3>
+<h3 id="record_name"><%= table_title %> </h3>
 
 <table id="datatable" cellspacing="0">
 
@@ -29,7 +29,7 @@
           <td id="action"> 
             <% if current_page?(:controller => 'applications') %> 
               <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => row.id} %>
-            <% elsif current_page?(:controller => 'jobs') %>
+            <% elsif current_page?(:controller => 'jobs') or current_page?(naf.root_url) %>
                <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
             <% end %>
           </td> 
@@ -45,11 +45,9 @@
       <% else %>
         <td colspan=<%= @cols.size %>>
       <% end %>
-        <div class="pagination"></div>
-        <div class="paginationTitle">Page</div>
-        <div class="selectPerPage"></div>
-        <div class="status"></div>
-      </td>
+
+        <div id="paginationTitle">Page:</div>
+       </td>
     </tr>
   </tfoot>
 
@@ -58,7 +56,14 @@
 
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
-    <b> Title: </b> <%= text_field(:search, :title) %><br />
+    <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at]]) %> <br />
+    <b> Direction: </b> 
+       Descending:
+        <%= radio_button(:search, :direction, :desc, :checked => true) %>
+       Ascending:
+        <%= radio_button(:search, :direction, :asc) %> <br />
+
+    <b> Running: </b> <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Command: </b> <%= text_field(:search, :command) %><br />
     <b> Script Type: </b> <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %><br />
     <b> Run Group </b> <%= text_field(:search, :application_run_group_name) %> <br />
@@ -67,8 +72,8 @@
     <b> Failed to Start <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Pid </b> <%= text_field(:search, :pid) %> <br />
     <b> Exit Status <%= text_field(:search, :exit_status)  %></b> <br />
-    <b> Request to Terminate </b> <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
-    <b> Machine: </b> <%= select(:search, :machine_id, Naf::Machine.all.collect{|m| [m.server_name.blank? ? m.server_address : m.server_name, m.id]}) %> <br />
+    <b> Request to Terminate </b> <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
+    <b> Machine: </b> <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect{|m| [m.server_name.blank? ? m.server_address : m.server_name, m.id]}, {:include_blank => true}) %> <br />
     <div style="text-align: right;">
     <input type="button" value="cancel" id="cancel" />
     <input type="submit" id="add" value="Search" /> 
@@ -102,3 +107,25 @@
         <input type="button" id="no" value="No" /> 
 </div> 
 
+<div id="searching" style="display:none; cursor: default">
+  <h5>Applying your search and filters to find jobs...</h5> 
+  <%= image_tag('loading.gif') %>
+  <br />
+  <br /> 
+</div>
+
+<p id="on_job_page" style="display:none; cursor: default"><%= display_job_search_link? %></p>
+
+<div id="loading_jobs" style="display:none; cursor: default">
+  <h5>Loading the Job Queue...</h5>
+   <%= image_tag('loading.gif') %>
+  <br />
+  <br /> 
+</div>
+
+<div id="adding" style="display:none; cursor: default">
+   <h5>Adding job to the job queue...</h5>
+   <%= image_tag('loading.gif') %>
+  <br />
+  <br /> 
+</div>

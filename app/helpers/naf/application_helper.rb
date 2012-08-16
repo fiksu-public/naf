@@ -25,6 +25,27 @@ module Naf
       end
     end
 
+    def parent_resource_link
+      case controller_name
+      when "job_affinity_tabs"
+        link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
+      when "application_schedule_affinity_tabs"
+        link_to "Back to Application Schedule", :controller => 'application_schedules', :action => 'show', :id => params[:application_schedule_id]
+      when "machine_affinity_slots"
+        link_to "Back to Machine", :controller => 'machines', :action => 'show', :id => params[:machine_id]
+      else 
+        ""
+      end
+    end
+
+    def nested_resource_index?
+      ["job_affinity_tabs", "application_schedule_affinity_tabs", "machine_affinity_slots"].include?(controller_name) and !params[:id]
+    end
+
+    def table_title
+      current_page?(naf.root_url) ? "Jobs" : make_header(controller_name)
+    end
+
     def generate_affinity_tabs_link
       case controller_name
       when "jobs"
@@ -44,7 +65,7 @@ module Naf
 
     def generate_create_link
       return "" if READ_ONLY_RESOURCES.include?(controller_name) or CREATE_BLOCKED_RESOURCES.include?(controller_name)
-      return link_to "Add a Job", "#", {:class => 'add_job'} if controller_name  == "jobs"
+      return link_to "Add a Job", "#", {:class => 'add_job'} if display_job_search_link?
       link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
     end
 
@@ -68,7 +89,7 @@ module Naf
     end
 
     def generate_back_link
-      link_to "Back", {:controller => controller_name, :action => 'index'}, :class => 'back'
+      link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
     end
 
     def generate_destroy_link
@@ -86,8 +107,9 @@ module Naf
     end
 
     def include_actions_in_table?
+      current_page?(naf.root_url) or
       current_page?(:controller => 'applications', :action => 'index') or
-        current_page?(:controller => 'jobs', :action => 'index')
+        current_page?(:controller => 'jobs', :action => 'index') 
     end
 
   end

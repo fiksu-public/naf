@@ -17,7 +17,7 @@ module Naf
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
 
     def self.created_at_between(start_time, end_time)
-      return where(["created_at >= ? AND created_at <= ?", start_time, end_time)]).
+      return where(["created_at >= ? AND created_at <= ?", start_time, end_time])
     end
 
     def self.recently_created_at

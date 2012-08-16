@@ -59,7 +59,7 @@ module Naf
     
     def set_cols_and_attributes
       @cols = [:title, :script_type_name, :command, :affinity_name, :affinity_classification_name]
-      @attributes = Naf::JobAffinityTab.attribute_names.map(&:to_sym) + @cols
+      @attributes = Naf::JobAffinityTab.attribute_names.map(&:to_sym) | @cols
     end
 
 

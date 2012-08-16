@@ -51,7 +51,7 @@ module Naf
 
     def set_cols_and_attributes
       more_attributes = [:script_type_name]
-      @attributes = Naf::Application.attribute_names.map(&:to_sym) + more_attributes
+      @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = [:title, :command, :script_type_name, :deleted]
     end
 
