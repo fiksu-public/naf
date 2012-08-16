@@ -1,6 +1,15 @@
 module Naf
+
+  #
+  # Things you should know about jobs
+  # new jobs older than 1.week will not be searched in the queue.  You should not run programs
+  # for more than a 1.week (instead, have them exit and restarted periodically)
+  #
+
   class Job < NafBase
     include ::Af::Application::SafeProxy
+
+    JOB_STALE_TIME = 1.week
 
     validates  :application_type_id, :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, :command,  {:presence => true, :length => {:minimum => 3}}
@@ -16,21 +25,45 @@ module Naf
 
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
 
-    def self.created_at_between(start_time, end_time)
+    # scope like things
+
+    def self.queued_between(start_time, end_time)
       return where(["created_at >= ? AND created_at <= ?", start_time, end_time])
     end
 
-    def self.recently_created_at
-      return created_at_between(Time.zone.now - 1.week, Time.zone.now)
+    def self.recently_queued
+      return created_at_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
     end
 
-    def self.not_finished_yet
+    def self.not_finished
       return where({:finished_at => nil})
     end
 
-    def self.started_on_machine(machine)
+    def self.started_on(machine)
       return where({:started_on_machine_id => machine.id})
     end
+
+    def self.not_started
+      return where({:started_at => nil})
+    end
+
+    def self.started
+      return where("started_at is not null")
+    end
+
+    def self.in_run_group(run_group_name)
+      return where(:application_run_group_name => run_group_name)
+    end
+
+    def self.order_by_priority
+      return order("priority,created_at")
+    end
+
+    def self.select_affinity_ids
+      return select("(select array(affinity_id) from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids")
+    end
+
+    #
 
     def title
       return application.try(:title)
@@ -45,15 +78,11 @@ module Naf
     end
 
     def self.fetch_assigned_jobs(machine)
-      return recently_created_at.not_finished_yet.started_on_machine(machine)
+      return recently_queued.not_finished.started_on(machine)
     end
 
     def self.fetch_next_job(machine)
-      select("jobs.*").
-        select("(select array(affinity_id) from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids").
-        where(["jobs.created_at >= ? AND jobs.created_at <= ? AND jobs.started_at IS NULL", Time.zone.now - 1.week, Time.zone.now]).
-        order("jobs.priority,jobs.created_at").each do |possible_job|
-
+      select("*").select_affinity_ids.recently_queued.not_started.order_by_priority.each do |possible_job|
         job_affinity_ids = possible_jobs.affinity_ids[1..-2].split(',').map(&:to_i)
 
         # eliminate job if it can't run on this machine
@@ -73,19 +102,12 @@ module Naf
         job = nil
         lock_for_job_queue do
           if possible_job.run_group_restriction.name == "one per machine"
-            if where(["created_at >= ? AND created_at <= ? AND started_at IS NULL", Time.zone.now - 1.week, Time.zone.now]).
-                where("started_at is not null").
-                where("finished_at is null").
-                where(:application_run_group_name => possible_job.application_run_group_name).
-                where(:started_on_machine_id => machine.id).count > 0
+            if recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count > 0
               #logger.debug "already running on this machine"
               next
             end
           elsif possible_job.run_group_restriction.name == "one at a time"
-            if where(["created_at >= ? AND created_at <= ? AND started_at IS NULL", Time.zone.now - 1.week, Time.zone.now]).
-                where("started_at is not null").
-                where("finished_at is null").
-                where(:application_run_group_name => possible_job.application_run_group_name).count > 0
+            if recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count > 0
               #logger.debug "already running"
               next
             end
