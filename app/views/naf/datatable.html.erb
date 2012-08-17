@@ -39,14 +39,15 @@
   </tbody>
 
   <tfoot class="nav">
-    <tr>
+    <tr style="text-align: center">
       <% if include_actions_in_table? %>
         <td colspan=<%= @cols.size + 1 %>>
       <% else %>
         <td colspan=<%= @cols.size %>>
       <% end %>
-
-        <div id="paginationTitle">Page:</div>
+        <a href="#" id="page_back" style="display:none; cursor: default">Back</a>
+        &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+        <a href="#" id="page_forward">Forward</a>
        </td>
     </tr>
   </tfoot>
@@ -56,6 +57,7 @@
 
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
+    <%= hidden_field(:search, :offset, :value => 0) %>
     <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at]]) %> <br />
     <b> Direction: </b> 
        Descending:

@@ -35,7 +35,7 @@
     
     bundle install
 
-2. Run the generator to bring in the necessary configurations, initializers, and migrations into your Rails app.
+2. Run the two generators to bring in the necessary configurations, initializers, and migrations into your Rails app.
    You can provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
 
     rails generate naf_system {myapp_job_system}
@@ -43,10 +43,11 @@
 
 3. This has created/edited the following files:
 
+    config/job_system_schema_config.yml (Specifies the schema_name)
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
-    config/job_system_schema_config.yml (specfies the schema_name)
-    config/initializers/extensions_migration.rb (an extension to help with migrations)
-    config/routes.rb  (This file is edited to mount Naf as a rails engine, at the default path "/job_system")
+    config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
+    app/assets/javascripts/application.js (Edited to require naf javascript assets)
+    app/assets/stylesheets/application.css (Edited to require naf stylesheet assets)
 
     db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
 
@@ -54,7 +55,7 @@
 
     rake db:migrate
 
-5. Try running the Rails console, and see that you have the Naf models loaded.
+5. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
     rails console
     Naf::Affinity.all
@@ -63,15 +64,7 @@
 
     CONTROLLER_NAME_STR = "::ApplicationController"
 
-7. Add the Naf javascript files to the asset pipeline.  In app/assets/javascripts/application.js, insert:
-    
-    //= require naf
-
-8. Add the Naf stylesheet files to the asset pipeline.  In app/assets/stylesheets/application.css, insert:
-
-    *= require naf
-
-9. Now the Naf Job System engine should be mounted at the default path '/job_system' (change this in config/routes.rb)
+7. Now the Naf Job System engine should be mounted at the default path '/job_system' (Configurable in config/routes.rb)
 
 == Using Naf
   
