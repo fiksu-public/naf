@@ -8,6 +8,7 @@ module Naf
 
   class Job < NafBase
     include ::Af::Application::SafeProxy
+    include ::Af::AdvisoryLocker
 
     JOB_STALE_TIME = 1.week
 
@@ -24,7 +25,7 @@ module Naf
     delegate :script_type_name, :to => :application_type
 
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
-
+    attr_accessible :priority
     # scope like things
 
     def self.queued_between(start_time, end_time)
@@ -32,7 +33,7 @@ module Naf
     end
 
     def self.recently_queued
-      return created_at_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
+      return queued_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
     end
 
     def self.not_finished
@@ -60,7 +61,7 @@ module Naf
     end
 
     def self.select_affinity_ids
-      return select("(select array(affinity_id) from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids")
+      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids")
     end
 
     def self.possible_jobs
@@ -81,6 +82,20 @@ module Naf
       return started_on_machine.try(:server_address)
     end
 
+    #
+
+    def self.lock_for_job_queue(&block)
+      return lock_record(0, &block)
+    end
+
+    def self.queue_rails_job(command, affinities = [], priority = 0)
+      create(:application_type_id => 1,
+             :command => command,
+             :application_run_group_restriction_id => 2,
+             :application_run_group_name => command,
+             :priority => priority)
+    end
+
     def self.fetch_assigned_jobs(machine)
       return recently_queued.not_finished.started_on(machine)
     end
@@ -90,12 +105,12 @@ module Naf
         job_affinity_ids = possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
 
         # eliminate job if it can't run on this machine
-        unless machine.machine_affinty_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
+        unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
           #logger.debug "required affinity not found"
           next
         end
 
-        machine_affinity_ids = machine.machine_affinty_slots.map(&:affinity_id)
+        machine_affinity_ids = machine.machine_affinity_slots.map(&:affinity_id)
 
         # eliminate job if machine can not run this it
         unless job_affinity_ids.all? { |job_affinity_id| machine.affinity_ids.include? job_affinity_id }
@@ -105,24 +120,24 @@ module Naf
 
         job = nil
         lock_for_job_queue do
-          if possible_job.run_group_restriction.name == "one per machine"
+          if possible_job.application_run_group_restriction.application_run_group_restriction_name == "one per machine"
             if recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count > 0
               #logger.debug "already running on this machine"
               next
             end
-          elsif possible_job.run_group_restriction.name == "one at a time"
+          elsif possible_job.application_run_group_restriction.application_run_group_restriction_name == "one at a time"
             if recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count > 0
               #logger.debug "already running"
               next
             end
-          else # possible_job.run_group_restriction.name == "no restrictions"
+          else # possible_job.application_run_group_restriction.application_run_group_restriction_name == "no restrictions"
           end
 
           sql = <<-SQL
-             UPDATE jobs
+             UPDATE #{JOB_SYSTEM_SCHEMA_NAME}.jobs
                SET
                    started_at = NOW(),
-                   started_on_machine_id = ?,
+                   started_on_machine_id = ?
              WHERE
                id = ? AND
                started_at IS NULL
@@ -135,7 +150,11 @@ module Naf
 
         return job if job.present?
       end
-        
+      return nil
+    end
+
+    def execute
+      application_type.execute(self)
     end
   end
 end

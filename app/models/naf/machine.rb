@@ -8,8 +8,8 @@ module Naf
     validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
     validates :server_address, :uniqueness => true, :if => :correct_server_address?
 
-    has_many :machine_affinity_slot, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
-    has_many :affinities, :through => :machine_affinity_slot
+    has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
+    has_many :affinities, :through => :machine_affinity_slots
 
     attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size 
 

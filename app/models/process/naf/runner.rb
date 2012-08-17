@@ -21,7 +21,7 @@ module Process::Naf
 
       # make sure no processes are thought to be running on
       # this machine
-      terminate_old_processes
+      terminate_old_processes(machine)
 
       logger.info "working: #{machine.inspect}"
 
@@ -123,11 +123,11 @@ module Process::Naf
       logger.info "runner quitting"
     end
 
-    def terminate_old_processes
+    def terminate_old_processes(machine)
       # check if any processes are hanging around and ask them
       # politely if they will please terminate
 
-      jobs = assigned_jobs
+      jobs = assigned_jobs(machine)
       return jobs.length == 0
       jobs.each do |job|
         if job.request_to_terminate == false
@@ -139,12 +139,12 @@ module Process::Naf
 
       # wait
       (1..@wait_time_for_processes_to_terminate).each do
-        return if assigned_jobs.length == 0
+        return if assigned_jobs(machine).length == 0
         sleep(1)
       end
 
       # nudge them to terminate
-      jobs = assigned_jobs
+      jobs = assigned_jobs(machine)
       return jobs.length == 0
       jobs.each do |job|
         logger.warn "sending SIG_TERM to process: pid=#{job.pid}, command=#{job.command}"
@@ -153,18 +153,24 @@ module Process::Naf
 
       # wait
       (1..5).each do
-        return if assigned_jobs.length == 0
+        return if assigned_jobs(machine).length == 0
         sleep(1)
       end
 
       # kill with fire
-      assigned_jobs.each do |job|
+      assigned_jobs(machine).each do |job|
         logger.warn "sending SIG_KILL to process: pid=#{job.pid}, command=#{job.command}"
         send_signal_and_maybe_clean_up(job, "KILL")
       end
     end
 
     def send_signal_and_maybe_clean_up(job, signal)
+      if job.pid.nil?
+        job.finished_at = Time.zone.now
+        job.save!
+        return false
+      end
+
       begin
         Process.kill(signal, job.pid)
       rescue Errno::ESRCH
@@ -176,8 +182,8 @@ module Process::Naf
       return true
     end
 
-    def assigned_job
-      return ::Naf::Machine.assigned_jobs.select do |job|
+    def assigned_jobs(machine)
+      return machine.assigned_jobs.select do |job|
         send_signal_and_maybe_clean_up(job, 0)
       end.map(&:pid)
     end

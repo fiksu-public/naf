@@ -64,13 +64,13 @@ class CreateJobSystem < ActiveRecord::Migration
           enabled             boolean not null default true,
           script_type_name    text unique not null,
           description         text,
-          invocation_class    text not null
+          invocation_method   text not null
       );
-      insert into #{schema_name}.application_types (script_type_name, description, invocation_class) values
-        ('rails', 'ruby on rails NAF application', '::Naf::ApplicationType.rails_invocator'),
-        ('bash command', 'bash command', '::Naf::ApplicationType.bash_command_invocator'),
-        ('bash script', 'bash script', '::Naf::ApplicationType.bash_script_invocator'),
-        ('ruby', 'ruby script', '::Naf::ApplicationType.ruby_script_invocator');
+      insert into #{schema_name}.application_types (script_type_name, description, invocation_method) values
+        ('rails', 'ruby on rails NAF application', 'rails_invocator'),
+        ('bash command', 'bash command', 'bash_command_invocator'),
+        ('bash script', 'bash script', 'bash_script_invocator'),
+        ('ruby', 'ruby script', 'ruby_script_invocator');
       create table #{schema_name}.applications
       (
           id                              serial not null primary key,
