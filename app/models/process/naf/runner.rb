@@ -219,16 +219,8 @@ module Process::Naf
         find_all{|job| job.application_id.present? }.
         index_by{|job| job.application_id }
 
-      puts "#" * 100
-      puts not_finished_applications.inspect
-      puts "#" * 100
-
       application_last_runs = ::Naf::Job.application_last_runs.
         index_by{|job| job.application_id }
-
-      puts "-" * 100
-      puts application_last_runs.inspect
-      puts "-" * 100
 
       schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).
         find_all do |schedule|
@@ -236,10 +228,6 @@ module Process::Naf
           ( application_last_runs[schedule.application_id].nil? ||
             (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval * 60)))
       end
-
-      puts "*" * 100
-      puts schedules_what_need_queuin.inspect
-      puts "*" * 100
 
       return schedules_what_need_queuin
     end
