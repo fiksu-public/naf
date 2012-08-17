@@ -5,9 +5,10 @@ module NafGeneratorHelper
   module ClassMethods
     def to_lowercase_underscored_format(str)
       output, temp = [], ""
-      str.split(/([[:upper:]][[:lower:]]*)/)
-        .delete_if(&:empty?)
-        .map(&:downcase).each do |i|
+      str.
+        split(/([[:upper:]][[:lower:]]*)/).
+        delete_if(&:empty?).
+        map(&:downcase).each do |i|
         if i.length > 1
           if temp.length > 0
             output << temp
