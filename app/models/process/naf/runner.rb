@@ -65,57 +65,81 @@ module Process::Naf
 
         # clean up children that have exited
 
-        if @children.length > 0
+        logger.info "cleaning up dead children: #{@children.length}"
+        while @children.length > 0
           begin
             pid, status = Process.waitpid2(-1, Process::WNOHANG)
-            if pid.present?
-              # XXX remove from children list -- mark as dead
-              child_job = @children.delete(pid)
-              if child_job.present?
-                if status.exited?
-                  child_job.reload
-                  child_job.finished_at = Time.zone.now
-                  child_job.exit_status = status.exitstatus
-                  child_job.termination_signal = status.termsig
-                  child_job.save!
-                else
-                  # XXX this can happen if the child is sigstopped
-                end
+            break if pid.nil?
+            # XXX remove from children list -- mark as dead
+            child_job = @children.delete(pid)
+            if child_job.present?
+              if status.exited?
+                child_job.reload
+                logger.info "cleaning up dead child: #{child_job.inspect}"
+                child_job.finished_at = Time.zone.now
+                child_job.exit_status = status.exitstatus
+                child_job.termination_signal = status.termsig
+                child_job.save!
               else
-                # XXX ERROR no child for returned pid -- this can't happen
+                # this can happen if the child is sigstopped
+                logger.warn "child waited for did not exit: #{child.inspect}, status: #{status.inspect}"
               end
+            else
+              # XXX ERROR no child for returned pid -- this can't happen
+              logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
             end
-          rescue # XXX just incase a job control failure -- more code here
+          rescue StandardError => e
+            # XXX just incase a job control failure -- more code here
+            logger.error "some failure during child clean up"
+            logger.error e.message
+            logger.error e.backtrace.join("\n")
           end
         end
 
         # start new jobs
+        logger.info "starting new jobs, num children: #{@children.length}/#{@num_processes}"
         while @children.length < @num_processes
           begin
             job = machine.fetch_next_job
 
-            break unless job.present?
+            unless job.present?
+              logger.info "no more jobs to run"
+              break 
+            end
+
+            logger.info "starting new job : #{job.inspect}"
 
             job.started_on_machine_id = machine.id
             job.started_at = Time.zone.now
 
+            # this (job.application_type) needs to be fetched so that
+            # there is no db access in the child fork we could do an
+            # include in the job code although that is squirly code
+            # AND it means runner dependancies are in the job model
+
+            job.application_type
+            job.save!
+
             pid = Process.fork do
               job.execute
               # should never get here
+              logger.error "failed to execute #{job.inspect}"
+              Process.exit
             end
+            # 
 
-            if pid
-              @children[pid] = job
-            else
-              # failed to execute -- interesting
-              job.failed_to_start = true
-              job.finished_at = Time.zone.now
-            end
-
+            @children[pid] = job
+            job.pid = pid
             job.save!
-          rescue # XXX rescue for various issues
+            logger.info "job started : #{job.inspect}"
+          rescue StandardError => e
+            # XXX rescue for various issues
+            logger.error "failure during job start"
+            logger.error e.message
+            logger.error e.backtrace.join("\n")
           end
         end
+        logger.info "done starting jobs"
 
         sleep(@loop_sleep_time)
       end

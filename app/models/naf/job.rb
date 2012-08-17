@@ -148,13 +148,22 @@ module Naf
           job = find_by_sql([sql, machine.id, possible_job.id]).first
         end
 
-        return job if job.present?
+        if job.present?
+          # found a job
+          return job
+        end
       end
+
+      # no jobs found
       return nil
     end
 
     def execute
       application_type.execute(self)
+    end
+
+    def self.test(*foo)
+      puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}"
     end
   end
 end
