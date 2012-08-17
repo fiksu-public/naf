@@ -153,7 +153,17 @@ class CreateJobSystem < ActiveRecord::Migration
   def down
     schema_name = SCHEMA_NAME
     execute <<-SQL
-      drop schema #{schema_name} cascade;
+      drop table #{schema_name}.job_affinity_tabs cascade;
+      drop table #{schema_name}.jobs cascade;
+      drop table #{schema_name}.affinities cascade;
+      drop table #{schema_name}.affinity_classifications cascade;
+      drop table #{schema_name}.machines cascade;
+      drop table #{schema_name}.machine_affinity_slots cascade;
+      drop table #{schema_name}.applications cascade;
+      drop table #{schema_name}.application_types cascade;
+      drop table #{schema_name}.application_run_group_restrictions cascade;
+      drop table #{schema_name}.application_schedules cascade;
+      drop table #{schema_name}.application_schedule_affinity_tabs cascade;
     SQL
   end
 end

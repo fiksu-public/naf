@@ -66,5 +66,9 @@
 
 7. Now the Naf Job System engine should be mounted at the default path '/job_system' (Configurable in config/routes.rb)
 
+8. Undo all of this setup by running the following rake task:
+
+    rake naf:teardown
+
 == Using Naf
   

@@ -72,7 +72,7 @@ module Naf
     def set_cols_and_attributes
       more_attributes = [:title, :command, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
       @attributes = Naf::Job.attribute_names.map(&:to_sym) | more_attributes
-      @cols = [:created_at, :title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :priority, :failed_to_start, :started_at, :finished_at, :pid, :exit_status, :request_to_terminate,  :machine_started_on_server_name, :machine_started_on_server_address]
+      @cols = [:id, :created_at, :title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :priority, :failed_to_start, :started_at, :finished_at, :pid, :exit_status, :request_to_terminate,  :machine_started_on_server_name, :machine_started_on_server_address]
     end
 
   end
