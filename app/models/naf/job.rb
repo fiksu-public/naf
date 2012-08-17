@@ -205,7 +205,7 @@ module Naf
     # We eventually build up these results over created_at/1.week partitions.
     def self.search(search)
       order, direction = search[:order], search[:direction]
-      job_scope = order("#{order} #{direction}").limit(2).offset(search[:offset])
+      job_scope = order("#{order} #{direction}").limit(search[:limit]).offset(search[:offset].to_i*search[:limit].to_i)
       if search[:running].present?
         machine_id_value = search[:running] == "true" ? "not null" : "null"
         job_scope = job_scope.where("started_on_machine_id is #{machine_id_value}")

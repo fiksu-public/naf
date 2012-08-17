@@ -56,7 +56,17 @@ jQuery ->
             for msg in data.errors
               $('td#main div#status').prepend('<p style="color: red">' + msg + '</p>');
         ), 1000; 
-    }) 
+    })
+
+  # Show Loading Message
+
+  show_loading_message = (message) ->
+    output = '<h5>'
+    output += message
+    output += '</h5>'
+    output += '<img alt=\"Loading\" src=\"/assets/loading.gif\" />'
+    $.blockUI({ message: output});
+
 
 
   # --------------------------------------------------
@@ -78,7 +88,8 @@ jQuery ->
   # to populate the jobs table 
 
   if $('p#on_job_page').text() == 'true'
-    $.blockUI({ message: $('div#loading_jobs') })
+    $('a#page_forward').show()
+    show_loading_message('Loading Jobs')
     perform_job_search($('form#job_search'))
 
 
@@ -101,28 +112,30 @@ jQuery ->
 
   $('form#job_search').submit (event) ->
     event.preventDefault()
-    $.blockUI({ message: $('div#searching') })
+    show_loading_message('Applying your searches and filters to find jobs...')
     perform_job_search($(this))
 
   # Go to next page, rerun job search, ++offset
   $('a#page_forward').live 'click', (event) ->
+    limit = $('select#search_limit').val()
     offset_element = $('input#search_offset')
     offset = parseInt(offset_element.val()) + 1
     if offset > 0
       $('a#page_back').show()
     offset_element.val(offset)
-    $.blockUI({ message: $('div#searching') })
+    show_loading_message('Loading the next ' + limit + ' jobs')
     perform_job_search($('form#job_search'))
 
 
   # Go to the previous page, rerun job search, --offset
   $('a#page_back').live 'click', (event) ->
+    limit = $('select#search_limit').val()
     offset_element = $('input#search_offset')
     offset = parseInt(offset_element.val()) - 1
     if offset < 1
       $(this).hide()
     offset_element.val(offset)
-    $.blockUI({ message: $('div#searching') })
+    show_loading_message('Loading the previous ' + limit + ' jobs')
     perform_job_search($('form#job_search'))
     
 
@@ -150,7 +163,7 @@ jQuery ->
 
   $('form#add_job').submit (event) ->
     event.preventDefault()
-    $.blockUI({ message: $('div#adding') })
+    show_loading_message('Adding job to the job queue')
     create_job($(this))
 
 

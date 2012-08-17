@@ -31,7 +31,7 @@ class NafSystemGenerator < Rails::Generators::Base
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
     insert_into_file("#{Rails.root}/config/routes.rb", :after => /routes.draw.do\n/) do
-      %Q{ mount Naf::Engine, :at => "/job_system"\n}
+      %Q{mount Naf::Engine, :at => "/job_system"\n}
     end
   end
 
