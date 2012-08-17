@@ -40,6 +40,14 @@ module Naf
       return queued_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
     end
 
+    def self.application_last_runs
+      return recently_queued.
+        where("application_id is not null").
+        group("application_id").
+        select("application_id,max(finished_at) as finished_at").
+        reject{|job| job.finished_at.nil? }
+    end
+
     def self.not_finished
       return where({:finished_at => nil})
     end
@@ -93,11 +101,29 @@ module Naf
     end
 
     def self.queue_rails_job(command, affinities = [], priority = 0)
+      # XXX handle affinities -- remember to transaction between create and affinity additions
       create(:application_type_id => 1,
              :command => command,
              :application_run_group_restriction_id => 2,
              :application_run_group_name => command,
              :priority => priority)
+    end
+
+    def self.queue_application(application, application_run_group_restriction, application_run_group_name, priority)
+      # XXX handle affinities -- remember to transaction between create and affinity additions
+      create(:application_id => application.id,
+             :application_type_id => application.application_type_id,
+             :command => application.command,
+             :application_run_group_restriction_id => application_run_group_restriction.id,
+             :application_run_group_name => application_run_group_name,
+             :priority => priority)
+    end
+
+    def self.queue_application_schedule(application_schedule)
+      queue_application(application_schedule.application,
+                        application_schedule.application_run_group_restriction,
+                        application_schedule.application_run_group_name,
+                        application_schedule.priority)
     end
 
     def self.fetch_assigned_jobs(machine)
@@ -167,7 +193,10 @@ module Naf
     end
 
     def self.test(*foo)
-      puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}"
+      seconds = rand 120 + 15
+      puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}: sleeping for #{seconds} seconds"
+      sleep(seconds)
+      puts "TEST DONE: #{Time.zone.now}: #{foo.inspect}"
     end
 
     # Given search, a hash of the search query for jobs on the queue,

@@ -48,8 +48,5 @@ module Naf
       puts "Num Collisions: #{num_collisions}"
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
     end
-
-    # XXX this should be fixed to figure out of an application schedule is ready to be queued
-    scope :should_be_queued, where(:enabled => true)
   end
 end

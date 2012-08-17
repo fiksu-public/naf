@@ -96,7 +96,7 @@ class CreateJobSystem < ActiveRecord::Migration
           updated_at                             timestamp,
           enabled                                boolean not null default true,
           visible                                boolean not null default true,
-          application_id                         integer not null references #{schema_name}.applications,
+          application_id                         integer unique not null references #{schema_name}.applications,
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
           run_interval                           integer not null,

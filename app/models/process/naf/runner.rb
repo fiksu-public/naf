@@ -35,15 +35,16 @@ module Process::Naf
         end
 
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period)
-          logger.debug "it's time"
+          logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
             logger.info "checking schedules"
             machine.mark_checked_schedule
             ::Naf::ApplicationSchedule.unlock_schedules
 
             # check scheduled tasks
-            ::Naf::ApplicationSchedule.should_be_queued do |application_schedule|
+            should_be_queued.each do |application_schedule|
               logger.info "schedule application: #{application_schedule.inspect}"
+              ::Naf::Job.queue_application_schedule(application_schedule)
             end
 
             # check the runner machines
@@ -210,6 +211,37 @@ module Process::Naf
       return machine.assigned_jobs.select do |job|
         send_signal_and_maybe_clean_up(job, 0)
       end.map(&:pid)
+    end
+
+    def should_be_queued
+      not_finished_applications = ::Naf::Job.recently_queued.
+        not_finished.
+        find_all{|job| job.application_id.present? }.
+        index_by{|job| job.application_id }
+
+      puts "#" * 100
+      puts not_finished_applications.inspect
+      puts "#" * 100
+
+      application_last_runs = ::Naf::Job.application_last_runs.
+        index_by{|job| job.application_id }
+
+      puts "-" * 100
+      puts application_last_runs.inspect
+      puts "-" * 100
+
+      schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).
+        find_all do |schedule|
+        ( not_finished_applications[schedule.application_id].nil? &&
+          ( application_last_runs[schedule.application_id].nil? ||
+            (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval * 60)))
+      end
+
+      puts "*" * 100
+      puts schedules_what_need_queuin.inspect
+      puts "*" * 100
+
+      return schedules_what_need_queuin
     end
   end
 end
