@@ -73,6 +73,7 @@
 		if ( rowCount > perPage && perPage != 0 )
 			$('>tbody>tr:gt(' + (perPage - 1) + ')', this).addClass('hideTR');
 
+                /*
 		// bind sort functionality to theader
 		if (perPage != 0)
 			$('>thead [sort],>thead .sort', this).each(
@@ -103,6 +104,7 @@
 					);
 				}
 			);
+                */
 
 		// add perPage selection link + delim dom node
 	        //$('>.nav .selectPerPage', this).empty();

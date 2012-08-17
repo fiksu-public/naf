@@ -165,5 +165,11 @@ class CreateJobSystem < ActiveRecord::Migration
       drop table #{schema_name}.application_schedules cascade;
       drop table #{schema_name}.application_schedule_affinity_tabs cascade;
     SQL
+
+    if schema_name != "public"
+      execute <<-SQL
+        drop schema #{schema_name}; 
+      SQL
+    end
   end
 end

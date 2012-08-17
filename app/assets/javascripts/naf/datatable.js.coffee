@@ -65,6 +65,8 @@ jQuery ->
     output += message
     output += '</h5>'
     output += '<img alt=\"Loading\" src=\"/assets/loading.gif\" />'
+    output += '<br />'
+    output += '<br />'
     $.blockUI({ message: output});
 
 
@@ -199,7 +201,7 @@ jQuery ->
 
   $('form#enqueue_form').submit (event) ->
     event.preventDefault()
-    $.blockUI({ message: $('div#adding') })
+    show_loading_message('Adding application as a job on the queue')    
     create_job($(this))
 
 

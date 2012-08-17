@@ -29,9 +29,7 @@ namespace :naf do
       "config/job_system_schema_config.yml"
     ]
     edit_file_line_regex_hash = { 
-      "app/assets/javascripts/application.js"  => %r{\/\/= require naf\s*\n},
-      "app/assets/stylesheets/application.css" => %r{\*= require naf\s*\n}, 
-      "config/routes.rb" => %r{mount Naf::Engine, :at => "/job_system"\s*\n}
+      "config/routes.rb" => %r{$  mount Naf::Engine, :at => "/job_system"\s*\n}
     } 
 
     files_to_remove.each do |file|

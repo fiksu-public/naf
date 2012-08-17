@@ -17,10 +17,9 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.homepage    = 'http://github.com/fiksu/naf'
 
-  s.add_dependency "rails", ">= 3.2.5"
+  s.add_dependency "rails", ">= 3.2"
   s.add_dependency "jquery-rails"
   s.add_development_dependency "pg"
   s.add_dependency "rspec-rails"
   s.add_dependency "foreigner"
-#  s.add_dependency "af", :git => "git@github.com:fiksu/af.git"
 end
