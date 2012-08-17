@@ -9,7 +9,7 @@ class CreateJobSystem < ActiveRecord::Migration
     #  names: normal, canary, perennial
     #  location: ip address
     #  application/release on machine: application-release-number
-    sql <<-SQL
+    execute <<-SQL
       create schema #{schema_name};
       create table #{schema_name}.affinity_classifications
       (
@@ -152,7 +152,7 @@ class CreateJobSystem < ActiveRecord::Migration
 
   def down
     schema_name = SCHEMA_NAME
-    sql <<-SQL
+    execute <<-SQL
       drop schema #{schema_name} cascade;
     SQL
   end

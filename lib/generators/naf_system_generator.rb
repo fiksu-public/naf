@@ -28,20 +28,36 @@ class NafSystemGenerator < Rails::Generators::Base
     end
   end
 
-  def add_migrations_extension
-    path = "#{Rails.root}/config/initializers/extensions_migration.rb"
-    if File.exists?(path)
-      puts "Skipping config/initializers/extensions_migration.rb creation, as file already exists!"
-    else
-      puts "Adding migration extension for executing raw sql (config/initializers/extensions_migration.rb)..."
-      template 'extensions_migration.rb', path
-    end
-  end
-
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
     insert_into_file("#{Rails.root}/config/routes.rb", :after => /routes.draw.do\n/) do
       %Q{ mount Naf::Engine, :at => "/job_system"\n}
+    end
+  end
+
+  def add_assets
+    path = "#{Rails.root}/app/assets/javascripts/application.js"
+    if File.exists?(path)
+      if File.readlines(path).grep(/\/\/= require naf/).any?
+        puts "Naf Javascript files already required"
+      else
+        puts "Adding Naf Javascript files to the asset pipeline"
+        insert_into_file(path, :after => /\/\/= require jquery\s*\n/) do
+          %Q{//= require naf\n}
+        end
+      end
+    end
+  
+    path = "#{Rails.root}/app/assets/stylesheets/application.css"
+    if File.exists?(path)
+      if File.readlines(path).grep(/\*= require naf/).any?
+        puts "Naf Stylesheet files already required"        
+      else
+        puts "Adding Naf Stylesheet files to the asset pipeline"
+        insert_into_file(path, :after => /\*= require_self\s*\n/ ) do
+          %Q{*= require naf\n}
+        end
+      end
     end
   end
 
