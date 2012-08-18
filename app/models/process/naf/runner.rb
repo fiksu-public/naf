@@ -97,8 +97,8 @@ module Process::Naf
         end
 
         # start new jobs
-        logger.info "starting new jobs, num children: #{@children.length}/#{@machine.thread_pool_size}"
-        while @children.length < @machine.thread_pool_size
+        logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
+        while @children.length < machine.thread_pool_size
           begin
             job = machine.fetch_next_job
 
