@@ -61,8 +61,8 @@
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
     <%= hidden_field(:search, :offset, :value => 0) %>
-
-    <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at]]) %> <br />
+    <b> Status: </b>  <%= select(:search, :status, [["All", :queued], ["Running", :running], ["Queued", :not_started], ["Finished", :finished]]) %> </b><br />
+    <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %> <br />
     <b> Direction: </b> 
        Descending:
         <%= radio_button(:search, :direction, :desc, :checked => true) %>

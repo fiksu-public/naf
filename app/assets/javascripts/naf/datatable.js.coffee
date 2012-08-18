@@ -30,7 +30,7 @@ jQuery ->
              row_object = $(row)
              row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
            $.unblockUI();
-         ), 1000;
+         ), 500;
      })
   
   # Create Job Function
@@ -55,7 +55,7 @@ jQuery ->
           else
             for msg in data.errors
               $('td#main div#status').prepend('<p style="color: red">' + msg + '</p>');
-        ), 1000; 
+        ), 500; 
     })
 
   # Show Loading Message

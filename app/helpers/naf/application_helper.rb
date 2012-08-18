@@ -5,8 +5,7 @@ module Naf
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
     CREATE_BLOCKED_RESOURCES = []
     ALL_RESOURCES = [ "jobs",  "applications", "application_schedules",
-                      "machines", "affinities", "affinity_classifications", 
-                      "application_run_group_restrictions", "application_types"]
+                      "machines", "affinities"]
 
     def tabs
       ALL_RESOURCES

@@ -5,14 +5,19 @@
 
 #header h3 {
  text-shadow: black 1px 1px 1px;
+ font-size: 20px;
 }
 
 #main {
-  padding: 5px 10px 20px 10px;
+  padding: 0px 10px 20px 10px;
+  margin: 0px;
   text-align: top;
   background-color:#eeeeee;
 }
 
+a {
+ color: blue;
+}
 
 td#main div#status {
   font-size: 12px;
@@ -100,6 +105,10 @@ div#record table#record th {
     color: white;
 }
 
+div#record table#record tbody {
+    text-align: left;
+}
+
 div#record table#record td, th {
     padding: 5px 20px 5px 20px;
     margin: 0px;
@@ -125,6 +134,17 @@ div#record table#record tr:nth-child(odd){
   display: inline;
   font-size: 12px;
   float: right;
+  background: #FFA500;
+  padding: 5px;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px; 
+
+}
+
+#main span#job_search a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
 }
 
 #main span#parent {
@@ -138,8 +158,8 @@ p.clear {
 }
 
 img.action {
-  float: left;
   display: inline;
+  margin: auto;
 }
 
 td#tabs {
@@ -156,15 +176,15 @@ td#tabs {
 
 #tabs li {
   float: left;
-  margin: 0px 5px 0px 0px;
-  padding: 5px;
+  margin: 0px 15px 0px 0px;
+  padding: 5px 20px 5px 20px;
   display: block;
   border: 1px solid black;
   border-top-left-radius: 7px;
-  border-top-right-radius: 7px;
+  border-top-right-radius: 7px; 
   background: #888;
   color: #eee;
-  font-size: 10px;
+  font-size: 14px;
   box-shadow: -2px -2px 10px #555;
 }
 
@@ -190,11 +210,22 @@ td#tabs {
 }
 
 #datatable {
+  width: 100%;
+  white-space:nowrap;
   margin: auto;
   margin-top: 10px;
   background-color: #ffffff;
   border: 1px #000 solid;
   font-size: 12px;
+  text-align: left;
+}
+
+#datatable  td {
+ padding: 5px 10px 5px 10px;
+}
+
+#dataable td#action {
+ text-align: center;
 }
 
 div.field input[type=text] { 
