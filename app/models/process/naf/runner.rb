@@ -1,13 +1,12 @@
 module Process::Naf
-  class Runner < ::Af::Application
+  class Runner < ::Process::Naf::Application
     opt :wait_time_for_processes_to_terminate, :default => 120
-    opt :num_processes, :default => 10
+    opt :check_schedules_period, :default => 1
+    opt :runner_stale_period, :default => 10
+    opt :loop_sleep_time, :default => 5
 
     def initialize
       super
-      @check_schedules_period = 1.minute
-      @runner_stale_period = 10.minutes
-      @loop_sleep_time = 5
     end
 
     def work
@@ -34,7 +33,7 @@ module Process::Naf
           break
         end
 
-        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period)
+        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minute)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
             logger.info "checking schedules"
@@ -56,7 +55,7 @@ module Process::Naf
                 logger.warn "runner not alive #{runner_to_check.inspect}"
               end
 
-              if runner_to_check.is_stale?(@runner_stale_period)
+              if runner_to_check.is_stale?(@runner_stale_period.minute)
                 logger.alarm "runner down #{runner_to_check.inspect}"
                 runner_to_check.mark_machine_dead
               end
@@ -98,8 +97,8 @@ module Process::Naf
         end
 
         # start new jobs
-        logger.info "starting new jobs, num children: #{@children.length}/#{@num_processes}"
-        while @children.length < @num_processes
+        logger.info "starting new jobs, num children: #{@children.length}/#{@machine.thread_pool_size}"
+        while @children.length < @machine.thread_pool_size
           begin
             job = machine.fetch_next_job
 
