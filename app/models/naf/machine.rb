@@ -13,8 +13,17 @@ module Naf
 
     attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size 
 
-    scope :enabled, where(:enabled => true)
-    scope :local_machine, where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
+    def self.enabled
+      return where(:enabled => true)
+    end
+
+    def self.machine_ip_address
+      return Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
+    end
+
+    def self.local_machine
+      return where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
+    end
 
     def correct_server_address?
       server_address.present? and IP_REGEX =~ server_address

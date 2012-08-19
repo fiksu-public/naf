@@ -1,5 +1,5 @@
 module Process::Naf
-  class Runner < ::Process::Naf::Application
+  class Runner < ::Af::Application
     opt :wait_time_for_processes_to_terminate, :default => 120
     opt :check_schedules_period, :default => 1
     opt :runner_stale_period, :default => 10
@@ -13,7 +13,9 @@ module Process::Naf
       machine = ::Naf::Machine.current
 
       unless machine.present?
-        logger.fatal "this machine is not configued correctly"
+        logger.fatal "this machine is not configued correctly, please update #{::Naf::Machine.table_name} with an entry for this machine ipaddress: #{::Naf::Machine.machine_ip_address}"
+        logger.fatal "exiting..."
+        exit
       end
 
       machine.mark_alive
