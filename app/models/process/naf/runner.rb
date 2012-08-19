@@ -7,7 +7,7 @@ module Process::Naf
 
     def initialize
       super
-      update_options :log_file, :default => "naf"
+      update_opts :log_file, :default => "naf"
     end
 
     def work
