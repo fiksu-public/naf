@@ -6,24 +6,24 @@ module Naf
       self.send(invocation_method.to_sym, job)
     end
 
-    def invoke(command)
+    def invoke(job, command)
       return Process.spawn(ENV.merge({"NAF_APPLICATION_ID" => job.id}), command)
     end
 
     def rails_invocator(job)
-      return invoke(SCRIPT_RUNNER + " " + job.command)
+      return invoke(job, SCRIPT_RUNNER + " " + job.command)
     end
 
     def bash_command_invocator(job)
-      return invoke(job.command)
+      return invoke(job, job.command)
     end
 
     def bash_script_invocator(job)
-      return invoke(job.command)
+      return invoke(job, job.command)
     end
 
     def ruby_script_invocator(job)
-      return invoke(job.command)
+      return invoke(job, job.command)
     end
   end
 end
