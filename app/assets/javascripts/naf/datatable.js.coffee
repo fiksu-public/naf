@@ -18,8 +18,19 @@ jQuery ->
          setTimeout (-> 
            job_root_url = data.job_root_url
            $('table#datatable tbody').text('')
+           if data.jobs.length == 0
+             $('a#page_forward').hide()
+             $('span#result_numbers').text('')
+           else
+             $('a#page_forward').show()
+             offset = parseInt($('input#search_offset').val())
+             limit = parseInt($('select#search_limit').val())
+             lower = offset*limit + 1
+             upper = lower + data.jobs.length - 1
+             $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
            for job in data.jobs
-             row = '<tr class=\"job_row\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
+             class_label = job.status
+             row = '<tr class=\"'+ class_label + '\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
              for col in data.cols
                value = if job[col] == null then "" else job[col]
                row += "<td>" + value + "</td>"

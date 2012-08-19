@@ -5,8 +5,9 @@ module Naf
     validates :run_interval, :priority, :numericality => {:only_integer => true}
     validate :visible_enabled_check
     validate :enabled_application_id_unique
-    validates :application_run_group_restriction_id, :presence => true
+    validates :application_id, :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
+    
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'

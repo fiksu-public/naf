@@ -109,6 +109,3 @@
 .jTPS tbody tr td:not(#action) {
         cursor: pointer;
 }
-
-.jTPS tr:nth-child(even) { background: #eee }
-.jTPS tr:nth-child(odd)  { background: #fff }

@@ -5,6 +5,8 @@ module Logical
   class Job
     include ActionView::Helpers::DateHelper
 
+    COLUMNS = [:id, :status, :queued_time, :title, :started_at, :finished_at, :pid, :server]
+
     FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
  
     SEARCH_FIELDS = [:command, :application_run_group_name]
@@ -22,17 +24,21 @@ module Logical
     end
 
     def status
-      if started_at and (not finished_at)
+      if @job.started_at and (not @job.finished_at)
         "Running"
-      elsif started_at and finished_at
+      elsif @job.exit_status and @job.exit_status > 0
+        "Error"
+      elsif @job.started_at and @job.finished_at
         "Finished"
+      elsif @job.failed_to_start 
+        "Failed to start"
       else
         "Queued"
       end
     end
 
     def queued_time
-      created_at
+      created_at.localtime.strftime("%Y-%m-%d %r")
     end
 
     def title
@@ -45,8 +51,9 @@ module Logical
 
     def server
       if started_on_machine 
-        if started_on_machine.server_name
-          started_on_machine.server_name
+        name = started_on_machine.server_name
+        if name and name.length > 0
+          name
         else
           started_on_machine.server_address
         end
@@ -59,6 +66,10 @@ module Logical
     # We eventually build up these results over created_at/1.week partitions.
     def self.search(search)
       case search[:status].to_sym
+      when :failed_to_start
+        job_scope = ::Naf::Job.where(:failed_to_start => true)
+      when :error
+        job_scope = ::Naf::Job.where("exit_status > 0")
       when :not_started
         job_scope = ::Naf::Job.not_started
       when :running
@@ -82,26 +93,24 @@ module Logical
 
     # Format the hash of a job record nicely for the table
     def to_hash
-      methods = [:id, :status, :queued_time, :title, :started_at, :finished_at, :pid, :server]
-      Hash[
-        methods.map do |m|
-          value = send(m)
-          if value.blank?
-            [m, '']
-          else
-            case m
-            when :queued_time
-              [m, value.localtime.strftime("%Y-%m-%d %H:%M:%S")]
-            when :started_at, :finished_at
-              [m, "#{time_ago_in_words(value, true)} ago"]
-            else
-              [m, value]
-            end
-          end
-        end
-      ]
+      Hash[ COLUMNS.map{ |m| [m, send(m)] } ]
     end
 
+    def started_at
+      if value = @job.started_at
+        "#{time_ago_in_words(value, true)} ago"
+      else
+        ""
+      end
+    end
+
+    def finished_at
+      if value = @job.finished_at
+        "#{time_ago_in_words(value, true)} ago"
+      else
+        ""
+      end
+    end
 
   end
 end

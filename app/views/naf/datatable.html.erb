@@ -1,9 +1,14 @@
 <h3 id="record_name"><%= table_title %> </h3>
 
-<div style="text-align:right; font-size: 10px">
-  <a href="#" id="page_back" style="display:none; cursor: default">Back</a>
+<div>
+  <a href="#" id="page_back" style="float:left;display:none;">
+    <%= image_tag('back.png') %>
+  </a>
   &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-  <a href="#" id="page_forward" style ="display:none; cursor: default">Forward</a>
+  <a href="#" id="page_forward" style="float:right;display:none;">
+    <%= image_tag('forward.png') %>
+  </a>
+  <p class="clear"></p>
 </div>
 
 <table id="datatable" cellspacing="0">
@@ -35,6 +40,7 @@
           <td id="action"> 
             <% if current_page?(:controller => 'applications') %> 
               <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => row.id} %>
+              <%= generate_schedule_link(row) %>
             <% elsif current_page?(:controller => 'jobs') or current_page?(naf.root_url) %>
                <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
             <% end %>
@@ -51,6 +57,7 @@
       <% else %>
         <td colspan=<%= @cols.size %>>
       <% end %>
+      <span id="result_numbers"></span>
        </td>
     </tr>
   </tfoot>
@@ -61,14 +68,14 @@
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
     <%= hidden_field(:search, :offset, :value => 0) %>
-    <b> Status: </b>  <%= select(:search, :status, [["All", :queued], ["Running", :running], ["Queued", :not_started], ["Finished", :finished]]) %> </b><br />
+    <b> Status: </b>  <%= select(:search, :status, [["All", :queued], ["Running", :running], ["Queued", :not_started], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error]]) %> </b><br />
     <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %> <br />
     <b> Direction: </b> 
        Descending:
         <%= radio_button(:search, :direction, :desc, :checked => true) %>
        Ascending:
         <%= radio_button(:search, :direction, :asc) %> <br />
-    <b> Per Page: </b> <%= select(:search, :limit, [25, 50, 100, 5, 10].map{|val| [val.to_s, val] }) %> </b> <br />
+    <b> Per Page: </b> <%= select(:search, :limit, [10, 25, 50, 100].map{|val| [val.to_s, val] }) %> </b> <br />
     <b> Running: </b> <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Command: </b> <%= text_field(:search, :command) %><br />
     <b> Script Type: </b> <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %><br />

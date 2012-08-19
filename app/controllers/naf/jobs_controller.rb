@@ -72,7 +72,7 @@ module Naf
     def set_cols_and_attributes
       more_attributes = [:title, :command, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
       @attributes = Naf::Job.attribute_names.map(&:to_sym) | more_attributes
-      @cols = [:id, :status, :queued_time, :title, :started_at, :finished_at, :pid, :server]
+      @cols = Logical::Job::COLUMNS
     end
 
   end
