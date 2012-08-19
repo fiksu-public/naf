@@ -113,27 +113,22 @@ module Process::Naf
 
             job.started_on_machine_id = machine.id
             job.started_at = Time.zone.now
-
-            # this (job.application_type) needs to be fetched so that
-            # there is no db access in the child fork we could do an
-            # include in the job code although that is squirly code
-            # AND it means runner dependancies are in the job model
-
-            job.application_type
             job.save!
 
-            pid = Process.fork do
-              job.execute
-              # should never get here
+            pid = job.spawn
+            if pid
+              @children[pid] = job
+              job.pid = pid
+              job.failed_to_start = false
+              logger.info "job started : #{job.inspect}"
+            else
+              # should never get here (well, hopefullly)
+              job.failed_to_start = true
+              job.finished_at = Time.zone.now
               logger.error "failed to execute #{job.inspect}"
-              Process.exit
             end
-            # 
 
-            @children[pid] = job
-            job.pid = pid
             job.save!
-            logger.info "job started : #{job.inspect}"
           rescue StandardError => e
             # XXX rescue for various issues
             logger.error "failure during job start"

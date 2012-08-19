@@ -2,21 +2,28 @@ module Naf
   class ApplicationType < NafBase
     SCRIPT_RUNNER = "#{Rails.root}/script/rails runner"
 
-    def execute(job)
+    def spawn(job)
       self.send(invocation_method.to_sym, job)
     end
 
+    def invoke(command)
+      return Process.spawn(ENV.merge({"NAF_APPLICATION_ID" => job.id}), command)
+    end
+
     def rails_invocator(job)
-      Process.exec(SCRIPT_RUNNER + " " + job.command)
+      return invoke(SCRIPT_RUNNER + " " + job.command)
     end
 
     def bash_command_invocator(job)
+      return invoke(job.command)
     end
 
     def bash_script_invocator(job)
+      return invoke(job.command)
     end
 
     def ruby_script_invocator(job)
+      return invoke(job.command)
     end
   end
 end

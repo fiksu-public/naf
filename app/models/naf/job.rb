@@ -188,8 +188,8 @@ module Naf
       return nil
     end
 
-    def execute
-      application_type.execute(self)
+    def spawn
+      application_type.spawn(self)
     end
 
     def self.test(*foo)
