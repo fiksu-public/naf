@@ -7,7 +7,7 @@ module Naf
     end
 
     def invoke(job, command)
-      return Process.spawn(ENV.merge({"NAF_APPLICATION_ID" => job.id}), command)
+      return Process.spawn({"NAF_APPLICATION_ID" => job.id}.merge(ENV), command)
     end
 
     def rails_invocator(job)
