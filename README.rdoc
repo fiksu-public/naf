@@ -48,7 +48,7 @@
 
 4. Now bring in all of the Naf schema migrations.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script. So that you can change to the Engine's latest schema.
 
-   rake naf:install:migrations
+    rake naf:install:migrations
 
 5. This has copied all the Naf migrations to your db/migrate folder, run the schema changes.
 
@@ -69,7 +69,7 @@
 
 10. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.
 
-    rake naf:teardown
+     rake naf:teardown
 
 == Using Naf
   
