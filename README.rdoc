@@ -35,11 +35,10 @@
     
     bundle install
 
-2. Run the two generators to bring in the necessary configurations, initializers, and migrations into your Rails app.
-   You can optionally provide an argument here which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
+2. The generator to copy a configuration YAML file, and an initializer into your main applications code base.
+   You can optionally provide an argument which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
 
     rails generate naf_system [myapp_job_system]
-    rails generate naf_system_schema
 
 3. This has created/edited the following files:
 
@@ -47,24 +46,28 @@
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
-    db/migrate/[migration_number]create_job_system.rb (The migration to create the job system tables)
+4. Now bring in all of the Naf schema migrations.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script. So that you can change to the Engine's latest schema.
 
-4. All you have to do is to run this new migration, and you have your database all set up.
+   rake naf:install:migrations
+
+5. This has copied all the Naf migrations to your db/migrate folder, run the schema changes.
 
     rake db:migrate
 
-5. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
+6. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
     rails console
     Naf::Affinity.all
 
-6. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_schema_initializer.rb
+7. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_initializer.rb
 
     CONTROLLER_NAME_STR = "::ApplicationController"
 
-7. Now the Naf Job System engine should be mounted at the default path '/job_system' (Configurable in config/routes.rb)
+8. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
 
-8. Undo all of this setup by running the following rake task:
+9. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
+
+10. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.
 
     rake naf:teardown
 
