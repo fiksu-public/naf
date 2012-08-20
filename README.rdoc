@@ -35,7 +35,7 @@
     
     bundle install
 
-2. The generator to copy a configuration YAML file, and an initializer into your main applications code base.
+2. Run the generator to copy a configuration YAML file, and an initializer into your main applications code base.
    You can optionally provide an argument which specifies the Postgres schema which the Naf tables will reside in, default is: 'myapp_job_system'
 
     rails generate naf_system [myapp_job_system]
