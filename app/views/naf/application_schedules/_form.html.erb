@@ -1,4 +1,4 @@
-<%= form_for(@application_schedule) do |f| %>
+<%= form_for([@application, @application_schedule]) do |f| %>
   
   <% if @application_schedule.errors.any? %>
   <div id="errorExplanation">
@@ -12,11 +12,8 @@
   </div>
   <% end %>
  
-  <div class="field">
-    <%= f.label :application %><br />
-    <%= f.select(:application_id, ::Naf::Application.all.map{ |a| [a.title, a.id]}, :include_blank => true) %>
-  </div>
-
+  <%= hidden_field(:application_schedule, :application_id, :value => @application.id) %>
+  
   <div class="field">
     <%= f.label :run_group_restriction %><br />
     <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>

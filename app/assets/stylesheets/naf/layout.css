@@ -1,18 +1,24 @@
-#header {
+td#header {
   background-color: #FFA500;
   text-align: center;
+  padding: 0px;
 }
 
 #header h3 {
  text-shadow: black 1px 1px 1px;
+ font-size: 20px;
 }
 
 #main {
-  padding: 5px 10px 20px 10px;
+  padding: 0px 10px 20px 10px;
+  margin: 0px;
   text-align: top;
   background-color:#eeeeee;
 }
 
+a {
+ color: blue;
+}
 
 td#main div#status {
   font-size: 12px;
@@ -100,21 +106,26 @@ div#record table#record th {
     color: white;
 }
 
+div#record table#record tbody {
+    text-align: left;
+}
+
 div#record table#record td, th {
     padding: 5px 20px 5px 20px;
     margin: 0px;
     border: none;
 }
 
-div#record table#record tr:nth-child(even){
-    background: #eee;
+div#record table#record tr {
+    border-top: 1px solid black;
 }
 
-
-div#record table#record tr:nth-child(odd){
+div#record table#record tr:nth-child(odd) {
+    background: #ddd;
+}
+div#record table#record tr:nth-child(even) {
     background: #fff;
 }
-
 
 #main span#create {
   display: inline;
@@ -125,6 +136,20 @@ div#record table#record tr:nth-child(odd){
   display: inline;
   font-size: 12px;
   float: right;
+  background: #888;
+  padding: 5px;
+  border: 1px solid black;
+  border-bottom-left-radius: 7px;
+  border-bottom-right-radius: 7px; 
+}
+
+#main span#job_search:hover {
+  background: #333;
+}
+
+#main span#job_search a {
+  color: white;
+  text-decoration: none;
 }
 
 #main span#parent {
@@ -138,46 +163,45 @@ p.clear {
 }
 
 img.action {
-  float: left;
   display: inline;
 }
 
 td#tabs {
   background-color: #FFA500;
-  position: relative;
+  padding: 0px;
 }
 
-#tabs ul {
+ul#tabs {
   list-style: none;
-  margin: auto;
-  position: relative;
+  text-align: center;
+  padding: 0px;
+  margin-bottom: 6px;
 }
 
 
-#tabs li {
-  float: left;
-  margin: 0px 5px 0px 0px;
-  padding: 5px;
-  display: block;
+ul#tabs li {
+  margin: 0px 10px 0px 10px;
+  padding: 5px 20px 5px 20px;
+  display: inline;
   border: 1px solid black;
   border-top-left-radius: 7px;
-  border-top-right-radius: 7px;
+  border-top-right-radius: 7px; 
   background: #888;
   color: #eee;
-  font-size: 10px;
+  font-size: 12px;
   box-shadow: -2px -2px 10px #555;
 }
 
-#tabs li#on {
+ul#tabs li#on {
   background: #333;
 }
 
-#tabs li:hover {
+ul#tabs li:hover {
   background: #333;
   cursor: pointer;
 }
 
-#tabs li a {
+ul#tabs li a {
  color: white;
  text-decoration: none;
 }
@@ -190,18 +214,46 @@ td#tabs {
 }
 
 #datatable {
+  min-width: 1000px;
+  white-space:nowrap;
   margin: auto;
   margin-top: 10px;
   background-color: #ffffff;
   border: 1px #000 solid;
   font-size: 12px;
+  text-align: left;
+}
+
+
+#datatable  td {
+ padding: 5px 25px 5px 25px;
+}
+
+#datatable thead th {
+  text-align: center;
+  padding: 0px;
+}
+
+
+#datatable tfoot.nav tr {
+  height: 20px;
+}
+
+#datatable td#action {
+ text-align: center;
 }
 
 div.field input[type=text] { 
-    width: 500px; 
+    width: 400px; 
 } 
 
+span#result_number {
+  display: inline;
+}
+
+
 body {
+  background: #eee;
   margin: 0px;
   padding: 0px;
   font-family: "Verdana", Times, serif;
@@ -211,3 +263,40 @@ form#job_search {
   font-size: 12px;
   text-align: left;
 }
+
+#datatable tbody tr {
+  background: #fff;
+}
+
+
+#datatable tbody tr:nth-child(even) {
+  background: #eee;
+}
+
+#datatable tbody tr:nth-child(odd) {
+  background: #fff;
+}
+
+#datatable tbody tr.Failed.to.start{
+  background: #CD9B9B;
+}
+
+#datatable tbody tr.Error{
+  background: #CD9B9B;
+}
+
+
+#datatable tbody tr.Running{
+  background: #EEE685;
+}
+
+#datatable tbody tr.Queued {
+  background: #00CDCD;
+}
+
+
+#datatable tbody tr.Finished {
+  background: #BCED91;
+  color: #555;
+}
+

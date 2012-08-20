@@ -4,12 +4,23 @@ module Naf
     DESTROY_BLOCKED_RESOURCES = ["jobs"]
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
     CREATE_BLOCKED_RESOURCES = []
-    ALL_RESOURCES = [ "jobs",  "applications", "application_schedules",
-                      "machines", "affinities", "affinity_classifications", 
-                      "application_run_group_restrictions", "application_types"]
+    ALL_VISIBLE_RESOURCES = [ "jobs",  "applications", "machines", "affinities"]
 
     def tabs
-      ALL_RESOURCES
+      ALL_VISIBLE_RESOURCES
+    end
+
+    def schedule_url(schedule)
+      url_for({:controller => 'application_schedules', :action => 'show', :application_id => schedule.application_id, :id => schedule.id})
+    end
+
+    def generate_schedule_link(app)
+      schedule_button = image_tag('clock.png', :class => 'action', :title => 'Schedule')
+      if schedule = app.application_schedule
+        link_to schedule_button, {:controller => 'application_schedules', :action => 'show', :application_id => app.id, :id => schedule.id}
+      else
+        link_to schedule_button, {:controller => 'application_schedules', :action => 'new', :application_id => app.id}
+      end
     end
 
     def highlight_tab?(tab)
@@ -18,8 +29,8 @@ module Naf
         [tab, "machine_affinity_slots"].include?(controller_name)
       when "jobs"
         [tab, "job_affinity_tabs"].include?(controller_name)
-      when "application_schedules"
-        [tab, "application_schedule_affinity_tabs"].include?(controller_name)
+      when "applications"
+        [tab, "application_schedules", "application_schedule_affinity_tabs"].include?(controller_name)
       else
         tab == controller_name
       end
@@ -27,6 +38,8 @@ module Naf
 
     def parent_resource_link
       case controller_name
+      when "application_schedules"
+        link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
       when "job_affinity_tabs"
         link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
       when "application_schedule_affinity_tabs"
@@ -39,15 +52,22 @@ module Naf
     end
 
     def nested_resource_index?
-      ["job_affinity_tabs", "application_schedule_affinity_tabs", "machine_affinity_slots"].include?(controller_name) and !params[:id]
+      ["job_affinity_tabs", "application_schedule_affinity_tabs", "machine_affinity_slots", "application_schedules"].include?(controller_name) and !params[:id]
     end
 
     def table_title
       current_page?(naf.root_url) ? "Jobs" : make_header(controller_name)
     end
 
-    def generate_affinity_tabs_link
+    def generate_child_resources_link
       case controller_name
+      when "applications"
+        if schedule = @record.application_schedule
+          config = {:controller => 'application_schedules', :action => 'show', :application_id => @record.id, :id => schedule.id}
+        else
+          config = {:controller => 'application_schedules', :action => 'new', :application_id => @record.id}
+        end
+        link_to "Application Schedule", config
       when "jobs"
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
       when "application_schedules"
@@ -89,7 +109,12 @@ module Naf
     end
 
     def generate_back_link
-      link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
+      case controller_name.to_sym
+      when :application_schedules
+        link_to "Back to Application", {:controller => 'applications', :action => 'show', :id => @record.application.id}, :class => 'back'
+      else
+        link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
+      end
     end
 
     def generate_destroy_link
@@ -101,6 +126,8 @@ module Naf
         link_to "Destroy", application_schedule_application_schedule_affinity_tab_url(@application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "machine_affinity_slots"
         link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+      when "application_schedules"
+        link_to "Destroy", schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end

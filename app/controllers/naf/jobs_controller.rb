@@ -10,7 +10,7 @@ module Naf
           render :template => 'naf/datatable'
         end
         format.json do
-          job_hashes = Naf::Job.search(params[:search]).map(&:serializable_hash_for_table_view)
+          job_hashes = Logical::Job.search(params[:search]).map(&:to_hash)
           render :json => {:job_root_url => naf.jobs_path, :cols => @cols, :jobs => job_hashes }.to_json
         end
       end
@@ -72,7 +72,7 @@ module Naf
     def set_cols_and_attributes
       more_attributes = [:title, :command, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
       @attributes = Naf::Job.attribute_names.map(&:to_sym) | more_attributes
-      @cols = [:id, :created_at, :title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :priority, :failed_to_start, :started_at, :finished_at, :pid, :exit_status, :request_to_terminate,  :machine_started_on_server_name, :machine_started_on_server_address]
+      @cols = Logical::Job::COLUMNS
     end
 
   end

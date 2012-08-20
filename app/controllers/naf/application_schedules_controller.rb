@@ -4,7 +4,7 @@ module Naf
     before_filter :set_cols_and_attributes
   
     def index
-      @rows = Naf::ApplicationSchedule.all
+      @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
       render :template => 'naf/datatable'
     end
     
@@ -14,34 +14,39 @@ module Naf
     end
 
     def new
+      @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.new
     end
 
     def destroy
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
+      @application = @application_schedule.application
       @application_schedule.destroy
-      redirect_to :action => 'index'
+      redirect_to :action => 'index', :application_id => @application.id
     end
 
     def create
+      @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.new(params[:application_schedule])
       if  @application_schedule.save
-        redirect_to(@application_schedule, :notice => 'Application Schedule was successfully created.') 
+        redirect_to({:action => 'show', :application_id => @application.id, :id => @application_schedule.id}, :notice => 'Application Schedule was successfully created.') 
       else
-        render :action => "new"
+        render :action => "new", :application_id => @application.id
       end
     end
 
     def edit
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
+      @application = @application_schedule.application
     end
 
     def update
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
+      @application = @application_schedule.application
       if @application_schedule.update_attributes(params[:application_schedule])
-        redirect_to(@application_schedule, :notice => 'Application Schedule was successfully updated.') 
+        redirect_to({:action => 'show', :application_id => @application.id, :id => @application_schedule.id}, :notice => 'Application Schedule was successfully updated.') 
       else
-        render :action => "edit"
+        render :action => "edit", :id => @application_schedule.id, :application_id => @application.id
       end
     end
     

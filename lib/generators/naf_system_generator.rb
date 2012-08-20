@@ -19,48 +19,21 @@ class NafSystemGenerator < Rails::Generators::Base
   end
 
   def add_job_system_config
-    path = "#{Rails.root}/config/job_system_schema_config.yml"
+    path = "#{Rails.root}/config/job_system_config.yml"
     if File.exists?(path)
-      puts "Skipping config/job_system_schema_config.yml creation, as file already exists!"
+      puts "Skipping config/job_system_config.yml creation, as file already exists!"
     else
-      puts "Adding job_system_schema_config.yml initializer (config/job_system_schema_config.yml)..."
-      template 'job_system_schema_config.yml', path
+      puts "Adding job_system_config.yml initializer (config/job_system_config.yml)..."
+      template 'job_system_config.yml', path
     end
   end
 
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
-    insert_into_file("#{Rails.root}/config/routes.rb", :after => /routes.draw.do\n/) do
-      %Q{mount Naf::Engine, :at => "/job_system"\n}
+    insert_into_file("#{Rails.root}/config/routes.rb", :before => /$\s*end\n/) do
+      %Q{\n  mount Naf::Engine, :at => "/job_system"\n}
     end
   end
-
-  def add_assets
-    path = "#{Rails.root}/app/assets/javascripts/application.js"
-    if File.exists?(path)
-      if File.readlines(path).grep(/\/\/= require naf/).any?
-        puts "Naf Javascript files already required"
-      else
-        puts "Adding Naf Javascript files to the asset pipeline"
-        insert_into_file(path, :after => /\/\/= require jquery\s*\n/) do
-          %Q{//= require naf\n}
-        end
-      end
-    end
-  
-    path = "#{Rails.root}/app/assets/stylesheets/application.css"
-    if File.exists?(path)
-      if File.readlines(path).grep(/\*= require naf/).any?
-        puts "Naf Stylesheet files already required"        
-      else
-        puts "Adding Naf Stylesheet files to the asset pipeline"
-        insert_into_file(path, :after => /\*= require_self\s*\n/ ) do
-          %Q{*= require naf\n}
-        end
-      end
-    end
-  end
-
 
 
 end

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Fiksu&trade; | Job Scheduling System</title>
-  <%= stylesheet_link_tag    "application", :media => "all" %>
-  <%= javascript_include_tag "application" %>
+  <title><%= Naf::MAIN_APP_TITLE.html_safe %> | Job Scheduling System</title>
+  <%= stylesheet_link_tag    "naf" %>
+  <%= javascript_include_tag "naf" %>
   <%= csrf_meta_tags %>
 </head>
 <body>
@@ -12,13 +12,8 @@
 
   <tr>
     <td colspan="2" id="header">
-      <h3>Fiksu&trade; | Job Scheduling System</h3>
-    </td>
-  </tr>
-
-<tr>
-  <td id="tabs">
-    <ul>
+      <h3><%= Naf::MAIN_APP_TITLE.html_safe %> | Job Scheduling System</h3>
+       <ul id="tabs">
       <% tabs.each do |tab| %>
         <% if highlight_tab?(tab) %>
           <li id="on">
@@ -29,10 +24,11 @@
           <%= generate_index_link(tab) %>
 
         </li>
-      <% end %>
-    </ul>
-  </td>
-</tr>
+     <% end %>
+     </ul>
+       
+    </td>
+  </tr>
 
   <tr valign="top">
     <td id="main">

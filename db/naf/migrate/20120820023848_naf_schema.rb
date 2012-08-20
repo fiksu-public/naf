@@ -1,9 +1,8 @@
-class CreateJobSystem < ActiveRecord::Migration
-  SCHEMA_NAME = '<%= schema_name %>'
+class NafSchema < ActiveRecord::Migration
 
   def up
     # Define a schema_name, the scheduling tables fall under:
-    schema_name = SCHEMA_NAME
+    schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
 
     # affinities
     #  names: normal, canary, perennial
@@ -151,7 +150,7 @@ class CreateJobSystem < ActiveRecord::Migration
   end
 
   def down
-    schema_name = SCHEMA_NAME
+    schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
     execute <<-SQL
       drop table #{schema_name}.job_affinity_tabs cascade;
       drop table #{schema_name}.jobs cascade;
@@ -165,5 +164,11 @@ class CreateJobSystem < ActiveRecord::Migration
       drop table #{schema_name}.application_schedules cascade;
       drop table #{schema_name}.application_schedule_affinity_tabs cascade;
     SQL
+
+    if schema_name != "public"
+      execute <<-SQL
+        drop schema #{schema_name}; 
+      SQL
+    end
   end
 end

@@ -1,20 +1,22 @@
 module Process::Naf
   class Runner < ::Af::Application
     opt :wait_time_for_processes_to_terminate, :default => 120
-    opt :num_processes, :default => 10
+    opt :check_schedules_period, :default => 1
+    opt :runner_stale_period, :default => 10
+    opt :loop_sleep_time, :default => 5
 
     def initialize
       super
-      @check_schedules_period = 1.minute
-      @runner_stale_period = 10.minutes
-      @loop_sleep_time = 5
+      update_opts :log_file, :default => "naf"
     end
 
     def work
       machine = ::Naf::Machine.current
 
       unless machine.present?
-        logger.fatal "this machine is not configued correctly"
+        logger.fatal "this machine is not configued correctly, please update #{::Naf::Machine.table_name} with an entry for this machine ipaddress: #{::Naf::Machine.machine_ip_address}"
+        logger.fatal "exiting..."
+        exit
       end
 
       machine.mark_alive
@@ -34,7 +36,7 @@ module Process::Naf
           break
         end
 
-        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period)
+        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minute)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
             logger.info "checking schedules"
@@ -56,7 +58,7 @@ module Process::Naf
                 logger.warn "runner not alive #{runner_to_check.inspect}"
               end
 
-              if runner_to_check.is_stale?(@runner_stale_period)
+              if runner_to_check.is_stale?(@runner_stale_period.minute)
                 logger.alarm "runner down #{runner_to_check.inspect}"
                 runner_to_check.mark_machine_dead
               end
@@ -71,7 +73,6 @@ module Process::Naf
           begin
             pid, status = Process.waitpid2(-1, Process::WNOHANG)
             break if pid.nil?
-            # XXX remove from children list -- mark as dead
             child_job = @children.delete(pid)
             if child_job.present?
               if status.exited?
@@ -98,8 +99,8 @@ module Process::Naf
         end
 
         # start new jobs
-        logger.info "starting new jobs, num children: #{@children.length}/#{@num_processes}"
-        while @children.length < @num_processes
+        logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
+        while @children.length < machine.thread_pool_size
           begin
             job = machine.fetch_next_job
 
@@ -112,27 +113,22 @@ module Process::Naf
 
             job.started_on_machine_id = machine.id
             job.started_at = Time.zone.now
-
-            # this (job.application_type) needs to be fetched so that
-            # there is no db access in the child fork we could do an
-            # include in the job code although that is squirly code
-            # AND it means runner dependancies are in the job model
-
-            job.application_type
             job.save!
 
-            pid = Process.fork do
-              job.execute
-              # should never get here
+            pid = job.spawn
+            if pid
+              @children[pid] = job
+              job.pid = pid
+              job.failed_to_start = false
+              logger.info "job started : #{job.inspect}"
+            else
+              # should never get here (well, hopefullly)
+              job.failed_to_start = true
+              job.finished_at = Time.zone.now
               logger.error "failed to execute #{job.inspect}"
-              Process.exit
             end
-            # 
 
-            @children[pid] = job
-            job.pid = pid
             job.save!
-            logger.info "job started : #{job.inspect}"
           rescue StandardError => e
             # XXX rescue for various issues
             logger.error "failure during job start"
