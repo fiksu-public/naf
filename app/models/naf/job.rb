@@ -10,10 +10,6 @@ module Naf
     include ::Af::Application::SafeProxy
     include ::Af::AdvisoryLocker
 
-    FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
- 
-    SEARCH_FIELDS = [:command, :application_run_group_name]
-
     JOB_STALE_TIME = 1.week
 
     validates  :application_type_id, :application_run_group_restriction_id, :presence => true
@@ -49,7 +45,7 @@ module Naf
     end
 
     def self.not_finished
-      return where({:finished_at => nil})
+      return where("finished_at is null")
     end
 
     def self.started_on(machine)
@@ -62,6 +58,10 @@ module Naf
 
     def self.started
       return where("started_at is not null")
+    end
+
+    def self.finished
+      return where("finished_at is not null")
     end
 
     def self.in_run_group(run_group_name)
@@ -199,36 +199,5 @@ module Naf
       puts "TEST DONE: #{Time.zone.now}: #{foo.inspect}"
     end
 
-    # Given search, a hash of the search query for jobs on the queue,
-    # build up and return the ActiveRecord scope
-    #
-    # We eventually build up these results over created_at/1.week partitions.
-    def self.search(search)
-      order, direction = search[:order], search[:direction]
-      job_scope = order("#{order} #{direction}").limit(search[:limit]).offset(search[:offset].to_i*search[:limit].to_i)
-      if search[:running].present?
-        machine_id_value = search[:running] == "true" ? "not null" : "null"
-        job_scope = job_scope.where("started_on_machine_id is #{machine_id_value}")
-      end
-      FILTER_FIELDS.each do |field|
-        job_scope = job_scope.where(field => search[field]) if search[field].present?
-      end
-      SEARCH_FIELDS.each do |field|
-        job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
-      end
-      job_scope
-    end
-
-    # Format the hash of a job record nicely for the table
-    def serializable_hash_for_table_view
-      more_attributes = [:title, :script_type_name, :application_run_group_restriction_name, 
-                         :machine_started_on_server_name, :machine_started_on_server_address]
-      job_hash = as_json(:methods => more_attributes)
-      job_hash.each do |key, value| 
-        if value.kind_of?(Time)
-          job_hash[key] = value.strftime("%Y-%m-%d %H:%M:%S") 
-        end
-      end
-    end
   end
 end

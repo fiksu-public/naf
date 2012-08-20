@@ -98,7 +98,6 @@
         margin: 0px;
 	border-bottom: 1px solid #000;
         text-align: left;
-        padding: 5px 5px 5px 5px;
         font-size: 12px;
 }
 
@@ -110,6 +109,3 @@
 .jTPS tbody tr td:not(#action) {
         cursor: pointer;
 }
-
-.jTPS tr:nth-child(even) { background: #eee }
-.jTPS tr:nth-child(odd)  { background: #fff }

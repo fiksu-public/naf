@@ -13,13 +13,16 @@
    <th>Value </th>
  </tr>
 
+<tbody>
  <% @attributes.each do |a| %>
    <tr>
-     <td scope="row"><%= a.to_s %></td>
+     <td scope="row"><%= make_header(a.to_s) %></td>
      <td> <%= @record.send(a) %></td>
    </tr>
  <% end %>
+</tbody>
 </table>
-<%= generate_affinity_tabs_link %>
+<br /><br />
+<%= generate_child_resources_link %>
 <%= generate_destroy_link %>
 </div>
