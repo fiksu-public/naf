@@ -46,28 +46,37 @@
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
-4. Now bring in all of the Naf schema migrations.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script. So that you can change to the Engine's latest schema.
+4.  By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml  For example, if you had a database named: sparedb_development, you would add this:
+
+    naf_development:
+        adapter: postgresql
+        encoding: UTF8
+        username: postgres
+        host: localhost
+        database: sparedb_development
+
+5. Now bring in all of the Naf schema migrations.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script. So that you can change to the Engine's latest schema.
 
     rake naf:install:migrations
 
-5. This has copied all the Naf migrations to your db/migrate folder, run the schema changes.
+6. This has copied all the Naf migrations to a new folder db/naf/migrate folder, run the schema changes.
 
-    rake db:migrate
+    rake naf:db:migrate
 
-6. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
+7. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
     rails console
     Naf::Affinity.all
 
-7. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_initializer.rb
+8. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_initializer.rb
 
     CONTROLLER_NAME_STR = "::ApplicationController"
 
-8. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
+9. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
 
-9. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
+10. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
 
-10. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.
+11. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.
 
      rake naf:teardown
 
