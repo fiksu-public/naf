@@ -46,7 +46,7 @@
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
-4.  By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml  For example, if you had a database named: sparedb_development, you would add this:
+4. By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml  For example, if you had a database named: sparedb_development, you can have the Naf tables live there by adding:
 
     naf_development:
         adapter: postgresql
@@ -76,7 +76,7 @@
 
 10. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
 
-11. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.
+11. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.  WARNING: This will wipe away all of your data in your Naf tables.
 
      rake naf:teardown
 
