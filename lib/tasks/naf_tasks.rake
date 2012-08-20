@@ -26,7 +26,7 @@ namespace :naf do
   task :system_teardown => :environment do
     files_to_remove = [
       "config/initializers/job_system_initializer.rb", 
-      "config/job_system_schema_config.yml"
+      "config/job_system_config.yml"
     ]
     edit_file_line_regex_hash = { 
       "config/routes.rb" => %r{$  mount Naf::Engine, :at => "/job_system"\s*\n}
