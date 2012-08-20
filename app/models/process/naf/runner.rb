@@ -73,7 +73,6 @@ module Process::Naf
           begin
             pid, status = Process.waitpid2(-1, Process::WNOHANG)
             break if pid.nil?
-            # XXX remove from children list -- mark as dead
             child_job = @children.delete(pid)
             if child_job.present?
               if status.exited?
