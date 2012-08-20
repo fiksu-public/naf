@@ -1,6 +1,0 @@
-# Once you have run the migrations you cannot change
-# This configuration, unless you have moved the schema
-# under which the job scheduling system resides.
-
-job_system_configuration:
-  schema_name: <%= schema_name %> 
