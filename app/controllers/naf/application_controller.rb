@@ -1,5 +1,5 @@
 module Naf
-  class ApplicationController < CONTROLLER_NAME_STR.constantize
+  class ApplicationController < Naf.controller_class
     protect_from_forgery
   end
 end

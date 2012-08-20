@@ -30,16 +30,22 @@ namespace :naf do
     desc "Custom install of Engine migrations to db/naf/migrate folder"
     override_task :migrations => :environment do
 
-      puts "Copying naf migration files to new folder: #{naf_migrations_folder}"
-      FileUtils.mkdir(naf_folder)
-      FileUtils.mkdir(naf_migrations_folder)
+      puts "Copying naf migration files to folder: #{naf_migrations_folder}"
+      
+      FileUtils.mkdir(naf_folder) unless Dir.exists?(naf_folder)
+      FileUtils.mkdir(naf_migrations_folder) unless Dir.exists?(naf_migrations_folder)
 
       source_folder = "#{Naf::Engine.root}/db/naf/migrate"
 
       Dir.entries(source_folder).grep(/\.rb/).each do |migration_file|
         file_path = "#{source_folder}/#{migration_file}"
-        puts "\tCopying #{migration_file}"
-        FileUtils.cp(file_path, naf_migrations_folder)
+        puts "#{naf_migrations_folder}/#{migration_file}"
+        if File.exists?("#{naf_migrations_folder}#{migration_file}")
+          puts "\t#{migration_file} already exists, skipping"
+        else
+          puts "\tCopying #{file_path} => #{naf_migrations_folder}"
+          FileUtils.cp(file_path, naf_migrations_folder)
+        end
       end
 
     end
@@ -49,6 +55,7 @@ namespace :naf do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
     override_task :migrate => :environment do
       puts "Running naf migrations with db configuration: #{naf_environment}"
+      puts naf_migrations
       connect_to_naf_database do
         version = ENV['VERSION'] ?  ENV['VERSION'].to_i : nil
         ActiveRecord::Migrator.migrate(naf_migrations_folder, version )
@@ -75,16 +82,21 @@ namespace :naf do
   desc "Delete all of the naf schema migrations files that were installed"
   task :remove_migration_files => [:environment, :schema_rollback] do
     naf_migrations.each do |migration| 
-      file_path = "#{naf_migrations_folder}/#{migration}"
+      file_path = "#{naf_migrations_folder}#{migration}"
       if File.exists?(file_path)
         puts "Removing migration file: #{migration}"
         File.delete(file_path)
       end
     end
-    puts "Removing folder #{naf_migrations_folder}"
-    FileUtils.rmdir(naf_migrations_folder)
-    puts "Removing folder #{naf_folder}"
-    FileUtils.rmdir(naf_folder)
+
+    if Dir.exists?(naf_migrations_folder)
+      puts "Removing folder #{naf_migrations_folder}"
+      FileUtils.rmdir(naf_migrations_folder)
+    end
+    if Dir.exists?(naf_folder)
+      puts "Removing folder #{naf_folder}"
+      FileUtils.rmdir(naf_folder)
+    end
   end
 
   desc "Deletes initalizers, configs that were installed, revert edit to config/routes"
@@ -149,13 +161,17 @@ def gsub_file(path, regexp, *args, &block)
 end
 
 def naf_folder
-  "#{Rails.root}/db/naf"
+  "#{Rails.root}/db/naf/"
 end
 
 def naf_migrations_folder
-  "#{naf_folder}/migrate"
+  "#{naf_folder}migrate/"
 end
 
 def naf_migrations
-  Dir.entries(naf_migrations_folder).grep(/\.rb$/)
+  if Dir.exists?(naf_migrations_folder)
+    Dir.entries(naf_migrations_folder).grep(/\.rb$/)
+  else
+    ['blah']
+  end
 end

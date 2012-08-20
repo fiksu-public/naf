@@ -9,10 +9,8 @@ module Naf
       self.establish_connection "warehousing_#{Rails.env}"
     end
 
-
-
     def self.full_table_name_prefix
-      "#{JOB_SYSTEM_SCHEMA_NAME}."
+      "#{Naf.schema_name}."
     end
     
     def self.naf_environment
