@@ -5,7 +5,7 @@ module Logical
   class Job
     include ActionView::Helpers::DateHelper
 
-    COLUMNS = [:id, :status, :queued_time, :title, :started_at, :finished_at, :pid, :server]
+    COLUMNS = [:id, :server, :pid, :queued_time, :title, :command, :started_at, :finished_at, :status]
 
     FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
  
@@ -24,7 +24,7 @@ module Logical
     end
 
     def status
-      if @job.started_at and (not @job.finished_at)
+      if @job.started_at and (not @job.finished_at) and @job.failed_to_start.present? and not @job.failed_to_start
         "Running"
       elsif @job.exit_status and @job.exit_status > 0
         "Error"
