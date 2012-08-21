@@ -46,7 +46,13 @@
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
-4. By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml.  For example, if you had a database named: sparedb_development, you can have the Naf tables live there by adding:
+4. Now bring in all of the Naf schema migrations.  
+
+    rake naf:install:migrations
+
+=== Using a Non-Primary Database (Skip if you aren't)
+
+1. By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml.  For example, if you had a database named: sparedb_development, you can have the Naf tables live there by adding:
 
     naf_development:
         adapter: postgresql
@@ -55,28 +61,42 @@
         host: localhost
         database: sparedb_development
 
-5. Now bring in all of the Naf schema migrations.  
+2. Now you must run this rake command to isolate the migrations from your main apps migrations.   This moves all naf migrations to:  db/naf/migrate.  When you bundle the latest version of Naf, there may be new schema migrations, so you must isolate those as well.  Run this command, and make sure to add it to your deploy script.
 
-    rake naf:install:migrations
+    rake naf:isolate:migrations
 
-6. This has copied all the Naf migrations to a new folder db/naf/migrate folder, run the schema changes.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script, so that you can change to the Engine's latest schema.
+3. Now that all of the latest migrations are isolated from the main app, they work on your non-primary database.  When you bundle the latest version of Naf, and isolate new migrations, they have to be run.  Run this command and make sure to add it to your deploy script.
 
     rake naf:db:migrate
 
-7. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
+=== Run the migrations
+
+1. Now if you are using your Primary database for Naf, then your app controls the migrations.  So run them (does nothing if you using a non-primary database, and have run #2, and #3 from the above section):
+
+    rake db:migrate
+
+2. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
     rails console
     Naf::Affinity.all
 
-8. If you use a base controller for your application's authentication, edit the line from config/initializers/job_system_initializer.rb
+=== Configure
 
-    CONTROLLER_NAME_STR = "::ApplicationController"
+1. If you use a base controller for your application's authentication, edit the line from config/initializers/naf_initializer.rb
 
-9. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
+    Naf.controller_class = "::ApplicationController"
 
-10. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
+2. If you want use your non-primary database for Naf tables (skip if you aren't). edit the line from config/initializers/naf_initializer.rb to read:
 
-11. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.  WARNING: This will wipe away all of your data in your Naf tables.
+    Naf.model_class = "::Naf::OtherBase"
+
+3. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
+
+4. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
+
+=== Teardown
+
+1. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.  WARNING: This will wipe away all of your data in your Naf tables.
 
      rake naf:teardown
 

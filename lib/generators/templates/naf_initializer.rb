@@ -3,7 +3,7 @@ module Naf
   # You will need to use the scope resolution operator. Example:  "::AuthenticationController"
 
   Naf.controller_class = "::ApplicationController"
-  Naf.model_class = "::ActiveRecord::Base"
+  Naf.model_class = "ActiveRecord::Base"
 
   begin
     data = YAML::load(File.open("#{Rails.root}/config/naf_config.yml"))

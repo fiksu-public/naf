@@ -15,4 +15,8 @@ module Naf
       ActiveRecord::Base
     end
   end
+
+  def self.using_another_database?
+    self.model_class != ActiveRecord::Base
+  end
 end
