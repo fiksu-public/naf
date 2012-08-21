@@ -1,7 +1,9 @@
 module Naf
   # Please change the Naf.base_class to the controller your app uses for authentication
   # You will need to use the scope resolution operator. Example:  "::AuthenticationController"
+
   Naf.controller_class = "::ApplicationController"
+  Naf.model_class = "::ActiveRecord::Base"
 
   begin
     data = YAML::load(File.open("#{Rails.root}/config/naf_config.yml"))
