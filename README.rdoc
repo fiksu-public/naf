@@ -46,7 +46,7 @@
     config/initializers/job_system_initializer.rb  (Loads the schema_name)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
-4. By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml  For example, if you had a database named: sparedb_development, you can have the Naf tables live there by adding:
+4. By default the Naf tables live on your primary database.  You can optionally configure the naf tables to live on a specific database connection, add entries: naf_development, naf_production etc. to your config/database.yml.  For example, if you had a database named: sparedb_development, you can have the Naf tables live there by adding:
 
     naf_development:
         adapter: postgresql
@@ -55,11 +55,11 @@
         host: localhost
         database: sparedb_development
 
-5. Now bring in all of the Naf schema migrations.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script. So that you can change to the Engine's latest schema.
+5. Now bring in all of the Naf schema migrations.  
 
     rake naf:install:migrations
 
-6. This has copied all the Naf migrations to a new folder db/naf/migrate folder, run the schema changes.
+6. This has copied all the Naf migrations to a new folder db/naf/migrate folder, run the schema changes.  When you bundle the latest version of Naf for production, make sure to add this command to your deploy script, so that you can change to the Engine's latest schema.
 
     rake naf:db:migrate
 

@@ -24,86 +24,176 @@ end
 # --------------------------------------------------
 # ---------------Custom Rake Tasks for Naf----------
 # --------------------------------------------------
+
 namespace :naf do
 
-  namespace :install do
-    desc "Custom install of Engine migrations to db/naf/migrate folder"
-    override_task :migrations => :environment do
 
-      puts "Copying naf migration files to folder: #{naf_migrations_folder}"
+  namespace :isolate do
+    desc "Custom isolation Engine migrations to db/naf/migrate folder, for use on non-primary database"
+    task :migrations => :environment do
+
+      puts "Moving naf migration files to folder: #{isolated_naf_migrations_folder}"
       
-      FileUtils.mkdir(naf_folder) unless Dir.exists?(naf_folder)
-      FileUtils.mkdir(naf_migrations_folder) unless Dir.exists?(naf_migrations_folder)
+      FileUtils.mkdir(isolated_naf_folder) unless Dir.exists?(isolated_naf_folder)
+      FileUtils.mkdir(isolated_naf_migrations_folder) unless Dir.exists?(isolated_naf_migrations_folder)
 
-      source_folder = "#{Naf::Engine.root}/db/naf/migrate"
+      source_folder = "#{Rails.root}/db/migrate"
 
-      Dir.entries(source_folder).grep(/\.rb/).each do |migration_file|
+      Dir.entries(source_folder).grep(/\.naf\.rb/).each do |migration_file|
         file_path = "#{source_folder}/#{migration_file}"
-        puts "#{naf_migrations_folder}/#{migration_file}"
-        if File.exists?("#{naf_migrations_folder}#{migration_file}")
+        puts "#{isolated_naf_migrations_folder}/#{migration_file}"
+        if File.exists?("#{isolated_naf_migrations_folder}#{migration_file}")
           puts "\t#{migration_file} already exists, skipping"
         else
-          puts "\tCopying #{file_path} => #{naf_migrations_folder}"
-          FileUtils.cp(file_path, naf_migrations_folder)
+          puts "\t #{file_path} => #{isolated_naf_migrations_folder}#{migration_file}"
+          FileUtils.mv(file_path, isolated_naf_migrations_folder)
         end
       end
 
     end
   end
 
+
   namespace :db do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
     override_task :migrate => :environment do
-      puts "Running naf migrations with db configuration: #{naf_environment}"
-      puts naf_migrations
-      connect_to_naf_database do
-        version = ENV['VERSION'] ?  ENV['VERSION'].to_i : nil
-        ActiveRecord::Migrator.migrate(naf_migrations_folder, version )
+      if using_another_database? and naf_migrations.size > 0
+        puts "Running naf migrations with database configuration: #{naf_environment}"
+        puts naf_migrations
+        connect_to_naf_database do
+          version = ENV['VERSION'] ?  ENV['VERSION'].to_i : nil
+          ActiveRecord::Migrator.migrate(isolated_naf_migrations_folder, version )
+        end
+      else
+        #Invoke the standard migration task, within the Naf Engine scope
+        ENV['SCOPE'] = 'naf'
+        Rake::Task['db:migrate'].invoke
       end
     end
     
     desc "Perform a rollback on the warehousing database within the data_api schema"
     task :rollback => :environment do
-      connect_to_naf_database do
-        step = ENV['STEP'] ? ENV['STEP'].to_i : 1
-        ActiveRecord::Migrator.rollback(naf_migrations_folder, step)
+      if using_another_database? and naf_migrations.size > 0
+        connect_to_naf_database do
+          step = ENV['STEP'] ? ENV['STEP'].to_i : 1
+          ActiveRecord::Migrator.rollback(isolated_naf_migrations_folder, step)
+        end
+      else
+        ENV['SCOPE'] = 'naf'
+        Rake::Task['db:rollback'].invoke
       end
     end
+    
+    namespace :migrate do
+
+      desc 'Runs the "up" for a given migration VERSION.'
+      task :up => [:environment] do
+        if using_another_database? and naf_migrations.size > 0
+          connect_to_naf_database do
+            version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
+            raise 'VERSION is required' unless version
+            ActiveRecord::Migrator.run(:up, [isolated_naf_migrations_folder], version)
+          end
+        else
+          puts "You are using the primary database for Naf, please run:  rake db:migrate:up VERSION=x"
+        end
+      end
+
+      desc 'Runs the "down" for a given migration VERSION.'
+      task :down => [:environment] do
+        if using_another_database? and naf_migrations.size > 0
+          connect_to_naf_database do
+            version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
+            raise 'VERSION is required' unless version
+            ActiveRecord::Migrator.run(:down, [isolated_naf_migrations_folder], version)
+          end
+        else
+          puts "You are using the primary database for Naf, please run:  rake db:migrate:down VERSION=x"
+        end
+      end
+
+      desc "Show the status of migrations"
+      task :status => :environment do
+        if using_another_database? and naf_migrations.size > 0
+          connect_to_naf_database do
+            config = ActiveRecord::Base.configurations[naf_environment]
+            unless ActiveRecord::Base.connection.table_exists?(ActiveRecord::Migrator.schema_migrations_table_name)
+              puts 'Schema migrations table does not exist yet.'
+              next  # means "return" for rake task
+            end
+            db_list = ActiveRecord::Base.connection.select_values("SELECT version FROM #{ActiveRecord::Migrator.schema_migrations_table_name}")
+            file_list = []
+            Dir.foreach(isolated_naf_migrations_folder) do |file|
+              # only files matching "20091231235959_some_name.rb" pattern
+              if match_data = /^(\d{14})_(.+)\.rb$/.match(file)
+                status = db_list.delete(match_data[1]) ? 'up' : 'down'
+                file_list << [status, match_data[1], match_data[2].humanize]
+              end
+            end
+            db_list.map! do |version|
+              ['up', version, '********** NO FILE **********']
+            end
+            # output
+            puts "\ndatabase: #{config['database']}\n\n"
+            puts "#{'Status'.center(8)}  #{'Migration ID'.ljust(14)}  Migration Name"
+            puts "-" * 50
+            (db_list + file_list).sort_by {|migration| migration[1]}.each do |migration|
+              puts "#{migration[0].center(8)}  #{migration[1].ljust(14)}  #{migration[2]}"
+            end
+          end
+        else
+          puts "You are using the primary database for Naf, please run: rake db:migrate:status"
+        end
+      end
+    end
+
   end
 
   desc "Undo all of the naf schema migrations"
   task :schema_rollback => :environment do
     puts "Rolling back all of Naf migrations"
-    connect_to_naf_database do
-      ActiveRecord::Migrator.migrate(naf_migrations_folder, 0)
+    if using_another_database? and naf_migrations.size > 0
+      connect_to_naf_database do
+        ActiveRecord::Migrator.migrate(isolated_naf_migrations_folder, 0)
+      end
+    else
+      ENV['SCOPE'] = 'naf'
+      ENV['VERSION'] = '0'
+      Rake::Task['db:migrate'].invoke
     end
   end
 
   desc "Delete all of the naf schema migrations files that were installed"
   task :remove_migration_files => [:environment, :schema_rollback] do
     naf_migrations.each do |migration| 
-      file_path = "#{naf_migrations_folder}#{migration}"
+      if using_another_database? and naf_migrations.size > 0
+        file_path = "#{isolated_naf_migrations_folder}#{migration}"
+      else
+        file_path = "#{standard_migrations_folder}#{migration}"
+      end
       if File.exists?(file_path)
         puts "Removing migration file: #{migration}"
         File.delete(file_path)
       end
     end
-
-    if Dir.exists?(naf_migrations_folder)
-      puts "Removing folder #{naf_migrations_folder}"
-      FileUtils.rmdir(naf_migrations_folder)
+    if Dir.exists?(isolated_naf_migrations_folder)
+      puts "Removing folder #{isolated_naf_migrations_folder}"
+      FileUtils.rmdir(isolated_naf_migrations_folder)
     end
-    if Dir.exists?(naf_folder)
-      puts "Removing folder #{naf_folder}"
-      FileUtils.rmdir(naf_folder)
+    if Dir.exists?(isolated_naf_folder)
+      puts "Removing folder #{isolated_naf_folder}"
+      FileUtils.rmdir(isolated_naf_folder)
     end
   end
 
   desc "Deletes initalizers, configs that were installed, revert edit to config/routes"
   task :system_teardown => :environment do
+    # The first two files configured to be removed, if someone is using an older versions of naf
     files_to_remove = [
-      "config/initializers/job_system_initializer.rb", 
-      "config/job_system_config.yml"
+      "config/initializers/job_system_initializer.rb",
+      "config/job_system_config.yml",
+      "config/initializers/naf_initializer.rb", 
+      "config/naf_config.yml"
     ]
     edit_file_line_regex_hash = { 
       "config/routes.rb" => %r{$  mount Naf::Engine, :at => "/job_system"\s*\n}
@@ -142,6 +232,11 @@ ensure
   ActiveRecord::Base.establish_connection original
 end
 
+# Figure out if you are using another database for naf
+def using_another_database?
+  return naf_environment == "naf_#{Rails.env}"
+end
+
 # Specifiy the naf environment, the configuration that migrations with run under,
 # If the naf_#{Rails.env} configuration exists in in database.yml, choose that, 
 # else choose Rails.env
@@ -155,23 +250,40 @@ def naf_environment
 end
 
 # Subsitute matches to a given regex in the given file, with the given string
+# Used right now just to revert config/routes.rb
 def gsub_file(path, regexp, *args, &block)
   content = File.read(path).gsub(regexp, *args, &block)
   File.open(path, 'wb') { |file| file.write(content) }
 end
 
-def naf_folder
+def standard_migrations_folder
+  "#{Rails.root}/db/migrate"
+end
+
+def isolated_naf_folder
   "#{Rails.root}/db/naf/"
 end
 
-def naf_migrations_folder
-  "#{naf_folder}migrate/"
+def isolated_naf_migrations_folder
+  "#{isolated_naf_folder}migrate/"
 end
 
 def naf_migrations
-  if Dir.exists?(naf_migrations_folder)
-    Dir.entries(naf_migrations_folder).grep(/\.rb$/)
+  if using_another_database?
+    unless Dir.exists?(isolated_naf_folder) and Dir.exists?(isolated_naf_migrations_folder)
+      raise NafConfigurationError
+    else
+      Dir.entries(isolated_naf_migrations_folder).grep(/\.naf\.rb$/)
+    end
   else
-    ['blah']
+    Dir.entries(standard_migrations_folder).grep(/\.naf\.rb$/)
   end
 end
+
+class NafUsageError < Exception
+end
+
+class NafConfigurationError < Exception
+end
+
+

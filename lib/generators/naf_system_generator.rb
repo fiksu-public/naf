@@ -1,30 +1,32 @@
-require File.expand_path(File.dirname(__FILE__) +  '/naf_generator_helper')
 require 'rails/generators'
 
 class NafSystemGenerator < Rails::Generators::Base
-  include NafGeneratorHelper
 
   source_root File.expand_path("../templates", __FILE__)
 
-  argument :schema_name, :type => :string, :default => default_postgres_schema
+  argument :schema_name, :type => :string, :default => "naf"
 
-  def add_job_system_intializer
-    path = "#{Rails.root}/config/initializers/job_system_initializer.rb"
+  def add_naf_intializer
+    filename = "naf_initializer.rb"
+    filepath = "config/initializers/#{filename}"
+    path = "#{Rails.root}/#{filepath}"
     if File.exists?(path)
-      puts "Skipping config/initializers/job_system_initializer.rb creation, as file already exists!"
+      puts "Skipping #{filepath} creation, as file already exists!"
     else
-      puts "Adding job system initializer (config/initializers/job_system_initializer.rb)..."
-      template 'job_system_initializer.rb', path
+      puts "Adding Naf initializer (#{filepath})..."
+      template filename, path
     end
   end
 
-  def add_job_system_config
-    path = "#{Rails.root}/config/job_system_config.yml"
+  def add_naf_config
+    filename = "naf_config.yml"
+    filepath = "config/#{filename}"
+    path = "#{Rails.root}/#{filepath}"
     if File.exists?(path)
-      puts "Skipping config/job_system_config.yml creation, as file already exists!"
+      puts "Skipping #{filepath} creation, as file already exists!"
     else
-      puts "Adding job_system_config.yml initializer (config/job_system_config.yml)..."
-      template 'job_system_config.yml', path
+      puts "Adding Naf config (#{filepath})..."
+      template filename, path
     end
   end
 
