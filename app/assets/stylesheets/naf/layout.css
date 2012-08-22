@@ -214,7 +214,7 @@ ul#tabs li a {
 }
 
 #datatable {
-  min-width: 1000px;
+  min-width: 95%;
   white-space:nowrap;
   margin: auto;
   margin-top: 10px;
@@ -278,7 +278,7 @@ form#job_search {
 }
 
 #datatable tbody tr.Failed.to.start{
-  background: #CD9B9B;
+  background: #ffcc33;
 }
 
 #datatable tbody tr.Error{
@@ -287,11 +287,12 @@ form#job_search {
 
 
 #datatable tbody tr.Running{
-  background: #EEE685;
+    background: yellow;
 }
 
 #datatable tbody tr.Queued {
-  background: #00CDCD;
+
+  background: #EEE685;
 }
 
 
@@ -300,3 +301,11 @@ form#job_search {
   color: #555;
 }
 
+
+#datatable tbody tr:hover {
+    background:  #E6E6FA;
+}
+
+#datatable tbody tr td:not(#action) {
+    cursor: pointer;
+}

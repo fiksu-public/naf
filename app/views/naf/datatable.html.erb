@@ -88,6 +88,7 @@
     <b> Request to Terminate </b> <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Machine: </b> <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect{|m| [m.server_name.blank? ? m.server_address : m.server_name, m.id]}, {:include_blank => true}) %> <br />
     <div style="text-align: right;">
+    <input type="reset" id="reset" style="display: none; cursor: default"/>
     <input type="button" value="cancel" id="cancel" />
     <input type="submit" id="add" value="Search" /> 
     </div>

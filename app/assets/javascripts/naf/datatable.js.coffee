@@ -2,12 +2,21 @@ jQuery ->
 
   # Some lengthy helper functions to search jobs, and create/enqueue them
 
+  on_jobs_page = () ->
+    $('p#on_job_page').text() == 'true'
+
+  # Clear the search parameters
+  reset_search = () ->
+    $('form#job_search input#reset').click()
+    offset_element = $('input#search_offset')
+    offset_element.val(0)
+   
 
   # Job Search Function
   #   Make GET request to jobs/
   #   read JSON response, render the results
 
-  perform_job_search = (search_form) ->
+  perform_job_search = (search_form, callback = () -> ) ->
      url = search_form.attr('action')
      $.ajax({
        type: "GET"
@@ -42,7 +51,10 @@ jQuery ->
              row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
            $.unblockUI();
          ), 500;
+         callback()        
+
      })
+
   
   # Create Job Function
   #   Make POST request to jobs/
@@ -50,7 +62,7 @@ jQuery ->
   #   render link to job on successful creation
   #   or ActiveRecord validation error messages
 
-  create_job = (form) ->
+  create_job = (form, callback = () ->) ->
     url = form.attr('action')
     $.ajax({
       type: "POST",
@@ -62,7 +74,10 @@ jQuery ->
           $.unblockUI();
           addedMessage = ' was added to the job queue'
           if data.saved
-            $('td#main div#status').prepend('<p>' + '<a href=\"' + data.job_url + '\">' + data.post_source + '</a>'  + addedMessage + '</p>');
+            if on_jobs_page()
+              callback()
+            else
+              $('td#main div#status').prepend('<p>' + '<a href=\"' + data.job_url + '\">' + data.post_source + '</a>'  + addedMessage + '</p>');
           else
             for msg in data.errors
               $('td#main div#status').prepend('<p style="color: red">' + msg + '</p>');
@@ -80,7 +95,19 @@ jQuery ->
     output += '<br />'
     $.blockUI({ message: output});
 
+  
+  # Refresh the jobs table
+  refresh_jobs = () ->
+    reset_search()
+    $('a#page_back').hide()
+    show_loading_message('Refreshing...')
+    perform_job_search($('form#job_search'))
 
+  refresh_timer = ""
+  start_refresh_timer = () ->
+    refresh_timer = setInterval (() -> refresh_jobs()), 30000
+  stop_refresh_timer = () ->
+    clearInterval(refresh_timer) 
 
   # --------------------------------------------------
   # Naf System UI Event Handlers
@@ -95,20 +122,22 @@ jQuery ->
  
   $.blockUI.defaults.css.top = '10%'
 
-
   # Upon Page Loaded (really Jquery loaded),
   # If we are on the job page, run empty job search
   # to populate the jobs table 
+  
 
-  if $('p#on_job_page').text() == 'true'
+  if on_jobs_page()
     $('a#page_forward').show()
     show_loading_message('Loading Jobs')
     perform_job_search($('form#job_search'))
-
-
+    start_refresh_timer()
+    
+   
   # Provide modal view of Job Search form
 
   $('a.job_search').live 'click', (event) ->
+    stop_refresh_timer()
     offset_element = $('input#search_offset')
     offset_element.val(0)
     $('a#page_back').hide()
@@ -119,17 +148,22 @@ jQuery ->
 
   $('form#job_search input#cancel').click ->
     $.unblockUI();
+    start_refresh_timer()   
 
 
   # Run the Job Search
 
   $('form#job_search').submit (event) ->
+    stop_refresh_timer()
     event.preventDefault()
     show_loading_message('Applying your searches and filters to find jobs...')
-    perform_job_search($(this))
+    perform_job_search($(this), start_refresh_timer())
+
+    
 
   # Go to next page, rerun job search, ++offset
   $('a#page_forward').live 'click', (event) ->
+    stop_refresh_timer()
     limit = $('select#search_limit').val()
     offset_element = $('input#search_offset')
     offset = parseInt(offset_element.val()) + 1
@@ -137,11 +171,14 @@ jQuery ->
       $('a#page_back').show()
     offset_element.val(offset)
     show_loading_message('Loading the next ' + limit + ' jobs')
-    perform_job_search($('form#job_search'))
+    perform_job_search($('form#job_search'), start_refresh_timer())
+    
+
 
 
   # Go to the previous page, rerun job search, --offset
   $('a#page_back').live 'click', (event) ->
+    stop_refresh_timer()
     limit = $('select#search_limit').val()
     offset_element = $('input#search_offset')
     offset = parseInt(offset_element.val()) - 1
@@ -149,20 +186,21 @@ jQuery ->
       $(this).hide()
     offset_element.val(offset)
     show_loading_message('Loading the previous ' + limit + ' jobs')
-    perform_job_search($('form#job_search'))
+    perform_job_search($('form#job_search'), start_refresh_timer())
     
 
 
   # On index action view of resources, make the table row a link
   # to show a specific resource
 
-  $('.jTPS tbody tr td:not(#action)').live 'click', (event) ->
+  $('#datatable tbody tr td:not(#action)').live 'click', (event) ->
     window.location = $(this).parent().data('url');
 
 
   # Provide modal view of Job adding form
 
   $('a.add_job').click ->
+    stop_refresh_timer()
     $.blockUI( { message: $('form#add_job') } )
 
   
@@ -170,6 +208,7 @@ jQuery ->
 
   $('form#add_job input#cancel').click ->
     $.unblockUI();
+    start_refresh_timer()
 
 
   # Add the job to the job queue
@@ -177,7 +216,8 @@ jQuery ->
   $('form#add_job').submit (event) ->
     event.preventDefault()
     show_loading_message('Adding job to the job queue')
-    create_job($(this))
+    create_job($(this), () -> refresh_jobs())
+    start_refresh_timer()
 
 
   # Request confirmation that you want to enqueue the application as a job
