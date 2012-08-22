@@ -44,7 +44,8 @@ class NafSchema < ActiveRecord::Migration
           enabled                    boolean not null default true,
           thread_pool_size           integer not null default 5,
           last_checked_schedules_at  timestamp null,
-          last_seen_alive_at         timestamp null
+          last_seen_alive_at         timestamp null,
+          log_level                  text null
       );
       create table #{schema_name}.machine_affinity_slots
       (
@@ -78,7 +79,8 @@ class NafSchema < ActiveRecord::Migration
           deleted                         boolean not null default false,
           application_type_id	          integer not null references #{schema_name}.application_types,
           command                         text not null,
-          title                           text not null
+          title                           text not null,
+          log_level                       text null
       );
       create table #{schema_name}.application_run_group_restrictions
       (
@@ -136,7 +138,9 @@ class NafSchema < ActiveRecord::Migration
           exit_status                            integer null,
           termination_signal                     integer null,
 
-          request_to_terminate                   boolean not null default false
+          request_to_terminate                   boolean not null default false,
+
+          log_level                              text null
       );
       create table #{schema_name}.job_affinity_tabs
       (

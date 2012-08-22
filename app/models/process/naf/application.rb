@@ -1,14 +1,14 @@
 module Process::Naf
   class Application < ::Af::Application
-    opt :naf_application_id, :env => "NAF_APPLICATION_ID", :type => :int, :default => "unknown"
+    opt :naf_job_id, :env => "NAF_JOB_ID", :type => :int, :default => "unknown"
 
     def log4r_name_suffix
-      return ":[#{@naf_application_id}]"
+      return ":[#{@naf_job_id}]"
     end
 
     def requested_to_terminate?
-      if @naf_application_id.is_a? Integer && @naf_application_id > 0
-        job = ::Naf::Job.find(@naf_application_id)
+      if @naf_job_id.is_a? Integer && @naf_job_id > 0
+        job = ::Naf::Job.find(@naf_job_id)
         if job
           if job.request_to_terminate
             return true
@@ -20,6 +20,12 @@ module Process::Naf
         end
       end
       return false
+    end
+
+    def pre_work
+      super
+      ActiveRecord::ConnectionAdapters::ConnectionPool.
+        initialize_connection_application_name("#{self.class.name}(pid: #{Process.pid}, naf_job_id: #{@naf_job_id})")
     end
 
     def work
