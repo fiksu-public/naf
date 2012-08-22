@@ -24,8 +24,7 @@ module Naf
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
     delegate :script_type_name, :to => :application_type
 
-    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate
-    attr_accessible :priority
+    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
     # scope like things
 
     def self.queued_between(start_time, end_time)

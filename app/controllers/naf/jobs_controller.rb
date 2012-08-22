@@ -10,7 +10,7 @@ module Naf
           render :template => 'naf/datatable'
         end
         format.json do
-          job_hashes = Logical::Job.search(params[:search]).map(&:to_hash)
+          job_hashes = Logical::Job.search(params[:search]).map(&:to_hash).map{|hash| add_application_url(hash)}
           render :json => {:job_root_url => naf.jobs_path, :cols => @cols, :jobs => job_hashes }.to_json
         end
       end
@@ -18,7 +18,15 @@ module Naf
 
     def show
       @record = Naf::Job.find(params[:id])
-      render :template => 'naf/record'
+      @record = Logical::Job.new(@record)
+      respond_to do |format|
+        format.json do
+          render :json => {:cols => @attributes, :job => @record.to_detailed_hash}.to_json
+        end
+        format.html do
+          render :template => 'naf/record'
+        end
+      end
     end
 
     def destroy
@@ -70,9 +78,18 @@ module Naf
     private
 
     def set_cols_and_attributes
-      more_attributes = [:title, :command, :script_type_name, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
-      @attributes = Naf::Job.attribute_names.map(&:to_sym) | more_attributes
+      @attributes = Logical::Job::ATTRIBUTES
       @cols = Logical::Job::COLUMNS
+    end
+
+    def add_application_url(hash)
+      job = Naf::Job.find(hash[:id])
+      if application = job.application
+        hash[:application_url] = url_for(application)
+      else
+        hash[:application_url] = nil
+      end
+      return hash
     end
 
   end

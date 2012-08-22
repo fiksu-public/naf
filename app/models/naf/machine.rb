@@ -11,7 +11,7 @@ module Naf
     has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
     has_many :affinities, :through => :machine_affinity_slots
 
-    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size 
+    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level
 
     def self.enabled
       return where(:enabled => true)

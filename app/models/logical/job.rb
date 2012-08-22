@@ -4,8 +4,10 @@
 module Logical
   class Job
     include ActionView::Helpers::DateHelper
+    
+    COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :status]
 
-    COLUMNS = [:id, :server, :pid, :queued_time, :title, :command, :started_at, :finished_at, :status]
+    ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :started_at, :finished_at,  :script_type_name, :log_level, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
 
     FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
  
@@ -24,14 +26,14 @@ module Logical
     end
 
     def status
-      if @job.started_at and (not @job.finished_at) and @job.failed_to_start.present? and not @job.failed_to_start
+      if @job.started_at and (not @job.finished_at)
         "Running"
+      elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
+        "Failed to Start"
       elsif @job.exit_status and @job.exit_status > 0
         "Error"
       elsif @job.started_at and @job.finished_at
         "Finished"
-      elsif @job.failed_to_start 
-        "Failed to start"
       else
         "Queued"
       end
@@ -91,6 +93,10 @@ module Logical
       job_scope.map{|naf_job| new(naf_job)}
     end
 
+    def to_detailed_hash
+      Hash[ ATTRIBUTES.map{ |m| [m, send(m)] } ]
+    end
+    
     # Format the hash of a job record nicely for the table
     def to_hash
       Hash[ COLUMNS.map{ |m| [m, send(m)] } ]

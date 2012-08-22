@@ -309,3 +309,19 @@ form#job_search {
 #datatable tbody tr td:not(#action) {
     cursor: pointer;
 }
+
+div#tooltip {
+     font-size: 13px;
+     display: none; 
+     cursor: default; 
+     border: 5px solid black; 
+     background: #eee; 
+     position: fixed; 
+     padding: 20px;
+}
+
+div#tooltip h3 {
+    font-size: 18px;
+    text-align:center;
+}
+

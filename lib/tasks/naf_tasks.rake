@@ -257,7 +257,7 @@ def gsub_file(path, regexp, *args, &block)
 end
 
 def standard_migrations_folder
-  "#{Rails.root}/db/migrate"
+  "#{Rails.root}/db/migrate/"
 end
 
 def isolated_naf_folder

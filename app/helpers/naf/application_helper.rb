@@ -10,6 +10,10 @@ module Naf
       ALL_VISIBLE_RESOURCES
     end
 
+    def application_url(app)
+      url_for({:controller => 'applications', :action => 'show', :id => app.id})
+    end
+
     def schedule_url(schedule)
       url_for({:controller => 'application_schedules', :action => 'show', :application_id => schedule.application_id, :id => schedule.id})
     end

@@ -5,7 +5,7 @@ module Naf
 
     validates :title, :uniqueness => true
    
-    attr_accessible :title, :command, :application_type_id
+    attr_accessible :title, :command, :application_type_id, :log_level
 
     has_one :application_schedule, :class_name => '::Naf::ApplicationSchedule', :dependent => :destroy
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'

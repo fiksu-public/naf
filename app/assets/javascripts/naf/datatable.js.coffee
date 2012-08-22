@@ -16,7 +16,10 @@ jQuery ->
   #   Make GET request to jobs/
   #   read JSON response, render the results
 
-  perform_job_search = (search_form, callback = () -> ) ->
+  last_job_id = 0;
+
+  perform_job_search = (search_form, message, callback = () -> ) ->
+     showing_message = message != null
      url = search_form.attr('action')
      $.ajax({
        type: "GET"
@@ -24,35 +27,46 @@ jQuery ->
        url: url,
        data: search_form.serialize(),
        success: (data) ->
-         setTimeout (-> 
-           job_root_url = data.job_root_url
-           $('table#datatable tbody').text('')
-           if data.jobs.length == 0
-             $('a#page_forward').hide()
-             $('span#result_numbers').text('')
+         job_root_url = data.job_root_url
+         $('table#datatable tbody').text('')
+         if data.jobs.length == 0
+           $('a#page_forward').hide()
+           $('span#result_numbers').text('')
+         else
+           $('a#page_forward').show()
+           offset = parseInt($('input#search_offset').val())
+           limit = parseInt($('select#search_limit').val())
+           lower = offset*limit + 1
+           upper = lower + data.jobs.length - 1
+           $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
+           if last_job_id ==0
+             showing_message = true
+             message = 'Loading the Job Queue...'
+           if showing_message
+             show_loading_message(message)
            else
-             $('a#page_forward').show()
-             offset = parseInt($('input#search_offset').val())
-             limit = parseInt($('select#search_limit').val())
-             lower = offset*limit + 1
-             upper = lower + data.jobs.length - 1
-             $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
+             if last_job_id != parseInt(data.jobs[0]['id'])
+               showing_message = true
+               show_loading_message('Showing new jobs on the queue')
+           last_job_id = data.jobs[0]['id']
            for job in data.jobs
              class_label = job.status
              row = '<tr class=\"'+ class_label + '\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
              for col in data.cols
                value = if job[col] == null then "" else job[col]
-               row += "<td>" + value + "</td>"
+               if col == 'title' && job.application_url
+                 row += '<td><a href=\"' + job.application_url + '\">' + value + "</a></td>"
+               else
+                 row += "<td>" + value + "</td>"
              row += '<td id=\"action\">'
              row += '<a href=\"http://www.papertrailapp.com\"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
              row += "</td>"
              row += "</tr>"
              row_object = $(row)
              row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
-           $.unblockUI();
-         ), 500;
-         callback()        
-
+           if showing_message
+             setTimeout (() -> $.unblockUI()), 1000
+           callback()        
      })
 
   
@@ -100,8 +114,8 @@ jQuery ->
   refresh_jobs = () ->
     reset_search()
     $('a#page_back').hide()
-    show_loading_message('Refreshing...')
-    perform_job_search($('form#job_search'))
+    # show_loading_message('Refreshing...')
+    perform_job_search($('form#job_search'), null)
 
   refresh_timer = ""
   start_refresh_timer = () ->
@@ -129,8 +143,8 @@ jQuery ->
 
   if on_jobs_page()
     $('a#page_forward').show()
-    show_loading_message('Loading Jobs')
-    perform_job_search($('form#job_search'))
+    # show_loading_message('Loading Jobs')
+    perform_job_search($('form#job_search'), null)
     start_refresh_timer()
     
    
@@ -156,8 +170,8 @@ jQuery ->
   $('form#job_search').submit (event) ->
     stop_refresh_timer()
     event.preventDefault()
-    show_loading_message('Applying your searches and filters to find jobs...')
-    perform_job_search($(this), start_refresh_timer())
+    # show_loading_message('Applying your searches and filters to find jobs...')
+    perform_job_search($(this), 'Applying your searches and filters to find jobs...', start_refresh_timer())
 
     
 
@@ -170,8 +184,8 @@ jQuery ->
     if offset > 0
       $('a#page_back').show()
     offset_element.val(offset)
-    show_loading_message('Loading the next ' + limit + ' jobs')
-    perform_job_search($('form#job_search'), start_refresh_timer())
+    # show_loading_message('Loading the next ' + limit + ' jobs')
+    perform_job_search($('form#job_search'), null,  start_refresh_timer())
     
 
 
@@ -185,8 +199,8 @@ jQuery ->
     if offset < 1
       $(this).hide()
     offset_element.val(offset)
-    show_loading_message('Loading the previous ' + limit + ' jobs')
-    perform_job_search($('form#job_search'), start_refresh_timer())
+    # show_loading_message('Loading the previous ' + limit + ' jobs')
+    perform_job_search($('form#job_search'), null, start_refresh_timer())
     
 
 
@@ -255,8 +269,42 @@ jQuery ->
     show_loading_message('Adding application as a job on the queue')    
     create_job($(this))
 
+  popup_timer = ''
 
+  show_tooltip = (event, url) ->
+    x = (event.pageX - 1) + 'px'
+    y = (event.pageY - 3) + 'px'
+    $('div#tooltip').text('')
+    body_text = ''
+    $.ajax({
+      type: "GET",
+      dataType: 'json',
+      url: url,
+      success: (data) ->
+        job = data.job
+        for col in data.cols
+          if col == 'title'
+            body_text += '<h3>' + job[col] + '</h3>'
+          else
+            body_text += '<b>' + col + ': </b>'
+            body_text += job[col]
+            body_text += '<br />'
+        body_text_object = $(body_text)
+        body_text_object.appendTo('div#tooltip')
+        $('div#tooltip').css({'display': 'block', 'top': y, 'left': x});
+        $('div#tooltip').show()
+    })
 
+  hide_tooltip = () ->
+    $('div#tooltip').hide()
+
+  $('#datatable tbody tr').live 'mouseenter', (event) ->
+    url = $(this).data('url')
+    popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
+  
+  $('#datatable tbody tr').live 'mouseout', (event) ->
+    hide_tooltip()
+    clearTimeout(popup_timer)
 
   
 
