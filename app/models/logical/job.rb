@@ -7,7 +7,7 @@ module Logical
     
     COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :status]
 
-    ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :started_at, :finished_at,  :script_type_name, :log_level, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
+    ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address, :machine_started_on_server_name, :application_run_group_restriction_name]
 
     FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
  
@@ -72,7 +72,7 @@ module Logical
         job_scope = ::Naf::Job.where(:failed_to_start => true)
       when :error
         job_scope = ::Naf::Job.where("exit_status > 0")
-      when :not_started
+      when :queued
         job_scope = ::Naf::Job.not_started
       when :running
         puts "Getting all the running jobs"
@@ -94,7 +94,18 @@ module Logical
     end
 
     def to_detailed_hash
-      Hash[ ATTRIBUTES.map{ |m| [m, send(m)] } ]
+      Hash[ ATTRIBUTES.map{ |m| 
+        case m
+        when :started_at, :finished_at
+          if value = @job.send(m)
+            [m, value.localtime.strftime("%Y-%m-%d %r")]
+          else
+            [m, '']
+          end
+        else
+          [m, send(m)] 
+        end
+      }]
     end
     
     # Format the hash of a job record nicely for the table

@@ -17,10 +17,10 @@
     <tr>
       
       <% if @cols.size == 1 %>
-        <th sort="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
+        <th class="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
       <% else %>
         <% @cols.each do |col| %>
-          <th sort="<%= col %>"><%= make_header(col) %></th>
+          <th id="<%= col %>"><%= make_header(col) %></th>
         <% end %>
       <% end %>
       
@@ -68,8 +68,8 @@
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
     <%= hidden_field(:search, :offset, :value => 0) %>
-    <b> Status: </b>  <%= select(:search, :status, [["All", :queued], ["Running", :running], ["Queued", :not_started], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error]]) %> </b><br />
-    <b> Order By: </b><%= select(:search, :order, [["Created", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %> <br />
+    <b> Status: </b>  <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error]]) %> </b><br />
+    <b> Order By: </b><%= select(:search, :order, [["Queued Time", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %> <br />
     <b> Direction: </b> 
        Descending:
         <%= radio_button(:search, :direction, :desc, :checked => true) %>
