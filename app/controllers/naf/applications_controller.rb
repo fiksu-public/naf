@@ -5,7 +5,7 @@ module Naf
 
  
     def index
-      @rows = Logical::Application.all
+      @rows = Logical::Naf::Application.all
       render :template => 'naf/datatable'
     end
 
@@ -52,7 +52,7 @@ module Naf
     def set_cols_and_attributes
       more_attributes = [:script_type_name]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
-      @cols = Logical::Application::COLUMNS
+      @cols = Logical::Naf::Application::COLUMNS
     end
 
   end

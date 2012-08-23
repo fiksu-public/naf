@@ -1,3 +1,4 @@
+# This migration comes from naf (originally 20120820023848)
 class NafSchema < ActiveRecord::Migration
 
   def up

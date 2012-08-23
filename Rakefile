@@ -1,7 +1,5 @@
 #!/usr/bin/env rake
 
-
-# This file is copied from SchemaCommenter
 begin
   require 'bundler/setup'
 rescue LoadError
@@ -26,7 +24,7 @@ end
 # Eventually we will want a test application to use this Engine
 # to see if it works!
 
-#APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
+APP_RAKEFILE = File.expand_path("../spec/dummy/Rakefile", __FILE__)
 
 load 'rails/tasks/engine.rake'
 
