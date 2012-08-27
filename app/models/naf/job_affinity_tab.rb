@@ -1,5 +1,5 @@
 module Naf
-  class JobAffinityTab < NafBase
+  class JobAffinityTab < ::Partitioned::ByForeignKey
     validates :job_id, :affinity_id, :presence => true
 
     validates_uniqueness_of :affinity_id, :scope => :job_id, :message => "has already been taken for this job"
@@ -13,5 +13,21 @@ module Naf
     delegate :affinity_classification_name, :to => :affinity
 
     attr_accessible :job_id, :affinity_id
+
+    def self.partition_foreign_key
+      return :job_id
+    end
+
+    def self.connection
+      return ::Naf::NafBase.connection
+    end
+
+    def self.partition_table_size
+      return ::Naf::Job.partition_table_size
+    end
+
+    partitioned do |partition|
+      partition.index :id, :unique => true
+    end
   end
 end

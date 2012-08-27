@@ -6,13 +6,13 @@ module Naf
   # for more than a 1.week (instead, have them exit and restarted periodically)
   #
 
-  class Job < NafBase
+  class Job < ::Partitioned::ById
     include ::Af::Application::SafeProxy
     include ::Af::AdvisoryLocker
 
     JOB_STALE_TIME = 1.week
 
-    validates  :application_type_id, :application_run_group_restriction_id, :presence => true
+    validates :application_type_id, :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, :command,  {:presence => true, :length => {:minimum => 3}}
     
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
@@ -24,7 +24,33 @@ module Naf
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
     delegate :script_type_name, :to => :application_type
 
-    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id, :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
+    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id
+    attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
+
+    # partitioning
+
+    def self.connection
+      return ::Naf::NafBase.connection
+    end
+
+    def self.partition_table_size
+      return 100,000
+    end
+
+    partitioned do |partition|
+      partition.foreign_key :application_id
+      partition.foreign_key :application_type_id
+      partition.foreign_key :application_run_group_restriction_id
+      partition.foreign_key :started_on_machine_id, :machines
+      partition.index :created_at
+      partition.index :application_id
+      partition.index :started_on_machine_id
+      partition.index :command
+      partition.index :application_run_group_name
+      partition.index :finished_at
+      partition.index :exit_status
+    end
+
     # scope like things
 
     def self.queued_between(start_time, end_time)
