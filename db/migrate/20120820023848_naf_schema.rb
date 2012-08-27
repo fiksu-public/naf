@@ -137,7 +137,6 @@ class NafSchema < ActiveRecord::Migration
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
 
-
           priority                               integer not null default 0,
 
           started_on_machine_id                  integer null references #{schema_name}.machines,
@@ -152,6 +151,12 @@ class NafSchema < ActiveRecord::Migration
           request_to_terminate                   boolean not null default false,
 
           log_level                              text null
+      );
+      create table #{schema_name}.job_id_created_ats
+      (
+          id                                 serial not null primary key,
+          job_id                             integer not null unique,
+          created_at                         timestamp not null
       );
       create table #{schema_name}.job_affinity_tabs
       (
@@ -171,6 +176,7 @@ class NafSchema < ActiveRecord::Migration
     schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
     execute <<-SQL
       drop table #{schema_name}.job_affinity_tabs cascade;
+      drop table #{schema_name}.job_id_created_ats cascade;
       drop table #{schema_name}.jobs cascade;
       drop table #{schema_name}.affinities cascade;
       drop table #{schema_name}.affinity_classifications cascade;
