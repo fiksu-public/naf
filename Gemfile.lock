@@ -13,10 +13,8 @@ PATH
   remote: .
   specs:
     naf (0.9.0)
-      factory_girl_rails (~> 4.0.0)
       jquery-rails
       rails (>= 3.2)
-      rspec-rails
 
 GEM
   remote: https://rubygems.org/
@@ -150,8 +148,10 @@ PLATFORMS
 DEPENDENCIES
   af!
   coffee-rails (~> 3.2.1)
+  factory_girl_rails (~> 4.0.0)
   jquery-rails
   naf!
   pg
+  rspec-rails
   sass-rails (~> 3.2.3)
   uglifier (>= 1.0.3)

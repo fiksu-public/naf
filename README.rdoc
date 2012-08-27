@@ -14,11 +14,22 @@
 
     createdb -O postgres myapp_development
 
-3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem, the Fiksu Af gem, and Fiksu Naf gem
+3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem, the Fiksu Af gem, and Fiksu Naf gem, and front-end UI dependencies.
 
     gem 'pg'
     gem 'af',  :git => 'git@github.com:fiksu/af.git'
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
+    group :assets do
+      gem 'sass-rails',   '~> 3.2.3'
+      gem 'coffee-rails', '~> 3.2.1'
+      gem 'uglifier', '>= 1.0.3'
+    end
+    gem 'jquery-rails'
+
+4. You must also configure your application to serve assets from the asset pipeline by adding/editing the line from config/application.rb
+   Move public/[images|javascripts|stylesheets] to app/assets/[images|javascripts|stylesheets].
+
+    config.assets.enabled = true
 
 3. Edit your config/database.yml file
 

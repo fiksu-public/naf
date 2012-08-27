@@ -20,6 +20,6 @@ Gem::Specification.new do |s|
   s.add_dependency "rails", ">= 3.2"
   s.add_dependency "jquery-rails"
   s.add_development_dependency "pg"
-  s.add_dependency "rspec-rails"
-  s.add_dependency "factory_girl_rails", "~> 4.0.0"
+  s.add_development_dependency "rspec-rails"
+  s.add_development_dependency "factory_girl_rails", "~> 4.0.0"
 end
