@@ -12,7 +12,7 @@ class NafSchema < ActiveRecord::Migration
 
       do LANGUAGE plpgsql $$
         begin
-          if (SELECT count(*) FROM pg_namespace WHERE nspname !~ '^pg_.*' AND nspname NOT IN ('information_schema') AND nspname = '#{schema_name}') > 0
+          if (SELECT count(*) FROM pg_namespace WHERE nspname !~ '^pg_.*' AND nspname NOT IN ('information_schema') AND nspname = '#{schema_name}') > 0 THEN
             raise notice 'Skipping creation of schema: #{schema_name}, already exists';
           else 
             raise notice 'Creating new schema #{schema_name}';
