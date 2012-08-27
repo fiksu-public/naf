@@ -1,6 +1,8 @@
 module Logical
   module Naf
     class Application
+      include ActionView::Helpers::TextHelper
+
       COLUMNS = [:title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :deleted]
       
       def initialize(naf_app)
@@ -13,6 +15,10 @@ module Logical
       
       def to_hash
         Hash[ COLUMNS.map{ |m| [m, send(m)] } ]
+      end
+
+      def command
+        truncate(@app.command)
       end
       
       def method_missing(method_name, *arguments, &block)

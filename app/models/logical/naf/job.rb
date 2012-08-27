@@ -5,6 +5,7 @@ module Logical
   module Naf
     class Job
       include ActionView::Helpers::DateHelper
+      include ActionView::Helpers::TextHelper
       
       COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :status]
       
@@ -48,7 +49,7 @@ module Logical
         if application and application.application_schedule
           application.application_schedule.title
         else
-          command
+          truncate(command)
         end
       end
       
