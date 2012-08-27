@@ -53,13 +53,6 @@ div#errorExplanation ul li {
     margin-left: 100px;
 }
 
-div#record form {
-    text-align: center;
-}
-
-div#record div.field {
-    text-align: left;
-}
 
 div#record {
     width: 70%;
@@ -93,6 +86,18 @@ h3#record_name {
     margin: 0px;
     text-align: center;
 }
+
+
+div#record form {
+    margin-left: 30%;
+    display: block;
+    text-align: left;
+}
+
+div#record div.field {
+
+}
+
 
 div#record table#record {
     margin: auto;
@@ -325,3 +330,52 @@ div#tooltip h3 {
     text-align:center;
 }
 
+
+
+#datatable thead th.sortAsc {
+    background: #1BB2E0 url('bullet_arrow_up.png') center -4px no-repeat;
+}
+#datatable thead th.sortDesc {
+    background: #1BB2E0 url('bullet_arrow_down.png') center -4px no-repeat;
+}
+
+#datatable tfoot td {
+	padding: 5px;
+        background: #888;
+        color: #fff;
+}
+#datatable thead th {
+	color: #fff;
+        background: #888;
+	border: 1px solid #000;
+	padding: 6px 6px 6px 6px !important;
+        font-weight: normal;
+        font-size: 10px;
+}
+
+#datatable thead th#queued_time, th#started_at, th#finished_at {
+    cursor: pointer;
+}
+
+#datatable thead th#single {
+        width: 500px;
+}
+
+#datatable tbody td {
+        margin: 0px;
+	border-bottom: 1px solid #000;
+        text-align: left;
+        font-size: 12px;
+}
+
+
+#datatable  tbody tr:hover {
+        background:  #FFFFAA;
+}
+
+#datatable tbody tr td:not(#action) {
+        cursor: pointer;
+}
+
+
+    

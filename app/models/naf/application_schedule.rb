@@ -46,7 +46,6 @@ module Naf
         conditions = ["application_id = ? AND enabled = ?", application_id, true]
       end
       num_collisions = self.class.count(:conditions => conditions)
-      puts "Num Collisions: #{num_collisions}"
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
     end
   end

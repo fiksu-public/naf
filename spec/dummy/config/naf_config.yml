@@ -1,0 +1,4 @@
+# Set the configuration for Naf Job System
+
+schema_name: naf 
+main_app_title: Fiksu Inc. Job Scheduling System

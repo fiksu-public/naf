@@ -7,6 +7,7 @@ jQuery ->
 
   # Clear the search parameters
   reset_search = () ->
+    $('input#search_direction_desc').attr('checked', 'checked')
     $('form#job_search input#reset').click()
     offset_element = $('input#search_offset')
     offset_element.val(0)
@@ -19,55 +20,67 @@ jQuery ->
   last_job_id = 0;
 
   perform_job_search = (search_form, message, callback = () -> ) ->
-     showing_message = message != null
-     url = search_form.attr('action')
-     $.ajax({
-       type: "GET"
-       dataType: 'json'
-       url: url,
-       data: search_form.serialize(),
-       success: (data) ->
-         job_root_url = data.job_root_url
-         $('table#datatable tbody').text('')
-         if data.jobs.length == 0
-           $('a#page_forward').hide()
-           $('span#result_numbers').text('')
-         else
-           $('a#page_forward').show()
-           offset = parseInt($('input#search_offset').val())
-           limit = parseInt($('select#search_limit').val())
-           lower = offset*limit + 1
-           upper = lower + data.jobs.length - 1
-           $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
-           if last_job_id ==0
-             showing_message = true
-             message = 'Loading the Job Queue...'
-           if showing_message
-             show_loading_message(message)
-           else
-             if last_job_id != parseInt(data.jobs[0]['id'])
-               showing_message = true
-               show_loading_message('Showing new jobs on the queue')
-           last_job_id = data.jobs[0]['id']
-           for job in data.jobs
-             class_label = job.status
-             row = '<tr class=\"'+ class_label + '\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
-             for col in data.cols
-               value = if job[col] == null then "" else job[col]
-               if col == 'title' && job.application_url
-                 row += '<td><a href=\"' + job.application_url + '\">' + value + "</a></td>"
-               else
-                 row += "<td>" + value + "</td>"
-             row += '<td id=\"action\">'
-             row += '<a href=\"http://www.papertrailapp.com\"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
-             row += "</td>"
-             row += "</tr>"
-             row_object = $(row)
-             row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
-           if showing_message
-             setTimeout (() -> $.unblockUI()), 1000
-           callback()        
-     })
+    sort_attr = $('form#job_search select#search_order').val()
+    sort_dir  = $("form#job_search input[name='search[direction]']:checked").val();
+    $('#datatable thead th').each  ->
+      element = $(@)
+      element.removeClass();
+    if sort_attr == "created_at"
+      sort_attr = "queued_time"
+    header_element = $('#datatable thead th#' + sort_attr)
+    if sort_dir == "desc"
+      header_element.attr('class', 'sortDesc') 
+    else
+      header_element.attr('class', 'sortAsc') 
+    showing_message = message != null
+    url = search_form.attr('action')
+    $.ajax({
+      type: "GET"
+      dataType: 'json'
+      url: url,
+      data: search_form.serialize(),
+      success: (data) ->
+        job_root_url = data.job_root_url
+        $('table#datatable tbody').text('')
+        if data.jobs.length == 0
+          $('a#page_forward').hide()
+          $('span#result_numbers').text('')
+        else
+          $('a#page_forward').show()
+          offset = parseInt($('input#search_offset').val())
+          limit = parseInt($('select#search_limit').val())
+          lower = offset*limit + 1
+          upper = lower + data.jobs.length - 1
+          $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
+          if last_job_id == 0
+            showing_message = true
+            message = 'Loading the Job Queue...'
+          if showing_message
+            show_loading_message(message)
+          else
+            if last_job_id != parseInt(data.jobs[0]['id'])
+              showing_message = true
+              show_loading_message('Showing new jobs on the queue')
+          last_job_id = data.jobs[0]['id']
+          for job in data.jobs
+            class_label = job.status
+            row = '<tr class=\"'+ class_label + '\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
+            for col in data.cols
+              value = if job[col] == null then "" else job[col]
+              if col == 'title' && job.application_url
+                row += '<td><a href=\"' + job.application_url + '\">' + value + "</a></td>"
+              else
+                row += "<td>" + value + "</td>"
+            row += '<td id=\"action\">'
+            row += '<a href=\"http://www.papertrailapp.com\"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
+            row += "</td>"
+            row += "</tr>"
+            row_object = $(row)
+            row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
+          if showing_message
+            setTimeout (() -> $.unblockUI()), 300
+          callback()        
+    })
 
   
   # Create Job Function
@@ -129,7 +142,7 @@ jQuery ->
 
   # Mostly just adding .jTPS class, may remove soon
  
-  $('#datatable').jTPS()
+  #  $('#datatable').jTPS()
 
  
   # Place modal views of messages/forms at the top of the screen
@@ -170,8 +183,8 @@ jQuery ->
   $('form#job_search').submit (event) ->
     stop_refresh_timer()
     event.preventDefault()
-    # show_loading_message('Applying your searches and filters to find jobs...')
     perform_job_search($(this), 'Applying your searches and filters to find jobs...', start_refresh_timer())
+    $.unblockUI();
 
     
 
@@ -184,8 +197,7 @@ jQuery ->
     if offset > 0
       $('a#page_back').show()
     offset_element.val(offset)
-    # show_loading_message('Loading the next ' + limit + ' jobs')
-    perform_job_search($('form#job_search'), null,  start_refresh_timer())
+    perform_job_search($('form#job_search'), 'Loading the next ' + limit + ' jobs',  start_refresh_timer())
     
 
 
@@ -199,8 +211,7 @@ jQuery ->
     if offset < 1
       $(this).hide()
     offset_element.val(offset)
-    # show_loading_message('Loading the previous ' + limit + ' jobs')
-    perform_job_search($('form#job_search'), null, start_refresh_timer())
+    perform_job_search($('form#job_search'), 'Loading the previous ' + limit + ' jobs', start_refresh_timer())
     
 
 
@@ -306,7 +317,31 @@ jQuery ->
     hide_tooltip()
     clearTimeout(popup_timer)
 
+
+
   
+  $('#datatable thead th').live 'click', (event) ->
+    id = $(this).attr('id');
+    switch id
+      when "queued_time", "started_at", "finished_at"
+        if id == "queued_time"
+          id = "created_at"
+        $('form#job_search select#search_order').val(id)
+        offset_element = $('input#search_offset')
+        offset_element.val(0)
+        $('a#page_back').hide()
+        class_value = $(this).attr('class')
+        if class_value == undefined
+          $('input#search_direction_desc').attr('checked', 'checked')
+          dir = 'descending'
+        else
+          if class_value == 'sortDesc'
+            $('input#search_direction_asc').attr('checked', 'checked')
+            dir = 'ascending'
+          else
+            $('input#search_direction_desc').attr('checked', 'checked')
+            dir = 'descending'
+        perform_job_search($('form#job_search'), 'Sorting by ' + id + ' ' + dir + '...',  null)
 
 
  

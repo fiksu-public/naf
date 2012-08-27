@@ -9,7 +9,18 @@ class NafSchema < ActiveRecord::Migration
     #  location: ip address
     #  application/release on machine: application-release-number
     execute <<-SQL
-      create schema #{schema_name};
+
+      do LANGUAGE plpgsql $$
+        begin
+          if (SELECT count(*) FROM pg_namespace WHERE nspname !~ '^pg_.*' AND nspname NOT IN ('information_schema') AND nspname = '#{schema_name}') > 0 THEN
+            raise notice 'Skipping creation of schema: #{schema_name}, already exists';
+          else 
+            raise notice 'Creating new schema #{schema_name}';
+            create schema #{schema_name};
+          end if;
+        end;
+      $$;
+      
       create table #{schema_name}.affinity_classifications
       (
           id                             serial not null primary key,
@@ -155,6 +166,9 @@ class NafSchema < ActiveRecord::Migration
           affinity_id           	     integer not null references #{schema_name}.affinities,
           unique (job_id, affinity_id)
       );
+
+      set search_path = 'public';
+
     SQL
   end
 
@@ -177,7 +191,16 @@ class NafSchema < ActiveRecord::Migration
 
     if schema_name != "public"
       execute <<-SQL
-        drop schema #{schema_name}; 
+        do LANGUAGE plpgsql $$
+          begin
+            if (SELECT COUNT(*) FROM pg_tables WHERE schemaname = '#{schema_name}') > 0 THEN
+              raise notice 'Skipping drop of schema:: #{schema_name}, there are still other tables under it!';
+            else 
+              raise notice 'Dropping schema #{schema_name}';
+              drop schema #{schema_name} cascade;
+            end if;
+          end;
+        $$;
       SQL
     end
   end
