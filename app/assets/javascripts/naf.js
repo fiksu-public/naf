@@ -14,5 +14,6 @@
 //= require jquery_ujs
 //= require_tree './naf'
 //= require_tree './blockUI'
+//= require_tree './timepicker'
 //= require_tree .
 

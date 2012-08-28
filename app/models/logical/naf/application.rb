@@ -3,7 +3,7 @@ module Logical
     class Application
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :deleted]
+      COLUMNS = [:title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval, :deleted]
       
       def initialize(naf_app)
         @app = naf_app
@@ -21,6 +21,19 @@ module Logical
         truncate(@app.command)
       end
       
+      def run_start_minute
+        output = ""
+        if schedule = @app.application_schedule and schedule.run_start_minute.present?
+          minutes = schedule.run_start_minute % 60
+          hours =   schedule.run_start_minute / 60
+          output << hours.to_s + ":"
+          output << "%02d" % minutes
+          output = Time.parse(output).strftime("%I:%M %p")
+        end
+
+        return output
+      end
+
       def method_missing(method_name, *arguments, &block)
         case method_name
         when :application_run_group_restriction_name, :run_interval, :application_run_group_name

@@ -33,7 +33,7 @@ td#main div#status p {
 }
 
 div#errorExplanation {
-    text-align: center;
+    text-align: left;
     color: red;
 }
 

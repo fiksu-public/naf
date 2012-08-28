@@ -1,7 +1,6 @@
 GIT
   remote: git@github.com:fiksu/af.git
-  revision: 976d37ec0bbcd93e37a708be5a30153f36bc2c26
-  ref: 976d37ec0bbcd93e37a708be5a30153f36bc2c26
+  revision: 6b2d5a1f36bf3b936383715982afbd930b844e7f
   specs:
     af (0.9.3)
       log4r (= 1.1.10)
@@ -12,8 +11,9 @@ GIT
 PATH
   remote: .
   specs:
-    naf (0.9.0)
+    naf (0.9.1)
       jquery-rails
+      partitioned
       rails (>= 3.2)
 
 GEM
@@ -80,6 +80,10 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.19)
     multi_json (1.3.6)
+    partitioned (1.0.1)
+      pg
+      rails (>= 3.0.0)
+      rspec-rails
     pg (0.14.0)
     polyglot (0.3.3)
     rack (1.4.1)
@@ -151,6 +155,7 @@ DEPENDENCIES
   factory_girl_rails (~> 4.0.0)
   jquery-rails
   naf!
+  partitioned
   pg
   rspec-rails
   sass-rails (~> 3.2.3)

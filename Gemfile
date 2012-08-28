@@ -8,6 +8,9 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
 end
 
-gem 'af', :git => 'git@github.com:fiksu/af.git', :ref => '976d37ec0bbcd93e37a708be5a30153f36bc2c26'
+gem 'af', :git => 'git@github.com:fiksu/af.git'
 
-gem "jquery-rails"
+gem 'partitioned'
+gem 'jquery-rails'
+
+

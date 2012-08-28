@@ -2,6 +2,7 @@ module Naf
   class ApplicationSchedulesController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
+    before_filter :coerce_start_run_minute, :only => [:create, :update]
   
     def index
       @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
@@ -55,6 +56,18 @@ module Naf
     def set_cols_and_attributes
       @cols = [:title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
       @attributes = Naf::ApplicationSchedule.attribute_names.map(&:to_sym) | @cols
+    end
+
+    def coerce_start_run_minute
+      time_text = params[:application_schedule][:run_start_minute]
+      
+      unless time_text.blank?
+        begin
+          minutes_since_midnight = (Time.parse(time_text).seconds_since_midnight / 60).to_i
+          params[:application_schedule][:run_start_minute] = minutes_since_midnight
+        rescue ArgumentError
+        end
+      end
     end
 
   end

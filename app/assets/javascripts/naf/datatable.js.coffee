@@ -1,5 +1,7 @@
 jQuery ->
 
+  $('#application_schedule_run_start_minute').timepicker {'step': 10}
+
   # Some lengthy helper functions to search jobs, and create/enqueue them
 
   on_jobs_page = () ->

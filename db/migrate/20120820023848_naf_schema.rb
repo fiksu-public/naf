@@ -117,19 +117,19 @@ class NafSchema < ActiveRecord::Migration
           application_id                         integer unique not null references #{schema_name}.applications,
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
-          run_start_time                         time null,
+          run_start_minute                       integer null,
           run_interval                           integer null,
           priority                               integer not null default 0,
           check (visible = true OR enabled = false),
-          check (run_start_time is not null OR run_interval is not null)
+          check (run_start_minute is not null OR run_interval is not null)
       );
       insert into #{schema_name}.application_schedules
-        (application_id, application_run_group_restriction_id, application_run_group_name, run_start_time) values
+        (application_id, application_run_group_restriction_id, application_run_group_name, run_start_minute, run_interval) values
         (
           (select id from #{schema_name}.applications where command = '::Process::Naf::Janitor.run'),
           (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
           '::Process::Naf::Janitor.run',
-          '00:10:00'::time,
+           9 * 60,
           24 * 60
         );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;

@@ -4,6 +4,7 @@ module Naf
 
     validates :run_interval, :priority, :numericality => {:only_integer => true}
     validate :visible_enabled_check
+    validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validates :application_id, :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
@@ -19,7 +20,7 @@ module Naf
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
-    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled
+    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled, :run_start_minute
 
     SCHEDULES_LOCK_ID = 0
 
@@ -47,6 +48,14 @@ module Naf
       end
       num_collisions = self.class.count(:conditions => conditions)
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
+    end
+
+    def run_interval_at_time_check
+      unless run_start_minute.blank?
+        if (run_interval % (60*24)) != 0
+          errors.add(:run_interval, "needs to be a multiple of #{24*60} minutes (one day) since you specified a Run Start Time")
+        end
+      end
     end
   end
 end
