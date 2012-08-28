@@ -93,6 +93,12 @@ class NafSchema < ActiveRecord::Migration
           title                           text not null,
           log_level                       text null
       );
+      insert into #{schema_name}.applications (application_type_id, command, title) values
+        (
+          (select id from #{schema_name}.application_types where script_type_name = 'rails'),
+          '::Process::Naf::Janitor.run',
+          'Database Janitorial Work'
+        );
       create table #{schema_name}.application_run_group_restrictions
       (
           id                                        serial not null primary key,
@@ -111,10 +117,21 @@ class NafSchema < ActiveRecord::Migration
           application_id                         integer unique not null references #{schema_name}.applications,
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
-          run_interval                           integer not null,
+          run_start_time                         time null,
+          run_interval                           integer null,
           priority                               integer not null default 0,
-          check (visible = true or enabled = false)
+          check (visible = true OR enabled = false),
+          check (run_start_time is not null OR run_interval is not null)
       );
+      insert into #{schema_name}.application_schedules
+        (application_id, application_run_group_restriction_id, application_run_group_name, run_start_time) values
+        (
+          (select id from #{schema_name}.applications where command = '::Process::Naf::Janitor.run'),
+          (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
+          '::Process::Naf::Janitor.run',
+          '00:10:00'::time,
+          24 * 60
+        );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
       create table #{schema_name}.application_schedule_affinity_tabs
       (
@@ -166,6 +183,19 @@ class NafSchema < ActiveRecord::Migration
           affinity_id           	     integer not null references #{schema_name}.affinities,
           unique (job_id, affinity_id)
       );
+      create table #{schema_name}.janitorial_assignments
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          enabled                                boolean not null default true,
+          deleted                                boolean not null default false,
+          model_name                             text not null,  -- ::Naf::Job
+          janitorial_creates_enabled             boolean not null default true,
+          janitorial_archives_enabled            boolean not null default false,
+          janitorial_drops_enabled               boolean not null default false,
+          check (deleted = false OR enabled = false)
+      );
 
       set search_path = 'public';
 
@@ -175,6 +205,7 @@ class NafSchema < ActiveRecord::Migration
   def down
     schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
     execute <<-SQL
+      drop table #{schema_name}.janitorial_assignments cascade;
       drop table #{schema_name}.job_affinity_tabs cascade;
       drop table #{schema_name}.job_id_created_ats cascade;
       drop table #{schema_name}.jobs cascade;
