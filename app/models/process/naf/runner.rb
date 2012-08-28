@@ -14,8 +14,9 @@ module Process::Naf
       machine = ::Naf::Machine.current
 
       unless machine.present?
-        logger.fatal "this machine is not configued correctly, please update #{::Naf::Machine.table_name} with an entry for this machine ipaddress: #{::Naf::Machine.machine_ip_address}"
-        logger.fatal "exiting..."
+        logger.fatal "This machine is not configued correctly (ipaddress: #{::Naf::Machine.machine_ip_address})."
+        logger.fatal "Please update #{::Naf::Machine.table_name} with an entry for this machine."
+        logger.fatal "Exiting..."
         exit
       end
 
