@@ -18,7 +18,6 @@ module Process::Naf
 
     def post_command_line_parsing
       if @list_assignments
-        puts "assignments: #{@assignments.inspect}"
         puts self.class.columnized(assignments_to_process.map{|a| [a.id.to_s, a.model_name]}.join("\n"))
         exit 0
       end
