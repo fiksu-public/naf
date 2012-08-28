@@ -10,7 +10,7 @@ end
 
 gem 'af', :git => 'git@github.com:fiksu/af.git'
 
-gem 'partitioned'
+gem 'partitioned', :git => 'git@github.com:fiksu/partitioned.git'
 gem 'jquery-rails'
 
 
