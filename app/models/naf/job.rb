@@ -37,6 +37,10 @@ module Naf
       return 100,000
     end
 
+    def self.partition_num_lead_buffers
+      return 10
+    end
+
     partitioned do |partition|
       partition.foreign_key :application_id
       partition.foreign_key :application_type_id
@@ -49,6 +53,20 @@ module Naf
       partition.index :application_run_group_name
       partition.index :finished_at
       partition.index :exit_status
+
+      partition.janitorial_creates_needed lambda {|model, *partition_key_values|
+        current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
+        current_partition_id = current_id / model.partition_table_size * model.partition_table_size
+        last_partition_id = current_partition_id + (model.partition_table_size * model.partition_num_lead_buffers)
+        return (current_partition_id..last_partition_id).step(model.partition_table_size).reject{|pid| model.sql_adapter.partition_exists?(pid)}
+      }
+      partition.janitorial_archives_needed []
+      partition.janitorial_drops_needed lambda {|model, *partition_key_values|
+        current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
+        current_partition_id = current_id / model.partition_table_size * model.partition_table_size
+        first_partition_id = [0, current_partition_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
+        return (0..first_partition_id).step(model.partition_table_size).reverse.select{|pid| model.sql_adapter.partition_exists?(pid)}
+      }
     end
 
     # scope like things

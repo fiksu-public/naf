@@ -1,9 +1,9 @@
 module Process::Naf
   class Runner < ::Af::Application
-    opt :wait_time_for_processes_to_terminate, :default => 120
-    opt :check_schedules_period, :default => 1
-    opt :runner_stale_period, :default => 10
-    opt :loop_sleep_time, :default => 5
+    opt :wait_time_for_processes_to_terminate, :argument_note => "SECONDS", :default => 120
+    opt :check_schedules_period, :argument_note => "MINUTES", :default => 1
+    opt :runner_stale_period, :argument_note => "MINUTES", :default => 10
+    opt :loop_sleep_time, :argument_note => "SECONDS", :default => 5
 
     def initialize
       super
