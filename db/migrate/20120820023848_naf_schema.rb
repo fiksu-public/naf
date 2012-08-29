@@ -188,12 +188,11 @@ class NafSchema < ActiveRecord::Migration
           id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
+          type                                   text not null,
           enabled                                boolean not null default true,
           deleted                                boolean not null default false,
           model_name                             text not null,  -- ::Naf::Job
-          janitorial_creates_enabled             boolean not null default true,
-          janitorial_archives_enabled            boolean not null default false,
-          janitorial_drops_enabled               boolean not null default false,
+          assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
 
