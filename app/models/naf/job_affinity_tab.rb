@@ -28,6 +28,7 @@ module Naf
 
     partitioned do |partition|
       partition.index :id, :unique => true
+      partition.foreign_key :affinity_id
     end
   end
 end
