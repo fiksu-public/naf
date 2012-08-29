@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:fiksu/af.git
-  revision: 6b2d5a1f36bf3b936383715982afbd930b844e7f
+  revision: 5bee875acf418e84c388824ada37d98533ef6a09
   specs:
     af (0.9.3)
       log4r (= 1.1.10)

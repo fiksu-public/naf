@@ -1,6 +1,6 @@
 module Naf
   class ApplicationType < NafBase
-    SCRIPT_RUNNER = "#{Rails.root}/script/rails runner"
+    SCRIPT_RUNNER = "#{Gem.ruby}/script/rails runner"
 
     def spawn(job)
       self.send(invocation_method.to_sym, job)

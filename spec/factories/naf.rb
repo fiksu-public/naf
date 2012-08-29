@@ -29,6 +29,29 @@ FactoryGirl.define do
   factory :running_job, :parent => :job_picked_by_machine do
     started_at Time.zone.now
   end
+
+  factory :finished_job, :parent => :job_picked_by_machine do
+    started_at Time.zone.now - 3.minutes
+    finished_at Time.zone.now
+  end
+
+  factory :stale_job, :parent => :job_picked_by_machine do
+    started_at  Time.zone.now - 1.week - 3.days - 3.minutes
+    finished_at Time.zone.now - 1.week - 3.days
+  end
+
+  factory :scheduled_picked_job, :parent => :job_picked_by_machine do
+    association :application, :factory => :scheduled_application
+  end
+
+  factory :scheduled_running_job, :parent => :scheduled_picked_job do
+    started_at Time.zone.now
+  end
+
+  factory :scheduled_finished_job, :parent => :scheduled_picked_job do
+    started_at Time.zone.now - 3.minutes
+    finished_at Time.zone.now
+  end
   
   #############################################################
   #######   Machines  #########################################
@@ -215,6 +238,12 @@ FactoryGirl.define do
     end
   end
 
+  factory :affinity, :class => ::Naf::Affinity do
+    association :affinity_classification, :factory => :purpose_affinity_classification
+    sequence(:affinity_name) do |n|
+      "Affinity #{n}"
+    end
+  end
   
   #############################################################
   #######   Affinity Classifications  #########################
@@ -243,6 +272,8 @@ FactoryGirl.define do
       ::Naf::AffinityClassification.find_or_initialize_by_id(id)
     end
   end
+
+
 
   #############################################################
   #######   Affinity Tabs and Slots   #########################
