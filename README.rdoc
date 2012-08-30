@@ -19,6 +19,7 @@
     gem 'pg'
     gem 'af',  :git => 'git@github.com:fiksu/af.git'
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
+    gem 'partitioned'
     group :assets do
       gem 'sass-rails',   '~> 3.2.3'
       gem 'coffee-rails', '~> 3.2.1'
@@ -106,6 +107,51 @@
 3. Now you can visit the Naf Job System UI mounted at the default path '/job_system' (Configurable in config/routes.rb)
 
 4. You can change the name shown on the page, edit the 'main_app_title' attribute in config/job_system_config.yml.
+
+=== Logging
+
+Papertrail is to manage logging
+
+1. Acquire a papertrail log-in associated with fiksu.com (https://papertrailapp.com)
+
+2. Create new "logging destination" at https://papertrailapp.com/account/logging, the destination will be a port:
+     port 64857 is assigned to WAC
+     port 42751 is assigned to FreeMyApps
+   We'll call this LOGGING_PORT below.
+
+3. For each server to be configured:
+
+3a. Run:
+    gem install remote_syslog
+
+3b. Copy the following to /etc/log_files.yml
+
+ files: 
+   - /var/log/nginx/*.log
+   - /var/log/af/*.log
+   - /home/rails/wac/shared/log/*.log
+ destination:
+   host: logs.papertrailapp.com
+   port: LOGGING_PORT
+
+3c. Set up log rotation for the things that matter
+  /etc/logrotate.d/af.log
+    /var/log/af/*.log {
+      daily
+      missingok
+      rotate 5
+      size 50M
+      compress
+      delaycompress
+      copytruncate
+      notifempty
+      create 644 root adm
+    }
+
+3d. Start the daemon:
+    remote_syslog --tls
+
+
 
 === Teardown
 
