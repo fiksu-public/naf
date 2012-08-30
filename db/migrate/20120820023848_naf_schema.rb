@@ -172,8 +172,9 @@ class NafSchema < ActiveRecord::Migration
       create table #{schema_name}.job_id_created_ats
       (
           id                                 serial not null primary key,
+          created_at                         timestamp not null default now(),
           job_id                             integer not null unique,
-          created_at                         timestamp not null
+          job_created_at                     timestamp not null
       );
       create table #{schema_name}.job_affinity_tabs
       (

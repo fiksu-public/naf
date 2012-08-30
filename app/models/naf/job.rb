@@ -147,30 +147,41 @@ module Naf
       return lock_record(0, &block)
     end
 
-    def self.queue_rails_job(command, affinities = [], priority = 0)
-      # XXX handle affinities -- remember to transaction between create and affinity additions
-      create(:application_type_id => 1,
-             :command => command,
-             :application_run_group_restriction_id => 2,
-             :application_run_group_name => command,
-             :priority => priority)
+    def self.queue_rails_job(command, priority = 0, affinities = [])
+      ::Naf::Job.transaction do
+        job = ::Naf::Job.create(:application_type_id => 1,
+                                :command => command,
+                                :application_run_group_restriction_id => 2,
+                                :application_run_group_name => command,
+                                :priority => priority)
+        ::Naf::JobIdCreateAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        affinities.each do |affinity|
+          ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
+        end
+      end
     end
 
-    def self.queue_application(application, application_run_group_restriction, application_run_group_name, priority)
-      # XXX handle affinities -- remember to transaction between create and affinity additions
-      create(:application_id => application.id,
-             :application_type_id => application.application_type_id,
-             :command => application.command,
-             :application_run_group_restriction_id => application_run_group_restriction.id,
-             :application_run_group_name => application_run_group_name,
-             :priority => priority)
+    def self.queue_application(application, application_run_group_restriction, application_run_group_name, priority = 0, affinities = [])
+      ::Naf::Job.transaction do
+        job = ::Naf::Job.create(:application_id => application.id,
+                                :application_type_id => application.application_type_id,
+                                :command => application.command,
+                                :application_run_group_restriction_id => application_run_group_restriction.id,
+                                :application_run_group_name => application_run_group_name,
+                                :priority => priority)
+        ::Naf::JobIdCreateAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        affinities.each do |affinity|
+          ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
+        end
+      end
     end
 
     def self.queue_application_schedule(application_schedule)
       queue_application(application_schedule.application,
                         application_schedule.application_run_group_restriction,
                         application_schedule.application_run_group_name,
-                        application_schedule.priority)
+                        application_schedule.priority,
+                        application_schedule.affinities)
     end
 
     def self.fetch_assigned_jobs(machine)

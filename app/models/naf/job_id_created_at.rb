@@ -1,5 +1,7 @@
 module Naf
   class JobIdCreatedAt < ::Partitioned::ByCreatedAt
+    attr_accessible :job_id, :job_created_at
+
     def self.connection
       return ::Naf::NafBase.connection
     end
