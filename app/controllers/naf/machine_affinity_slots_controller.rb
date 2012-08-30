@@ -13,14 +13,15 @@ module Naf
 
     def show
       @record = Naf::MachineAffinitySlot.find(params[:id])
-      @machine = Naf::Machine.find(@record.machine_id)
+      @machine = Naf::Machine.find(params[:machine_id])
       render :template => 'naf/record'
     end
 
     def destroy
+      @machine = Naf::Machine.find(params[:machine_id])
       @slot = Naf::MachineAffinitySlot.find(params[:id])
       @slot.destroy
-      redirect_to :action => 'index'
+      redirect_to machine_machine_affinity_slots_path(@machine)
     end
 
     def new
@@ -32,7 +33,7 @@ module Naf
       @machine = Naf::Machine.find(params[:machine_affinity_slot][:machine_id])
       @slot = Naf::MachineAffinitySlot.new(params[:machine_affinity_slot])
       if  @slot.save
-        redirect_to({:action => 'show', :id => @slot.id, :machine_id => @machine.id}, :notice => 'Machine Affinity Slot was successfully created.') 
+        redirect_to(machine_machine_affinity_slot_path(@machine, @slot), :notice => 'Machine Affinity Slot was successfully created.') 
       else
         render :action => "new", :machine_id => @machine.id
       end
@@ -40,14 +41,14 @@ module Naf
 
     def edit
       @slot = Naf::MachineAffinitySlot.find(params[:id])
-      @machine = Naf::Machine.find(@slot.machine_id)
+      @machine = Naf::Machine.find(params[:machine_id])
     end
 
     def update
       @slot = Naf::MachineAffinitySlot.find(params[:id])
       @machine = Naf::Machine.find(@slot.machine_id)
       if @slot.update_attributes(params[:machine_affinity_slot])
-        redirect_to({:action => "show", :id => @slot.id, :machine_id => @machine.id}, :notice => "Machine Affinity Slot was successfully updated")
+        redirect_to(machine_machine_affinity_slot_path(@machine, @slot), :notice => "Machine Affinity Slot was successfully updated")
       else
         render :action => "edit", :machine_id => @machine.id
       end

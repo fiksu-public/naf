@@ -57,7 +57,7 @@ module Naf
         it "should save when the run_interval is nil" do
           schedule_base.run_start_minute = 5 # 12:05 AM
           schedule_base.run_interval = nil
-          schedule_base.save.should be_false
+          schedule_base.save.should be_true
         end
         
         it "should save when the run_interval is a multiple of one day" do

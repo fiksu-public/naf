@@ -30,22 +30,22 @@ module Naf
       @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.new(params[:application_schedule])
       if  @application_schedule.save
-        redirect_to({:action => 'show', :application_id => @application.id, :id => @application_schedule.id}, :notice => 'Application Schedule was successfully created.') 
+        redirect_to(application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully created.') 
       else
         render :action => "new", :application_id => @application.id
       end
     end
 
     def edit
+      @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
-      @application = @application_schedule.application
     end
 
     def update
+      @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
-      @application = @application_schedule.application
       if @application_schedule.update_attributes(params[:application_schedule])
-        redirect_to({:action => 'show', :application_id => @application.id, :id => @application_schedule.id}, :notice => 'Application Schedule was successfully updated.') 
+        redirect_to(application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully updated.')
       else
         render :action => "edit", :id => @application_schedule.id, :application_id => @application.id
       end
