@@ -127,7 +127,7 @@ module Naf
       when "job_affinity_tabs"
         link_to "Destroy", job_job_affinity_tab_url(@job, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedule_affinity_tabs"
-        link_to "Destroy", application_schedule_application_schedule_affinity_tab_url(@application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+        link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "machine_affinity_slots"
         link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedules"

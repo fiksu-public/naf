@@ -2,13 +2,13 @@ module Naf
   class ApplicationSchedule < NafBase
     include ::Af::AdvisoryLocker
 
-    validates :run_interval, :priority, :numericality => {:only_integer => true}
+    validates :priority, :numericality => {:only_integer => true}
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validates :application_id, :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
-    
+    validates :run_interval, :numericality => {:only_integer => true}, :unless => :run_start_minute
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
@@ -52,8 +52,8 @@ module Naf
 
     def run_interval_at_time_check
       unless run_start_minute.blank?
-        if (run_interval % (60*24)) != 0
-          errors.add(:run_interval, "needs to be a multiple of #{24*60} minutes (one day) since you specified a Run Start Time")
+        if run_interval.present? and (run_interval % (60*24) != 0)
+          errors.add(:run_interval, "needs to be nil or a multiple of #{24*60} minutes (one day) since you specified a Run Start Time")
         end
       end
     end

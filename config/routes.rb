@@ -12,7 +12,5 @@ Naf::Engine.routes.draw do
     resources :machine_affinity_slots
   end
   resources :affinities
-  resources :affinity_classifications
-  resources :application_run_group_restrictions
   root :to => "jobs#index"
 end
