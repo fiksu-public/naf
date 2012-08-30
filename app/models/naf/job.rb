@@ -33,8 +33,12 @@ module Naf
       return ::Naf::NafBase.connection
     end
 
+    def self.full_table_name_prefix
+      return ::Naf::NafBase.full_table_name_prefix
+    end
+
     def self.partition_table_size
-      return 100,000
+      return 100000
     end
 
     def self.partition_num_lead_buffers
@@ -42,10 +46,10 @@ module Naf
     end
 
     partitioned do |partition|
-      partition.foreign_key :application_id
-      partition.foreign_key :application_type_id
-      partition.foreign_key :application_run_group_restriction_id
-      partition.foreign_key :started_on_machine_id, :machines
+      partition.foreign_key :application_id, full_table_name_prefix + "applications"
+      partition.foreign_key :application_type_id, full_table_name_prefix + "application_types"
+      partition.foreign_key :application_run_group_restriction_id, full_table_name_prefix + "application_run_group_restrictions"
+      partition.foreign_key :started_on_machine_id, full_table_name_prefix + "machines"
       partition.index :created_at
       partition.index :application_id
       partition.index :started_on_machine_id
@@ -56,16 +60,16 @@ module Naf
 
       partition.janitorial_creates_needed lambda {|model, *partition_key_values|
         current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
-        current_partition_id = current_id / model.partition_table_size * model.partition_table_size
-        last_partition_id = current_partition_id + (model.partition_table_size * model.partition_num_lead_buffers)
-        return (current_partition_id..last_partition_id).step(model.partition_table_size).reject{|pid| model.sql_adapter.partition_exists?(pid)}
+        start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
+        end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
+        return model.partition_generate_range(start_range, end_range).reject{|p| model.sql_adapter.partition_exists?(p)}
       }
       partition.janitorial_archives_needed []
       partition.janitorial_drops_needed lambda {|model, *partition_key_values|
         current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
-        current_partition_id = current_id / model.partition_table_size * model.partition_table_size
-        first_partition_id = [0, current_partition_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
-        return (0..first_partition_id).step(model.partition_table_size).reverse.select{|pid| model.sql_adapter.partition_exists?(pid)}
+        start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
+        end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
+        return model.partition_generate_range(start_range, end_range).reverse.select{|p| model.sql_adapter.partition_exists?(p)}
       }
     end
 

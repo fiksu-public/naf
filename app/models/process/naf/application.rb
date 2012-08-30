@@ -1,6 +1,6 @@
 module Process::Naf
   class Application < ::Af::Application
-    opt :naf_job_id, :env => "NAF_JOB_ID", :type => :int, :default => "unknown"
+    opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
 
     def log4r_name_suffix
       return ":[#{@naf_job_id}]"

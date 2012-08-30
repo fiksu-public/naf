@@ -130,7 +130,7 @@ class NafSchema < ActiveRecord::Migration
           (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
           '::Process::Naf::Janitor.run',
           5,
-          24*60
+          nil
         );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
       create table #{schema_name}.application_schedule_affinity_tabs
@@ -195,6 +195,9 @@ class NafSchema < ActiveRecord::Migration
           assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
+      insert into #{schema_name}.janitorial_assignments (type, model_name) values
+        ('Naf::JanitorialCreateAssignment', '::Naf::Job'),
+        ('Naf::JanitorialDropAssignment', '::Naf::Job');
 
       set search_path = 'public';
 
