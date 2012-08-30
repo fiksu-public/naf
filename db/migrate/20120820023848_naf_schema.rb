@@ -196,9 +196,13 @@ class NafSchema < ActiveRecord::Migration
           assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
-      insert into #{schema_name}.janitorial_assignments (type, model_name) values
-        ('Naf::JanitorialCreateAssignment', '::Naf::Job'),
-        ('Naf::JanitorialDropAssignment', '::Naf::Job');
+      insert into #{schema_name}.janitorial_assignments (type, assignment_order, model_name) values
+        ('Naf::JanitorialCreateAssignment', 500, '::Naf::Job'),
+        ('Naf::JanitorialDropAssignment',   500, '::Naf::Job'),
+        ('Naf::JanitorialCreateAssignment', 100, '::Naf::JobIdCreatedAt'),
+        ('Naf::JanitorialDropAssignment',   100, '::Naf::JobIdCreatedAt'),
+        ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
+        ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
       set search_path = 'public';
 
