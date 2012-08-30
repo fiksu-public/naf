@@ -131,7 +131,7 @@ class NafSchema < ActiveRecord::Migration
           (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
           '::Process::Naf::Janitor.run',
           5,
-          24*60
+          null
         );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
       create table #{schema_name}.application_schedule_affinity_tabs
@@ -173,8 +173,9 @@ class NafSchema < ActiveRecord::Migration
       create table #{schema_name}.job_id_created_ats
       (
           id                                 serial not null primary key,
+          created_at                         timestamp not null default now(),
           job_id                             integer not null unique,
-          created_at                         timestamp not null
+          job_created_at                     timestamp not null
       );
       create table #{schema_name}.job_affinity_tabs
       (
@@ -189,14 +190,20 @@ class NafSchema < ActiveRecord::Migration
           id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
+          type                                   text not null,
           enabled                                boolean not null default true,
           deleted                                boolean not null default false,
           model_name                             text not null,  -- ::Naf::Job
-          janitorial_creates_enabled             boolean not null default true,
-          janitorial_archives_enabled            boolean not null default false,
-          janitorial_drops_enabled               boolean not null default false,
+          assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
+      insert into #{schema_name}.janitorial_assignments (type, assignment_order, model_name) values
+        ('Naf::JanitorialCreateAssignment', 500, '::Naf::Job'),
+        ('Naf::JanitorialDropAssignment',   500, '::Naf::Job'),
+        ('Naf::JanitorialCreateAssignment', 100, '::Naf::JobIdCreatedAt'),
+        ('Naf::JanitorialDropAssignment',   100, '::Naf::JobIdCreatedAt'),
+        ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
+        ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
       set search_path = 'public';
 

@@ -130,7 +130,7 @@ class NafSchema < ActiveRecord::Migration
           (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
           '::Process::Naf::Janitor.run',
           5,
-          nil
+          null
         );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
       create table #{schema_name}.application_schedule_affinity_tabs
