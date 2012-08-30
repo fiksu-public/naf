@@ -88,7 +88,8 @@
     rake db:migrate
 
 2. Set up partitioning
-   script/rails runner Process::Naf::Janitor.run --create-infrastructure ::Naf::Job,::Naf::JobIdCreatedAt,::Naf::JobAffinityTab
+   
+    rails runner Process::Naf::Janitor.run --create-infrastructure ::Naf::Job,::Naf::JobIdCreatedAt,::Naf::JobAffinityTab
 
 3. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
