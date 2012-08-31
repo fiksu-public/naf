@@ -14,7 +14,7 @@ module Naf
     def show
       @record = Naf::ApplicationScheduleAffinityTab.find(params[:id])
       @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_id])
-      @application - @application_schedule.application
+      @application = @application_schedule.application
       render :template => 'naf/record'
     end
 
@@ -31,28 +31,30 @@ module Naf
     end
 
     def create
-      @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_affinity_tab][:application_schedule_id])
-      @application = @application_schedule.application
+      route_params = {:application_id => params[:application_id], 
+                      :application_schedule_id => params[:application_schedule_id]}
+      @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_id])
+      @application = Naf::Application.find(params[:application_id])
       @tab = Naf::ApplicationScheduleAffinityTab.new(params[:application_schedule_affinity_tab])
       if @tab.save
-        redirect_to({:action => 'show', :id => @tab.id, :application_schedule_id => @application_schedule.id, :application_id => @application.id}, :notice => 'Application Schedule Affinity Tab was successfully created.') 
+        redirect_to(application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully created.') 
       else
-        render :action => "new", :application_id => @application.id, :application_schedule_id => @application_schedule.id
+        render route_params.merge(:action => "new")
       end
     end
 
     def edit
       @tab = Naf::ApplicationScheduleAffinityTab.find(params[:id])
-      @application_schedule = Naf::ApplicationSchedule.find(@tab.application_schedule_id)
+      @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_id])
       @application = @application_schedule.application
     end
 
     def update
       @tab = Naf::ApplicationScheduleAffinityTab.find(params[:id])
-      @application_schedule = Naf::ApplicationSchedule.find(@tab.application_schedule_id)
-      @application = @application_schedule.application
+      @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_id])
+      @application = Naf::Application.find(params[:application_id])
       if @tab.update_attributes(params[:application_schedule_affinity_tab])
-        redirect_to({:action => 'show', :id => @tab.id, :application_schedule_id => @application_schedule.id, :application_id => @application.id}, :notice => 'Application Schedule Affinity Tab was successfully created  was successfully updated.') 
+        redirect_to(application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully updated.') 
       else
         render :action => "edit", :application_schedule_id => @application_schedule.id, :application_id => @application.id
       end

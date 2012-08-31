@@ -17,7 +17,7 @@ module Naf
     def destroy
       @application = Naf::Application.find(params[:id])
       @application.destroy
-      redirect_to :action => 'index'
+      redirect_to applications_path
     end
 
     def new

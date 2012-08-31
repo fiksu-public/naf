@@ -16,7 +16,7 @@ module Naf
     def destroy
       @machine = Naf::Machine.find(params[:id])
       @machine.destroy
-      redirect_to :action => 'index'
+      redirect_to machines_path
     end
 
 

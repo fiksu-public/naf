@@ -29,12 +29,6 @@ module Naf
       end
     end
 
-    def destroy
-      @job = Naf::Job.find(params[:id])
-      @job.destroy
-      redirect_to :action => 'index'
-    end
-
     def create
      @job = Naf::Job.new(params[:job])
      if params[:job][:application_id] and app = Naf::Application.find(params[:job][:application_id])
