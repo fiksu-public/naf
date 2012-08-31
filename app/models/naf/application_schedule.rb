@@ -32,6 +32,14 @@ module Naf
       return unlock_record(SCHEDULES_LOCK_ID)
     end
 
+    def exact_schedules
+      return where('run_start_minute > 0')
+    end
+
+    def relative_schedules
+      return where('run_interval > 0')
+    end
+
     def visible_enabled_check
       unless visible or !enabled
         errors.add(:visible, "must be true, or set enabled to false")

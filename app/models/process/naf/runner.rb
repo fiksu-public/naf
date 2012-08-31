@@ -1,9 +1,10 @@
 module Process::Naf
   class Runner < ::Af::Application
-    opt :wait_time_for_processes_to_terminate, :argument_note => "SECONDS", :default => 120
-    opt :check_schedules_period, :argument_note => "MINUTES", :default => 1
-    opt :runner_stale_period, :argument_note => "MINUTES", :default => 10
-    opt :loop_sleep_time, :argument_note => "SECONDS", :default => 5
+    opt :wait_time_for_processes_to_terminate, "time between askign processes to terminate and sending kill signals", :argument_note => "SECONDS", :default => 120
+    opt :check_schedules_period, "time between checking schedules", :argument_note => "MINUTES", :default => 1
+    opt :schedule_fudge_scale, "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)", :default => 5
+    opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
+    opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
 
     def initialize
       super
@@ -37,7 +38,7 @@ module Process::Naf
           break
         end
 
-        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minute)
+        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
             logger.info "checking schedules"
@@ -59,7 +60,7 @@ module Process::Naf
                 logger.warn "runner not alive #{runner_to_check.inspect}"
               end
 
-              if runner_to_check.is_stale?(@runner_stale_period.minute)
+              if runner_to_check.is_stale?(@runner_stale_period.minutes)
                 logger.alarm "runner down #{runner_to_check.inspect}"
                 runner_to_check.mark_machine_dead
               end
@@ -219,14 +220,27 @@ module Process::Naf
       application_last_runs = ::Naf::Job.application_last_runs.
         index_by{|job| job.application_id }
 
-      schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).
-        find_all do |schedule|
+      # find the run_interval based schedules that should be queued
+      # select anything that isn't currently running and completed
+      # running more than run_interval minutes ago
+      relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).relative_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
-            (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval * 60)))
+            (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval.minutes)))
       end
 
-      return schedules_what_need_queuin
+      # find the run_start_minute based schedules
+      # select anything that isn't currently running
+      # hasn't run since run_start_time and
+      # that should have run within fudge period 
+      exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).exact_schedules.select do |schedule|
+        ( not_finished_applications[schedule.application_id].nil? &&
+          ( application_last_runs[schedule.application_id].nil? ||
+            ((Date.today + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id])) &&
+          ((Date.today + schedule.run_start_minute.minutes) >= (Time.zone.now - (@check_schedules_period * @schedule_fudge_scale).minutes)))
+      end
+
+      return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin
     end
   end
 end
