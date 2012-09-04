@@ -24,6 +24,8 @@ module Naf
 
     SCHEDULES_LOCK_ID = 0
 
+    # scope like things
+
     def self.try_lock_schedules
       return try_lock_record(SCHEDULES_LOCK_ID)
     end
@@ -32,13 +34,15 @@ module Naf
       return unlock_record(SCHEDULES_LOCK_ID)
     end
 
-    def exact_schedules
-      return where('run_start_minute > 0')
+    def self.exact_schedules
+      return where('run_start_minute is not null')
     end
 
-    def relative_schedules
+    def self.relative_schedules
       return where('run_interval > 0')
     end
+
+    # accessors
 
     def visible_enabled_check
       unless visible or !enabled

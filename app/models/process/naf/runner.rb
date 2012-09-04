@@ -230,14 +230,19 @@ module Process::Naf
       end
 
       # find the run_start_minute based schedules
-      # select anything that isn't currently running
-      # hasn't run since run_start_time and
-      # that should have run within fudge period 
+      # select anything that
+      #  isn't currently running (or queued) AND
+      #  hasn't run since run_start_time AND
+      #  should have been run by now AND
+      #  that should have run within fudge period AND
+
       exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).exact_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
-            ((Date.today + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id])) &&
-          ((Date.today + schedule.run_start_minute.minutes) >= (Time.zone.now - (@check_schedules_period * @schedule_fudge_scale).minutes)))
+            ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id])) &&
+          (Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) >= 0.seconds &&
+          ((Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) <= (@check_schedules_period * @schedule_fudge_scale).minutes)
+          )
       end
 
       return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin
