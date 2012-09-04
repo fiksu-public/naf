@@ -238,6 +238,10 @@ module Naf
 
         if job.present?
           # found a job
+          log_levels = {}
+          log_levels.merge!(machine.log_level) if machine.log_level.present?
+          log_levels.merge!(job.application.log_level) if job.application.try(:log_level).present?
+          job.log_level = log_levels
           return job
         end
       end
