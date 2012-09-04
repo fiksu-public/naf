@@ -13,5 +13,12 @@ module Naf
 
     accepts_nested_attributes_for :application_schedule, :allow_destroy => true
 
+
+    def last_finished_job
+      return Naf::Job.recently_queued
+                     .where(:finished_at => Naf::Job.recently_queued.where(:application_id => id).select("max(finished_at)"))
+                     .first
+    end
+
   end
 end

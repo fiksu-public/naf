@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:fiksu/af.git
-  revision: 5b8a461c412edf827635f7ad0919ca82e058ae27
+  revision: ac6dfe7b4be691c77f49d23239ae8e0b73c8ff0f
   specs:
     af (0.9.3)
       log4r (= 1.1.10)
@@ -10,7 +10,7 @@ GIT
 
 GIT
   remote: git@github.com:fiksu/partitioned.git
-  revision: a36469796a4ebef4b616fa6524f486069ff72f7b
+  revision: 5c4ff0b61ed4c5821c2955976045ab75d5878ee4
   specs:
     partitioned (1.0.1)
       pg
