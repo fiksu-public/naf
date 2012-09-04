@@ -254,6 +254,10 @@ module Naf
       application_type.spawn(self)
     end
 
+    def self.queue_test
+      queue_rails_job("::Naf::Job.test")
+    end
+
     def self.test(*foo)
       seconds = rand 120 + 15
       puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}: sleeping for #{seconds} seconds"

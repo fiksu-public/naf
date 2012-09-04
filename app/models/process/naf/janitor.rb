@@ -42,16 +42,18 @@ module Process::Naf
         exit 0
       end
       unless @create_infrastructure.blank?
+        logger.info "creating infrastructure: #{@create_infrastructure.inspect}"
         first_model = nil
         begin
           @create_infrastructure.each do |target_model_name|
+            logger.info "target model: #{target_model_name}"
             target_model = target_model_name.constantize rescue nil
             if target_model.nil?
               logger.error "couldn't find target_model #{target_model_name}"
             else
               unless first_model
+                target_model.connection.begin_db_transaction
                 first_model = target_model
-                first_model.connection.begin_db_transaction
               end
               begin
                 logger.info "#{target_model_name}: creating infrastructure"

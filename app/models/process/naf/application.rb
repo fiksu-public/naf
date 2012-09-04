@@ -14,6 +14,7 @@ module Process::Naf
 
     def initialize
       @last_log_level = nil
+      super
     end
 
     def log4r_name_suffix
