@@ -270,7 +270,7 @@ jQuery ->
 
   # Cancel out from enqueuing form
 
-  $('div#enqueue_form #cancel').click ->
+  $('form#enqueue_form #cancel').click ->
     $.unblockUI();
     return false;
 

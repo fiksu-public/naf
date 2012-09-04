@@ -10,7 +10,7 @@ module Naf
     end
 
     def show
-      @record = Naf::Application.find(params[:id])
+      @record = Logical::Naf::Application.new(Naf::Application.find(params[:id]))
       render :template => 'naf/record'
     end
 
@@ -22,10 +22,11 @@ module Naf
 
     def new
       @application = Naf::Application.new
+      @application.build_application_schedule
     end
 
     def create
-     @application = Naf::Application.new(params[:application])
+      @application = Naf::Application.new(params[:application])
       if @application.save
         redirect_to(@application, :notice => 'Application was successfully created.') 
       else
@@ -50,7 +51,7 @@ module Naf
     private
 
     def set_cols_and_attributes
-      more_attributes = [:script_type_name]
+      more_attributes = [:script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :run_start_minute, :priority, :visible, :enabled ]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = Logical::Naf::Application::COLUMNS
     end
