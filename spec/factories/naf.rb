@@ -121,6 +121,11 @@ FactoryGirl.define do
     end
   end
 
+  factory :schedule_at_time, :parent => :schedule do
+    run_interval nil
+    run_start_minute 5
+  end
+
 
   #############################################################
   #######   Application Run Group Restrictions ################

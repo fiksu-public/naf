@@ -1,7 +1,9 @@
 require 'spec_helper'
 
 module Process::Naf
-  describe Application do
+
+  describe Janitor do
+
 
 
   end
