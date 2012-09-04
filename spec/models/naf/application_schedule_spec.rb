@@ -47,12 +47,6 @@ module Naf
       end
 
       context "when a run_start_minute is specified" do
-        it "should not save when the run_interval is not a multiple of one day" do
-          schedule_base.run_start_minute = 5 # 12:05 AM
-          schedule_base.run_interval = 30
-          schedule_base.save.should be_false
-          schedule_base.should have(1).error_on(:run_interval)
-        end
 
         it "should save when the run_interval is nil" do
           schedule_base.run_start_minute = 5 # 12:05 AM
@@ -60,10 +54,10 @@ module Naf
           schedule_base.save.should be_true
         end
         
-        it "should save when the run_interval is a multiple of one day" do
+        it "should not save when the run_interval is present" do
           schedule_base.run_start_minute = 5 # 12:05 AM
-          schedule_base.run_interval = 2*24*60 # Every Two Days
-          schedule_base.save.should be_true
+          schedule_base.run_interval = 180
+          schedule_base.save.should be_false
         end
       end
      
