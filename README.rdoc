@@ -207,6 +207,10 @@ Papertrail is to manage logging
 
       git clone git@github.com:fiksu/naf.git
 
+2.  Bundle the dependencies
+
+      bundle install
+
 === Running Tests
 
 1.  If you are developing for Naf, you will want to be able to run the test suite.  First change to the spec/dummy directory and run:
@@ -219,11 +223,15 @@ Papertrail is to manage logging
 
       rake db:migrate
 
-3.  Clone the structure of the naf_development database to the naf_test database
+3.  Set up the partitioning
+
+      rails runner Process::Naf::Janitor.run --create-infrastructure ::Naf::Job,::Naf::JobIdCreatedAt,::Naf::JobAffinityTab
+
+4.  Clone the structure of the naf_development database to the naf_test database
 
       rake db:test:clone_structure
 
-4.  Now change back to the root directory of the engine repository, and run:
+5.  Now change back to the root directory of the engine repository, and run:
 
       rake spec
 
