@@ -1,25 +1,46 @@
 module Process::Naf
   class Application < ::Af::Application
+    class TerminationRequest < StandardError
+      attr_reader :job, :reason
+      def initialize(job, reason)
+        @job = job
+        @reason = reason
+        super("Requested to terminate: #{reason}")
+      end
+    end
+
     opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
+    opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
+
+    def initialize
+      @last_log_level = nil
+    end
 
     def log4r_name_suffix
       return ":[#{@naf_job_id}]"
     end
 
-    def requested_to_terminate?
+    def update_job_status
       if @naf_job_id.is_a? Integer && @naf_job_id > 0
         job = ::Naf::Job.find(@naf_job_id)
         if job
-          if job.request_to_terminate
-            return true
+          unless @do_not_terminate
+            if job.request_to_terminate
+              raise TerminationRequest.new(job, "job requested to terminate")
+            end
+            unless job.machine
+              raise TerminationRequest.new(job, "machine not configured correctly")
+            end
+            unless job.machine.enabled
+              raise TerminationRequest.new(job, "machine disabled")
+            end
           end
-          # if no machines row exist assume someone is running by hand (do not terminate)
-          if job.machine && !job.machine.enabled
-            return true
+          if job.log_level != @last_log_level
+            @last_log_level = job.log_level
+            set_logger_levels(@last_log_level || {})
           end
         end
       end
-      return false
     end
 
     def pre_work
