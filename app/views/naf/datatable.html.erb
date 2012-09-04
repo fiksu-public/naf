@@ -40,7 +40,6 @@
           <td id="action"> 
             <% if current_page?(:controller => 'applications') %> 
               <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => row.id} %>
-              <%= generate_schedule_link(row) %>
             <% elsif current_page?(:controller => 'jobs') or current_page?(naf.root_url) %>
                <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
             <% end %>
@@ -105,6 +104,8 @@
 </form>
 
 <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
+    <p> You are manually scheduling this application. </p>
+    <p> Please fill in the following fields: </p>
     <input type="hidden" name="job[application_id]" id="application_id" value="" />
     <b> Run Group Restriction: </b></br />
     <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect{ |a| [a.application_run_group_restriction_name, a.id] }, {:include_blank => true}) %> <br />

@@ -47,7 +47,7 @@ module Naf
       when "job_affinity_tabs"
         link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
       when "application_schedule_affinity_tabs"
-        link_to "Back to Application Schedule", :controller => 'application_schedules', :action => 'show', :id => params[:application_schedule_id]
+        link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
       when "machine_affinity_slots"
         link_to "Back to Machine", :controller => 'machines', :action => 'show', :id => params[:machine_id]
       else 
@@ -60,22 +60,28 @@ module Naf
     end
 
     def table_title
-      current_page?(naf.root_url) ? "Jobs" : make_header(controller_name)
+      if current_page?(naf.root_url)
+        "Jobs"
+      else 
+        case controller_name
+        when "application_schedule_affinity_tabs"
+          Application.find(params[:application_id]).title + ", Affinity Tabs"
+        when "machine_affinity_slots"
+          machine = Machine.find(params[:machine_id])
+          name = machine.server_name
+          ((name and name.length > 0) ? name : machine.server_address) + ", Affinity Slots"
+        else
+          make_header(controller_name)
+        end
+      end
     end
 
     def generate_child_resources_link
       case controller_name
-      when "applications"
-        if schedule = @record.application_schedule
-          config = {:controller => 'application_schedules', :action => 'show', :application_id => @record.id, :id => schedule.id}
-        else
-          config = {:controller => 'application_schedules', :action => 'new', :application_id => @record.id}
-        end
-        link_to "Application Schedule", config
       when "jobs"
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
-      when "application_schedules"
-        link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => params[:id]
+      when "applications"
+        link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
       when "machines"
         link_to "Machine Affinity Slots", :controller => 'machine_affinity_slots', :action => 'index', :machine_id => params[:id]
       else
@@ -114,7 +120,7 @@ module Naf
 
     def generate_back_link
       case controller_name.to_sym
-      when :application_schedules
+      when :application_schedule_affinity_tabs
         link_to "Back to Application", {:controller => 'applications', :action => 'show', :id => @record.application.id}, :class => 'back'
       else
         link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
@@ -132,6 +138,8 @@ module Naf
         link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedules"
         link_to "Destroy", schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+      when "applications"
+        link_to "Destroy", @record.app, {:confirm => "Are you sure you want to destroy this application?", :method => :delete, :class => 'destroy'}
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end

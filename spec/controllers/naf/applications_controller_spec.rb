@@ -27,7 +27,9 @@ module Naf
     end
 
     it "should respond with affinity new" do
-      Application.should_receive(:new).and_return(nil)
+      app = mock('app')
+      Application.should_receive(:new).and_return(app)
+      app.should_receive(:build_application_schedule).and_return(nil)
       get :new
       response.should render_template("naf/applications/new")
       response.should be_success
