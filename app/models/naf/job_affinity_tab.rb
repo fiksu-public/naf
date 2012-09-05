@@ -40,7 +40,7 @@ module Naf
       partition.index :id, :unique => true
       partition.foreign_key lambda {|model, *partition_key_values|
         return Configurator::Data::ForeignKey.new(model.partition_integer_field,
-                                                  ::Naf::Job.partition_name(*partition_key_values),
+                                                  ::Naf::Job.partition_table_name(*partition_key_values),
                                                   :id)
       }
       partition.foreign_key :affinity_id, full_table_name_prefix + "affinities"
