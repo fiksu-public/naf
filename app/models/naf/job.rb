@@ -91,6 +91,13 @@ module Naf
         reject{|job| job.finished_at.nil? }
     end
 
+    def self.application_last_queued
+      return recently_queued.
+        where("application_id is not null").
+        group("application_id").
+        select("application_id,max(id) as id,max(created_at) as created_at")
+    end
+
     def self.not_finished
       return where("finished_at is null")
     end
