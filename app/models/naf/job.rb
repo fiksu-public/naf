@@ -120,7 +120,7 @@ module Naf
     end
 
     def self.select_affinity_ids
-      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = jobs.id order by affinity_id) as affinity_ids")
+      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = #{JOB_SYSTEM_SCHEMA_NAME}.jobs.id order by affinity_id) as affinity_ids")
     end
 
     def self.possible_jobs

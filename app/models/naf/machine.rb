@@ -29,7 +29,7 @@ module Naf
     end
 
     def self.local_machine
-      return where(:server_address => machine_ip_address)
+      return where(:server_address => machine_ip_address).first
     end
 
     def correct_server_address?
