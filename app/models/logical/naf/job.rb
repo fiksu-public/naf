@@ -28,7 +28,9 @@ module Logical
      end
       
       def status
-        if @job.started_at and (not @job.finished_at)
+        if @job.request_to_terminate
+          "Canceled"
+        elsif @job.started_at and (not @job.finished_at)
           "Running"
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
           "Failed to Start"
@@ -70,6 +72,8 @@ module Logical
       # We eventually build up these results over created_at/1.week partitions.
       def self.search(search)
         case search[:status].to_sym
+        when :canceled
+          job_scope = ::Naf::Job.canceled
         when :failed_to_start
           job_scope = ::Naf::Job.where(:failed_to_start => true)
         when :error

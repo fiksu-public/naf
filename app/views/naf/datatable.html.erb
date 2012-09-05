@@ -31,7 +31,7 @@
 
   <tbody>
     <% @rows.each do |row| %>
-      <tr id="<%= row.id %>" data-url="<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>">
+      <tr id='<%= row.id %>' data-url='<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>'>
         <% @cols.each do |col| %>
           <td> <%= row.send(col) %> </td>
         <% end %>
@@ -75,7 +75,7 @@
 
 <form id="job_search"  style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
     <%= hidden_field(:search, :offset, :value => 0) %>
-    <b> Status: </b>  <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error]]) %> </b><br />
+    <b> Status: </b>  <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error], ["Canceled", :canceled]]) %> </b><br />
     <b> Order By: </b><%= select(:search, :order, [["Queued Time", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %> <br />
     <b> Direction: </b> 
        Descending:

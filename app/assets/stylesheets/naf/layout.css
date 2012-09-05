@@ -282,6 +282,11 @@ form#job_search {
   background: #fff;
 }
 
+
+#datatable tbody tr.Canceled{
+  background: #ff66cc;
+}
+
 #datatable tbody tr.Failed.to.start{
   background: #ffcc33;
 }
@@ -308,7 +313,7 @@ form#job_search {
 
 
 #datatable tbody tr:hover {
-    background:  #E6E6FA;
+    background:  #E6E6E6;
 }
 
 #datatable tbody tr td:not(#action) {
@@ -370,7 +375,7 @@ div#tooltip h3 {
 
 
 #datatable  tbody tr:hover {
-        background:  #FFFFAA;
+        background:  #aaa;
 }
 
 #datatable tbody tr td:not(#action) {

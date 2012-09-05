@@ -20,6 +20,13 @@
      <td> <%= @record.send(a) %></td>
    </tr>
  <% end %>
+ <% if controller_name == 'jobs' %>
+   <tr>
+     <td colspan="2" style="text-align:center">
+       <%= link_to 'View Log in Papertrail', "http://www.papertrailapp.com" %>
+     </td>
+   </tr>
+ <% end %>
 </tbody>
 </table>
 <br /><br />
