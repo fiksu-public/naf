@@ -37,7 +37,7 @@ module Naf
     end
 
     def self.current
-      return local_machine.first
+      return local_machine
     end
 
     def self.last_time_schedules_were_checked

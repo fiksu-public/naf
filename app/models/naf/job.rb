@@ -127,7 +127,7 @@ module Naf
     end
 
     def self.select_affinity_ids
-      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = #{::Naf::Job.partition_table_alias_name}.id order by affinity_id) as affinity_ids")
+      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = #{JOB_SYSTEM_SCHEMA_NAME}.jobs.id order by affinity_id) as affinity_ids")
     end
 
     def self.possible_jobs
@@ -246,9 +246,9 @@ module Naf
         if job.present?
           # found a job
           log_levels = {}
-          log_levels.merge!(machine.log_level) if machine.log_level.present?
-          log_levels.merge!(job.application.log_level) if job.application.try(:log_level).present?
-          job.log_level = log_levels
+         # log_levels.merge!(machine.log_level) if machine.log_level.present?
+         # log_levels.merge!(job.application.log_level) if job.application.try(:log_level).present?
+         # job.log_level = log_levels
           return job
         end
       end
