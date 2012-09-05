@@ -12,7 +12,7 @@ module Naf
 
     def last_queued_at_link(app)
       if job = app.last_queued_job
-        link_to "#{time_ago_in_words(job.finished_at, true)} ago", job_path(job)
+        link_to "#{time_ago_in_words(job.created_at, true)} ago", job_path(job)
       else
         ""
       end
