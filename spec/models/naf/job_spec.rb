@@ -8,7 +8,8 @@ module Naf
 
     context "when it is newly created" do
       it "should be found in the possible_jobs scope" do
-        Job.possible_jobs.should.include(job)
+        job_id = job.id
+        Job.possible_jobs.map(&:id).should include(job_id)
       end
       it "should find the job by run group" do
         Job.in_run_group(job.application_run_group_name).should include(job)
@@ -32,7 +33,7 @@ module Naf
 
     context "when the job is stale" do
       let(:stale_job) { FactoryGirl.create(:stale_job) }
-      it "should not be found by recenty_queued scope" do
+      it "should not be found by recently_queued scope" do
         stale_job_id = stale_job.id
         Job.recently_queued.map(&:id).should_not include(stale_job_id)
       end

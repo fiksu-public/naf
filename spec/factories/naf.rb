@@ -36,6 +36,7 @@ FactoryGirl.define do
   end
 
   factory :stale_job, :parent => :job_picked_by_machine do
+    created_at  Time.zone.now - 1.week - 3.days - 5.minutes
     started_at  Time.zone.now - 1.week - 3.days - 3.minutes
     finished_at Time.zone.now - 1.week - 3.days
   end
