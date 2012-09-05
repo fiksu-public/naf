@@ -1,6 +1,6 @@
 jQuery ->
 
-  $('#application_schedule_run_start_minute').timepicker {'step': 10}
+  $('#application_application_schedule_attributes_run_start_minute').timepicker {'step': 5}
 
   # Some lengthy helper functions to search jobs, and create/enqueue them
 
