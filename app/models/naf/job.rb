@@ -154,7 +154,7 @@ module Naf
                                 :application_run_group_restriction_id => 2,
                                 :application_run_group_name => command,
                                 :priority => priority)
-        ::Naf::JobIdCreateAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        ::Naf::JobIdCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
@@ -169,7 +169,7 @@ module Naf
                                 :application_run_group_restriction_id => application_run_group_restriction.id,
                                 :application_run_group_name => application_run_group_name,
                                 :priority => priority)
-        ::Naf::JobIdCreateAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        ::Naf::JobIdCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
@@ -194,7 +194,7 @@ module Naf
 
         # eliminate job if it can't run on this machine
         unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
-          #logger.debug "required affinity not found"
+          logger.debug "required affinity not found"
           next
         end
 
@@ -202,7 +202,7 @@ module Naf
 
         # eliminate job if machine can not run this it
         unless job_affinity_ids.all? { |job_affinity_id| machine.affinity_ids.include? job_affinity_id }
-          #logger.debug "machine does not meet affinity requirements"
+          logger.debug "machine does not meet affinity requirements"
           next
         end
 
@@ -210,12 +210,12 @@ module Naf
         lock_for_job_queue do
           if possible_job.application_run_group_restriction.application_run_group_restriction_name == "one per machine"
             if recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count > 0
-              #logger.debug "already running on this machine"
+              logger.debug "already running on this machine"
               next
             end
           elsif possible_job.application_run_group_restriction.application_run_group_restriction_name == "one at a time"
             if recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count > 0
-              #logger.debug "already running"
+              logger.debug "already running"
               next
             end
           else # possible_job.application_run_group_restriction.application_run_group_restriction_name == "no restrictions"
@@ -264,6 +264,5 @@ module Naf
       sleep(seconds)
       puts "TEST DONE: #{Time.zone.now}: #{foo.inspect}"
     end
-
   end
 end

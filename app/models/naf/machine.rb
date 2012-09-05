@@ -2,6 +2,8 @@ require 'socket'
 
 module Naf
   class Machine < NafBase
+    include ::Af::Application::SafeProxy
+
     IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
 
     validates :server_address, :presence => true
@@ -18,11 +20,16 @@ module Naf
     end
 
     def self.machine_ip_address
-      return Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3]
+      hostname = nil
+      hostname = Socket.gethostname
+      return Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
+    rescue StandardError => e
+      logger.error "couldn't find host names ip address: hostname: #{hostname}"
+      return "127.0.0.1"
     end
 
     def self.local_machine
-      return where(:server_address => Socket::getaddrinfo(Socket.gethostname, "echo", Socket::AF_INET)[0][3])
+      return where(:server_address => machine_ip_address)
     end
 
     def correct_server_address?
