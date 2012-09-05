@@ -10,6 +10,14 @@ module Naf
       ALL_VISIBLE_RESOURCES
     end
 
+    def last_run_at_link(app)
+      if job = app.last_finished_job
+        link_to job.finished_at, job_path(job)
+      else
+        ""
+      end
+    end
+
     def application_url(app)
       url_for({:controller => 'applications', :action => 'show', :id => app.id})
     end
