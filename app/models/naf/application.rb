@@ -14,10 +14,12 @@ module Naf
     accepts_nested_attributes_for :application_schedule, :allow_destroy => true
 
 
-    def last_finished_job
-      return Naf::Job.recently_queued
-                     .where(:finished_at => Naf::Job.recently_queued.where(:application_id => id).select("max(finished_at)"))
-                     .first
+    def last_queued_job
+      last_queued_job = Naf::Job.recently_queued
+        .where(:application_id => self.id)
+        .group("application_id")
+        .select("application_id, max(id) as id").first
+      last_queued_job ? Naf::Job.find(last_queued_job.id) : nil
     end
 
   end

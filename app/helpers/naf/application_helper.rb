@@ -10,9 +10,9 @@ module Naf
       ALL_VISIBLE_RESOURCES
     end
 
-    def last_run_at_link(app)
-      if job = app.last_finished_job
-        link_to job.finished_at, job_path(job)
+    def last_queued_at_link(app)
+      if job = app.last_queued_job
+        link_to "#{time_ago_in_words(job.finished_at, true)} ago", job_path(job)
       else
         ""
       end

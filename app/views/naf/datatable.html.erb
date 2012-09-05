@@ -23,7 +23,7 @@
           <th id="<%= col %>"><%= make_header(col) %></th>
         <% end %>
       <% end %>
-      <% if current_page?(:controller => 'applications') %> <th> Last Run At </th> <% end %>
+      <% if current_page?(:controller => 'applications') %> <th> Last Queued At </th> <% end %>
       <% if include_actions_in_table? %> <th> Actions </th> <% end %>
     </tr>
   </thead>
@@ -31,13 +31,13 @@
 
   <tbody>
     <% @rows.each do |row| %>
-      <tr id="<%= row.id %>" data-url="<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>" >
+      <tr id="<%= row.id %>" data-url="<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>">
         <% @cols.each do |col| %>
           <td> <%= row.send(col) %> </td>
         <% end %>
 
         <% if current_page?(:controller => 'applications') %> 
-          <td> <%= last_run_at_link(row) %> </td>
+          <td> <%= last_queued_at_link(row) %> </td>
         <% end %>
 
         <% if include_actions_in_table? %>
