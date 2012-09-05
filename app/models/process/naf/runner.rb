@@ -12,7 +12,7 @@ module Process::Naf
     end
 
     def work
-      machine = ::Naf::Machine.current
+      machine = ::Naf::Machine.local_machine
 
       unless machine.present?
         logger.fatal "This machine is not configued correctly (ipaddress: #{::Naf::Machine.machine_ip_address})."
