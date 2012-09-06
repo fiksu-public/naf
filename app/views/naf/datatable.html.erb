@@ -89,10 +89,7 @@
     <b> Run Group </b> <%= text_field(:search, :application_run_group_name) %> <br />
     <b> Run Group Restriction </b> <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect{ |a| [a.application_run_group_restriction_name, a.id] }, {:include_blank => true}) %> <br />
     <b> Priority </b> <%= text_field(:search, :priority) %><br />
-    <b> Failed to Start <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Pid </b> <%= text_field(:search, :pid) %> <br />
-    <b> Exit Status <%= text_field(:search, :exit_status)  %></b> <br />
-    <b> Request to Terminate </b> <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Machine: </b> <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect{|m| [m.server_name.blank? ? m.server_address : m.server_name, m.id]}, {:include_blank => true}) %> <br />
     <div style="text-align: right;">
     <input type="reset" id="reset" style="display: none; cursor: default"/>

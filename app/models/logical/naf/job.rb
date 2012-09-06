@@ -81,7 +81,6 @@ module Logical
         when :queued
           job_scope = ::Naf::Job.not_started
         when :running
-          puts "Getting all the running jobs"
           job_scope = ::Naf::Job.started.not_finished
         when :finished
           job_scope = ::Naf::Job.finished
@@ -96,7 +95,9 @@ module Logical
         SEARCH_FIELDS.each do |field|
           job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
         end
-        job_scope.map{|naf_job| new(naf_job)}
+        # Now return instantiations of all the logical job wrappers 
+        # from the job scope
+        return job_scope.map{|physical_job| new(physical_job) }
       end
       
       def to_detailed_hash
