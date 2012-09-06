@@ -28,7 +28,9 @@ module Logical
      end
       
       def status
-        if @job.started_at and (not @job.finished_at)
+        if @job.request_to_terminate
+          "Canceled"
+        elsif @job.started_at and (not @job.finished_at)
           "Running"
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
           "Failed to Start"
@@ -70,6 +72,8 @@ module Logical
       # We eventually build up these results over created_at/1.week partitions.
       def self.search(search)
         case search[:status].to_sym
+        when :canceled
+          job_scope = ::Naf::Job.canceled
         when :failed_to_start
           job_scope = ::Naf::Job.where(:failed_to_start => true)
         when :error
@@ -77,7 +81,6 @@ module Logical
         when :queued
           job_scope = ::Naf::Job.not_started
         when :running
-          puts "Getting all the running jobs"
           job_scope = ::Naf::Job.started.not_finished
         when :finished
           job_scope = ::Naf::Job.finished
@@ -92,7 +95,9 @@ module Logical
         SEARCH_FIELDS.each do |field|
           job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
         end
-        job_scope.map{|naf_job| new(naf_job)}
+        # Now return instantiations of all the logical job wrappers 
+        # from the job scope
+        return job_scope.map{|physical_job| new(physical_job) }
       end
       
       def to_detailed_hash

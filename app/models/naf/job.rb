@@ -83,6 +83,10 @@ module Naf
       return queued_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
     end
 
+    def self.canceled
+      return where(:request_to_terminate => true)
+    end
+
     def self.application_last_runs
       return recently_queued.
         where("application_id is not null").

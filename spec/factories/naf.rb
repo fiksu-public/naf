@@ -26,13 +26,27 @@ FactoryGirl.define do
     association :started_on_machine, :factory => :machine
   end
 
+  factory :failed_to_start_job, :parent => :job_picked_by_machine do
+    failed_to_start true
+  end
+
+
   factory :running_job, :parent => :job_picked_by_machine do
     started_at Time.zone.now
+  end
+
+  factory :canceled_job, :parent => :running_job do
+    request_to_terminate true
   end
 
   factory :finished_job, :parent => :job_picked_by_machine do
     started_at Time.zone.now - 3.minutes
     finished_at Time.zone.now
+    exit_status 0
+  end
+
+  factory :job_with_error, :parent => :finished_job do
+    exit_status 1
   end
 
   factory :stale_job, :parent => :job_picked_by_machine do
