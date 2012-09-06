@@ -239,7 +239,7 @@ module Process::Naf
       exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).exact_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
-            ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id])) &&
+            ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id].finished_at)) &&
           (Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) >= 0.seconds &&
           ((Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) <= (@check_schedules_period * @schedule_fudge_scale).minutes)
           )

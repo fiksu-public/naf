@@ -10,7 +10,7 @@ GIT
 
 GIT
   remote: git@github.com:fiksu/partitioned.git
-  revision: 5620d7079db971f26c956d1f8370de0ab1789bc0
+  revision: 7fcb0c9d265488f060b60d4b37998f7f2c923ceb
   specs:
     partitioned (1.0.1)
       pg
