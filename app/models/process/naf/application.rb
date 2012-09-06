@@ -37,8 +37,8 @@ module Process::Naf
             end
           end
           if job.log_level != @last_log_level
-            @last_log_level = job.log_level
-            set_logger_levels(@last_log_level || {})
+            #@last_log_level = job.log_level
+            #set_logger_levels(@last_log_level || {})
           end
         end
       end
