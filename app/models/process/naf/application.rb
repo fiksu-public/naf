@@ -46,8 +46,10 @@ module Process::Naf
 
     def pre_work
       super
-      ActiveRecord::ConnectionAdapters::ConnectionPool.
-        initialize_connection_application_name("#{self.class.name}(pid: #{Process.pid}, naf_job_id: #{@naf_job_id})")
+      # Max length of text in Postgres here is: 63
+      # Truncate the value in Rails to this limit, so that Postgres stops yelling.
+      value = "#{self.class.name}(pid: #{Process.pid}, naf_job_id: #{@naf_job_id})".slice(0, 63)
+      ActiveRecord::ConnectionAdapters::ConnectionPool.initialize_connection_application_name(value)
     end
 
     def work
