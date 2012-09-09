@@ -1,6 +1,5 @@
 module Naf
   class Application < NafBase
-    
     validates :application_type_id, :command, :title, :presence => true
 
     validates :title, :uniqueness => true
@@ -13,6 +12,15 @@ module Naf
 
     accepts_nested_attributes_for :application_schedule, :allow_destroy => true
 
+    def to_s
+      components = []
+      if deleted
+        components << "DELETED"
+      end
+      components << "id: #{id}"
+      components << title
+      return "::Naf::Application<#{components.join(', ')}>"
+    end
 
     def last_queued_job
       last_queued_job = Naf::Job.recently_queued

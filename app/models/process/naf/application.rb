@@ -21,8 +21,8 @@ module Process::Naf
       return "#{af_name}(pid: #{Process.pid}, nid: #{@naf_job_id})"
     end
 
-    def log4r_name_suffix
-      return ":[#{@naf_job_id}]"
+    def log4r_pattern_formatter_format
+      return "#{@log_with_timestamps ? '%d ' : ''}%C[#{@naf_job_id}] %l %M"
     end
 
     def update_job_status
@@ -31,13 +31,20 @@ module Process::Naf
         if job
           unless @do_not_terminate
             if job.request_to_terminate
+              logger.alarm "terminating by request"
               raise TerminationRequest.new(job, "job requested to terminate")
             end
             unless job.started_on_machine
+              logger.alarm "terminating: #{job.started_on_machine} is misconfigured"
               raise TerminationRequest.new(job, "machine not configured correctly")
             end
             unless job.started_on_machine.enabled
+              logger.alarm "terminating: #{job.started_on_machine} is disabled"
               raise TerminationRequest.new(job, "machine disabled")
+            end
+            if job.started_on_machine.marked_down
+              logger.alarm "terminating: #{job.started_on_machine} is marked down"
+              raise TerminationRequest.new(job, "machine marked down")
             end
           end
           if job.log_level != @last_log_level

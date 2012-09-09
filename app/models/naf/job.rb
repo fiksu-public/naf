@@ -27,6 +27,49 @@ module Naf
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id
     attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
 
+    def to_s
+      components = []
+      if started_at.nil?
+        components << "QUEUED"
+      else
+        if finished_at.nil?
+          if pid
+            extras = []
+            extras << pid.to_s
+            if request_to_terminate
+              extras << 'RequestedToTerminate'
+            end
+            components << "RUNNING:#{extras.join(':')}"
+          else
+            components << "SPAWNING"
+          end
+        else
+          extras = []
+          if request_to_terminate
+            extras << 'RequestedToTerminate'
+          end
+          if failed_to_start
+            extras << "FailedToStart"
+          end
+          if termination_signal
+            extras << "SIG#{termination_signal}"
+          end
+          if exit_status && exit_status != 0
+            extras << "STATUS=#{exit_status}"
+          end
+          if extras.length
+            extras_str = " (#{extras.join(',')})"
+          else
+            extras_str = ""
+          end
+          components << "FINISHED#{extras_str}"
+        end
+      end
+      components << "id: #{id}"
+      components << "\"#{command}\""
+      return "::Naf::Job<#{components.join(', ')}>"
+    end
+
     # partitioning
 
     def self.connection
