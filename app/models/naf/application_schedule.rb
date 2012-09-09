@@ -24,6 +24,29 @@ module Naf
 
     SCHEDULES_LOCK_ID = 0
 
+    def to_s
+      components = []
+      if enabled
+        components << "ENABLED"
+      else
+        if visible
+          components << "DISABLED"
+        else
+          components << "HIDDEN|DISABLED"
+        end
+      end
+      components << "id: #{id}"
+      components << "application_id: #{application_id}"
+      if run_start_minute
+        components << "start at: #{"%02d" % (run_start_minute/60)}:#{"%02d" % (run_start_minute%60)}"
+      else
+        components << "start every: #{run_interval} minutes"
+      end
+      components << application_run_group_restriction.application_run_group_restriction_name
+
+      return "::Naf::ApplicationSchedule<#{components.join(', ')}>"
+    end
+
     # scope like things
 
     def self.try_lock_schedules

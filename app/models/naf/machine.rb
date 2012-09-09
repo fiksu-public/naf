@@ -15,6 +15,27 @@ module Naf
 
     attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level
 
+    def machine_logger
+      return af_logger(self.class.name)
+    end
+
+    def to_s
+      components = []
+      if enabled
+        components << "ENABLED"
+      else
+        components << "DISABLED"
+      end
+      components << "id: #{id}"
+      components << "address: #{server_address}"
+      components << "name: \"#{server_name}\"" unless server_name.blank?
+      components << "pool size: #{thread_pool_size}"
+      components << "last checked schedules: #{last_checked_schedules_at}"
+      components << "last seen: #{last_seen_alive_at}"
+      
+      return "::Naf::Machine<#{components.join(', ')}>"
+    end
+
     def self.enabled
       return where(:enabled => true)
     end
@@ -24,7 +45,6 @@ module Naf
       hostname = Socket.gethostname
       return Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
     rescue StandardError => e
-      logger.error "couldn't find host names ip address: hostname: #{hostname}"
       return "127.0.0.1"
     end
 
@@ -54,11 +74,6 @@ module Naf
       save
     end
 
-    def runner_alive
-      # XXX needs to check if runner is alive
-      return true
-    end
-
     def self.is_it_time_to_check_schedules?(check_period)
       time = Naf::Machine.last_time_schedules_were_checked
       return time.nil? || time < (Time.zone.now - check_period)
@@ -68,13 +83,25 @@ module Naf
       return self.last_seen_alive_at.nil? || self.last_seen_alive_at < (Time.zone.now - period)
     end
 
-    def mark_processes_as_dead
-      # XXX mark processes in queue as dead
+    def mark_processes_as_dead(by_machine)
+      ::Naf::Job.recently_queued.not_finished.started_on(self).each do |job|
+        marking_at = Time.zone.now
+        machine_logger.alarm "machine[#{by_machine.id}] marking job[#{job.id}] as dead at #{marking_at}"
+        job.request_to_terminate = true
+        job.marked_dead_by_machine_id = by_machine.id
+        job.marked_dead_at = marking_at
+        job.finished_at = marking_at
+        job.save!
+      end
     end
 
-    def mark_machine_dead
+    def mark_machine_dead(by_machine)
+      marking_at = Time.zone.now
+      machine_logger.alarm "machine[#{by_machine.id}] marking machine[#{self.id}] as disabled at #{marking_at}"
       self.enabled = false
-      save
+      self.marked_disabled_by_machine_id = by_machine.id
+      self.marked_disabled_at = marking_at
+      save!
       mark_processes_as_dead
     end
 

@@ -5,10 +5,32 @@ module Process::Naf
     opt :schedule_fudge_scale, "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)", :default => 5
     opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
     opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
+    opt :server_name, "set the machines server name (use with --create-new-machine)", :type => :string
+    opt :server_note, "set the machines server note (use with --create-new-machine)", :type => :string
+    opt :server_address, "set the machines server address (use with --create-new-machine)", :type => :string, :default => ::Naf::Machine.machine_ip_address
+    opt :create_new_machine, "create a new machine"
 
     def initialize
       super
       update_opts :log_file, :default => "naf"
+      @last_machine_log_level = nil
+    end
+
+    def pre_work
+      super
+      if @create_new_machine
+        machine = ::Naf::Machine.find_by_server_address(@server_address)
+        if machine.present?
+          puts "--create-new-machine: Machine address #{@server_address} already exists -- nothing done"
+          exit 1
+        end
+        
+        machine = ::Naf::Machine.create(:server_address => @server_address,
+                                        :server_note => @server_note,
+                                        :server_name => @server_name)
+        puts machine
+        exit 0
+      end
     end
 
     def work
@@ -27,15 +49,28 @@ module Process::Naf
       # this machine
       terminate_old_processes(machine)
 
-      logger.info "working: #{machine.inspect}"
+      logger.info "working: #{machine}"
 
       @children = {}
 
       while true
         machine = ::Naf::Machine.current
         if machine.nil? || !machine.enabled
-          logger.warn "this machine is down #{machine.inspect}"
+          logger.warn "this machine is down #{machine}"
           break
+        end
+
+        if machine.log_level != @last_machine_log_level
+          @last_machine_log_level = machine.log_level
+          unless @last_machine_log_level.blank?
+            begin
+              log_level_hash = JSON.parse(@last_machine_log_level)
+            rescue StandardError => e
+              logger.error "couldn't parse machine.log_level: #{@last_machine_log_level}: (#{e.message})"
+              log_level_hash = {}
+            end
+            set_logger_levels(log_level_hash)
+          end
         end
 
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
@@ -53,15 +88,8 @@ module Process::Naf
 
             # check the runner machines
             ::Naf::Machine.enabled.each do |runner_to_check|
-              if runner_to_check.runner_alive
-                logger.info "runner alive #{runner_to_check.inspect}"
-                runner_to_check.mark_alive
-              else
-                logger.warn "runner not alive #{runner_to_check.inspect}"
-              end
-
               if runner_to_check.is_stale?(@runner_stale_period.minutes)
-                logger.alarm "runner down #{runner_to_check.inspect}"
+                logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
                 runner_to_check.mark_machine_dead
               end
             end

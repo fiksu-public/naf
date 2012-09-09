@@ -165,7 +165,7 @@ module Naf
                                 :application_run_group_restriction_id => 2,
                                 :application_run_group_name => command,
                                 :priority => priority)
-        ::Naf::JobIdCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
@@ -180,7 +180,7 @@ module Naf
                                 :application_run_group_restriction_id => application_run_group_restriction.id,
                                 :application_run_group_name => application_run_group_name,
                                 :priority => priority)
-        ::Naf::JobIdCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
+        ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
@@ -250,9 +250,23 @@ module Naf
         if job.present?
           # found a job
           log_levels = {}
-         # log_levels.merge!(machine.log_level) if machine.log_level.present?
-         # log_levels.merge!(job.application.log_level) if job.application.try(:log_level).present?
-         # job.log_level = log_levels
+          unless machine.log_level.blank?
+            begin
+              log_level_hash = JSON.parse(machine.log_level)
+              log_levels.merge!(log_level_hash)
+            rescue StandardError => e
+              logger.error "couldn't parse machine.log_level: #{machine.log_level}: (#{e.message})"
+            end
+          end
+          unless job.application.nil? || job.application.log_level.blank?
+            begin
+              log_level_hash = JSON.parse(job.application.log_level)
+              log_levels.merge!(log_level_hash)
+            rescue StandardError => e
+              logger.error "couldn't parse job.application.log_level: #{job.application.log_level}: (#{e.message})"
+            end
+          end
+          job.log_level = log_levels.to_json
           return job
         end
       end

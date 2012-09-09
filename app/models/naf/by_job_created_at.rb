@@ -1,6 +1,10 @@
 module Naf
-  class JobIdCreatedAt < ::Partitioned::ByCreatedAt
-    attr_accessible :job_id, :job_created_at
+  class ByJobCreatedAt < ::Partitioned::ByCreatedAt
+    self.abstract_class = true
+
+    def self.partition_time_field
+      return :job_created_at
+    end
 
     def self.connection
       return ::Naf::NafBase.connection

@@ -17,39 +17,43 @@ module Process::Naf
       super
     end
 
+    def database_application_name
+      return "#{af_name}(pid: #{Process.pid}, nid: #{@naf_job_id})"
+    end
+
     def log4r_name_suffix
       return ":[#{@naf_job_id}]"
     end
 
     def update_job_status
-      if @naf_job_id.is_a? Integer && @naf_job_id > 0
-        job = ::Naf::Job.find(@naf_job_id)
+      if @naf_job_id.is_a?(Integer) && @naf_job_id > 0
+        job = ::Naf::Job.find_by_id(@naf_job_id)
         if job
           unless @do_not_terminate
             if job.request_to_terminate
               raise TerminationRequest.new(job, "job requested to terminate")
             end
-            unless job.machine
+            unless job.started_on_machine
               raise TerminationRequest.new(job, "machine not configured correctly")
             end
-            unless job.machine.enabled
+            unless job.started_on_machine.enabled
               raise TerminationRequest.new(job, "machine disabled")
             end
           end
           if job.log_level != @last_log_level
-            #@last_log_level = job.log_level
-            #set_logger_levels(@last_log_level || {})
+            @last_log_level = job.log_level
+            unless @last_log_level.blank?
+              begin
+                log_level_hash = JSON.parse(@last_log_level)
+              rescue StandardError => e
+                logger.error "couldn't parse job.log_level: #{@last_log_level}: (#{e.message})"
+                log_level_hash = {}
+              end
+              set_logger_levels(log_level_hash)
+            end
           end
         end
       end
-    end
-
-    def pre_work
-      super
-      # Max length of text in Postgres here is: 63
-      # Truncate the value in Rails to this limit, so that Postgres stops yelling.
-      value = "#{self.class.name}(pid: #{Process.pid}, naf_job_id: #{@naf_job_id})".slice(0, 63)
-      ActiveRecord::ConnectionAdapters::ConnectionPool.initialize_connection_application_name(value)
     end
 
     def work

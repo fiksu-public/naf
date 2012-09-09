@@ -89,7 +89,7 @@
 
 2. Set up partitioning
    
-    rails runner Process::Naf::Janitor.run --create-infrastructure ::Naf::Job,::Naf::JobIdCreatedAt,::Naf::JobAffinityTab
+    rake naf:janitor:infrastructure
 
 3. Try running the Rails console, and see that you have the Naf models loaded, and mapped to the database.
 
@@ -155,8 +155,6 @@ Papertrail is to manage logging
 3d. Start the daemon:
     remote_syslog --tls
 
-
-
 === Teardown
 
 1. Undo all of this setup by running the following rake task, rolling back all the naf migrations, and deleting all copied/installed files.  WARNING: This will wipe away all of your data in your Naf tables.
@@ -164,6 +162,10 @@ Papertrail is to manage logging
      rake naf:teardown
 
 == Using Naf
+
+=== Initialize an entry for this machine
+
+      rails runner Process::Naf::Runner.run --create-new-machine --server-name "Keith's machine"
 
 === Creating your own script
 

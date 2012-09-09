@@ -53,6 +53,13 @@ namespace :naf do
     end
   end
 
+  namespace :janitor do
+    desc "create partitioning infrastructure for naf tables"
+    task :infrastructure => :environment do
+      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name]
+      ::Logical::Naf::CreateInfrastructure.new(model_names).work
+    end
+  end
 
   namespace :db do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
