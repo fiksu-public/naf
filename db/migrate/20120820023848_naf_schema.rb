@@ -56,8 +56,9 @@ class NafSchema < ActiveRecord::Migration
           thread_pool_size               integer not null default 5,
           last_checked_schedules_at      timestamp null,
           last_seen_alive_at             timestamp null,
-          marked_disabled_by_machine_id  integer null references #{schema_name}.machines,
-          marked_disabled_at             timestamp null,
+          marked_down                    boolean not null default false,
+          marked_down_by_machine_id      integer null references #{schema_name}.machines,
+          marked_down_at                 timestamp null,
           log_level                      text null
       );
       create table #{schema_name}.machine_affinity_slots

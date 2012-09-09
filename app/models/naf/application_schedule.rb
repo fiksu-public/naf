@@ -36,13 +36,12 @@ module Naf
         end
       end
       components << "id: #{id}"
-      components << "application_id: #{application_id}"
+      components << "\"#{application.title}\""
       if run_start_minute
         components << "start at: #{"%02d" % (run_start_minute/60)}:#{"%02d" % (run_start_minute%60)}"
       else
         components << "start every: #{run_interval} minutes"
       end
-      components << application_run_group_restriction.application_run_group_restriction_name
 
       return "::Naf::ApplicationSchedule<#{components.join(', ')}>"
     end

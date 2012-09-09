@@ -13,7 +13,7 @@ module Naf
     has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
     has_many :affinities, :through => :machine_affinity_slots
 
-    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level
+    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level, :marked_down
 
     def machine_logger
       return af_logger(self.class.name)
@@ -25,6 +25,9 @@ module Naf
         components << "ENABLED"
       else
         components << "DISABLED"
+      end
+      if marked_down
+        components << "DOWN!"
       end
       components << "id: #{id}"
       components << "address: #{server_address}"
@@ -38,6 +41,14 @@ module Naf
 
     def self.enabled
       return where(:enabled => true)
+    end
+
+    def self.up
+      return where(:marked_down => false)
+    end
+
+    def self.down
+      return where(:marked_down => true)
     end
 
     def self.machine_ip_address
@@ -66,12 +77,24 @@ module Naf
 
     def mark_checked_schedule
       self.last_checked_schedules_at = Time.zone.now
-      save
+      save!
     end
 
     def mark_alive
       self.last_seen_alive_at = Time.zone.now
-      save
+      save!
+    end
+
+    def mark_up
+      self.marked_down = false
+      save!
+    end
+
+    def mark_down(by_machine)
+      self.marked_down = true
+      self.marked_down_by_machine_id = by_machine.id
+      self.marked_down_at = Time.zone.now
+      save!
     end
 
     def self.is_it_time_to_check_schedules?(check_period)
@@ -86,7 +109,7 @@ module Naf
     def mark_processes_as_dead(by_machine)
       ::Naf::Job.recently_queued.not_finished.started_on(self).each do |job|
         marking_at = Time.zone.now
-        machine_logger.alarm "machine[#{by_machine.id}] marking job[#{job.id}] as dead at #{marking_at}"
+        machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
         job.request_to_terminate = true
         job.marked_dead_by_machine_id = by_machine.id
         job.marked_dead_at = marking_at
@@ -95,14 +118,14 @@ module Naf
       end
     end
 
-    def mark_machine_dead(by_machine)
+    def mark_machine_down(by_machine)
       marking_at = Time.zone.now
-      machine_logger.alarm "machine[#{by_machine.id}] marking machine[#{self.id}] as disabled at #{marking_at}"
-      self.enabled = false
-      self.marked_disabled_by_machine_id = by_machine.id
-      self.marked_disabled_at = marking_at
+      machine_logger.alarm "#{by_machine.id} marking #{self} as down at #{marking_at}"
+      self.marked_down = true
+      self.marked_down_by_machine_id = by_machine.id
+      self.marked_down_at = marking_at
       save!
-      mark_processes_as_dead
+      mark_processes_as_dead(by_machine)
     end
 
     def assigned_jobs
