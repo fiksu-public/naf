@@ -77,7 +77,7 @@ module Naf
     end
 
     def add_application_url(hash)
-      job = Naf::Job.find(hash[:id])
+      job = ::Naf::Job.find(hash[:id])
       if application = job.application
         hash[:application_url] = url_for(application)
       else

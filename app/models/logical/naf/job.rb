@@ -99,6 +99,19 @@ module Logical
         # from the job scope
         return job_scope.map{|physical_job| new(physical_job) }
       end
+
+      def self.find(id)
+        physical_job = ::Naf::Job.find(id)
+        physical_job ? new(physical_job) : nil
+      end
+
+      def application_url
+        if application = @job.application
+          return Rails.application.routes.url_helpers.application_path(application)
+        else
+          return nil
+        end
+      end
       
       def to_detailed_hash
         Hash[ ATTRIBUTES.map{ |m| 
