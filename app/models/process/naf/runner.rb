@@ -5,8 +5,9 @@ module Process::Naf
     opt :schedule_fudge_scale, "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)", :default => 5
     opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
     opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
+    opt :create_new_machine, "create a new machine", :hidden => true
     opt :server_address, "set the machines server address (dangerous)", :type => :string, :default => ::Naf::Machine.machine_ip_address, :hidden => true
-
+    opt :server_name, "set the machine's name", :type => :string, :hidden => true
     def initialize
       super
       update_opts :log_file, :default => "naf"

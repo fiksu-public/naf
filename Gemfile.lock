@@ -10,9 +10,9 @@ GIT
 
 GIT
   remote: git@github.com:fiksu/partitioned.git
-  revision: 7fcb0c9d265488f060b60d4b37998f7f2c923ceb
+  revision: e431627cf667505bc70f2de810ab3a3486041264
   specs:
-    partitioned (1.0.1)
+    partitioned (2.0.0)
       pg
       rails (>= 3.0.0)
       rspec-rails
@@ -56,7 +56,7 @@ GEM
       i18n (~> 0.6)
       multi_json (~> 1.0)
     arel (3.0.2)
-    builder (3.0.2)
+    builder (3.0.3)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)

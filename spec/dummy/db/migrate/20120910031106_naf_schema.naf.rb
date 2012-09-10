@@ -47,17 +47,20 @@ class NafSchema < ActiveRecord::Migration
          ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial');
       create table #{schema_name}.machines
       (
-          id                         serial not null primary key,
-          created_at                 timestamp not null default now(),
-          updated_at                 timestamp,
-          server_address             inet not null unique,
-          server_name                text,
-          server_note                text,
-          enabled                    boolean not null default true,
-          thread_pool_size           integer not null default 5,
-          last_checked_schedules_at  timestamp null,
-          last_seen_alive_at         timestamp null,
-          log_level                  text null
+          id                             serial not null primary key,
+          created_at                     timestamp not null default now(),
+          updated_at                     timestamp,
+          server_address                 inet not null unique,
+          server_name                    text,
+          server_note                    text,
+          enabled                        boolean not null default true,
+          thread_pool_size               integer not null default 5,
+          last_checked_schedules_at      timestamp null,
+          last_seen_alive_at             timestamp null,
+          marked_down                    boolean not null default false,
+          marked_down_by_machine_id      integer null references #{schema_name}.machines,
+          marked_down_at                 timestamp null,
+          log_level                      text null
       );
       create table #{schema_name}.machine_affinity_slots
       (
@@ -93,6 +96,14 @@ class NafSchema < ActiveRecord::Migration
           command                         text not null,
           title                           text not null,
           log_level                       text null
+      );
+      create table #{schema_name}.application_prerequisites
+      (
+          id                              serial not null primary key,
+          created_at                      timestamp not null default now(),
+          application_id                  integer not null references #{schema_name}.applications,
+          prerequisite_application_id     integer not null references #{schema_name}.applications,
+          CHECK (application_id <> prerequisite_application_id)
       );
       insert into #{schema_name}.applications (application_type_id, command, title) values
         (
@@ -167,11 +178,25 @@ class NafSchema < ActiveRecord::Migration
           exit_status                            integer null,
           termination_signal                     integer null,
 
+          state                                  text null,
+
           request_to_terminate                   boolean not null default false,
+
+          marked_dead_by_machine_id              integer null references #{schema_name}.machines,
+          marked_dead_at                         timestamp null,
 
           log_level                              text null
       );
-      create table #{schema_name}.job_id_created_ats
+      create table #{schema_name}.job_prerequisites
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          job_id                                 integer not null,
+          job_created_at                         timestamp not null,
+          prerequisite_job_id                    integer not null,
+          CHECK (job_id <> prerequisite_job_id)
+      );
+      create table #{schema_name}.job_created_ats
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
@@ -201,8 +226,10 @@ class NafSchema < ActiveRecord::Migration
       insert into #{schema_name}.janitorial_assignments (type, assignment_order, model_name) values
         ('Naf::JanitorialCreateAssignment', 500, '::Naf::Job'),
         ('Naf::JanitorialDropAssignment',   500, '::Naf::Job'),
-        ('Naf::JanitorialCreateAssignment', 100, '::Naf::JobIdCreatedAt'),
-        ('Naf::JanitorialDropAssignment',   100, '::Naf::JobIdCreatedAt'),
+        ('Naf::JanitorialCreateAssignment', 100, '::Naf::JobCreatedAt'),
+        ('Naf::JanitorialDropAssignment',   100, '::Naf::JobCreatedAt'),
+        ('Naf::JanitorialCreateAssignment', 125, '::Naf::JobPrerequisite'),
+        ('Naf::JanitorialDropAssignment',   125, '::Naf::JobPrerequisite'),
         ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
         ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
@@ -216,12 +243,14 @@ class NafSchema < ActiveRecord::Migration
     execute <<-SQL
       drop table #{schema_name}.janitorial_assignments cascade;
       drop table #{schema_name}.job_affinity_tabs cascade;
-      drop table #{schema_name}.job_id_created_ats cascade;
+      drop table #{schema_name}.job_created_ats cascade;
+      drop table #{schema_name}.job_prerequisites cascade;
       drop table #{schema_name}.jobs cascade;
       drop table #{schema_name}.affinities cascade;
       drop table #{schema_name}.affinity_classifications cascade;
       drop table #{schema_name}.machines cascade;
       drop table #{schema_name}.machine_affinity_slots cascade;
+      drop table #{schema_name}.application_prerequisites cascade;
       drop table #{schema_name}.applications cascade;
       drop table #{schema_name}.application_types cascade;
       drop table #{schema_name}.application_run_group_restrictions cascade;
