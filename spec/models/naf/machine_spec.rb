@@ -69,8 +69,8 @@ module Naf
       it "should un-enable itself, and mark child proceses as dead" do
         dying_machine = machine
         dying_machine.should_receive(:mark_processes_as_dead).and_return(nil)
-        dying_machine.mark_machine_dead
-        dying_machine.enabled.should be_false
+        dying_machine.mark_machine_down(dying_machine)
+        dying_machine.marked_down.should be_true
       end
     end
       
