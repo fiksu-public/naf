@@ -1,5 +1,6 @@
 module Naf
   module ApplicationHelper
+    include ActionView::Helpers::TextHelper
 
     DESTROY_BLOCKED_RESOURCES = ["jobs"]
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
@@ -15,6 +16,15 @@ module Naf
         link_to "#{time_ago_in_words(job.created_at, true)} ago", job_path(job)
       else
         ""
+      end
+    end
+    
+    def format_index_table_row(row, col)
+      value = row.send(col)
+      if value.is_a?(String)
+        return truncate(value)
+      else
+        return value
       end
     end
 

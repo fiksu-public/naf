@@ -33,7 +33,7 @@
     <% @rows.each do |row| %>
       <tr id='<%= row.id %>' data-url='<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>'>
         <% @cols.each do |col| %>
-          <td> <%= row.send(col) %> </td>
+          <td> <%= format_index_table_row(row, col) %> </td>
         <% end %>
 
         <% if current_page?(:controller => 'applications') %> 

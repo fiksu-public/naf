@@ -21,7 +21,7 @@ module Logical
       end
 
       def command
-        truncate(@app.command)
+        @app.command
       end
       
       def run_start_minute
