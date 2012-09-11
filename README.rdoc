@@ -19,7 +19,7 @@
     gem 'pg'
     gem 'af',  :git => 'git@github.com:fiksu/af.git'
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
-    gem 'partitioned'
+    gem 'partitioned', :git => 'git@github.com:fiksu/partitioned.git, :ref => '7fcb0c9d265488f060b60d4b37998f7f2c923ceb'
     group :assets do
       gem 'sass-rails',   '~> 3.2.3'
       gem 'coffee-rails', '~> 3.2.1'
@@ -121,39 +121,89 @@ Papertrail is to manage logging
 2. Create new "logging destination" at https://papertrailapp.com/account/logging, the destination will be a port:
      port 64857 is assigned to WAC
      port 42751 is assigned to FreeMyApps
+     port 60979 is assigned to Data-API
+
    We'll call this LOGGING_PORT below.
 
-3. For each server to be configured:
+==== Configure using Papertrail's Remote Syslog Ruby daemon
 
-3a. Run:
+For each server to be configured:
+
+1. Run:
     gem install remote_syslog
 
-3b. Copy the following to /etc/log_files.yml
+2. Copy the following to /etc/log_files.yml
 
- files: 
-   - /var/log/nginx/*.log
-   - /var/log/af/*.log
-   - /home/rails/wac/shared/log/*.log
- destination:
-   host: logs.papertrailapp.com
-   port: LOGGING_PORT
+    files: 
+    - /var/log/nginx/*.log
+    - /var/log/af/*.log
+    - /home/rails/wac/shared/log/*.log
+    destination:
+    host: logs.papertrailapp.com
+    port: LOGGING_PORT
 
-3c. Set up log rotation for the things that matter
-  /etc/logrotate.d/af.log
-    /var/log/af/*.log {
-      daily
-      missingok
-      rotate 5
-      size 50M
-      compress
-      delaycompress
-      copytruncate
-      notifempty
-      create 644 root adm
-    }
+3. Set up log rotation for the things that matter
+    /etc/logrotate.d/af.log
+      /var/log/af/*.log {
+        daily
+        missingok
+        rotate 5
+        size 50M
+        compress
+        delaycompress
+        copytruncate
+        notifempty
+        create 644 root adm
+     }
 
-3d. Start the daemon:
+4. Start the daemon:
+
     remote_syslog --tls
+
+==== Configure using Log4r to directly output to Papertrail
+
+1. Add this gem to your Gemfile
+
+    gem 'log4r_remote_syslog_outputter', :git => "git@github.com:nlim/log4r_remote_syslog_outputter.git"
+
+2. Make a file config/log4r-development.yml
+
+    # Define the Loggers
+    logger_defaults: &logger_defaults
+      level: ALL
+      trace: true
+      additive: false
+      outputters:
+      - papertrail
+
+    loggers:
+    - name: Process::Naf::Runner
+      <<: *logger_defaults
+    - name: Process::Naf::Runner::Af::AdvisoryLocker
+      <<: *logger_defaults
+    - name: {MY_NAF_SUBCLASS_NAME}
+      <<: *logger_defaults
+
+    outputters:
+    - type: RemoteSyslogOutputter
+      name: papertrail
+      level: ALL
+      url: syslog://logs.papertrailapp.com:LOGGING_PORT
+      program: My_Program
+      formatter:
+        pattern     : '%c %l: %m'
+        type        : PatternFormatter
+
+3. If you want to to use commands you define for applications must have the command line option:
+
+    --log-configuration-file config/log4r-development.yml
+
+4. Or if you want to run the runner, and have all the child processes use the configuation file, you should
+   set the environment variable and run:
+
+    LOG_CONFIGURATION_FILE=config/log4r-development.yml rails runner Process::Naf::Runner.run
+
+5. Check Papertrail dashboard for your logger events!
 
 === Teardown
 
@@ -227,7 +277,7 @@ Papertrail is to manage logging
 
 3.  Set up the partitioning
 
-      rails runner Process::Naf::Janitor.run --create-infrastructure ::Naf::Job,::Naf::JobIdCreatedAt,::Naf::JobAffinityTab
+      rake naf:janitor:infrastructure
 
 4.  Clone the structure of the naf_development database to the naf_test database
 

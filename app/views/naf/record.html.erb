@@ -17,7 +17,15 @@
  <% @attributes.each do |a| %>
    <tr>
      <td scope="row"><%= make_header(a.to_s) %></td>
-     <td> <%= @record.send(a) %></td>
+     <% if a == :title and controller_name == 'jobs' %>
+       <% if application = @record.application %>
+       <td> <%= link_to @record.send(a), url_for(application) %> </td>
+       <% else %>
+         <td> <%= @record.send(a) %> </td>
+       <% end %>
+     <% else %>
+       <td> <%= @record.send(a) %></td>
+     <% end %>
    </tr>
  <% end %>
  <% if controller_name == 'jobs' %>
@@ -26,6 +34,11 @@
        <%= link_to 'View Log in Papertrail', "http://www.papertrailapp.com" %>
      </td>
    </tr>
+ <% elsif controller_name == 'applications' %>
+  <tr>
+    <td scope="row">Last Queued At:</td>
+     <td> <%= last_queued_at_link(@record) %> </td>
+   </tr> 
  <% end %>
 </tbody>
 </table>
