@@ -194,11 +194,16 @@ For each server to be configured:
         pattern     : '%c %l: %m'
         type        : PatternFormatter
 
-3. The Runner, and all the commands you define for applications must have the command line option:
+3. If you want to to use commands you define for applications must have the command line option:
 
     --log-configuration-file config/log4r-development.yml
 
-4. Check Papertrail dashboard for your logger events!
+4. Or if you want to run the runner, and have all the child processes use the configuation file, you should
+   set the environment variable and run:
+
+    LOG_CONFIGURATION_FILE=config/log4r-development.yml rails runner Process::Naf::Runner.run
+
+5. Check Papertrail dashboard for your logger events!
 
 === Teardown
 
