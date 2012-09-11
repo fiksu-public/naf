@@ -134,27 +134,27 @@ For each server to be configured:
 
 2. Copy the following to /etc/log_files.yml
 
- files: 
-   - /var/log/nginx/*.log
-   - /var/log/af/*.log
-   - /home/rails/wac/shared/log/*.log
- destination:
-   host: logs.papertrailapp.com
-   port: LOGGING_PORT
+    files: 
+    - /var/log/nginx/*.log
+    - /var/log/af/*.log
+    - /home/rails/wac/shared/log/*.log
+    destination:
+    host: logs.papertrailapp.com
+    port: LOGGING_PORT
 
 3. Set up log rotation for the things that matter
-  /etc/logrotate.d/af.log
-    /var/log/af/*.log {
-      daily
-      missingok
-      rotate 5
-      size 50M
-      compress
-      delaycompress
-      copytruncate
-      notifempty
-      create 644 root adm
-    }
+    /etc/logrotate.d/af.log
+      /var/log/af/*.log {
+        daily
+        missingok
+        rotate 5
+        size 50M
+        compress
+        delaycompress
+        copytruncate
+        notifempty
+        create 644 root adm
+     }
 
 4. Start the daemon:
 
@@ -194,7 +194,11 @@ For each server to be configured:
         pattern     : '%c %l: %m'
         type        : PatternFormatter
 
-3. Check Papertrail dashboard for your logger events!
+3. The Runner, and all the commands you define for applications must have the command line option:
+
+    --log-configuration-file config/log4r-development.yml
+
+4. Check Papertrail dashboard for your logger events!
 
 === Teardown
 
@@ -270,15 +274,11 @@ For each server to be configured:
 
       rake naf:janitor:infrastructure
 
-4.  Set up your machine:
-
-      rails runner Process::Naf::Runner.run --create-new-machine --server-name "Keith's machine"
-
-5.  Clone the structure of the naf_development database to the naf_test database
+4.  Clone the structure of the naf_development database to the naf_test database
 
       rake db:test:clone_structure
 
-6.  Now change back to the root directory of the engine repository, and run:
+5.  Now change back to the root directory of the engine repository, and run:
 
       rake spec
 
