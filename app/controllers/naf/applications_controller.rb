@@ -36,6 +36,7 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
+      @application.build_application_schedule if @application.application_schedule.blank?
     end
 
     def update

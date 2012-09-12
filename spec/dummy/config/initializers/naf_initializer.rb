@@ -10,7 +10,7 @@ module Naf
     Naf.schema_name = data["schema_name"]
     JOB_SYSTEM_SCHEMA_NAME = data["schema_name"]
     MAIN_APP_TITLE = data["main_app_title"]
-    
+    ENV["LOG_CONFIGURATION_FILE"] = data["log4r_config_file"] if data["log4r_config_file"].present?
   rescue => e
     puts "Your 'config/job_naf_config.yml' file is formatted incorrectly, or doesn't exist."
     puts e

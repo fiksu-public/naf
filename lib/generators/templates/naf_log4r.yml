@@ -1,0 +1,25 @@
+# Define the Loggers
+logger_defaults: &logger_defaults
+  level: ALL
+  trace: true
+  additive: false
+  outputters:
+  - stdout
+
+loggers:
+
+- name: Process::Naf::Runner
+  <<: *logger_defaults
+
+- name: Process::Naf::Runner::Af::AdvisoryLocker
+  <<: *logger_defaults
+
+outputters:
+
+- type  : StdoutOutputter
+  name  : stdout
+  level : ALL
+  formatter:
+    pattern     : '%C %l: %m'
+    type        : PatternFormatter
+

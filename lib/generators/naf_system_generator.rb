@@ -30,6 +30,18 @@ class NafSystemGenerator < Rails::Generators::Base
     end
   end
 
+  def add_log4r_config
+    filename = "naf_log4r.yml"
+    filepath = "config/#{filename}"
+    path = "#{Rails.root}/#{filepath}"
+    if File.exists?(path)
+      puts "Skipping #{filepath} create, as file already exists!"
+    else
+      puts "Adding Log4r config (#{filepath})..."
+      template filename, path
+    end
+  end
+
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
     insert_into_file("#{Rails.root}/config/routes.rb", :before => /$\s*end\n/) do

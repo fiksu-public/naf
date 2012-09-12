@@ -74,7 +74,7 @@ jQuery ->
               else
                 row += "<td>" + value + "</td>"
             row += '<td id=\"action\">'
-            row += '<a href=\"http://www.papertrailapp.com\"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
+            row += '<a href=\"#\" class=\"papertrail\" data-url=\"' + job.papertrail_url + '"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
             row += "</td>"
             row += "</tr>"
             row_object = $(row)
@@ -318,9 +318,6 @@ jQuery ->
   $('#datatable tbody tr').live 'mouseout', (event) ->
     hide_tooltip()
     clearTimeout(popup_timer)
-
-
-
   
   $('#datatable thead th').live 'click', (event) ->
     id = $(this).attr('id');
@@ -346,4 +343,14 @@ jQuery ->
         perform_job_search($('form#job_search'), 'Sorting by ' + id + ' ' + dir + '...',  null)
 
 
- 
+$('a.papertrail').live 'click', (event) ->
+  url = $(this).data('url')
+  $('iframe.papertrail').attr('src', url)
+  $.blockUI( { message: $('div#iframeContainer'), css: { left: '5%', height: '75%', width: '90%'} } )
+
+$('div#iframeContainer input#close').live 'click', (event) ->
+  $.unblockUI();
+                       
+  
+
+  

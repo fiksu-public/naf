@@ -1,4 +1,5 @@
 # Set the configuration for Naf Job System
 
 schema_name: naf 
-main_app_title: Fiksu Inc. Job Scheduling System
+main_app_title: Naf - Job Scheduling System
+log4r_config_file: config/naf_log4r.yml
