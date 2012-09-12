@@ -173,10 +173,13 @@ module Naf
         current_page?(:controller => 'jobs', :action => 'index') 
     end
 
-    def papertrail_link(query = nil)
+    def papertrail_link(job)
       if Naf.const_defined?("PAPERTRAIL_GROUP_ID")
         url = "http://www.papertrailapp.com/groups/#{Naf::PAPERTRAIL_GROUP_ID}/events"
-        url << "?q=#{query}" if query
+        if job.pid.present?
+          query = "PID: #{job.pid}"
+          url << "?q=#{query}"
+        end
       else
         url = "http://www.papertrailapp.com/dashboard"
       end

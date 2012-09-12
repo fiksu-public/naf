@@ -350,7 +350,7 @@ $('a.papertrail').live 'click', (event) ->
 
 $('div#iframeContainer input#close').live 'click', (event) ->
   $.unblockUI();
-                       
+
   
 
   

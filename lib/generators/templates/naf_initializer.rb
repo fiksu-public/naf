@@ -11,6 +11,8 @@ module Naf
     JOB_SYSTEM_SCHEMA_NAME = data["schema_name"]
     MAIN_APP_TITLE = data["main_app_title"]
     ENV["LOG_CONFIGURATION_FILE"] = data["log4r_config_file"] if data["log4r_config_file"].present?
+    # If you want to use Papertrail, please uncomment the following line and add your Papertrail group id (an integer)
+    # PAPERTRAIL_GROUP_ID = ...
   rescue => e
     puts "Your 'config/job_naf_config.yml' file is formatted incorrectly, or doesn't exist."
     puts e
