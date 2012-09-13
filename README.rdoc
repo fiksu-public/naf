@@ -17,9 +17,9 @@
 3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem, the Fiksu Af gem, and Fiksu Naf gem, and front-end UI dependencies.
 
     gem 'pg'
-    gem 'af',  :git => 'git@github.com:fiksu/af.git'
+    gem 'af',  :git => 'git@github.com:fiksu/af.git', :branch => 'better_configuration'
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
-    gem 'partitioned', :git => 'git@github.com:fiksu/partitioned.git, :ref => '7fcb0c9d265488f060b60d4b37998f7f2c923ceb'
+    gem 'partitioned', '1.1.0'
     group :assets do
       gem 'sass-rails',   '~> 3.2.3'
       gem 'coffee-rails', '~> 3.2.1'
@@ -50,12 +50,12 @@
 2. Run the generator to copy a configuration YAML file, and an initializer into your main application's code base.
    You can optionally provide an argument which specifies the Postgres schema which the Naf tables will reside in, default is: 'naf'
 
-    rails generate naf_system [naf]
+    rails generate naf [naf]
 
 3. This has created/edited the following files:
 
-    config/job_system_schema_config.yml (Specifies the schema_name, UI title)
-    config/initializers/job_system_initializer.rb  (Loads the schema_name, model_class, controller_class)
+    config/naf_config.yml (All the configuration you need for Naf, and Log4r output)
+    config/initializers/naf_initializer.rb  (Runs the Naf::Configurator on the above YAML file)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
 4. Now bring in all of the Naf schema migrations.  
@@ -73,7 +73,8 @@
         host: localhost
         database: sparedb_development
 
-2. Now you must run this rake command to isolate the migrations from your main apps migrations.   This moves all naf migrations to:  db/naf/migrate.  When you bundle the latest version of Naf, there may be new schema migrations, so you must isolate those as well.  Run this command, and make sure to add it to your deploy script.
+2. Now you must run this rake command to isolate the migrations from your main apps migrations.   This moves all naf migrations to:  db/naf/migrate.  When you bundle the latest version of Naf, there may be new schema migrations, so you must isolate those as well.  
+   Run this command:
 
     rake naf:isolate:migrations
 
@@ -119,6 +120,7 @@ Papertrail is to manage logging
 1. Acquire a papertrail log-in associated with fiksu.com (https://papertrailapp.com)
 
 2. Create new "logging destination" at https://papertrailapp.com/account/logging, the destination will be a port:
+     
      port 64857 is assigned to WAC
      port 42751 is assigned to FreeMyApps
      port 60979 is assigned to Data-API
@@ -162,48 +164,32 @@ For each server to be configured:
 
 ==== Configure using Log4r to directly output to Papertrail
 
-1. Add this gem to your Gemfile
+1. Follow the directions here in your config/naf_config.yml
 
-    gem 'log4r_remote_syslog_outputter', :git => "git@github.com:nlim/log4r_remote_syslog_outputter.git"
+    # For getting Papertrail links to work, uncomment the following line
+    # and fill in the value of your Papertrail group id.
+    #papertrail_group_id = ...
 
-2. Make a file config/log4r-development.yml
+2. Follow the instructions here in config/naf_config.yml
 
-    # Define the Loggers
-    logger_defaults: &logger_defaults
-      level: ALL
-      trace: true
-      additive: false
-      outputters:
-      - papertrail
+    # If you are using Papertrail use the following
+    # Log4r Outputter definition, and change LOGGING_PORT
+    # to the port of your logging destination
 
-    loggers:
-    - name: Process::Naf::Runner
-      <<: *logger_defaults
-    - name: Process::Naf::Runner::Af::AdvisoryLocker
-      <<: *logger_defaults
-    - name: {MY_NAF_SUBCLASS_NAME}
-      <<: *logger_defaults
+    # Make sure that your pattern format has the substring:  'PID: %p'
+    # or else it will not be found by Naf's links!
+    #
+    #- type: RemoteSyslogOutputter
+    #  name: papertrail
+    #  level: ALL
+    #  url: syslog://logs.papertrailapp.com:LOGGING_PORT
+    #  program: My_Program
+    #  formatter:
+    #    pattern     : '%c (PID: %p) %l: %m'
+    #    type        : PatternFormatter
 
-    outputters:
-    - type: RemoteSyslogOutputter
-      name: papertrail
-      level: ALL
-      url: syslog://logs.papertrailapp.com:LOGGING_PORT
-      program: My_Program
-      formatter:
-        pattern     : '%c %l: %m'
-        type        : PatternFormatter
-
-3. If you want to to use commands you define for applications must have the command line option:
-
-    --log-configuration-file config/log4r-development.yml
-
-4. Or if you want to run the runner, and have all the child processes use the configuation file, you should
-   set the environment variable and run:
-
-    LOG_CONFIGURATION_FILE=config/log4r-development.yml rails runner Process::Naf::Runner.run
-
-5. Check Papertrail dashboard for your logger events!
+5. Now the links in the Naf dashboard will pop-up an iframe for you see log lines
+   for specific jobs in Papertrail!  
 
 === Teardown
 
@@ -225,9 +211,15 @@ For each server to be configured:
 
       class MyScript < ::Process::Naf::Application
         opt :thing, :default => "world"
+
+        def pre_work
+        end
+
         def work
           puts "Hello #{@thing}!"
+          logger.info "I just said hello to a #{@thing}!"
         end
+
       end
 
 3.  Now can you can run it using rails runner:

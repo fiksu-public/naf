@@ -39,7 +39,7 @@ module Naf
     partitioned do |partition|
       partition.index :id, :unique => true
       partition.foreign_key lambda {|model, *partition_key_values|
-        return Configurator::Data::ForeignKey.new(model.partition_integer_field,
+        return ::Partitioned::PartitionedBase::Configurator::Data::ForeignKey.new(model.partition_integer_field,
                                                   ::Naf::Job.partition_table_name(*partition_key_values),
                                                   :id)
       }

@@ -7,10 +7,8 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
   gem 'uglifier', '>= 1.0.3'
 end
-
 gem 'af', :git => 'git@github.com:fiksu/af.git'
 
-gem 'partitioned', :git => 'git@github.com:fiksu/partitioned.git'
 gem 'jquery-rails'
 
 

@@ -99,7 +99,11 @@ module Naf
       when "jobs"
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
       when "applications"
-        link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
+        if @record.application_schedule
+          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
+        else
+          ""
+        end
       when "machines"
         link_to "Machine Affinity Slots", :controller => 'machine_affinity_slots', :action => 'index', :machine_id => params[:id]
       else
@@ -169,6 +173,18 @@ module Naf
         current_page?(:controller => 'jobs', :action => 'index') 
     end
 
+    def papertrail_link(job)
+      if Naf.const_defined?("PAPERTRAIL_GROUP_ID")
+        url = "http://www.papertrailapp.com/groups/#{Naf::PAPERTRAIL_GROUP_ID}/events"
+        if job.pid.present?
+          query = "PID: #{job.pid}"
+          url << "?q=#{query}"
+        end
+      else
+        url = "http://www.papertrailapp.com/dashboard"
+      end
+      return url
+    end
   end
 
 end

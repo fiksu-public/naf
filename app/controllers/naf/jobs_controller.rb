@@ -1,6 +1,8 @@
 module Naf
   class JobsController < Naf::ApplicationController
 
+    include Naf::ApplicationHelper
+
     before_filter :set_cols_and_attributes
 
     def index
@@ -10,7 +12,7 @@ module Naf
           render :template => 'naf/datatable'
         end
         format.json do
-          job_hashes = Logical::Naf::Job.search(params[:search]).map(&:to_hash).map{|hash| add_application_url(hash)}
+          job_hashes = Logical::Naf::Job.search(params[:search]).map(&:to_hash).map{|hash| add_urls(hash)}
           render :json => {:job_root_url => naf.jobs_path, :cols => @cols, :jobs => job_hashes }.to_json
         end
       end
@@ -76,13 +78,14 @@ module Naf
       @cols = Logical::Naf::Job::COLUMNS
     end
 
-    def add_application_url(hash)
+    def add_urls(hash)
       job = ::Naf::Job.find(hash[:id])
       if application = job.application
         hash[:application_url] = url_for(application)
       else
         hash[:application_url] = nil
       end
+      hash[:papertrail_url] = papertrail_link(job)
       return hash
     end
 

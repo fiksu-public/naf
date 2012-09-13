@@ -18,12 +18,31 @@ module Naf
       response.should be_success
     end
 
-    it "should respond with edit action" do
-      id = 5
-      Application.should_receive(:find).with("5").and_return(nil)
-      get :edit, :id => id
-      response.should render_template("naf/applications/edit")
-      response.should be_success
+    context "with regard to the edit action" do
+
+      it "should build a new application schedule if it was destroyed" do
+        @id = 5
+        app_mock = mock_model(Application)
+        Application.should_receive(:find).with("5").and_return(app_mock)
+        app_mock.should_receive(:application_schedule).and_return(nil)
+        app_mock.should_receive(:build_application_schedule).and_return(nil)
+      end
+
+      it "should respond without building a new application schedule" do
+        @id = 5
+        app_mock = mock_model(Application)
+        schedule_mock = mock_model(ApplicationSchedule) 
+        app_mock.should_receive(:application_schedule).and_return(schedule_mock)
+        Application.should_receive(:find).with("5").and_return(app_mock)
+        app_mock.should_not_receive(:build_application_schedule)
+      end
+
+      after(:each) do
+        get :edit, :id => @id
+        response.should render_template("naf/applications/edit")
+        response.should be_success
+
+      end
     end
 
     it "should respond with affinity new" do

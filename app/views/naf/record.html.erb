@@ -31,7 +31,10 @@
  <% if controller_name == 'jobs' %>
    <tr>
      <td colspan="2" style="text-align:center">
-       <%= link_to 'View Log in Papertrail', "http://www.papertrailapp.com" %>
+       <a href="#" class="papertrail" id="<%= @record.id %>" 
+          data-url='<%= papertrail_link(@record) %>'>
+         View Log in Papertrail
+       </a>
      </td>
    </tr>
  <% elsif controller_name == 'applications' %>
@@ -45,4 +48,11 @@
 <br /><br />
 <%= generate_child_resources_link %>
 <%= generate_destroy_link %>
+</div>
+
+<div id="iframeContainer" style="display:none;">
+  <input type="button" id="close" value="Close" /> 
+  <iframe style="" class="papertrail" src="" height="100%" width="100%">
+      <p>Your browser does not support iframes.</p>
+  </iframe>
 </div>

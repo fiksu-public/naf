@@ -33,9 +33,19 @@
     <%= f.select :log_level, Log4r::LNAMES.map{|level| "Log4r::#{level}" } %>   
   </div>
 
-  <h2 style="">Schedule</h2>
 
   <%= f.fields_for :application_schedule do |schedule_fields| %>
+
+     <br />
+     <br />
+    <div class="field">
+      <%= schedule_fields.label :_destroy, "Remove Schedule" %>
+      <%= schedule_fields.check_box :_destroy %>
+    </div>
+
+
+  <h2 style="">Schedule</h2>
+
 
     <%= schedule_fields.hidden_field :application_id %>
 

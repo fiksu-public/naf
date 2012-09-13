@@ -21,9 +21,9 @@ module Logical
         end
       end
 
-      it "should call truncate when rendering a command" do
+      it "should delegate command to the physical app" do
         app = logical_app
-        app.should_receive(:truncate).and_return("")
+        app.should_receive(:command).and_return("")
         app.command
       end
 

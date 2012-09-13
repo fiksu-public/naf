@@ -18,7 +18,8 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://github.com/fiksu/naf'
 
   s.add_dependency "rails", ">= 3.2"
-  s.add_dependency "partitioned"
+  s.add_dependency "partitioned", '1.1.0'
+  s.add_dependency "log4r_remote_syslog_outputter", "0.0.1"
   s.add_dependency "jquery-rails"
   s.add_development_dependency "pg"
   s.add_development_dependency "rspec-rails"
