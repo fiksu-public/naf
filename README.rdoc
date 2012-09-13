@@ -17,9 +17,8 @@
 3. Delete the sqlite gem dependency from your Gemfile, and add the Postgres adapter gem, the Fiksu Af gem, and Fiksu Naf gem, and front-end UI dependencies.
 
     gem 'pg'
-    gem 'af',  :git => 'git@github.com:fiksu/af.git', :branch => 'better_configuration'
+    gem 'af',  :git => 'git@github.com:fiksu/af.git',
     gem 'naf', :git => 'git@github.com:fiksu/naf.git'
-    gem 'partitioned', '1.1.0'
     group :assets do
       gem 'sass-rails',   '~> 3.2.3'
       gem 'coffee-rails', '~> 3.2.1'
@@ -129,7 +128,7 @@ Papertrail is to manage logging
 
 ==== Configure using Papertrail's Remote Syslog Ruby daemon
 
-For each server to be configured:
+For each server to be configured, if you want the most reliable TLS+TCP sending to Papertrail
 
 1. Run:
     gem install remote_syslog
