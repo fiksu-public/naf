@@ -4,7 +4,7 @@ logger_defaults: &logger_defaults
   trace: true
   additive: false
   outputters:
-  - papertrail
+  - stdout
 
 loggers:
 
