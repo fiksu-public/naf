@@ -1,9 +1,10 @@
 GIT
   remote: git@github.com:fiksu/af.git
-  revision: 635a18ec5f5893aa04ff03c439dae20d4ab2cc67
+  revision: cce65535289fc1498294116362188871bc2ab31d
   specs:
     af (0.9.3)
       log4r (= 1.1.10)
+      log4r_remote_syslog_outputter (= 0.0.1)
       rails (>= 3.0.0)
       rspec-rails (= 2.8.1)
       uuid (= 2.3.4)
