@@ -36,6 +36,9 @@ module Naf
      if params[:job][:application_id] and app = Naf::Application.find(params[:job][:application_id])
        @job.command = app.command
        @job.application_type_id = app.application_type_id
+       schedule = app.application_schedule
+       @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
+       @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
        post_source = "Application: #{app.title}"
      else
        post_source = "Job"

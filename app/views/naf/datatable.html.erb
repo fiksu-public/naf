@@ -110,22 +110,11 @@
 
 <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
     <p> You are manually scheduling this application. </p>
-    <p> Please fill in the following fields: </p>
+    <p> Are you sure you want to do this? </p>
     <input type="hidden" name="job[application_id]" id="application_id" value="" />
-    <b> Run Group Restriction: </b></br />
-    <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect{ |a| [a.application_run_group_restriction_name, a.id] }, {:include_blank => true}) %> <br />
-    <b> Run Group Name: </b> <br />
-    <%= text_field(:job, :application_run_group_name) %> <br /> <br />
     <input type="button" id="cancel" value="Cancel" /> 
-    <input type="submit" id="add" value="Add" /> 
-
+    <input type="submit" id="add" value="Schedule" /> 
 </form>
-
-<div id="enqueue_confirm" style="display:none; cursor: default"> 
-        <h3>Are you sure you want to add this application to the job queue?</h3> 
-        <input type="button" id="yes" value="Yes" /> 
-        <input type="button" id="no" value="No" /> 
-</div> 
 
 <p id="on_job_page" style="display:none; cursor: default"><%= display_job_search_link? %></p>
 

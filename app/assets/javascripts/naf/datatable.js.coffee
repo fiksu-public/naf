@@ -248,35 +248,17 @@ jQuery ->
 
 
   # Request confirmation that you want to enqueue the application as a job
-
   $('a.enqueue').click ->
     application_id = $(this).attr('id');
     $('form#enqueue_form input#application_id').val(application_id);
-    $.blockUI({ message: $('#enqueue_confirm'), css: { left: '30%', width: '700px' } });
-
-
-  # Yes you want to enqueue
-
-  $('div#enqueue_confirm #yes').click ->
-    $.blockUI({ message: $('#enqueue_form') }); 
-     
-
-  # No you don't want to enqueue
-
-  $('div#enqueue_confirm #no').click ->
-    $.unblockUI(); 
-    return false;
-
+    $.blockUI({ message: $('form#enqueue_form'), css: { left: '30%', width: '700px' } });
 
   # Cancel out from enqueuing form
-
   $('form#enqueue_form #cancel').click ->
     $.unblockUI();
     return false;
 
-
   # Enqueue an application as a job, on the job queue
-
   $('form#enqueue_form').submit (event) ->
     event.preventDefault()
     show_loading_message('Adding application as a job on the queue')    

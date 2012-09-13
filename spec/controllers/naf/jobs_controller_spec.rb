@@ -19,6 +19,22 @@ module Naf
       response.should be_success
     end
 
+    context "with respect to json post requests" do
+      context "with an application_id request parameter" do
+       
+        it "should create a valid job when the application has a schedule"
+        
+        it "should create a valid job when the application doesn't have a schedule"
+       
+      end
+
+      context "without an application_id request parameter" do
+        
+        it "should create a valid job"
+
+      end
+    end
+
     # Ensure that some instance variables are set
     after(:each) do
       cols = assigns(:cols)
