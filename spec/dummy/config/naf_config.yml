@@ -1,5 +1,57 @@
-# Set the configuration for Naf Job System
+# This is a generated config file for Naf
+# Please read the Naf wiki for documentation on
+# the available options.
 
+# Naf related configurations
 schema_name: naf 
-main_app_title: Naf - Job Scheduling System
-log4r_config_file: config/naf_log4r.yml
+controller_class: "::ApplicationController"
+model_class: "ActiveRecord::Base"
+main_app_title: "Naf - a Rails Job Scheduling Engine"
+
+# For getting Papertrail links to work, uncomment the following line
+# and fill in the value of your Papertrail group id.
+#papertrail_group_id = ...
+
+
+# Log4r related configuration
+logger_defaults: &logger_defaults
+  level: ALL
+  trace: true
+  additive: false
+  outputters:
+  - stdout
+
+loggers:
+- name: Process::Naf::Runner
+  <<: *logger_defaults
+- name: Process::Naf::Runner::Af::AdvisoryLocker
+  <<: *logger_defaults
+
+#- name: MyScript
+#  <<: *logger_defaults
+
+outputters:
+- type  : StdoutOutputter
+  name  : stdout
+  level : ALL
+  formatter:
+    pattern: '%c (PID: %p) %l: %m'
+    type: PatternFormatter
+
+
+# If you are using Papertrail use the following
+# Log4r Outputter definition, and change LOGGING_PORT
+# to the port of your logging destination
+
+# Make sure that your pattern format has the substring:  'PID: %p'
+# or else it will not be found by Naf's links!
+
+#- type: RemoteSyslogOutputter
+#  name: papertrail
+#  level: ALL
+#  url: syslog://logs.papertrailapp.com:LOGGING_PORT
+#  program: My_Program
+#  formatter:
+#    pattern: '%c (PID: %p) %l: %m'
+#    type: PatternFormatter
+

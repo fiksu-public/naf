@@ -343,13 +343,17 @@ jQuery ->
         perform_job_search($('form#job_search'), 'Sorting by ' + id + ' ' + dir + '...',  null)
 
 
-$('a.papertrail').live 'click', (event) ->
-  url = $(this).data('url')
-  $('iframe.papertrail').attr('src', url)
-  $.blockUI( { message: $('div#iframeContainer'), css: { left: '5%', height: '75%', width: '90%'} } )
+  $('a.papertrail').live 'click', (event) ->
+    if on_jobs_page()
+      stop_refresh_timer()
+    url = $(this).data('url')
+    $('iframe.papertrail').attr('src', url)
+    $.blockUI( { message: $('div#iframeContainer'), css: { left: '5%', height: '75%', width: '90%'} } )
 
-$('div#iframeContainer input#close').live 'click', (event) ->
-  $.unblockUI();
+  $('div#iframeContainer input#close').live 'click', (event) ->
+    if on_jobs_page()
+      start_refresh_timer()
+    $.unblockUI();
 
   
 

@@ -2,5 +2,9 @@ module Naf
   class Engine < ::Rails::Engine
     isolate_namespace Naf
     engine_name "naf"
+    initializer "dependencies" do 
+      require 'partitioned'
+      require 'log4r_remote_syslog_outputter'
+    end
   end
 end

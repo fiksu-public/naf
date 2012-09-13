@@ -1,6 +1,6 @@
 require 'rails/generators'
 
-class NafSystemGenerator < Rails::Generators::Base
+class NafGenerator < Rails::Generators::Base
 
   source_root File.expand_path("../templates", __FILE__)
 
@@ -26,18 +26,6 @@ class NafSystemGenerator < Rails::Generators::Base
       puts "Skipping #{filepath} creation, as file already exists!"
     else
       puts "Adding Naf config (#{filepath})..."
-      template filename, path
-    end
-  end
-
-  def add_log4r_config
-    filename = "naf_log4r.yml"
-    filepath = "config/#{filename}"
-    path = "#{Rails.root}/#{filepath}"
-    if File.exists?(path)
-      puts "Skipping #{filepath} create, as file already exists!"
-    else
-      puts "Adding Log4r config (#{filepath})..."
       template filename, path
     end
   end

@@ -50,12 +50,12 @@
 2. Run the generator to copy a configuration YAML file, and an initializer into your main application's code base.
    You can optionally provide an argument which specifies the Postgres schema which the Naf tables will reside in, default is: 'naf'
 
-    rails generate naf_system [naf]
+    rails generate naf [naf]
 
 3. This has created/edited the following files:
 
-    config/job_system_schema_config.yml (Specifies the schema_name, UI title)
-    config/initializers/job_system_initializer.rb  (Loads the schema_name, model_class, controller_class)
+    config/naf_config.yml (All the configuration you need for Naf, and Log4r output)
+    config/initializers/naf_initializer.rb  (Runs the Naf::Configurator on the above YAML file)
     config/routes.rb  (Edited to mount Naf as a rails engine, at the default path "/job_system")
 
 4. Now bring in all of the Naf schema migrations.  
@@ -164,16 +164,13 @@ For each server to be configured:
 
 ==== Configure using Log4r to directly output to Papertrail
 
-1. Add this gem to your Gemfile
+1. Follow the directions here in your config/naf_config.yml
 
-    gem 'log4r_remote_syslog_outputter', :git => "git@github.com:nlim/log4r_remote_syslog_outputter.git"
+    # For getting Papertrail links to work, uncomment the following line
+    # and fill in the value of your Papertrail group id.
+    #papertrail_group_id = ...
 
-2. Follow the instructions here in config/initializers/naf_initializer.rb
-
-    # If you want to use Papertrail, please uncomment the following line and add your Papertrail group id (an integer)                                                                                                                                                          
-    # PAPERTRAIL_GROUP_ID = ...   
-
-3. Follow the instructions here in config/naf_log4r.yml
+2. Follow the instructions here in config/naf_config.yml
 
     # If you are using Papertrail use the following
     # Log4r Outputter definition, and change LOGGING_PORT
@@ -214,9 +211,15 @@ For each server to be configured:
 
       class MyScript < ::Process::Naf::Application
         opt :thing, :default => "world"
+
+        def pre_work
+        end
+
         def work
           puts "Hello #{@thing}!"
+          logger.info "I just said hello to a #{@thing}!"
         end
+
       end
 
 3.  Now can you can run it using rails runner:

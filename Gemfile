@@ -7,10 +7,8 @@ group :assets do
   gem 'coffee-rails', '~> 3.2.1'
   gem 'uglifier', '>= 1.0.3'
 end
-
 gem 'af', :git => 'git@github.com:fiksu/af.git'
-gem 'log4r_remote_syslog_outputter', :git => "git@github.com:nlim/log4r_remote_syslog_outputter.git"
-gem 'partitioned', '1.1.0'
+
 gem 'jquery-rails'
 
 

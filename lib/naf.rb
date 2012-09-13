@@ -1,4 +1,7 @@
 require "naf/engine"
+require "log4r/yamlconfigurator"
+require 'naf/configurator'
+
 module Naf
   mattr_accessor :controller_class, :model_class, :schema_name
   def self.controller_class
