@@ -5,30 +5,12 @@ module Process::Naf
     opt :schedule_fudge_scale, "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)", :default => 5
     opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
     opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
-    opt :create_new_machine, "create a new machine", :hidden => true
     opt :server_address, "set the machines server address (dangerous)", :type => :string, :default => ::Naf::Machine.machine_ip_address, :hidden => true
-    opt :server_name, "set the machine's name", :type => :string, :hidden => true
+
     def initialize
       super
-      update_opts :log_file, :default => "naf"
+      update_opts :log_file_basename, :default => "nafrunner"
       @last_machine_log_level = nil
-    end
-
-    def pre_work
-      super
-      if @create_new_machine
-        machine = ::Naf::Machine.find_by_server_address(@server_address)
-        if machine.present?
-          puts "--create-new-machine: Machine address #{@server_address} already exists -- nothing done"
-          exit 1
-        end
-        
-        machine = ::Naf::Machine.create(:server_address => @server_address,
-                                        :server_note => @server_note,
-                                        :server_name => @server_name)
-        puts machine
-        exit 0
-      end
     end
 
     def work
@@ -49,6 +31,12 @@ module Process::Naf
       terminate_old_processes(machine)
 
       logger.info "working: #{machine}"
+
+      if @daemon
+        ENV['NAF_LOGGING_STYLE'] = "rollingfile"
+      else
+        ENV['NAF_LOGGING_STYLE'] = "stdout"
+      end
 
       @children = {}
 
@@ -74,13 +62,7 @@ module Process::Naf
         if machine.log_level != @last_machine_log_level
           @last_machine_log_level = machine.log_level
           unless @last_machine_log_level.blank?
-            begin
-              log_level_hash = JSON.parse(@last_machine_log_level)
-            rescue StandardError => e
-              logger.error "couldn't parse machine.log_level: #{@last_machine_log_level}: (#{e.message})"
-              log_level_hash = {}
-            end
-            set_logger_levels(log_level_hash)
+            parse_and_set_logger_levels(@last_machine_log_level)
           end
         end
 
@@ -147,7 +129,7 @@ module Process::Naf
 
             unless job.present?
               logger.info "no more jobs to run"
-              break 
+              break
             end
 
             logger.info "starting new job : #{job}"
@@ -163,7 +145,7 @@ module Process::Naf
               job.failed_to_start = false
               logger.info "job started : #{job}"
             else
-              # should never get here (well, hopefullly)
+              # should never get here (well, hopefully)
               job.failed_to_start = true
               job.finished_at = Time.zone.now
               logger.error "failed to execute #{job}"
