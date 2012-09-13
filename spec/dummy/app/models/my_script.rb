@@ -3,7 +3,6 @@ class MyScript < ::Process::Naf::Application
 
 
   def work
-    puts logger.inspect
     logger.info("Hello #{@thing}!")
   end
 end
