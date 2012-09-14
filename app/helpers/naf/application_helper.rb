@@ -177,8 +177,8 @@ module Naf
       if Naf.const_defined?("PAPERTRAIL_GROUP_ID")
         url = "http://www.papertrailapp.com/groups/#{Naf::PAPERTRAIL_GROUP_ID}/events"
         if job.pid.present?
-          query = "#{job.pid}"
-          url << "?q=#{query}"
+          query = "pid=#{job.pid} jid=#{job.id}"
+          url << "?q=#{CGI.escape(query)}"
         end
       else
         url = "http://www.papertrailapp.com/dashboard"

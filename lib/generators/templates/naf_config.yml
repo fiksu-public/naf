@@ -8,50 +8,8 @@ controller_class: "::ApplicationController"
 model_class: "ActiveRecord::Base"
 main_app_title: "Naf - a Rails Job Scheduling Engine"
 
-# For getting Papertrail links to work, uncomment the following line
-# and fill in the value of your Papertrail group id.
-#papertrail_group_id = ...
+# For getting Papertrail logging to work, fill in your Papertrail port:
+#papertrail_port: ...
 
-
-# Log4r related configuration
-logger_defaults: &logger_defaults
-  level: ALL
-  trace: true
-  additive: false
-  outputters:
-  - stdout
-
-loggers:
-- name: Process::Naf::Runner
-  <<: *logger_defaults
-- name: Process::Naf::Runner::Af::AdvisoryLocker
-  <<: *logger_defaults
-
-#- name: MyScript
-#  <<: *logger_defaults
-
-outputters:
-- type  : StdoutOutputter
-  name  : stdout
-  level : ALL
-  formatter:
-    pattern: '%c (PID: %p) %l: %m'
-    type: PatternFormatter
-
-
-# If you are using Papertrail use the following
-# Log4r Outputter definition, and change LOGGING_PORT
-# to the port of your logging destination
-
-# Make sure that your pattern format has the substring:  'PID: %p'
-# or else it will not be found by Naf's links!
-
-#- type: RemoteSyslogOutputter
-#  name: papertrail
-#  level: ALL
-#  url: syslog://logs.papertrailapp.com:LOGGING_PORT
-#  program: My_Program
-#  formatter:
-#    pattern: '%c (PID: %p) %l: %m'
-#    type: PatternFormatter
-
+# For getting Papertrail links to work, fill in the value of your Papertrail group id.
+#papertrail_group_id: ...

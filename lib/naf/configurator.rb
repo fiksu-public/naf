@@ -17,10 +17,19 @@ module Naf
         # Constants
         Naf.const_set(:JOB_SYSTEM_SCHEMA_NAME, schema_name)
         Naf.const_set(:MAIN_APP_TITLE,  main_app_title)
+        
+        
+        # Setting the Papertrail information
+
+        # Set the port to log to
+        if port = data["papertrail_port"]
+          ENV["PAPERTRAIL_PORT"] = port.to_s
+        end
+        # Set your papertrail group id, so links go to the right place
         if group_id = data["papertrail_group_id"]
           Naf.const_set(:PAPERTRAIL_GROUP_ID, group_id)
         end
-
+        
         # Setting the environment variable so all child processes of 
         # Process::Naf::Runner.run will get the same logger configuration
         if data["loggers"].present? and data["outputters"].present?
