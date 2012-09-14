@@ -20,11 +20,11 @@ module Naf
     end
 
     def model_class
-      configuration.model_class
+      configuration.model_class.constantize
     end
 
     def controller_class
-      configuration.controller_class
+      configuration.controller_class.constantize
     end
 
     def title

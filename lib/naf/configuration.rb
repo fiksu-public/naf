@@ -5,8 +5,8 @@ module Naf
     attr_reader :papertrail_port
     
     def initialize
-      @model_class = ::ActiveRecord::Base
-      @controller_class = ::ApplicationController
+      @model_class = "::ActiveRecord::Base"
+      @controller_class = "::ApplicationController"
       @title = "Naf - a Rails Job Scheduling Engine"
       @papertrail_group_id = nil
     end
