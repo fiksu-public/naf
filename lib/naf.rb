@@ -35,6 +35,10 @@ module Naf
       configuration.papertrail_group_id
     end
 
+    def papertrail_port
+      configuration.papertrail_port
+    end
+
     def using_another_database?
       model_class != ActiveRecord::Base
     end
