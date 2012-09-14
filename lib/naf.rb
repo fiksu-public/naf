@@ -1,25 +1,45 @@
 require "naf/engine"
-require "log4r/yamlconfigurator"
-require 'naf/configurator'
+require 'naf/configuration'
 
 module Naf
-  mattr_accessor :controller_class, :model_class, :schema_name
-  def self.controller_class
-    if @@controller_class
-      @@controller_class.constantize
-    else
-      ActionController::Base
+
+  class << self
+    
+    attr_writer :configuration
+
+    def configure
+      yield(configuration)
     end
-  end
-  def self.model_class
-    if @@model_class
-      @@model_class.constantize
-    else
-      ActiveRecord::Base
+    
+    def configuration
+      @configuration ||= Configuration.new
     end
+
+    def schema_name
+      configuration.schema_name
+    end
+
+    def model_class
+      configuration.model_class
+    end
+
+    def controller_class
+      configuration.controller_class
+    end
+
+    def title
+      configuration.title
+    end
+
+    def papertrail_group_id
+      configuration.papertrail_group_id
+    end
+
+    def using_another_database?
+      model_class != ActiveRecord::Base
+    end
+  
+
   end
 
-  def self.using_another_database?
-    self.model_class != ActiveRecord::Base
-  end
 end

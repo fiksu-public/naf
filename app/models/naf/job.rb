@@ -174,7 +174,7 @@ module Naf
     end
 
     def self.select_affinity_ids
-      return select("array(select affinity_id from #{JOB_SYSTEM_SCHEMA_NAME}.job_affinity_tabs where job_id = #{JOB_SYSTEM_SCHEMA_NAME}.jobs.id order by affinity_id) as affinity_ids")
+      return select("array(select affinity_id from #{Naf.schema_name}.job_affinity_tabs where job_id = #{Naf.schema_name}.jobs.id order by affinity_id) as affinity_ids")
     end
 
     def self.possible_jobs
@@ -276,7 +276,7 @@ module Naf
           end
 
           sql = <<-SQL
-             UPDATE #{JOB_SYSTEM_SCHEMA_NAME}.jobs
+             UPDATE #{Naf.schema_name}.jobs
                SET
                    started_at = NOW(),
                    started_on_machine_id = ?

@@ -2,7 +2,7 @@ class NafSchema < ActiveRecord::Migration
 
   def up
     # Define a schema_name, the scheduling tables fall under:
-    schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
+    schema_name = Naf.schema_name
 
     # affinities
     #  names: normal, canary, perennial
@@ -238,7 +238,7 @@ class NafSchema < ActiveRecord::Migration
   end
 
   def down
-    schema_name = Naf::JOB_SYSTEM_SCHEMA_NAME
+    schema_name = Naf.schema_name
     execute <<-SQL
       drop table #{schema_name}.janitorial_assignments cascade;
       drop table #{schema_name}.job_affinity_tabs cascade;

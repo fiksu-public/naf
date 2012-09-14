@@ -174,8 +174,8 @@ module Naf
     end
 
     def papertrail_link(job)
-      if Naf.const_defined?("PAPERTRAIL_GROUP_ID")
-        url = "http://www.papertrailapp.com/groups/#{Naf::PAPERTRAIL_GROUP_ID}/events"
+      if group_id = Naf.papertrail_group_id
+        url = "http://www.papertrailapp.com/groups/#{group_id}/events"
         if job.pid.present?
           query = "pid=#{job.pid} jid=#{job.id}"
           url << "?q=#{CGI.escape(query)}"

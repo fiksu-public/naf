@@ -7,25 +7,13 @@ class NafGenerator < Rails::Generators::Base
   argument :schema_name, :type => :string, :default => "naf"
 
   def add_naf_intializer
-    filename = "naf_initializer.rb"
+    filename = "naf.rb"
     filepath = "config/initializers/#{filename}"
     path = "#{Rails.root}/#{filepath}"
     if File.exists?(path)
       puts "Skipping #{filepath} creation, as file already exists!"
     else
       puts "Adding Naf initializer (#{filepath})..."
-      template filename, path
-    end
-  end
-
-  def add_naf_config
-    filename = "naf_config.yml"
-    filepath = "config/#{filename}"
-    path = "#{Rails.root}/#{filepath}"
-    if File.exists?(path)
-      puts "Skipping #{filepath} creation, as file already exists!"
-    else
-      puts "Adding Naf config (#{filepath})..."
       template filename, path
     end
   end

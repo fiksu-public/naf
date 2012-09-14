@@ -200,6 +200,7 @@ namespace :naf do
       "config/initializers/job_system_initializer.rb",
       "config/job_system_config.yml",
       "config/initializers/naf_initializer.rb", 
+      "config/initializers/naf.rb", 
       "config/naf_log4r.yml",
       "config/naf_config.yml"
     ]
