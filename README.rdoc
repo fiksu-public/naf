@@ -1,5 +1,8 @@
 = Network Application Framework (Naf)
 
+We have a Wiki Page.  Please find up to date information on Naf here:
+https://github.com/fiksu/naf/wiki
+
 == Getting Started with Naf (Fiksu's Job Scheduling Engine)
 
 === Creating Postgres-backed Rails App
