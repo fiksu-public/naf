@@ -5,12 +5,12 @@ log4r_config:
       level    : DEBUG
       formatter:
         date_pattern: '%y%m%d %H:%M:%S.%L'
-        pattern     : '%d runner_pid=%p jid=%g %C %l %M'
+        pattern     : '%d runner_pid=%p %C %l %M'
         type        : PatternFormatter
 
     - type: PapertrailOutputter
       name: papertrail
-      port: -1 # XXX put your papertrail port here
+      port: 0 # XXX put your papertrail port here
       program: runner
       formatter:
         pattern     : '%C %l %M'

@@ -16,12 +16,6 @@ log4r_config:
     root  :
       level: ALL
 
-  loggers:
-    - name      : root
-      level     : ALL
-      outputters:
-        - stdout
-
   outputters:
     - type     : StdoutOutputter
       name     : stdout

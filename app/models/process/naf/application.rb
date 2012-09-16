@@ -13,7 +13,6 @@ module Process::Naf
 
     opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
     opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
-    opt :log_papertrail, "log to papertrail", :group => :logging
 
     def initialize 
       super
@@ -29,13 +28,6 @@ module Process::Naf
         return ::Naf::Job.find_by_id(@naf_job_id)
       end
       return nil
-    end
-
-    def post_command_line_parsing
-      super
-      if @log_papertrail
-        @log_configuration_section_names = ["log4r_config", "log4r_config_papertrail"]
-      end
     end
 
     def pre_work
