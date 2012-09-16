@@ -234,9 +234,9 @@ namespace :naf do
           ActiveRecord::Base.connection.execute("DROP SCHEMA #{schema} CASCADE") if existing_schemas.include?(schema)
         end
       end
-      else
+    else
       schemas.each do |schema|
-          ActiveRecord::Base.connection.execute("DROP SCHEMA #{schema} CASCADE") if existing_schemas.include?(schema)
+        ActiveRecord::Base.connection.execute("DROP SCHEMA #{schema} CASCADE") if existing_schemas.include?(schema)
       end
     end
   end
