@@ -1,6 +1,8 @@
 require 'fileutils'
-# Add methods for aliasing and overriding rake tasks                                                                                                                                          
-# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task                                                                                                     
+
+# Add methods for aliasing and overriding rake tasks                                                                                                                         
+# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task 
+
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
     new_name = "#{fq_name}:original"
@@ -26,7 +28,6 @@ end
 # --------------------------------------------------
 
 namespace :naf do
-
 
   namespace :isolate do
     desc "Custom isolation Engine migrations to db/naf/migrate folder, for use on non-primary database"
@@ -59,6 +60,7 @@ namespace :naf do
       model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
+    
   end
 
   namespace :db do
@@ -221,8 +223,25 @@ namespace :naf do
     end
   end
 
+  desc "remove partitioning infrastructure for naf tables"
+  task :remove_partitions => :environment do
+    klasses = [::Naf::Job,::Naf::JobCreatedAt,::Naf::JobPrerequisite,::Naf::JobAffinityTab]
+    existing_schemas = database_schemas
+    schemas = klasses.map{ |klass| klass.configurator.schema_name }
+    if using_another_database?
+      connect_to_naf_database do
+        schemas.each do |schema|
+          ActiveRecord::Base.connection.execute("DROP SCHEMA #{schema} CASCADE") if existing_schemas.include?(schema)
+        end
+      end
+    else
+      schemas.each do |schema|
+        ActiveRecord::Base.connection.execute("DROP SCHEMA #{schema} CASCADE") if existing_schemas.include?(schema)
+      end
+    end
+  end
   desc "The master task for completely expunging the installation of the naf Engine"
-  task :teardown => [:system_teardown, :remove_migration_files] do
+  task :teardown => [:system_teardown, :remove_migration_files, :remove_partitions] do
   end
 
 end
@@ -230,6 +249,16 @@ end
 
 # Helper Methods
 
+def database_schemas
+  params = ["SELECT nspname FROM pg_namespace WHERE nspname !~ '^pg_.*' AND nspname NOT IN ('information_schema') ORDER by nspname; ", 'SCHEMA']
+  if using_another_database?
+    connect_to_naf_database do
+      return ActiveRecord::Base.connection.query(*params).flatten
+    end
+  else
+    return ActiveRecord::Base.connection.query(*params).flatten
+  end
+end
 
 # Transactions method to connect to the specific database
 # you want the naf tables to live in
