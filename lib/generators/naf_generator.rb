@@ -6,7 +6,7 @@ class NafGenerator < Rails::Generators::Base
 
   argument :schema_name, :type => :string, :default => "naf"
 
-  def add_naf_intializer
+  def add_configuration_files
     filename = "naf.rb"
     filepath = "config/initializers/#{filename}"
     path = "#{Rails.root}/#{filepath}"
@@ -16,6 +16,10 @@ class NafGenerator < Rails::Generators::Base
       puts "Adding Naf initializer (#{filepath})..."
       template filename, path
     end
+  end
+
+  def add_log4r_configuration_files
+    directory "config"
   end
 
   def mount_engine

@@ -1,0 +1,32 @@
+log4r_config:
+  pre_config:
+    custom_levels:
+      - DEBUG
+      - DEBUG_FINE
+      - DEBUG_MEDIUM
+      - DEBUG_GROSS
+      - DETAIL
+      - INFO
+      - WARN
+      - ALARM
+      - ERROR
+      - FATAL
+    global:
+      level: ALL
+    root  :
+      level: ALL
+
+  loggers:
+    - name      : root
+      level     : ALL
+      outputters:
+        - stdout
+
+  outputters:
+    - type     : StdoutOutputter
+      name     : stdout
+      level    : DEBUG
+      formatter:
+        date_pattern: '%y%m%d %H:%M:%S.%L'
+        pattern     : '%d %p %C %l %M'
+        type        : PatternFormatter

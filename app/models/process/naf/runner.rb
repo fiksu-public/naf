@@ -9,7 +9,7 @@ module Process::Naf
 
     def initialize
       super
-      update_opts :log_file_basename, :default => "nafrunner"
+      update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
     end
 
@@ -31,12 +31,6 @@ module Process::Naf
       terminate_old_processes(machine)
 
       logger.info "working: #{machine}"
-
-      if @daemon
-        ENV['NAF_LOGGING_STYLE'] = "rollingfile"
-      else
-        ENV['NAF_LOGGING_STYLE'] = "stdout"
-      end
 
       @children = {}
 

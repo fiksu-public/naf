@@ -8,7 +8,7 @@ module Naf
 
   class Job < ::Partitioned::ById
     include ::Af::Application::SafeProxy
-    include ::Af::AdvisoryLocker
+    include PgAdvisoryLocker
 
     JOB_STALE_TIME = 1.week
 

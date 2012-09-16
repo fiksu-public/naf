@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name        = "naf"
   s.version     = Naf::VERSION
   s.license     = 'New BSD License'
-  s.date        = '2012-08-27'
+  s.date        = '2012-09-16'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
   s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
   s.authors     = ["Keith Gabryelski", "Nathaniel Lim"]
@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://github.com/fiksu/naf'
 
   s.add_dependency "rails", ">= 3.2"
-  s.add_dependency "partitioned", '1.1.0'
-  s.add_dependency "log4r_remote_syslog_outputter", "0.0.1"
+  s.add_dependency "partitioned", '>= 1.1.0'
+  s.add_dependency "log4r_remote_syslog_outputter", ">= 0.0.1"
   s.add_dependency "jquery-rails"
   s.add_development_dependency "pg"
   s.add_development_dependency "rspec-rails"

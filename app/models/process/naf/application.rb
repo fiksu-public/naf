@@ -1,3 +1,5 @@
+require 'log4r/formatter/patternformatter'
+
 module Process::Naf
   class Application < ::Af::Application
     class TerminationRequest < StandardError
@@ -11,20 +13,15 @@ module Process::Naf
 
     opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
     opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
-    opt :logging_style, "how to log", :env => "NAF_LOGGING_STYLE", :type => :choice, :choices => [:stdout, :stderr, :file, :rollingfile, :papertrail], :group => :logging
+    opt :log_papertrail, "log to papertrail", :group => :logging
 
-    def initialize
-      @last_log_level = nil
+    def initialize 
       super
-      update_opts :log_file_basename, :default => "nafjobs"
+      update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
     end
 
     def database_application_name
       return "//pid=#{Process.pid}/jid=#{@naf_job_id}/#{af_name}"
-    end
-
-    def af_pattern_formatter_format_logger_name
-      return "//pid=#{Process.pid}/jid=#{@naf_job_id}/%C/%l"
     end
 
     def fetch_naf_job
@@ -34,20 +31,16 @@ module Process::Naf
       return nil
     end
 
+    def post_command_line_parsing
+      super
+      if @log_papertrail
+        @log_configuration_section_names = ["log4r_config", "log4r_config_papertrail"]
+      end
+    end
+
     def pre_work
       set_connection_application_name(database_application_name)
-
-      if @logging_style == :stdout
-        add_stdout_outputter
-      elsif @logging_style == :stderr
-        add_stderr_outputter
-      elsif @logging_style == :file
-        add_file_outputter
-      elsif @logging_style == :rollingfile
-        add_rolling_file_outputter
-      elsif @logging_style == :papertrail
-        add_papertrail_outputter
-      end
+      Log4r::GDC.set(naf_job_id.to_s)
 
       super
 

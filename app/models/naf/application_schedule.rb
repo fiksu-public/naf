@@ -1,6 +1,6 @@
 module Naf
   class ApplicationSchedule < NafBase
-    include ::Af::AdvisoryLocker
+    include PgAdvisoryLocker
 
     validates :priority, :numericality => {:only_integer => true}
     validate :visible_enabled_check
