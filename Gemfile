@@ -10,5 +10,3 @@ end
 gem 'af', :git => 'git@github.com:fiksu/af.git'
 
 gem 'jquery-rails'
-
-
