@@ -1,0 +1,22 @@
+log4r_config:
+  loggers:
+    - name      : root
+      level     : ALL
+      outputters:
+        - stdout
+
+  outputters:
+    - type     : StdoutOutputter
+      name     : stdout
+      formatter:
+        date_pattern: '%y%m%d %H:%M:%S.%L'
+        pattern     : '%d pid=%p jid=%g %C %l %M'
+        type        : PatternFormatter
+
+    - type: PapertrailOutputter
+      name: papertrail
+      port: 0 # XXX put your papertrail port here
+      program: naf_application
+      formatter:
+        pattern     : 'pid=%p %C %l %M'
+        type        : PatternFormatter

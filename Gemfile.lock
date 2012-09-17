@@ -1,6 +1,6 @@
 GIT
   remote: git@github.com:fiksu/af.git
-  revision: b8d738906049641174e595cdf0ea4084a5310343
+  revision: 5e1d780404bad934d982a4d81f3bb0e185471cfa
   specs:
     af (0.9.5)
       log4r (= 1.1.10)
@@ -8,6 +8,7 @@ GIT
       pg_advisory_locker (>= 0.9.0)
       pg_application_name (>= 1.0.0)
       rails (>= 3.0.0)
+      reasonable_log4r (>= 0.9.0)
       rspec-rails (= 2.8.1)
       uuid (= 2.3.4)
 
@@ -126,6 +127,8 @@ GEM
     rake (0.9.2.2)
     rdoc (3.12)
       json (~> 1.4)
+    reasonable_log4r (0.9.0)
+      log4r (= 1.1.10)
     remote_syslog_logger (1.0.3)
       syslog_protocol
     rspec (2.8.0)
