@@ -116,6 +116,17 @@
     <input type="submit" id="add" value="Schedule" /> 
 </form>
 
+
+<form id="terminate" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
+    <p> You are terminating this job</p>
+    <p> Are you sure you want to do this? </p>
+    <input type="hidden" name="job_id" id="job_id" />
+    <input type="hidden" name="job[request_to_terminate]" id="request_to_terminate" value="1" />
+    <input type="button" id="cancel" value="Cancel" /> 
+    <input type="submit" value="Terminate" /> 
+</form>
+
+
 <p id="on_job_page" style="display:none; cursor: default"><%= display_job_search_link? %></p>
 
 <div id="iframeContainer" style="display:none;">

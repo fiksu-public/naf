@@ -65,11 +65,23 @@ module Naf
     end
 
     def update
-      @job = Naf::Job.find(params[:id])
-      if @job.update_attributes(params[:job])
-        redirect_to(@job, :notice => 'Job was successfully updated.') 
-      else
-        render :action => "edit"
+      respond_to do |format|
+        @job = Naf::Job.find(params[:id])
+        if @job.update_attributes(params[:job])
+          format.html do
+            redirect_to(@job, :notice => 'Job was successfully updated.') 
+          end
+          format.json do
+            render :json => {:success => true}.to_json
+          end
+        else
+          format.html do 
+            render :action => "edit"
+          end
+          format.json do
+            render :json => {:success => false}.to_json
+          end
+        end
       end
     end
 

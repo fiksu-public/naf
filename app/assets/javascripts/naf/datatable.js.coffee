@@ -75,6 +75,8 @@ jQuery ->
                 row += "<td>" + value + "</td>"
             row += '<td id=\"action\">'
             row += '<a href=\"#\" class=\"papertrail\" data-url=\"' + job.papertrail_url + '"><img alt=\"Application_view_list\" class=\"action\" src=\"/assets/application_view_list.png\" title=\"View Log in Papertrail\" /></a>'
+            if job.status == "Queued" || job.status == "Running"
+              row += '&nbsp;&nbsp;<a href=\"#\" class=\"terminate\" id=\"' + job.id + '\"><img title=\"Terminate Job\" src=\"/assets/terminate.png\" /></a>'
             row += "</td>"
             row += "</tr>"
             row_object = $(row)
@@ -337,6 +339,30 @@ jQuery ->
       start_refresh_timer()
     $.unblockUI();
 
+  $('a.terminate').live 'click', (event) ->
+    stop_refresh_timer()
+    job_id = $(this).attr('id')
+    $('form#terminate input#job_id').val(job_id)
+    $.blockUI( { message: $('form#terminate') } )
+
+  $('form#terminate input#cancel').live 'click', (event) ->
+    $.unblockUI();
+    start_refresh_timer()
+
+  $('form#terminate').submit (event) ->
+    event.preventDefault()
+    url = $(this).attr('action') + '/' + $('form#terminate input#job_id').val()
+    $.ajax({
+      type: "PUT",
+      dataType: 'json',
+      url: url,
+      data: $(this).serialize(),
+      success: (data) ->
+        if data.success
+          refresh_jobs()
+    })
+    $.unblockUI();
+    start_refresh_timer()
   
 
   
