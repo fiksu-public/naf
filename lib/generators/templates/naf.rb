@@ -2,8 +2,7 @@ Naf.configure do |config|
 
   config.schema_name = '<%= schema_name %>'
 
-  # Setting the Papertrail information
-  # config.papertrail_port = 
+  # Setting up papertrail links
   # config.papertrail_group_id = 
 
 end

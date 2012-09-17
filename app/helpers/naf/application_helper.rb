@@ -177,7 +177,7 @@ module Naf
       if group_id = Naf.papertrail_group_id
         url = "http://www.papertrailapp.com/groups/#{group_id}/events"
         if job.pid.present?
-          query = "pid=#{job.pid} jid=#{job.id}"
+          query = "jid(#{job.id})"
           url << "?q=#{CGI.escape(query)}"
         end
       else
