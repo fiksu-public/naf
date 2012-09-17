@@ -67,7 +67,10 @@ module Naf
 
     context "when marking itself as dead" do
       it "should un-enable itself, and mark child proceses as dead" do
+        mock_machine_logger = mock('machine_logger')
+        mock_machine_logger.should_receive(:alarm).and_return(nil)
         dying_machine = machine
+        dying_machine.should_receive(:machine_logger).and_return(mock_machine_logger)
         dying_machine.should_receive(:mark_processes_as_dead).and_return(nil)
         dying_machine.mark_machine_down(dying_machine)
         dying_machine.marked_down.should be_true
