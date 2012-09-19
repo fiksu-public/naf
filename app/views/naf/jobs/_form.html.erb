@@ -33,7 +33,7 @@
 
   <div class="field">
     <%= f.label :log_level %> <br />
-    <%= f.select :log_level, Log4r::LNAMES.map{|level| "Log4r::#{level}" } %>   
+    <%= f.text_field :log_level %>
   </div>
 
 
