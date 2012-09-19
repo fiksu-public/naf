@@ -72,7 +72,9 @@ module Logical
       #
       # We eventually build up these results over created_at/1.week partitions.
       def self.search(search)
-        case search[:status].to_sym
+        status   = search[:status]
+        status ||= :all
+        case status.to_sym
         when :canceled
           job_scope = ::Naf::Job.canceled
         when :failed_to_start

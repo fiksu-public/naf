@@ -75,8 +75,7 @@ module Logical
       context "with regard to the search" do
         
         before(:all) do
-          # (nlim) Aliasing bug doeosn't allow me to do this
-          #::Naf::Job.destroy_all
+          ::Naf::Job.delete_all
           @job_status_type_map = {}
           STATUS_MAP.each{ |factory, status| 
             @job_status_type_map[status.downcase.split(' ').join('_')] = Job.new(FactoryGirl.create(factory))
@@ -86,8 +85,6 @@ module Logical
         it "should filter by status correctly" do
           @job_status_type_map.each do |status, logical_job|
             Job.search(:status => status).map(&:id).should include(logical_job.id)
-            # I really want to do this, once I'm able to clear all the jobs
-            # Job.search(:status => status).map(&:id).should equal([logical_job.id])
           end
         end
         
@@ -99,27 +96,53 @@ module Logical
           end
         end
         
-        context "for other filtering" do
+        context "for other filtering and searching" do
 
-          # (nlim) These are the only fields the job search
-          # should filter by
-          
-          it "should filter by application type"
-          
-          it "should filter by run_group_restriction"
-          
-          it "should filter by priority"
-          
-          it "should filter by pid"
-          
-        end
-        
-        context "for search fields" do
-          
-          it "should find jobs where the command is like the query"
+          let(:job_one) { FactoryGirl.create(:running_job, :pid => 400, :command => "MyScript.run --thing friend") }
 
-          it "should find jobs where the application_run_group_name is like the query"
+          let(:job_two) { FactoryGirl.create(:running_job, :application_type => FactoryGirl.create(:bash_command_app_type), :pid => 500, :command => "ps aux | grep ssh", :priority => 5, :application_run_group_restriction => FactoryGirl.create(:one_at_a_time_restriction), :application_run_group_name => "crazy group") }
 
+          before(:each) do
+            ::Naf::Job.delete_all
+            job_one
+            job_two
+            ::Naf::Job.all.should have(2).items
+          end
+
+          it "should filter by application type" do
+            id_one = job_one.application_type_id
+            Job.search(:application_type_id => id_one).map(&:id).should eql([job_one.id])
+            id_two = job_two.application_type_id
+            Job.search(:application_type_id => id_two).map(&:id).should eql([job_two.id])
+          end
+
+          it "should filter by run_group_restriction" do
+            id_one = job_one.application_run_group_restriction_id
+            Job.search(:application_run_group_restriction_id => id_one).map(&:id).should eql([job_one.id])
+            id_two = job_two.application_run_group_restriction_id
+            Job.search(:application_run_group_restriction_id => id_two).map(&:id).should eql([job_two.id])
+          end
+          it "should filter by priority" do
+            priority_one = job_one.priority
+            Job.search(:priority => priority_one).map(&:id).should eql([job_one.id])
+            priority_two = job_two.priority
+            Job.search(:priority => priority_two).map(&:id).should eql([job_two.id])
+          end
+          it "should filter by pid" do
+            pid_one = job_one.pid
+            Job.search(:pid => pid_one).map(&:id).should eql([job_one.id])
+            pid_two = job_two.pid
+            Job.search(:pid => pid_two).map(&:id).should eql([job_two.id])
+          end
+          
+          it "should find jobs where the command is like the query" do
+            Job.search(:command => "friend").map(&:id).should eql([job_one.id])
+            Job.search(:command => "ssh").map(&:id).should eql([job_two.id])
+          end
+          
+          it "should find jobs where the application_run_group_name is like the query" do
+            Job.search(:application_run_group_name => "crazy").map(&:id).should eql([job_two.id])
+          end
         end
       end
 

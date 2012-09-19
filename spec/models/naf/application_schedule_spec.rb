@@ -63,11 +63,5 @@ module Naf
      
     end
 
-
-    context "with regard to the schedules_lock" do
-      it "should not have two processes acquire the schedule lock"
-
-    end
-
   end
 end
