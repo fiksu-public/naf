@@ -5,7 +5,9 @@ module Logical
 
     describe Machine do
       let(:physical_machine) { FactoryGirl.create(:machine)  }
-      
+
+      let(:physical_machine_two) { FactoryGirl.create(:machine_two) }
+
       let(:columns) {[:server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]}
       
 
@@ -38,10 +40,13 @@ module Logical
       context "Class Methods," do
         it "all should return an array of logical wrappers around machines" do
           machine = physical_machine
+          machine_two = physical_machine_two
+
           logical_machine = Machine.new(machine)
           Machine.all.map(&:id).should include(machine.id)
+          Machine.all.map(&:id).should include(machine_two.id)
           Machine.all.should be_a(Array)
-          Machine.all.should have(1).item
+          Machine.all.should have(2).items
         end
 
       end

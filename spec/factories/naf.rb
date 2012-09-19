@@ -91,13 +91,6 @@ FactoryGirl.define do
     end
   end
 
-  factory :machine_three, :parent => :machine_base do
-    id 3
-    server_address "0.0.0.3"
-    initialize_with do
-      ::Naf::Machine.find_or_initialize_by_id(id)
-    end
-  end
 
   #############################################################
   #######   Applications ######################################
@@ -301,13 +294,22 @@ FactoryGirl.define do
   
   # Job Affinity Tabs
 
-  factory :job_afffinity_tab_base, :class => ::Naf::JobAffinityTab do
+  factory :job_affinity_tab_base, :class => ::Naf::JobAffinityTab do
     association :job, :factory => :job
   end
 
   factory :normal_job_affinity_tab, :parent => :job_affinity_tab_base do
     association :affinity, :factory => :normal_affinity
   end
+
+  factory :perennial_job_affinity_tab, :parent => :job_affinity_tab_base do
+    association :affinity, :factory => :perennial_affinity
+  end
+
+  factory :canary_job_affinity_tab, :parent => :job_affinity_tab_base do
+    association :affinity, :factory => :canary_affinity
+  end
+
 
   # Application Schedule Affinity Tabs
 
@@ -319,6 +321,11 @@ FactoryGirl.define do
     association :affinity, :factory => :normal_affinity
   end
 
+  factory :canary_app_schedule_affinity_tab, :parent => :app_schedule_affinity_tab_base do
+    association :affinity, :factory => :canary_affinity
+  end
+
+
   # Machine Affinity Slots
   
   factory :machine_affinity_slot_base, :class => ::Naf::MachineAffinitySlot do
@@ -327,6 +334,20 @@ FactoryGirl.define do
 
   factory :normal_machine_affinity_slot, :parent => :machine_affinity_slot_base do
     association :affinity, :factory => :normal_affinity
+  end
+
+  factory :required_perennial_slot, :parent => :machine_affinity_slot_base do
+    association :affinity, :factory => :perennial_affinity
+    required true
+  end
+
+  factory :canary_slot, :parent => :machine_affinity_slot_base do
+    association :affinity, :factory => :canary_affinity
+  end
+
+  factory :required_canary_slot, :parent => :machine_affinity_slot_base do
+    association :affinity, :factory => :canary_affinity
+    required true
   end
 
 
