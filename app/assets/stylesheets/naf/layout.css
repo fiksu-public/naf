@@ -284,7 +284,7 @@ form#job_search {
 
 
 #datatable tbody tr.Canceled{
-  background: #ff66cc;
+  background: #eee;
 }
 
 #datatable tbody tr.Failed.to.start{
