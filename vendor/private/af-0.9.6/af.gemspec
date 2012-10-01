@@ -7,7 +7,7 @@ Gem::Specification.new do |s|
  s.name        = 'af'
  s.version     = Af::VERSION
  s.license     = 'New BSD License'
- s.date        = '2012-09-14'
+ s.date        = '2012-10-01'
  s.summary     = "An application framework for ruby on rails based scripts."
  s.description = "Af groups together gems and provides some glue and helper classes to easily creating applications in a ruby on rails environment."
  s.authors     = ["Keith Gabryelski"]
