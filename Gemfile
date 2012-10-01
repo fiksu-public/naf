@@ -10,4 +10,4 @@ end
 gem 'jquery-rails'
 
 # For private repo testing on Travis
-gem 'af', '=0.9.5', :path => 'vendor/private'
+gem 'af', '=0.9.6', :path => 'vendor/private'

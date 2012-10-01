@@ -1,6 +1,7 @@
 require 'log4r'
 require 'log4r/configurator'
 require 'log4r/yamlconfigurator'
+require 'log4r/outputter/consoleoutputters'
 require 'log4r_remote_syslog_outputter'
 require 'pg_advisory_locker'
 require 'pg_application_name'
@@ -18,6 +19,7 @@ module Af
     opt :log_configuration_search_path, "directories to search for log4r files", :type => :strings, :default => ["."], :group => :logging
     opt :log_configuration_section_names, "section names in yaml files for log4r configurations", :type => :strings, :default => ["log4r_config"], :env => 'LOG_CONFIGURATION_SECTION_NAMES', :group => :logging
     opt :log_dump_configuration, "show the log4r configuration", :group => :logging
+    opt :log_levels, "set log levels", :type => :hash, :group => :logging
 
     attr_accessor :has_errors, :daemon
 
@@ -88,7 +90,11 @@ module Af
     end
 
     def _work
-      work
+      begin
+        work
+      rescue Exception => e
+        logger.fatal e
+      end
 
       exit @has_errors ? 1 : 0
     end
@@ -130,10 +136,23 @@ module Af
       logging_load_configuration_files(files, @log_configuration_section_names)
     end
 
+    def logging_configuration_looks_bogus
+      return Log4r::LNAMES.length == 1
+    end
+
     # Overload to do any operations that need to be handled before work is called.
     # call exit if needed.  always call super
     def pre_work
       logging_load_configuration
+
+      if logging_configuration_looks_bogus
+        Log4r::Configurator.custom_levels(:DEBUG, :DEBUG_FINE, :DEBUG_MEDIUM, :DEBUG_GROSS, :DETAIL, :INFO, :WARN, :ALARM, :ERROR, :FATAL)
+        Log4r::Logger.root.outputters << Log4r::Outputter.stdout
+      end
+      
+      if @log_levels
+        set_logger_levels(log_levels)
+      end
 
       if @log_dump_configuration
         puts "Log configuration search path:" 
