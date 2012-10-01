@@ -9,7 +9,6 @@
  * compiled file, but it's generally better to create a new file per style scope.
  *
  *= require_self
- *= require_true './naf'
+ *= require_tree './naf'
  *= require_tree './timepicker'
- *= require_tree .
 */
