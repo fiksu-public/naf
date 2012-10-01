@@ -1,12 +1,10 @@
-<div id="record">
-  <%= link_to 'Back', @affinity %>
+<div id='naf'>
+  <%= render :partial => "layouts/naf/application" %>
+  <div id="record">
+    <%= link_to 'Back', @affinity %>
 
-  <h3 id="record_name">Editing an Affinity</h3>
- 
-  <%= render 'form' %>
+    <h3 id="record_name">Editing an Affinity</h3>
 
-
-
-
-
+    <%= render 'form' %>
+  </div>
 </div>

@@ -1,12 +1,10 @@
-<div id="record">
-  <%= link_to 'Back', @application %>
+<div id='naf'>
+  <%= render :partial => "layouts/naf/application" %>
+  <div id="record">
+    <%= link_to 'Back', @application %>
 
-  <h3 id="record_name">Editing an Application</h3>
- 
-  <%= render 'form' %>
+    <h3 id="record_name">Editing an Application</h3>
 
-
-
-
-
+    <%= render 'form' %>
+  </div>
 </div>

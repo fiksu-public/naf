@@ -1,0 +1,6 @@
+/*
+ *= require_self
+ *= require_true './min_naf'
+ *= require_tree './timepicker'
+ *= require_tree .
+*/

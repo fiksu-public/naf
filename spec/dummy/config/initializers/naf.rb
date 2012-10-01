@@ -1,9 +1,10 @@
 Naf.configure do |config|
 
   config.schema_name = 'naf'
+  config.layout = "application"
 
-  # Seting up Papertrail links:
-  # config.papertrail_group_id = ...
+  # Setting up papertrail links
+  # config.papertrail_group_id = 
 
 end
 

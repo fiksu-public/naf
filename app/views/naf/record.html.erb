@@ -1,82 +1,86 @@
-<div id="record">
+<div id='naf'>
+  <%= render :partial => "layouts/naf/application" %>
+  <div id="record">
 
-<%= generate_back_link %>
-<%= generate_edit_link %>
+    <%= generate_back_link %>
+    <%= generate_edit_link %>
 
-<h3 id="record_name"><%= model_name %> </h3>
-<p id="notice"><%= notice %></p>
+    <h3 id="record_name"><%= model_name %> </h3>
 
-<table id="record">
+    <p id="notice"><%= notice %></p>
 
- <tr>
-   <th>Attribute</th>
-   <th>Value </th>
- </tr>
+    <table id="record">
 
-<tbody>
- <% @attributes.each do |a| %>
-   <tr>
-     <td scope="row"><%= make_header(a.to_s) %></td>
-     <% if a == :title and controller_name == 'jobs' %>
-       <% if application = @record.application %>
-       <td> <%= link_to @record.send(a), url_for(application) %> </td>
-       <% else %>
-         <td> <%= @record.send(a) %> </td>
-       <% end %>
-     <% else %>
-       <td> <%= @record.send(a) %></td>
-     <% end %>
-   </tr>
- <% end %>
- <% if controller_name == 'jobs' %>
-   <tr>
-     <td colspan="2" style="text-align:center">
-       <% if @record.has_started? %>
-         <a href="#" class="papertrail" id="<%= @record.id %>" 
-            data-url='<%= papertrail_link(@record) %>'>
-           View Log in Papertrail
-       <% end %>
-       </a>
-     </td>
-   </tr>
+      <tr>
+        <th>Attribute</th>
+        <th>Value</th>
+      </tr>
 
-
- <% elsif controller_name == 'applications' %>
-  <tr>
-    <td scope="row">Last Queued At:</td>
-     <td> <%= last_queued_at_link(@record) %> </td>
-   </tr> 
-
-   <tr>
-     <td colspan="2" style="text-align:center">
-         <a href="#" id="<%= @record.id %>" class="enqueue">
-           Manually Schedule
-         </a>
-     </td>
-   </tr>
-
- <% end %>
-</tbody>
-</table>
-<br /><br />
-<%= generate_child_resources_link %>
-<%= generate_destroy_link %>
-</div>
+      <tbody>
+      <% @attributes.each do |a| %>
+          <tr>
+            <td scope="row"><%= make_header(a.to_s) %></td>
+            <% if a == :title and controller_name == 'jobs' %>
+                <% if application = @record.application %>
+                    <td> <%= link_to @record.send(a), url_for(application) %> </td>
+                <% else %>
+                    <td> <%= @record.send(a) %> </td>
+                <% end %>
+            <% else %>
+                <td> <%= @record.send(a) %></td>
+            <% end %>
+          </tr>
+      <% end %>
+      <% if controller_name == 'jobs' %>
+          <tr>
+            <td colspan="2" style="text-align:center">
+              <% if @record.has_started? %>
+                  <a href="#" class="papertrail" id="<%= @record.id %>"
+                     data-url='<%= papertrail_link(@record) %>'>
+                    View Log in Papertrail
+              <% end %>
+              </a>
+            </td>
+          </tr>
 
 
+      <% elsif controller_name == 'applications' %>
+          <tr>
+            <td scope="row">Last Queued At:</td>
+            <td> <%= last_queued_at_link(@record) %> </td>
+          </tr>
 
-<form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index')%>">
+          <tr>
+            <td colspan="2" style="text-align:center">
+              <a href="#" id="<%= @record.id %>" class="enqueue">
+                Manually Schedule
+              </a>
+            </td>
+          </tr>
+
+      <% end %>
+      </tbody>
+    </table>
+    <br/><br/>
+    <%= generate_child_resources_link %>
+    <%= generate_destroy_link %>
+  </div>
+
+
+  <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
     <p> You are manually scheduling this application. </p>
+
     <p> Are you sure you want to do this? </p>
-    <input type="hidden" name="job[application_id]" id="application_id" value="" />
-    <input type="button" id="cancel" value="Cancel" /> 
-    <input type="submit" id="add" value="Schedule" /> 
-</form>
+    <input type="hidden" name="job[application_id]" id="application_id" value=""/>
+    <input type="button" id="cancel" value="Cancel"/>
+    <input type="submit" id="add" value="Schedule"/>
+  </form>
 
 
-<div id="iframeContainer" style="display:none;">
-  <input type="button" id="close" value="Close" /> 
-  <iframe style="" class="papertrail" src="" height="100%" width="100%">
+  <div id="iframeContainer" style="display:none;">
+    <input type="button" id="close" value="Close"/>
+    <iframe style="" class="papertrail" src="" height="100%" width="100%">
       <p>Your browser does not support iframes.</p>
-  </iframe>
+    </iframe>
+  </div>
 </div>
