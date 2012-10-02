@@ -1,5 +1,9 @@
 #naf {
 
+    font: {
+      family: "Verdana", Times, serif;
+    }
+
     td#header {
       background-color: #FFA500;
       text-align: center;
@@ -15,7 +19,6 @@
       padding: 0px 10px 20px 10px;
       margin: 0px;
       text-align: top;
-      background-color:#eeeeee;
     }
 
     a {
@@ -249,14 +252,6 @@
 
     span#result_number {
       display: inline;
-    }
-
-
-    body {
-      background: #eee;
-      margin: 0px;
-      padding: 0px;
-      font-family: "Verdana", Times, serif;
     }
 
     form#job_search {
