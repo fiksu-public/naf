@@ -201,7 +201,12 @@ module Naf
       return lock_record(0, &block)
     end
 
-    def self.queue_rails_job(command, priority = 0, affinities = [])
+    def self.queue_rails_job(command,
+                             application_run_group_restriction = ::Naf::ApplicationRunGroupRestriction.one_at_a_time,
+                             application_run_group_name = :command,
+                             priority = 0,
+                             affinities = [])
+      application_run_group_name = command if application_run_group_name == :command
       ::Naf::Job.transaction do
         job = ::Naf::Job.create(:application_type_id => 1,
                                 :command => command,
