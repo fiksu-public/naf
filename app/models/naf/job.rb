@@ -210,8 +210,8 @@ module Naf
       ::Naf::Job.transaction do
         job = ::Naf::Job.create(:application_type_id => 1,
                                 :command => command,
-                                :application_run_group_restriction_id => 2,
-                                :application_run_group_name => command,
+                                :application_run_group_restriction_id => application_run_group_restriction.id,
+                                :application_run_group_name => application_run_group_name,
                                 :priority => priority)
         ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
