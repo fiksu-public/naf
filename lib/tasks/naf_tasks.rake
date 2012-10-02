@@ -5,6 +5,8 @@ require 'fileutils'
 
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
+    raise "Task '#{fq_name}' not found" unless @tasks.has_key?(fq_name)
+
     new_name = "#{fq_name}:original"
     @tasks[new_name] = @tasks.delete(fq_name)
   end
@@ -65,7 +67,7 @@ namespace :naf do
 
   namespace :db do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
-    override_task :migrate => :environment do
+    task :migrate => :environment do
       if using_another_database? and naf_migrations.size > 0
         puts "Running naf migrations with database configuration: #{naf_environment}"
         puts naf_migrations
