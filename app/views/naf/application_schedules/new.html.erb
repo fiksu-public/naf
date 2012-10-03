@@ -1,5 +1,4 @@
-<div id='naf'>
-  <%= render :partial => "layouts/naf/application" %>
+<% content_for :body do %>
   <div id="record">
     <%= link_to 'Back', { :controller => 'application_schedules', :action => 'index' } %>
 
@@ -7,4 +6,6 @@
 
     <%= render 'form' %>
   </div>
-</div>
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

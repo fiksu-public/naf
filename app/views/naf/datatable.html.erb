@@ -1,163 +1,153 @@
-<div id='naf'>
-  <%= render :partial => "layouts/naf/application" %>
-  <h3 id="record_name"><%= table_title %> </h3>
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
 
-  <div>
-    <a href="#" id="page_back" style="float:left;display:none;">
-      <%= image_tag('back.png') %>
-    </a>
-    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
-    <a href="#" id="page_forward" style="float:right;display:none;">
-      <%= image_tag('forward.png') %>
-    </a>
+    <table id="datatable" cellspacing="0">
 
-    <p class="clear"></p>
-  </div>
+      <thead>
+      <tr>
 
-  <table id="datatable" cellspacing="0">
+        <% if @cols.size == 1 %>
+            <th class="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
+        <% else %>
+            <% @cols.each do |col| %>
+                <th id="<%= col %>"><%= make_header(col) %></th>
+            <% end %>
+        <% end %>
+        <% if current_page?(:controller => 'applications') %>
+            <th> Last Queued At</th>
+        <% end %>
+        <% if include_actions_in_table? %>
+            <th> Actions</th>
+        <% end %>
+      </tr>
+      </thead>
 
-    <thead>
-    <tr>
 
-      <% if @cols.size == 1 %>
-          <th class="<%= @cols.first %>" id="single"><%= make_header(@cols.first) %></th>
-      <% else %>
-          <% @cols.each do |col| %>
-              <th id="<%= col %>"><%= make_header(col) %></th>
-          <% end %>
+      <tbody>
+      <% @rows.each do |row| %>
+          <tr id='<%= row.id %>' data-url='<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>'>
+            <% @cols.each do |col| %>
+                <td> <%= format_index_table_row(row, col) %> </td>
+            <% end %>
+
+            <% if current_page?(:controller => 'applications') %>
+                <td> <%= last_queued_at_link(row) %> </td>
+            <% end %>
+
+            <% if include_actions_in_table? %>
+                <td id="action">
+                  <% if current_page?(:controller => 'applications') %>
+                      <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", { :class => "enqueue", :id => row.id } %>
+                  <% elsif current_page?(:controller => 'jobs') or current_page?(naf.root_url) %>
+                      <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
+                  <% end %>
+                </td>
+            <% end %>
+          </tr>
       <% end %>
-      <% if current_page?(:controller => 'applications') %>
-          <th> Last Queued At</th>
-      <% end %>
-      <% if include_actions_in_table? %>
-          <th> Actions</th>
-      <% end %>
-    </tr>
-    </thead>
+      </tbody>
+
+      <tfoot class="nav">
+      <tr style="text-align: center">
+        <% if include_actions_in_table? %>
+            <% if current_page?(:controller => 'applications') %>
+                <td colspan=<%= @cols.size + 2 %>>
+            <% else %>
+                <td colspan=<%= @cols.size + 1 %>>
+            <% end %>
+        <% else %>
+            <td colspan=<%= @cols.size %>>
+        <% end %>
+        <span id="result_numbers"></span>
+        </td>
+      </tr>
+      </tfoot>
+
+    </table>
 
 
-    <tbody>
-    <% @rows.each do |row| %>
-        <tr id='<%= row.id %>' data-url='<%= url_for :action => 'show', :id => row.id, :controller => controller_name %>'>
-          <% @cols.each do |col| %>
-              <td> <%= format_index_table_row(row, col) %> </td>
-          <% end %>
+    <form id="job_search" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
+      <%= hidden_field(:search, :offset, :value => 0) %>
+      <b>
+        Status: </b>  <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error], ["Canceled", :canceled]]) %> </b>
+      <br/>
+      <b> Order
+        By: </b><%= select(:search, :order, [["Queued Time", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %>
+      <br/>
+      <b> Direction: </b>
+      Descending:
+      <%= radio_button(:search, :direction, :desc, :checked => true) %>
+      Ascending:
+      <%= radio_button(:search, :direction, :asc) %> <br/>
+      <b> Per Page: </b> <%= select(:search, :limit, [10, 25, 50, 100].map { |val| [val.to_s, val] }) %> </b> <br/>
+      <b> Running: </b> <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br/>
+      <b> Command: </b> <%= text_field(:search, :command) %>
+      <br/>
+      <b> Script
+        Type: </b> <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }) %>
+      <br/>
+      <b> Run Group </b> <%= text_field(:search, :application_run_group_name) %> <br/>
+      <b> Run Group
+        Restriction </b> <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }) %>
+      <br/>
+      <b> Priority </b> <%= text_field(:search, :priority) %>
+      <br/>
+      <b> Pid </b> <%= text_field(:search, :pid) %> <br/>
+      <b>
+        Machine: </b> <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }, { :include_blank => true }) %>
+      <br/>
 
-          <% if current_page?(:controller => 'applications') %>
-              <td> <%= last_queued_at_link(row) %> </td>
-          <% end %>
+      <div style="text-align: right;">
+        <input type="reset" id="reset" style="display: none; cursor: default"/>
+        <input type="button" value="cancel" id="cancel"/>
+        <input type="submit" id="add" value="Search"/>
+      </div>
+    </form>
 
-          <% if include_actions_in_table? %>
-              <td id="action">
-                <% if current_page?(:controller => 'applications') %>
-                    <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", { :class => "enqueue", :id => row.id } %>
-                <% elsif current_page?(:controller => 'jobs') or current_page?(naf.root_url) %>
-                    <%= link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), "http://www.papertrailapp.com" %>
-                <% end %>
-              </td>
-          <% end %>
-        </tr>
-    <% end %>
-    </tbody>
+    <form id="add_job" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
+      <b> Script
+        Type: </b> <%= select(:job, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }) %>
+      <br/>
+      <b> Command: </b> <%= text_field(:job, :command) %>
+      <br/>
+      <b> Run Group Restriction: </b>
+      <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }) %>
+      <br/>
+      <b> Run Group Name: </b> <%= text_field(:job, :application_run_group_name) %> <br/> <br/>
+      <input type="button" id="cancel" value="Cancel"/>
+      <input type="submit" id="add" value="Add"/>
+    </form>
 
-    <tfoot class="nav">
-    <tr style="text-align: center">
-      <% if include_actions_in_table? %>
-          <% if current_page?(:controller => 'applications') %>
-              <td colspan=<%= @cols.size + 2 %>>
-          <% else %>
-              <td colspan=<%= @cols.size + 1 %>>
-          <% end %>
-      <% else %>
-          <td colspan=<%= @cols.size %>>
-      <% end %>
-      <span id="result_numbers"></span>
-      </td>
-    </tr>
-    </tfoot>
+    <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
+      <p> You are manually scheduling this application. </p>
 
-  </table>
+      <p> Are you sure you want to do this? </p>
+      <input type="hidden" name="job[application_id]" id="application_id" value=""/>
+      <input type="button" id="cancel" value="Cancel"/>
+      <input type="submit" id="add" value="Schedule"/>
+    </form>
 
 
-  <form id="job_search" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
-    <%= hidden_field(:search, :offset, :value => 0) %>
-    <b>
-      Status: </b>  <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error], ["Canceled", :canceled]]) %> </b>
-    <br/>
-    <b> Order
-      By: </b><%= select(:search, :order, [["Queued Time", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]]) %>
-    <br/>
-    <b> Direction: </b>
-    Descending:
-    <%= radio_button(:search, :direction, :desc, :checked => true) %>
-    Ascending:
-    <%= radio_button(:search, :direction, :asc) %> <br/>
-    <b> Per Page: </b> <%= select(:search, :limit, [10, 25, 50, 100].map { |val| [val.to_s, val] }) %> </b> <br/>
-    <b> Running: </b> <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br/>
-    <b> Command: </b> <%= text_field(:search, :command) %>
-    <br/>
-    <b> Script
-      Type: </b> <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }) %>
-    <br/>
-    <b> Run Group </b> <%= text_field(:search, :application_run_group_name) %> <br/>
-    <b> Run Group
-      Restriction </b> <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }) %>
-    <br/>
-    <b> Priority </b> <%= text_field(:search, :priority) %>
-    <br/>
-    <b> Pid </b> <%= text_field(:search, :pid) %> <br/>
-    <b>
-      Machine: </b> <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }, { :include_blank => true }) %>
-    <br/>
+    <form id="terminate" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
+      <p> You are terminating this job</p>
 
-    <div style="text-align: right;">
-      <input type="reset" id="reset" style="display: none; cursor: default"/>
-      <input type="button" value="cancel" id="cancel"/>
-      <input type="submit" id="add" value="Search"/>
+      <p> Are you sure you want to do this? </p>
+      <input type="hidden" name="job_id" id="job_id"/>
+      <input type="hidden" name="job[request_to_terminate]" id="request_to_terminate" value="1"/>
+      <input type="button" id="cancel" value="Cancel"/>
+      <input type="submit" value="Terminate"/>
+    </form>
+
+
+    <p id="on_job_page" style="display:none; cursor: default"><%= display_job_search_link? %></p>
+
+    <div id="iframeContainer" style="display:none;">
+      <input type="button" id="close" value="Close"/>
+      <iframe style="" class="papertrail" src="" height="100%" width="100%">
+        <p>Your browser does not support iframes.</p>
+      </iframe>
     </div>
-  </form>
 
-  <form id="add_job" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
-    <b> Script
-      Type: </b> <%= select(:job, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }) %>
-    <br/>
-    <b> Command: </b> <%= text_field(:job, :command) %>
-    <br/>
-    <b> Run Group Restriction: </b>
-    <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }) %>
-    <br/>
-    <b> Run Group Name: </b> <%= text_field(:job, :application_run_group_name) %> <br/> <br/>
-    <input type="button" id="cancel" value="Cancel"/>
-    <input type="submit" id="add" value="Add"/>
-  </form>
+<% end %>
 
-  <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
-    <p> You are manually scheduling this application. </p>
-
-    <p> Are you sure you want to do this? </p>
-    <input type="hidden" name="job[application_id]" id="application_id" value=""/>
-    <input type="button" id="cancel" value="Cancel"/>
-    <input type="submit" id="add" value="Schedule"/>
-  </form>
-
-
-  <form id="terminate" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
-    <p> You are terminating this job</p>
-
-    <p> Are you sure you want to do this? </p>
-    <input type="hidden" name="job_id" id="job_id"/>
-    <input type="hidden" name="job[request_to_terminate]" id="request_to_terminate" value="1"/>
-    <input type="button" id="cancel" value="Cancel"/>
-    <input type="submit" value="Terminate"/>
-  </form>
-
-
-  <p id="on_job_page" style="display:none; cursor: default"><%= display_job_search_link? %></p>
-
-  <div id="iframeContainer" style="display:none;">
-    <input type="button" id="close" value="Close"/>
-    <iframe style="" class="papertrail" src="" height="100%" width="100%">
-      <p>Your browser does not support iframes.</p>
-    </iframe>
-  </div>
-</div>
+<%= render :partial => 'naf/shared/application' %>

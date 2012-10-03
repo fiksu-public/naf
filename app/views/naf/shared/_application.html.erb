@@ -1,0 +1,28 @@
+<div id='naf'>
+  <div id="fluid">
+    <div id='hd'>
+      <div id="header">
+        <h3><%= link_to Naf.title.html_safe, naf.root_url %></h3>
+      </div>
+    </div>
+    <div id="navigation">
+      <ul id="tabs">
+        <% tabs.each do |tab| %>
+            <% if highlight_tab?(tab) %>
+                <li id="on">
+            <% else %>
+                <li>
+            <% end %>
+            <%= generate_index_link(tab) %>
+            </li>
+        <% end %>
+      </ul>
+      <div class="clear"></div>
+    </div>
+    <div id='bd'>
+      <%= yield :body %>
+    </div>
+  </div>
+</div>
+
+
