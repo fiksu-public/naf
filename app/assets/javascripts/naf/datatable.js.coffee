@@ -39,6 +39,8 @@ jQuery ->
       header_element.attr('class', 'sortAsc') 
     showing_message = message != null
     url = search_form.attr('action')
+    if showing_message
+      show_loading_message(message)
     $.ajax({
       type: "GET"
       dataType: 'json'
@@ -61,7 +63,7 @@ jQuery ->
             showing_message = true
             message = 'Loading the Job Queue...'
           if showing_message
-            show_loading_message(message)
+
           else
             if last_job_id != parseInt(data.jobs[0]['id'])
               showing_message = true
@@ -164,8 +166,7 @@ jQuery ->
 
   if on_jobs_page()
     $('a#page_forward').show()
-    # show_loading_message('Loading Jobs')
-    perform_job_search($('form#job_search'), null)
+    perform_job_search($('form#job_search'), 'Loading Jobs')
     start_refresh_timer()
     
    
@@ -301,7 +302,7 @@ jQuery ->
 
   $('#datatable tbody tr').live 'mouseenter', (event) ->
     url = $(this).data('url')
-    popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
+    # popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
   
   $('#datatable tbody tr').live 'mouseout', (event) ->
     hide_tooltip()
