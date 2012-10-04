@@ -7,6 +7,9 @@ jQuery ->
   on_jobs_page = () ->
     $('p#on_job_page').text() == 'true'
 
+  use_refreshing = () ->
+    $('p#use_refreshing').text() == 'true'
+
   # Clear the search parameters
   reset_search = () ->
     $('input#search_direction_desc').attr('checked', 'checked')
@@ -129,10 +132,11 @@ jQuery ->
   
   # Refresh the jobs table
   refresh_jobs = () ->
-    reset_search()
-    $('a#page_back').hide()
-    # show_loading_message('Refreshing...')
-    perform_job_search($('form#job_search'), null)
+    if use_refreshing()
+      reset_search()
+      $('a#page_back').hide()
+      # show_loading_message('Refreshing...')
+      perform_job_search($('form#job_search'), null)
 
   refresh_timer = ""
   start_refresh_timer = () ->

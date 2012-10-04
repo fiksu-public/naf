@@ -5,5 +5,8 @@ Naf.configure do |config|
   # Seting up Papertrail links:
   # config.papertrail_group_id = ...
 
+  # Allow jobs page to refresh
+  config.job_refreshing = true
+
 end
 

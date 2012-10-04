@@ -7,9 +7,9 @@ module Logical
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
       
-      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :status]
+      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status,]
       
-      ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address, 
+      ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address, 
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_restriction_name]
       
       FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
@@ -41,6 +41,16 @@ module Logical
           "Finished"
         else
           "Queued"
+        end
+      end
+
+      def run_time
+        start_time = @job.started_at
+        end_time = @job.finished_at
+        if start_time and end_time
+          return Time.at((end_time - start_time).round).utc.strftime("%H:%M:%S")
+        else
+          return ""
         end
       end
       

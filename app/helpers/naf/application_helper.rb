@@ -167,6 +167,10 @@ module Naf
       end
     end
 
+    def use_refreshing?
+      Naf.job_refreshing
+    end
+
     def include_actions_in_table?
       current_page?(naf.root_url) or
       current_page?(:controller => 'applications', :action => 'index') or
