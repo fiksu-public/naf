@@ -86,8 +86,7 @@ jQuery ->
             row += "</tr>"
             row_object = $(row)
             row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
-          if showing_message
-            setTimeout (() -> $.unblockUI()), 300
+            $.unblockUI()
           callback()        
     })
 
@@ -137,7 +136,6 @@ jQuery ->
     if use_refreshing()
       reset_search()
       $('a#page_back').hide()
-      # show_loading_message('Refreshing...')
       perform_job_search($('form#job_search'), null)
 
   refresh_timer = ""
@@ -166,7 +164,9 @@ jQuery ->
 
   if on_jobs_page()
     $('a#page_forward').show()
-    perform_job_search($('form#job_search'), 'Loading Jobs')
+    show_loading_message('Loading Jobs')
+    perform_job_search($('form#job_search'), null)
+    
     start_refresh_timer()
     
    
