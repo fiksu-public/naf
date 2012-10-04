@@ -66,7 +66,7 @@ module Process::Naf
             next
           end
           begin
-            assignment_type_processor.do_janitorial_work(target_model) unless @no_writes
+            assignment_type_processor.new.do_janitorial_work(target_model) unless @no_writes
           rescue StandardError => e
             logger.alarm "failed to use #{assignment_type_processor} for partitions model: #{assignment.model_name}, #{e.message}"
           end
