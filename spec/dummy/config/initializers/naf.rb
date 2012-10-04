@@ -7,6 +7,7 @@ Naf.configure do |config|
 
   # Allow jobs page to refresh
   config.job_refreshing = true
+  config.jobs_per_page = 50
 
 end
 

@@ -82,7 +82,7 @@
         <%= radio_button(:search, :direction, :desc, :checked => true) %>
        Ascending:
         <%= radio_button(:search, :direction, :asc) %> <br />
-    <b> Per Page: </b> <%= select(:search, :limit, [10, 25, 50, 100].map{|val| [val.to_s, val] }) %> </b> <br />
+    <b> Per Page: </b> <%= select(:search, :limit, per_page_array.map{|val| [val.to_s, val] }) %> </b> <br />
     <b> Running: </b> <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]]) %> </b> <br />
     <b> Command: </b> <%= text_field(:search, :command) %><br />
     <b> Script Type: </b> <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %><br />
