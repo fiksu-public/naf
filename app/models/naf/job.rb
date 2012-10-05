@@ -26,6 +26,7 @@ module Naf
 
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id
     attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
+    attr_accessible :application_run_group_limit
 
     def to_s
       components = []
@@ -202,8 +203,9 @@ module Naf
     end
 
     def self.queue_rails_job(command,
-                             application_run_group_restriction = ::Naf::ApplicationRunGroupRestriction.one_at_a_time,
+                             application_run_group_restriction = ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines,
                              application_run_group_name = :command,
+                             application_run_group_limit = 1,
                              priority = 0,
                              affinities = [])
       application_run_group_name = command if application_run_group_name == :command
@@ -212,6 +214,7 @@ module Naf
                                 :command => command,
                                 :application_run_group_restriction_id => application_run_group_restriction.id,
                                 :application_run_group_name => application_run_group_name,
+                                :application_run_group_limit => application_run_group_limit,
                                 :priority => priority)
         ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
@@ -220,13 +223,14 @@ module Naf
       end
     end
 
-    def self.queue_application(application, application_run_group_restriction, application_run_group_name, priority = 0, affinities = [])
+    def self.queue_application(application, application_run_group_restriction, application_run_group_name, application_run_group_limit = 1, priority = 0, affinities = [])
       ::Naf::Job.transaction do
         job = ::Naf::Job.create(:application_id => application.id,
                                 :application_type_id => application.application_type_id,
                                 :command => application.command,
                                 :application_run_group_restriction_id => application_run_group_restriction.id,
                                 :application_run_group_name => application_run_group_name,
+                                :application_run_group_limit => application_run_group_limit,
                                 :priority => priority)
         ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
@@ -239,6 +243,7 @@ module Naf
       queue_application(application_schedule.application,
                         application_schedule.application_run_group_restriction,
                         application_schedule.application_run_group_name,
+                        application_schedule.application_run_group_limit,
                         application_schedule.priority,
                         application_schedule.affinities)
     end
@@ -267,13 +272,13 @@ module Naf
 
         job = nil
         lock_for_job_queue do
-          if possible_job.application_run_group_restriction.application_run_group_restriction_name == "one per machine"
-            if recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count > 0
+          if possible_job.application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_machine.id
+            if (recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count + 1) > (possible_job.application_run_group_limit || 0)
               logger.debug "already running on this machine"
               next
             end
-          elsif possible_job.application_run_group_restriction.application_run_group_restriction_name == "one at a time"
-            if recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count > 0
+          elsif possible_job.application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines.id
+            if (recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count + 1) > (possible_job.application_run_group_limit || 0)
               logger.debug "already running"
               next
             end

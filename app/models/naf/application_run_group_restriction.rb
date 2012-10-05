@@ -1,19 +1,15 @@
 module Naf
   class ApplicationRunGroupRestriction < NafBase
-    NO_RESTRICTIONS = 1
-    ONE_AT_A_TIME = 2
-    ONE_PER_MACHINE = 3
-
-    def self.no_restrictions
-      return find(NO_RESTRICTIONS)
+    def self.no_limit
+      return @no_limit ||= find_by_application_run_group_restriction_name('no limit')
     end
 
-    def self.one_at_a_time
-      return find(ONE_AT_A_TIME)
+    def self.limited_per_machine
+      return @limited_per_machine ||= find_by_application_run_group_restriction_name('limited per machine')
     end
 
-    def self.one_per_machine
-      return find(ONE_PER_MACHINE)
+    def self.limited_per_all_machines
+      return @limited_per_all_machines ||= find_by_application_run_group_restriction_name('limited per all machines')
     end
   end
 end

@@ -21,6 +21,7 @@ module Naf
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
     attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled, :run_start_minute
+    attr_accessible :application_run_group_limit
 
     SCHEDULES_LOCK_ID = 0
 

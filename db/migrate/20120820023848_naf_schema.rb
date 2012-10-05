@@ -117,30 +117,32 @@ class NafSchema < ActiveRecord::Migration
           application_run_group_restriction_name    text unique not null
       );
       insert into #{schema_name}.application_run_group_restrictions (application_run_group_restriction_name) values
-         ('no restrictions'), ('one at a time'), ('one per machine');
+         ('no limit'), ('limited per machine'), ('limited per all machines');
       create table #{schema_name}.application_schedules
       (
-          id                                     serial not null primary key,
-          created_at                             timestamp not null default now(),
-          updated_at                             timestamp,
-          enabled                                boolean not null default true,
-          visible                                boolean not null default true,
-          application_id                         integer unique not null references #{schema_name}.applications,
-          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
-          application_run_group_name             text null,
-          run_start_minute                       integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
-          run_interval                           integer null check (run_interval > 0),
-          priority                               integer not null default 0,
+          id                                       serial not null primary key,
+          created_at                               timestamp not null default now(),
+          updated_at                               timestamp,
+          enabled                                  boolean not null default true,
+          visible                                  boolean not null default true,
+          application_id                           integer unique not null references #{schema_name}.applications,
+          application_run_group_restriction_id     integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name               text null,
+          application_run_group_limit              integer null default 1,
+          run_start_minute                         integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
+          run_interval                             integer null check (run_interval > 0),
+          priority                                 integer not null default 0,
           check (visible = true OR enabled = false),
           check (run_start_minute is not null OR run_interval is not null),
           check (run_start_minute is null OR run_interval is null)
       );
       insert into #{schema_name}.application_schedules
-        (application_id, application_run_group_restriction_id, application_run_group_name, run_start_minute, run_interval) values
+        (application_id, application_run_group_restriction_id, application_run_group_name, application_run_group_limit, run_start_minute, run_interval) values
         (
           (select id from #{schema_name}.applications where command = '::Process::Naf::Janitor.run'),
-          (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
+          (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'limited per all machines'),
           '::Process::Naf::Janitor.run',
+          1,
           5,
           null
         );
@@ -165,6 +167,7 @@ class NafSchema < ActiveRecord::Migration
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
+          application_run_group_limit            integer null default 1,
 
           priority                               integer not null default 0,
 
