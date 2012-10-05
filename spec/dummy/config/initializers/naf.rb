@@ -6,7 +6,7 @@ Naf.configure do |config|
   # config.papertrail_group_id = ...
 
   # Allow jobs page to refresh
-  config.jobs_per_page = 50
+  # config.jobs_per_page = 50
 
 end
 

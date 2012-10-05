@@ -59,16 +59,6 @@ jQuery ->
           lower = offset*limit + 1
           upper = lower + data.jobs.length - 1
           $('span#result_numbers').text('Results ' + lower + ' - ' + upper)
-          if last_job_id == 0
-            showing_message = true
-            message = 'Loading the Job Queue...'
-          if showing_message
-
-          else
-            if last_job_id != parseInt(data.jobs[0]['id'])
-              showing_message = true
-              show_loading_message('Showing new jobs on the queue')
-          last_job_id = data.jobs[0]['id']
           for job in data.jobs
             class_label = job.status
             row = '<tr class=\"'+ class_label + '\" id=\"' + job.id + '\"' + ' data-url=\"' + data.job_root_url + '/' + job.id +  '\">' 
@@ -86,8 +76,9 @@ jQuery ->
             row += "</tr>"
             row_object = $(row)
             row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
-            $.unblockUI()
-          callback()        
+        $.unblockUI()
+        $.unblockUI() 
+        callback()        
     })
 
   
@@ -105,18 +96,16 @@ jQuery ->
       url: url,
       data: form.serialize(),
       success: (data) ->
-        setTimeout (-> 
-          $.unblockUI();
-          addedMessage = ' was added to the job queue'
-          if data.saved
-            if on_jobs_page()
-              callback()
-            else
-              $('td#main div#status').prepend('<p>' + '<a href=\"' + data.job_url + '\">' + data.post_source + '</a>'  + addedMessage + '</p>');
+        $.unblockUI();
+        addedMessage = ' was added to the job queue'
+        if data.saved
+          if on_jobs_page()
+            callback()
           else
-            for msg in data.errors
-              $('td#main div#status').prepend('<p style="color: red">' + msg + '</p>');
-        ), 500; 
+            $('td#main div#status').prepend('<p>' + '<a href=\"' + data.job_url + '\">' + data.post_source + '</a>'  + addedMessage + '</p>');
+        else
+          for msg in data.errors
+            $('td#main div#status').prepend('<p style="color: red">' + msg + '</p>');
     })
 
   # Show Loading Message
@@ -133,14 +122,14 @@ jQuery ->
   
   # Refresh the jobs table
   refresh_jobs = () ->
-    if use_refreshing()
-      reset_search()
-      $('a#page_back').hide()
-      perform_job_search($('form#job_search'), null)
+    reset_search()    
+    $('a#page_back').hide()
+    perform_job_search($('form#job_search'), null)
 
   refresh_timer = ""
   start_refresh_timer = () ->
-    refresh_timer = setInterval (() -> refresh_jobs()), 30000
+    if use_refreshing()
+      refresh_timer = setInterval (() -> refresh_jobs()), 30000
   stop_refresh_timer = () ->
     clearInterval(refresh_timer) 
 
@@ -253,7 +242,6 @@ jQuery ->
     create_job($(this), () -> refresh_jobs())
     start_refresh_timer()
 
-
   # Request confirmation that you want to enqueue the application as a job
   $('a.enqueue').click ->
     application_id = $(this).attr('id');
@@ -271,43 +259,7 @@ jQuery ->
     show_loading_message('Adding application as a job on the queue')    
     create_job($(this))
 
-  popup_timer = ''
 
-  show_tooltip = (event, url) ->
-    x = (event.pageX - 1) + 'px'
-    y = (event.pageY - 3) + 'px'
-    $('div#tooltip').text('')
-    body_text = ''
-    $.ajax({
-      type: "GET",
-      dataType: 'json',
-      url: url,
-      success: (data) ->
-        job = data.job
-        for col in data.cols
-          if col == 'title'
-            body_text += '<h3>' + job[col] + '</h3>'
-          else
-            body_text += '<b>' + col + ': </b>'
-            body_text += job[col]
-            body_text += '<br />'
-        body_text_object = $(body_text)
-        body_text_object.appendTo('div#tooltip')
-        $('div#tooltip').css({'display': 'block', 'top': y, 'left': x});
-        $('div#tooltip').show()
-    })
-
-  hide_tooltip = () ->
-    $('div#tooltip').hide()
-
-  $('#datatable tbody tr').live 'mouseenter', (event) ->
-    url = $(this).data('url')
-    # popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
-  
-  $('#datatable tbody tr').live 'mouseout', (event) ->
-    hide_tooltip()
-    clearTimeout(popup_timer)
-  
   $('#datatable thead th').live 'click', (event) ->
     id = $(this).attr('id');
     switch id
