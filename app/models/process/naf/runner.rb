@@ -70,7 +70,9 @@ module Process::Naf
             # check scheduled tasks
             should_be_queued.each do |application_schedule|
               logger.info "schedule application: #{application_schedule}"
-              ::Naf::Job.queue_application_schedule(application_schedule)
+              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+                ::Naf::Job.queue_application_schedule(application_schedule)
+              end
             end
 
             # check the runner machines
