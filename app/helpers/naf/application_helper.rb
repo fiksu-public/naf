@@ -22,7 +22,12 @@ module Naf
     def format_index_table_row(row, col)
       value = row.send(col)
       if value.is_a?(String)
-        return truncate(value)
+        case col
+        when :title
+          return value
+        else
+          return truncate(value)
+        end
       else
         return value
       end
@@ -165,6 +170,23 @@ module Naf
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end
+    end
+
+    def use_refreshing?
+      Naf.job_refreshing
+    end
+
+    def per_page_array
+      options = [10, 25, 50, 100]
+      default = Naf.jobs_per_page
+      default = 10  unless default > 0
+      default = 100 unless default < 101
+      if options.include?(default)
+        result = [default] + (options - [default])
+      else
+        result = [default] + options
+      end
+      return result
     end
 
     def include_actions_in_table?

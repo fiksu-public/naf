@@ -7,6 +7,9 @@ jQuery ->
   on_jobs_page = () ->
     $('p#on_job_page').text() == 'true'
 
+  use_refreshing = () ->
+    $('p#use_refreshing').text() == 'true'
+
   # Clear the search parameters
   reset_search = () ->
     $('input#search_direction_desc').attr('checked', 'checked')
@@ -36,6 +39,8 @@ jQuery ->
       header_element.attr('class', 'sortAsc') 
     showing_message = message != null
     url = search_form.attr('action')
+    if showing_message
+      show_loading_message(message)
     $.ajax({
       type: "GET"
       dataType: 'json'
@@ -58,7 +63,7 @@ jQuery ->
             showing_message = true
             message = 'Loading the Job Queue...'
           if showing_message
-            show_loading_message(message)
+
           else
             if last_job_id != parseInt(data.jobs[0]['id'])
               showing_message = true
@@ -81,8 +86,7 @@ jQuery ->
             row += "</tr>"
             row_object = $(row)
             row_object.hide().appendTo('table#datatable tbody').slideDown(1000)
-          if showing_message
-            setTimeout (() -> $.unblockUI()), 300
+            $.unblockUI()
           callback()        
     })
 
@@ -129,10 +133,10 @@ jQuery ->
   
   # Refresh the jobs table
   refresh_jobs = () ->
-    reset_search()
-    $('a#page_back').hide()
-    # show_loading_message('Refreshing...')
-    perform_job_search($('form#job_search'), null)
+    if use_refreshing()
+      reset_search()
+      $('a#page_back').hide()
+      perform_job_search($('form#job_search'), null)
 
   refresh_timer = ""
   start_refresh_timer = () ->
@@ -160,8 +164,9 @@ jQuery ->
 
   if on_jobs_page()
     $('a#page_forward').show()
-    # show_loading_message('Loading Jobs')
+    show_loading_message('Loading Jobs')
     perform_job_search($('form#job_search'), null)
+    
     start_refresh_timer()
     
    
@@ -297,7 +302,7 @@ jQuery ->
 
   $('#datatable tbody tr').live 'mouseenter', (event) ->
     url = $(this).data('url')
-    popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
+    # popup_timer = setTimeout (() -> show_tooltip(event, url)), 1500 
   
   $('#datatable tbody tr').live 'mouseout', (event) ->
     hide_tooltip()

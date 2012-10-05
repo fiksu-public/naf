@@ -35,6 +35,14 @@ module Naf
       configuration.papertrail_group_id
     end
 
+    def job_refreshing
+      configuration.job_refreshing
+    end
+
+    def jobs_per_page
+      configuration.jobs_per_page
+    end
+
     def using_another_database?
       model_class != ActiveRecord::Base
     end  

@@ -5,8 +5,7 @@ module Logical
     
     describe Application do
       
-
-      let(:columns)      { [:title, :command, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval, :deleted] }
+      let(:columns)      { [:title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval, :deleted] }
       let(:physical_app) {  FactoryGirl.create(:application) }
       let(:logical_app)  {  Application.new(physical_app)    }
       let(:scheduled_physical_app) {  FactoryGirl.create(:scheduled_application, :application_schedule => FactoryGirl.create(:schedule_at_time)) }
