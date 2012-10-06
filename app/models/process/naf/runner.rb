@@ -23,12 +23,15 @@ module Process::Naf
         exit 1
       end
 
-      if try_lock_for_runner_use
+      if machine.try_lock_for_runner_use
         begin
           work_machine(machine)
         ensure
-          unlock_for_runner_use
+          machine.unlock_for_runner_use
         end
+      else
+        logger.fatal "There is already a runner running on this machine, exiting..."
+        exit 1
       end
     end
 
