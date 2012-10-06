@@ -23,6 +23,16 @@ module Process::Naf
         exit 1
       end
 
+      if try_lock_for_runner_use
+        begin
+          work_machine(machine)
+        ensure
+          unlock_for_runner_use
+        end
+      end
+    end
+
+    def work_machine(machine)
       machine.mark_alive
       machine.mark_up
 
