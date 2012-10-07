@@ -102,6 +102,7 @@ class NafSchema < ActiveRecord::Migration
           created_at                      timestamp not null default now(),
           application_id                  integer not null references #{schema_name}.applications,
           prerequisite_application_id     integer not null references #{schema_name}.applications,
+          UNIQUE (application_id, prerequisite_application_id),
           CHECK (application_id <> prerequisite_application_id)
       );
       insert into #{schema_name}.applications (application_type_id, command, title) values
@@ -153,7 +154,7 @@ class NafSchema < ActiveRecord::Migration
           created_at                         timestamp not null default now(),
           application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
           affinity_id           	     integer not null references #{schema_name}.affinities,
-          unique (application_schedule_id, affinity_id)
+          UNIQUE (application_schedule_id, affinity_id)
       );
       create table #{schema_name}.jobs
       (
@@ -196,6 +197,7 @@ class NafSchema < ActiveRecord::Migration
           job_id                                 integer not null,
           job_created_at                         timestamp not null,
           prerequisite_job_id                    integer not null,
+          UNIQUE (job_id, prerequisite_job_id),
           CHECK (job_id <> prerequisite_job_id)
       );
       create table #{schema_name}.job_created_ats
