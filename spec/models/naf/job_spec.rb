@@ -167,6 +167,21 @@ module Naf
       end
 
       
+
+      # TODO: Fill in these tests
+      # It's important that fetching jobs followings the run group restrictions
+
+      context "handling run group restrictions" do
+
+        it "should not limit running jobs in a run group with no limit restriction"
+        
+        it "should limit running jobs in a run group per machine"
+
+        it "should limit running jobs in a run group per all machines"
+        
+      end
+
+      
     end
 
   end
