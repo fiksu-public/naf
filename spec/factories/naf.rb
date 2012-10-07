@@ -8,7 +8,7 @@ FactoryGirl.define do
 
   factory :job_base, :class => ::Naf::Job do
     association :application_type, :factory => :rails_app_type
-    association :application_run_group_restriction, :factory => :no_restriction
+    association :application_run_group_restriction, :factory => :no_limit
   end
 
   factory :job, :parent => :job_base do
@@ -119,7 +119,7 @@ FactoryGirl.define do
 
   factory :schedule_base, :class => ::Naf::ApplicationSchedule do
     association :application, :factory => :application
-    association :application_run_group_restriction, :factory => :no_restriction
+    association :application_run_group_restriction, :factory => :no_limit
   end
 
   factory :schedule, :parent => :schedule_base do
@@ -139,27 +139,27 @@ FactoryGirl.define do
   #######   Application Run Group Restrictions ################
   #############################################################
 
-  factory :no_restriction, :class => ::Naf::ApplicationRunGroupRestriction do
+  factory :no_limit, :class => ::Naf::ApplicationRunGroupRestriction do
     id 1
-    application_run_group_restriction_name "no restrictions"
+    application_run_group_restriction_name "no limit"
     # Ensure single creation
     initialize_with do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
     end
   end
     
-  factory :one_at_a_time_restriction, :class => ::Naf::ApplicationRunGroupRestriction do
+  factory :limited_per_machine, :class => ::Naf::ApplicationRunGroupRestriction do
     id 2
-    application_run_group_restriction_name "one at a time"
+    application_run_group_restriction_name "limited per machine"
     # Ensure single creation
     initialize_with do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
     end
   end
   
-  factory :one_per_machine_restriction, :class => ::Naf::ApplicationRunGroupRestriction do
+  factory :limited_per_all_machines, :class => ::Naf::ApplicationRunGroupRestriction do
     id 3
-    application_run_group_restriction_name "one per machine"
+    application_run_group_restriction_name "limited per all machines"
     # Ensure single creation
     initialize_with do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
