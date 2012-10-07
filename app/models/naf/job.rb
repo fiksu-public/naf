@@ -7,6 +7,12 @@ module Naf
   #
 
   class Job < ::Partitioned::ById
+    class JobPrerequisiteLoop < StandardError
+      def initialize(job)
+        super("loop found in prerequisites for #{job}")
+      end
+    end
+
     include ::Af::Application::SafeProxy
     include PgAdvisoryLocker
 
@@ -20,6 +26,9 @@ module Naf
     belongs_to :application, :class_name => "::Naf::Application"
     belongs_to :application_run_group_restriction, :class_name => "::Naf::ApplicationRunGroupRestriction"
     has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
+    has_many :job_affinities, :class_name => "::Naf::Affinity", :through => :job_affinity_tabs
+    has_many :job_prerequisites, :class_name => "::Naf::JobPrerequisite", :dependent => :destroy
+    has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
     delegate :script_type_name, :to => :application_type
@@ -200,6 +209,16 @@ module Naf
 
     #
 
+    def verify_prerequisites(these_jobs)
+      these_jobs.each do |this_job|
+        if this_job.id == id
+          raise JobPrerequisiteLoop.new(self)
+        else
+          verify_prerequisites(this_job.prerequisites)
+        end
+      end
+    end
+
     def self.lock_for_job_queue(&block)
       return lock_record(0, &block)
     end
@@ -222,6 +241,7 @@ module Naf
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
+        job.verify_prerequisites(prerequisites)
         prerequisites.each do |prerequisite|
           ::Naf::JobPrerequisite.create(:job_id => job.id,
                                         :job_created_id => job.created_at,
@@ -248,7 +268,7 @@ module Naf
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
-        # XXX add application prerequisites
+        # XXX check prerequisites
         return job
       end
     end
