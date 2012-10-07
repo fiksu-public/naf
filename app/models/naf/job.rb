@@ -28,6 +28,8 @@ module Naf
     attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
     attr_accessible :application_run_group_limit
 
+    after_create :create_tracking_row
+
     def to_s
       components = []
       if started_at.nil?
@@ -207,7 +209,8 @@ module Naf
                              application_run_group_name = :command,
                              application_run_group_limit = 1,
                              priority = 0,
-                             affinities = [])
+                             affinities = [],
+                             prerequisites = [])
       application_run_group_name = command if application_run_group_name == :command
       ::Naf::Job.transaction do
         job = ::Naf::Job.create(:application_type_id => 1,
@@ -216,14 +219,24 @@ module Naf
                                 :application_run_group_name => application_run_group_name,
                                 :application_run_group_limit => application_run_group_limit,
                                 :priority => priority)
-        ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
+        prerequisites.each do |prerequisite|
+          ::Naf::JobPrerequisite.create(:job_id => job.id,
+                                        :job_created_id => job.created_at,
+                                        :prerequisite_job_id => prerequisite.id)
+        end
+        return job
       end
     end
 
-    def self.queue_application(application, application_run_group_restriction, application_run_group_name, application_run_group_limit = 1, priority = 0, affinities = [])
+    def self.queue_application(application,
+                               application_run_group_restriction,
+                               application_run_group_name,
+                               application_run_group_limit = 1,
+                               priority = 0,
+                               affinities = [])
       ::Naf::Job.transaction do
         job = ::Naf::Job.create(:application_id => application.id,
                                 :application_type_id => application.application_type_id,
@@ -232,20 +245,21 @@ module Naf
                                 :application_run_group_name => application_run_group_name,
                                 :application_run_group_limit => application_run_group_limit,
                                 :priority => priority)
-        ::Naf::JobCreatedAt.create(:job_id => job.id, :job_created_at => job.created_at)
         affinities.each do |affinity|
           ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
         end
+        # XXX add application prerequisites
+        return job
       end
     end
 
     def self.queue_application_schedule(application_schedule)
-      queue_application(application_schedule.application,
-                        application_schedule.application_run_group_restriction,
-                        application_schedule.application_run_group_name,
-                        application_schedule.application_run_group_limit,
-                        application_schedule.priority,
-                        application_schedule.affinities)
+      return queue_application(application_schedule.application,
+                               application_schedule.application_run_group_restriction,
+                               application_schedule.application_run_group_name,
+                               application_schedule.application_run_group_limit,
+                               application_schedule.priority,
+                               application_schedule.affinities)
     end
 
     def self.fetch_assigned_jobs(machine)
@@ -269,6 +283,12 @@ module Naf
           logger.debug "machine does not meet affinity requirements"
           next
         end
+
+        # check prerequisites
+        unfinished_prerequisites = ::Naf::JobPrerequisite.from_partition(job.created_at).where(:job_id => job.id).reject do |job_prerequisite|
+          job_prerequisite.prerequisite_job.finished_at.present?
+        end
+        next unless unfinished_prerequisites.blank?
 
         job = nil
         lock_for_job_queue do
@@ -341,6 +361,10 @@ module Naf
       puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}: sleeping for #{seconds} seconds"
       sleep(seconds)
       puts "TEST DONE: #{Time.zone.now}: #{foo.inspect}"
+    end
+
+    def create_tracking_row
+      ::Naf::JobCreatedAt.create(:job_id => id, :job_created_at => created_at)
     end
   end
 end
