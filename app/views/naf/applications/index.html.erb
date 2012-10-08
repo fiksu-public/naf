@@ -1,0 +1,36 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Script Type Name</th>
+          <th style='min-width:100px;'>Application Run Group Name</th>
+          <th>Application Run Group Restriction Name</th>
+          <th>Run Start Minute</th>
+          <th>Run Interval</th>
+          <th>Deleted</th>
+          <th>Last Queued At </th>
+          <!--<th>Actions</th>-->
+      </thead>
+      <tbody>
+
+    <tr>
+
+    </tr>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <%= javascript_include_tag("dataTablesTemplates/applications.js") %>
+      <script type='text/javascript'>
+
+        var sAjaxSource = "<%= naf.applications_path(:json) %>";
+
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

@@ -1,7 +1,9 @@
+html {
+	background-color:#f1f1f1;
+}
 #naf {
-    background-color:#f1f1f1;
     color:#333;
-    background: url(/assets//bg-grad.png) repeat-x 0px 0px;
+    background: url(/assets/bg-grad.png) repeat-x 0px 0px;
     height: 100%;
     min-width: 100%;
     display: inline-block;
@@ -78,8 +80,12 @@
                     margin: 0 0.2em 0 0;
                     color: #fff;
                     display: block;
-                    text-decoration: none;
                     &:hover { background-color: #2d2d2d; }
+                }
+            }
+            li#on {
+                a {
+                    background-color: #2D2D2D !important;
                 }
             }
         }
@@ -98,5 +104,74 @@
         }
     }
 
+    #links {
+        margin-bottom: 10px;
+    }
+
+    #search_container {
+        border: 1px solid #E1E1E1;
+        @include rounded-top;
+        @include rounded-bottom;
+        padding: 15px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        #job_search {
+            padding: 10px;
+            div.field{
+                clear:both;
+                text-align:right;
+                line-height:15px;
+
+                label {
+                    float:left;
+                }
+            }
+        }
+    }
+
+    .dataTables_processing {
+        color: #45a113;
+        font-style: bold;
+        font-size: 14px;
+        margin: 0 0 6px 0;
+        background-color: #e5f4e1;
+        border: 1px solid #d5f1cd;
+        padding: 4px 8px 4px 8px;
+    }
+
+    #datatable {
+        width:100%;
+        border-collapse: collapse;
+        td, th {
+            margin: 0;
+            padding: 3px 0 3px 3px;
+        }
+        .ui-state-default {
+            background-color: #F4F4F4;
+            background-image: none;
+            border: 1px solid #E1E1E1;
+            font-weight: normal;
+        }
+        .ui-icon {
+            float: left;
+            margin: -1px 0 0;
+            background-image: url(/assets/ui-icons_888888_256x240.png);
+            height: 16px;
+            width: 16px;
+            background-repeat: no-repeat;
+            display: block;
+            overflow: hidden;
+            text-indent: -99999px;
+        }
+        .ui-icon-triangle-1-s {
+            background-position: -64px -16px;
+        }
+        .ui-icon-triangle-1-n {
+            background-position: 0 -16px;
+        }
+        .ui-icon-carat-2-n-s {
+            background-position: -128px 0;
+        }
+    }
 }
     

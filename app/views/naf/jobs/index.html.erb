@@ -1,0 +1,38 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <%= render :partial => 'naf/shared/search_container' %>
+
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Server</th>
+          <th>Pid</th>
+          <th>Queued Time</th>
+          <th style='min-width:100px;'>Title</th>
+          <th>Started At</th>
+          <th>Finished At</th>
+          <th>Status</th>
+          <th></th>
+          <th>Actions</th>
+      </thead>
+      <tbody>
+
+    <tr>
+
+    </tr>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <%= javascript_include_tag("dataTablesTemplates/jobs.js") %>
+      <script type='text/javascript'>
+
+        var sAjaxSource = "<%= naf.jobs_path(:json) %>";
+
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

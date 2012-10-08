@@ -7,13 +7,20 @@ module Naf
 
     def index
       respond_to do |format|
-        format.html do 
-          @rows = []
-          render :template => 'naf/datatable'
+        format.html do
         end
         format.json do
-          job_hashes = Logical::Naf::Job.search(params[:search]).map(&:to_hash).map{|hash| add_urls(hash)}
-          render :json => {:job_root_url => naf.jobs_path, :cols => @cols, :jobs => job_hashes }.to_json
+          @jobs = []
+          job =[]
+          Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
+            add_urls(hash).map do |key, value|
+              value ||= ''
+              job << value
+            end
+            @jobs << job
+            job = []
+          end
+          render :layout => 'naf/layouts/jquery_datatables'
         end
       end
     end
@@ -29,6 +36,9 @@ module Naf
           render :template => 'naf/record'
         end
       end
+    end
+
+    def new
     end
 
     def create
@@ -105,7 +115,5 @@ module Naf
     end
 
   end
-
-  
 
 end

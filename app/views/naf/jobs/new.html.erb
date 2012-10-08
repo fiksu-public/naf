@@ -1,0 +1,19 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', naf.jobs_path %>
+
+    <h3 id="record_name">Create a Job</h3>
+
+    <%= form_tag(naf.jobs_path, :id => 'job_add') do %>
+        <b> Script Type: </b> <%= select(:job, :application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %><br />
+        <b> Command: </b> <%= text_field(:job, :command) %><br />
+        <b> Run Group Restriction: </b>
+        <%= select(:job, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect{ |a| [a.application_run_group_restriction_name, a.id] }, {:include_blank => true}) %> <br />
+        <b> Run Group Name: </b> <%= text_field(:job, :application_run_group_name) %> <br /> <br />
+        <input type="button" id="cancel" value="Cancel" />
+        <input type="submit" id="add" value="Add" />
+    <% end %>
+  </div>
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

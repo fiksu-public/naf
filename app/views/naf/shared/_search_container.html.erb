@@ -1,0 +1,117 @@
+<%= link_to 'Show search container', '#', :id => 'search_container_link' %>
+<div id="search_container">
+  <%= form_tag(naf.jobs_path, :method => "get", :id => 'job_search') do %>
+      <%= hidden_field(:search, :offset, :value => 0) %>
+      <div style="width:38%; display: inline-block;">
+          <div class="field">
+            <%= label(:command, "Command:") %>
+            <%= text_field(:search, :command) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:application_run_group_name, "Run Group:") %>
+            <%= text_field(:search, :application_run_group_name) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:priority, "Priority:") %>
+            <%= text_field(:search, :priority) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:pid, "Pid:") %>
+            <%= text_field(:search, :pid) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:exit_status, "Exit Status:") %>
+            <%= text_field(:search, :exit_status) %>
+          </div>
+      </div>
+      <div style="width:25%; display: inline-block; padding-left:40px;">
+          <div class="field">
+            <%= label(:status, "Status:") %>
+            <%= select(:search, :status, [["All", :all], ["Running", :running], ["Queued", :queued], ["Finished", :finished], ["Failed to Start", :failed_to_start], ["Exited with Error", :error], ["Canceled", :canceled]], { }, { :class => 'datatable_variable' }) %> </b>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:order, "Order By:") %>
+            <%= select(:search, :order, [["Queued Time", :created_at], ["Started", :started_at], ["Finished", :finished_at], ["Priority", :priority]], { }, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:direction, "Direction:") %>
+            Descending:
+            <%= radio_button(:search, :direction, :desc, :checked => true) %>
+            Ascending:
+            <%= radio_button(:search, :direction, :asc) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:limit, "Per Page:") %>
+            <%= select(:search, :limit, [10, 25, 50, 100].map { |val| [val.to_s, val] }, { }, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:running, "Running:") %>
+            <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]], { }, { :class => 'datatable_variable' }) %>
+          </div>
+      </div>
+      <div style="width:25%; display: inline-block; padding-left:40px;">
+          <div class="field">
+            <%= label(:application_type_id, "Script Type:") %>
+            <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:application_run_group_restriction_id, "Run Group Restriction:") %>
+            <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:failed_to_start, "Failed to Start:") %>
+            <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", true], ["False", false]], { }, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:request_to_terminate, "Request to Terminate:") %>
+            <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]]) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:started_on_machine_id, "Machine:") %>
+            <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }, { :include_blank => true }) %>
+          </div>
+      </div>
+      <br/><br/><br/>
+      <%= submit_tag("Search") %>
+  <% end %>
+</div>
+
+<% content_for :javascripts do %>
+    <script type='text/javascript'>
+        jQuery(document).ready(function() {
+            jQuery("#search_container").hide();
+            jQuery("#search_container_link").click(function () {
+                if (jQuery("#search_container").css('display') == 'none') {
+                    jQuery("#search_container_link").text("Hide search container");
+                }else {
+                    jQuery("#search_container_link").text("Show search container");
+                }
+                jQuery("#search_container").slideToggle("slow");
+            });
+        });
+    </script>
+<% end %>

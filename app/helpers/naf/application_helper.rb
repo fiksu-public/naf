@@ -117,7 +117,7 @@ module Naf
 
     def generate_create_link
       return "" if READ_ONLY_RESOURCES.include?(controller_name) or CREATE_BLOCKED_RESOURCES.include?(controller_name)
-      return link_to "Add a Job", "#", {:class => 'add_job'} if display_job_search_link?
+      return link_to "Add a Job", naf.new_job_path, {:class => 'add_job'} if display_job_search_link?
       link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
     end
 

@@ -3,10 +3,24 @@ module Naf
 
     before_filter :set_cols_and_attributes
 
- 
     def index
-      @rows = Logical::Naf::Application.all
-      render :template => 'naf/datatable'
+      respond_to do |format|
+        format.html do
+        end
+        format.json do
+          @applications = []
+          application = []
+          Logical::Naf::Application.all.map(&:to_hash).map do |hash|
+            hash.map do |key, value|
+              value = '' if value.nil?
+              application << value
+            end
+            @applications << application
+            application =[]
+          end
+          render :layout => 'naf/layouts/jquery_datatables'
+        end
+      end
     end
 
     def show
