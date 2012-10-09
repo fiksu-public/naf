@@ -3,7 +3,7 @@ module Logical
     class JobFetcher
       include ::Af::Application::SafeProxy
 
-      attr_accessible :machine
+      attr_reader :machine
 
       def initialize(machine)
         @machine = machine
