@@ -62,7 +62,7 @@ module Logical
     end
 
     def queue_test
-      queue_rails_job("::Logical::Naf::JobCreator.test")
+      queue_rails_job("#{self.class.name}.test")
     end
 
     def self.test(*foo)

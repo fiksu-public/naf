@@ -54,7 +54,7 @@ module Logical
             end
 
             sql = <<-SQL
-               UPDATE #{Naf.schema_name}.jobs
+               UPDATE #{::Naf.schema_name}.jobs
                  SET
                      started_at = NOW(),
                      started_on_machine_id = ?
