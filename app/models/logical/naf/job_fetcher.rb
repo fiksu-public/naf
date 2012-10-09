@@ -15,7 +15,7 @@ module Logical
 
       def fetch_next_job
         ::Naf::Job.possible_jobs.select("*").select_affinity_ids.order_by_priority.each do |possible_job|
-          job_affinity_ids = ::Naf::Job.possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
+          job_affinity_ids = possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
 
           # eliminate job if it can't run on this machine
           unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
