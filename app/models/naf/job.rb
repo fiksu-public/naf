@@ -113,17 +113,23 @@ module Naf
       partition.index :exit_status
 
       partition.janitorial_creates_needed lambda {|model, *partition_key_values|
-        current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
+        sequence_name = model.connection.default_sequence_name(model.table_name)
+        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
         start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
         end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
         return model.partition_generate_range(start_range, end_range).reject{|p| model.sql_adapter.partition_exists?(p)}
       }
       partition.janitorial_archives_needed []
       partition.janitorial_drops_needed lambda {|model, *partition_key_values|
-        current_id = model.find_by_sql("select last_value as id from #{model.table_name}_id_seq").first.id
-        start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
-        end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
-        return model.partition_generate_range(start_range, end_range).reverse.select{|p| model.sql_adapter.partition_exists?(p)}
+        sequence_name = model.connection.default_sequence_name(model.table_name)
+        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
+        partition_key_value = current_id - (model.partition_table_size * model.partition_num_lead_buffers)
+        partition_key_values_to_drop = []
+        while model.sql_adapter.partition_exists?(partition_key_value)
+          partition_key_values_to_drop << partition_key_value
+          partition_key_value -= model.partition_table_size
+        end
+        return partition_key_values_to_drop
       }
     end
 

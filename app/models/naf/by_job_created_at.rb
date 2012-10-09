@@ -20,7 +20,13 @@ module Naf
       }
       partition.janitorial_archives_needed []
       partition.janitorial_drops_needed lambda {|model, *partition_key_values|
-        return model.partition_generate_range(Time.zone.now.to_date - 1.month, Time.zone.now.to_date + 1.month).reverse.select{|p| model.sql_adapter.partition_exists?(p)}
+        partition_key_value = Time.zone.now.to_date - 1.month
+        partition_key_values_to_drop = []
+        while model.sql_adapter.partition_exists?(partition_key_value)
+          partition_key_values_to_drop << partition_key_value
+          partition_key_value -= model.partition_table_size
+        end
+        return partition_key_values_to_drop
       }
     end
   end
