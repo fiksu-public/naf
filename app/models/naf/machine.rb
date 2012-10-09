@@ -136,13 +136,5 @@ module Naf
       save!
       mark_processes_as_dead(by_machine)
     end
-
-    def assigned_jobs
-      return ::Naf::Job.fetch_assigned_jobs(self)
-    end
-
-    def fetch_next_job
-      return ::Naf::Job.fetch_next_job(self)
-    end
   end
 end

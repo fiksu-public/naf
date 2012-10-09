@@ -11,6 +11,7 @@ module Process::Naf
       super
       update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
+      @job_creator = ::Logical::Naf::JobCreator.new
     end
 
     def work
@@ -73,6 +74,8 @@ module Process::Naf
           end
         end
 
+        job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
+
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
@@ -84,7 +87,7 @@ module Process::Naf
             should_be_queued.each do |application_schedule|
               logger.info "schedule application: #{application_schedule}"
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-                ::Naf::Job.queue_application_schedule(application_schedule)
+                @job_creator.queue_application_schedule(application_schedule)
               end
             end
 
@@ -134,7 +137,7 @@ module Process::Naf
         logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
         while @children.length < machine.thread_pool_size
           begin
-            job = machine.fetch_next_job
+            job = job_fetcher.fetch_next_job
 
             unless job.present?
               logger.info "no more jobs to run"
@@ -274,7 +277,7 @@ module Process::Naf
     end
 
     def assigned_jobs(machine)
-      return machine.assigned_jobs.select do |job|
+      return ::Naf::Job.assigned_jobs(machine).select do |job|
         is_job_process_alive?(job)
       end
     end

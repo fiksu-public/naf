@@ -13,7 +13,6 @@ module Naf
       end
     end
 
-    include ::Af::Application::SafeProxy
     include PgAdvisoryLocker
 
     JOB_STALE_TIME = 1.week
@@ -193,6 +192,10 @@ module Naf
       return recently_queued.not_started
     end
 
+    def self.assigned_jobs(machine)
+      return recently_queued.not_finished.started_on(machine)
+    end
+
     #
 
     def title
@@ -223,164 +226,8 @@ module Naf
       return lock_record(0, &block)
     end
 
-    def self.queue_rails_job(command,
-                             application_run_group_restriction = ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines,
-                             application_run_group_name = :command,
-                             application_run_group_limit = 1,
-                             priority = 0,
-                             affinities = [],
-                             prerequisites = [])
-      application_run_group_name = command if application_run_group_name == :command
-      ::Naf::Job.transaction do
-        job = ::Naf::Job.create(:application_type_id => 1,
-                                :command => command,
-                                :application_run_group_restriction_id => application_run_group_restriction.id,
-                                :application_run_group_name => application_run_group_name,
-                                :application_run_group_limit => application_run_group_limit,
-                                :priority => priority)
-        affinities.each do |affinity|
-          ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
-        end
-        job.verify_prerequisites(prerequisites)
-        prerequisites.each do |prerequisite|
-          ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                        :job_created_id => job.created_at,
-                                        :prerequisite_job_id => prerequisite.id)
-        end
-        return job
-      end
-    end
-
-    def self.queue_application(application,
-                               application_run_group_restriction,
-                               application_run_group_name,
-                               application_run_group_limit = 1,
-                               priority = 0,
-                               affinities = [])
-      ::Naf::Job.transaction do
-        job = ::Naf::Job.create(:application_id => application.id,
-                                :application_type_id => application.application_type_id,
-                                :command => application.command,
-                                :application_run_group_restriction_id => application_run_group_restriction.id,
-                                :application_run_group_name => application_run_group_name,
-                                :application_run_group_limit => application_run_group_limit,
-                                :priority => priority)
-        affinities.each do |affinity|
-          ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
-        end
-        # XXX check prerequisites
-        return job
-      end
-    end
-
-    def self.queue_application_schedule(application_schedule)
-      return queue_application(application_schedule.application,
-                               application_schedule.application_run_group_restriction,
-                               application_schedule.application_run_group_name,
-                               application_schedule.application_run_group_limit,
-                               application_schedule.priority,
-                               application_schedule.affinities)
-    end
-
-    def self.fetch_assigned_jobs(machine)
-      return recently_queued.not_finished.started_on(machine)
-    end
-
-    def self.fetch_next_job(machine)
-      possible_jobs.select("*").select_affinity_ids.order_by_priority.each do |possible_job|
-        job_affinity_ids = possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
-
-        # eliminate job if it can't run on this machine
-        unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
-          logger.debug "required affinity not found"
-          next
-        end
-
-        machine_affinity_ids = machine.machine_affinity_slots.map(&:affinity_id)
-
-        # eliminate job if machine can not run this it
-        unless job_affinity_ids.all? { |job_affinity_id| machine.affinity_ids.include? job_affinity_id }
-          logger.debug "machine does not meet affinity requirements"
-          next
-        end
-
-        # check prerequisites
-        unfinished_prerequisites = ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).reject do |job_prerequisite|
-          job_prerequisite.prerequisite_job.finished_at.present?
-        end
-        next unless unfinished_prerequisites.blank?
-
-        job = nil
-        lock_for_job_queue do
-          if possible_job.application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_machine.id
-            if (recently_queued.started.not_finished.started_on(machine).in_run_group(possible_job.application_run_group_name).count + 1) > (possible_job.application_run_group_limit || 0)
-              logger.debug "already running on this machine"
-              next
-            end
-          elsif possible_job.application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines.id
-            if (recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count + 1) > (possible_job.application_run_group_limit || 0)
-              logger.debug "already running"
-              next
-            end
-          else # possible_job.application_run_group_restriction.application_run_group_restriction_name == "no restrictions"
-          end
-
-          sql = <<-SQL
-             UPDATE #{Naf.schema_name}.jobs
-               SET
-                   started_at = NOW(),
-                   started_on_machine_id = ?
-             WHERE
-               id = ? AND
-               started_at IS NULL
-             RETURNING
-               *
-          SQL
-
-          job = find_by_sql([sql, machine.id, possible_job.id]).first
-        end
-
-        if job.present?
-          # found a job
-          log_levels = {}
-          unless machine.log_level.blank?
-            begin
-              log_level_hash = JSON.parse(machine.log_level)
-              log_levels.merge!(log_level_hash)
-            rescue StandardError => e
-              logger.error "couldn't parse machine.log_level: #{machine.log_level}: (#{e.message})"
-            end
-          end
-          unless job.application.nil? || job.application.log_level.blank?
-            begin
-              log_level_hash = JSON.parse(job.application.log_level)
-              log_levels.merge!(log_level_hash)
-            rescue StandardError => e
-              logger.error "couldn't parse job.application.log_level: #{job.application.log_level}: (#{e.message})"
-            end
-          end
-          job.log_level = log_levels.to_json
-          return job
-        end
-      end
-
-      # no jobs found
-      return nil
-    end
-
     def spawn
       application_type.spawn(self)
-    end
-
-    def self.queue_test
-      queue_rails_job("::Naf::Job.test")
-    end
-
-    def self.test(*foo)
-      seconds = rand 120 + 15
-      puts "TEST CALLED: #{Time.zone.now}: #{foo.inspect}: sleeping for #{seconds} seconds"
-      sleep(seconds)
-      puts "TEST DONE: #{Time.zone.now}: #{foo.inspect}"
     end
 
     def create_tracking_row
