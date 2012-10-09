@@ -58,6 +58,7 @@ html {
             h3#record_name {
                 font-size: 130%;
                 @include margin-padding-null;
+                padding-bottom: 10px;
             }
         }
     }
@@ -99,9 +100,6 @@ html {
         border-left: 1px solid #E1E1E1;
         border-right: 1px solid #E1E1E1;
         padding: 10px;
-        #page-label {
-          padding-bottom: 10px;
-        }
     }
 
     #links {
@@ -146,32 +144,32 @@ html {
             margin: 0;
             padding: 3px 0 3px 3px;
         }
-        .ui-state-default {
-            background-color: #F4F4F4;
-            background-image: none;
-            border: 1px solid #E1E1E1;
-            font-weight: normal;
-        }
+
         .ui-icon {
             float: left;
-            margin: -1px 0 0;
-            background-image: url(/assets/ui-icons_888888_256x240.png);
-            height: 16px;
-            width: 16px;
-            background-repeat: no-repeat;
-            display: block;
-            overflow: hidden;
-            text-indent: -99999px;
         }
-        .ui-icon-triangle-1-s {
-            background-position: -64px -16px;
-        }
-        .ui-icon-triangle-1-n {
-            background-position: 0 -16px;
-        }
-        .ui-icon-carat-2-n-s {
-            background-position: -128px 0;
-        }
+    }
+
+    .ui-buttonset .ui-button {
+        border: 1px solid #CECECE;
+        color: #333333;
+        margin: 0;
+        padding: 4px 12px;
+    }
+
+    .ui-state-default {
+        background-color: #F4F4F4;
+        background-image: none;
+        border: 1px solid #E1E1E1;
+        font-weight: normal;
+    }
+
+    #datatable_info {
+        margin: 6px 0 8px 0 ;
+    }
+
+    .dataTables_info {
+        margin: 8px 0 6px 0 ;
     }
 }
     

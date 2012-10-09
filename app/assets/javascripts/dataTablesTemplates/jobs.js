@@ -1,6 +1,6 @@
 // When document is ready
 jQuery(document).ready(function() {
-//  var isUpdateDataTable = null;
+
   // Prepare for setup the datatable.
   var dataTableOptions = {
     "bProcessing": true,
@@ -10,6 +10,11 @@ jQuery(document).ready(function() {
     "bJQueryUI": true,
     "bFilter": false,
     'bLengthChange': false,
+    "bServerSide": true,
+    "bPaginate": true,
+    "sPaginationType": "full_numbers",
+    "bInfo": true,
+    "sDom": 'rpitip',
     "aoColumnDefs": [
       { "bVisible": false, "aTargets": [ 8 ] }
     ],

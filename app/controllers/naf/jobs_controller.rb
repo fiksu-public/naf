@@ -42,31 +42,18 @@ module Naf
     end
 
     def create
-     @job = Naf::Job.new(params[:job])
-     if params[:job][:application_id] and app = Naf::Application.find(params[:job][:application_id])
-       @job.command = app.command
-       @job.application_type_id = app.application_type_id
-       schedule = app.application_schedule
-       @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
-       @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
-       post_source = "Application: #{app.title}"
-     else
-       post_source = "Job"
-     end
-      respond_to do |format|
-        format.json do
-          response = {}
-          if @job.save
-            response[:job_url] = url_for(@job)
-            response[:post_source] = post_source
-            response[:saved] = true
-          else
-            response[:saved] = false
-            response[:errors] = @job.errors.full_messages
-          end
-          puts response
-          render :json => response.to_json
-        end
+      @job = Naf::Job.new(params[:job])
+      if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
+        @job.command = app.command
+        @job.application_type_id = app.application_type_id
+        schedule = app.application_schedule
+        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
+        @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
+      end
+      if @job.save
+        redirect_to(@job, :notice => 'Job was successfully created.')
+      else
+        render :action => "new"
       end
     end
 
