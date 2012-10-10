@@ -4,7 +4,7 @@ rake="bundle exec rake"
 
 cd spec/dummy
 
-$rake db:create db:migrate naf:janitor:infrastructure db:test:clone_structure
+$rake naf:install:migrations db:create db:migrate naf:janitor:infrastructure db:test:clone_structure
 
 cd ../..
 
