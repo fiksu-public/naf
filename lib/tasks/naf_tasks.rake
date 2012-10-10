@@ -59,7 +59,7 @@ namespace :naf do
   namespace :janitor do
     desc "create partitioning infrastructure for naf tables"
     task :infrastructure => :environment do
-      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name]
+      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name,::Naf::ApplicationSchedulePrerequisite.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
     

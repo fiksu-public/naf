@@ -235,6 +235,8 @@ class NafSchema < ActiveRecord::Migration
         ('Naf::JanitorialDropAssignment',   100, '::Naf::JobCreatedAt'),
         ('Naf::JanitorialCreateAssignment', 125, '::Naf::JobPrerequisite'),
         ('Naf::JanitorialDropAssignment',   125, '::Naf::JobPrerequisite'),
+        ('Naf::JanitorialCreateAssignment', 125, '::Naf::ApplicationSchedulePrerequisite'),
+        ('Naf::JanitorialDropAssignment',   125, '::Naf::ApplicationSchedulePrerequisite'),
         ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
         ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
@@ -259,6 +261,7 @@ class NafSchema < ActiveRecord::Migration
       drop table #{schema_name}.applications cascade;
       drop table #{schema_name}.application_types cascade;
       drop table #{schema_name}.application_run_group_restrictions cascade;
+      drop table #{schema_name}.application_schedule_prerequisites cascade;
       drop table #{schema_name}.application_schedules cascade;
       drop table #{schema_name}.application_schedule_affinity_tabs cascade;
     SQL
