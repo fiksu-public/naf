@@ -36,17 +36,6 @@ module Naf
       end
     end
 
-    context "when fetching jobs" do
-      it "should ask Naf::Job to find jobs assigned to it" do
-        Job.should_receive(:fetch_assigned_jobs).with(machine).and_return([])
-        machine.assigned_jobs
-      end
-      it "should ask Naf::Job to find the next job for it" do
-        Job.should_receive(:fetch_next_job).with(machine).and_return([])
-        machine.fetch_next_job
-      end
-    end
-
     context "when updating its status" do
       before(:each) do
         @time_before_update = Time.zone.now
