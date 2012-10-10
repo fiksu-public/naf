@@ -31,8 +31,16 @@ html {
         text-decoration: none;
     }
 
+    select {
+        width: 12em;
+    }
+
+    input {
+        width: 15em;
+    }
+
     .clear {
-        clear:both;
+        clear: both;
     }
 
     #fluid {

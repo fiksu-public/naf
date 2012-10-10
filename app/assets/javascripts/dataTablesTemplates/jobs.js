@@ -17,8 +17,9 @@ jQuery(document).ready(function() {
     "bInfo": true,
     "isPaginate": true,
     "sAjaxSource": sAjaxSource,
-    "aaSorting": [[0,'asc']],
+    "aaSorting": [[3,'asc']],
     "aoColumnDefs": [
+      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 9 ] },
       { "bVisible": false, "aTargets": [ 8 ] }
     ],
     "fnInitComplete" : function() {

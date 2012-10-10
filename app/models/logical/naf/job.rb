@@ -15,6 +15,8 @@ module Logical
       FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
       
       SEARCH_FIELDS = [:command, :application_run_group_name]
+
+      ORDER = { '3' => "created_at", '5' => "started_at", '6' => "finished_at" }
      
       def initialize(naf_job)
         @job = naf_job

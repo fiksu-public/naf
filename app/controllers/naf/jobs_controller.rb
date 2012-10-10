@@ -13,7 +13,9 @@ module Naf
         format.json do
           set_page
           params[:search][:direction] = params['sSortDir_0']
+          params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
+          params[:search][:offset] = @page - 1
           records = Logical::Naf::Job.search(params[:search])
           @total_records = Naf::Job.count(:all)
           @jobs = []
@@ -26,7 +28,6 @@ module Naf
             @jobs << job
             job = []
           end
-          @jobs = @jobs.paginate(:per_page => @rows_per_page, :page => @page)
           render :layout => 'naf/layouts/jquery_datatables'
         end
       end
