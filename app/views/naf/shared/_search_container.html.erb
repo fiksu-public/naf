@@ -46,21 +46,6 @@
           <br/>
 
           <div class="field">
-            <%= label(:direction, "Direction:") %>
-            Descending:
-            <%= radio_button(:search, :direction, :desc, :checked => true, :class => 'datatable_variable') %>
-            Ascending:
-            <%= radio_button(:search, :direction, :asc, :class => 'datatable_variable') %>
-          </div>
-          <br/>
-
-          <div class="field">
-            <%= label(:limit, "Per Page:") %>
-            <%= select(:search, :limit, [10, 25, 50, 100].map { |val| [val.to_s, val] }, { }, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
             <%= label(:running, "Running:") %>
             <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]], { }, { :class => 'datatable_variable' }) %>
           </div>

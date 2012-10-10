@@ -171,5 +171,24 @@ html {
     .dataTables_info {
         margin: 8px 0 6px 0 ;
     }
+
+    #page-select-container {
+        display: none;
+        float: right;
+        margin-top: -1px;
+        padding: 2px 2px;
+        width: 205px;
+    }
+
+    #iDisplayLength {
+        background-color: #FFFFFF;
+    }
+
+    .page-select {
+        border: 1px solid #E1E1E1;
+        cursor: pointer;
+        float: right;
+        width: 95px;
+    }
 }
     

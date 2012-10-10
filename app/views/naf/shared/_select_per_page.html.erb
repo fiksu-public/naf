@@ -10,9 +10,8 @@
     jQuery(document).ready(function() {
       jQuery('#page-select-container form select').change(function() {
         var ddTable = jQuery('#datatable');
-          setFirstPage();
+          ddTable.dataTableSettings[0]._iDisplayStart = 0;
           ddTable.dataTableSettings[0]._iDisplayLength = parseInt(this.value);
-          updateBBQState();
           jQuery('#datatable').dataTable().fnDraw();
         });
     });
@@ -25,11 +24,11 @@
 <% end %>
 
 <div id="page-select-container" class="ui-state-default ui-corner-all">
-  <% default_page_options = [20, 50, 100, 250] -%>
-  <% form_tag({ :controller => params[:controller], :action => params[:action], :format => 'js' }, 
-    :method => :get, :class => 'inline-block per_page') do -%>
+  <% default_page_options = [20, 50, 100, 250] %>
+  <%= form_tag({ :controller => params[:controller], :action => params[:action], :format => 'js' },
+    :method => :get) do %>
     <%= label_tag :iDisplayLength, "Rows Per Page:", :class => "label" %> 
     <%= select_tag :iDisplayLength, 
-      options_for_select((@per_page_options || default_page_options), @rows_per_page), :class => "page-select datatable_variable ui-state-default ui-corner-all" %>
-  <% end -%>
+      options_for_select(default_page_options, @rows_per_page), :class => "page-select datatable_variable ui-state-default ui-corner-all" %>
+  <% end %>
 </div>

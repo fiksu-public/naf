@@ -4,15 +4,21 @@ module Naf
     include Naf::ApplicationHelper
 
     before_filter :set_cols_and_attributes
+    before_filter :set_rows_per_page
 
     def index
       respond_to do |format|
         format.html do
         end
         format.json do
+          set_page
+          params[:search][:direction] = params['sSortDir_0']
+          params[:search][:limit] = params['iDisplayLength']
+          records = Logical::Naf::Job.search(params[:search])
+          @total_records = Naf::Job.count(:all)
           @jobs = []
           job =[]
-          Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
+          records.map(&:to_hash).map do |hash|
             add_urls(hash).map do |key, value|
               value ||= ''
               job << value
@@ -20,6 +26,7 @@ module Naf
             @jobs << job
             job = []
           end
+          @jobs = @jobs.paginate(:per_page => @rows_per_page, :page => @page)
           render :layout => 'naf/layouts/jquery_datatables'
         end
       end

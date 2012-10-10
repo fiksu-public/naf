@@ -3,28 +3,33 @@ jQuery(document).ready(function() {
 
   // Prepare for setup the datatable.
   var dataTableOptions = {
+    "bJQueryUI": true,
     "bProcessing": true,
+    "bServerSide": true,
+    "bFilter": false,
+    "bSort": true,
+    "asStripClasses": [ '','tablerow-bg-shade' ],
+    "bPaginate": true,
+    "bLengthChange": false,
+    "sPaginationType": "full_numbers",
+    "iDisplayLength": eval("if(typeof getDisplayLength == 'function') { getDisplayLength() }"),
+    "sDom": 'rpitip',
+    "bInfo": true,
     "isPaginate": true,
     "sAjaxSource": sAjaxSource,
-    "bSort": true,
-    "bJQueryUI": true,
-    "bFilter": false,
-    'bLengthChange': false,
-    "bServerSide": true,
-    "bPaginate": true,
-    "sPaginationType": "full_numbers",
-    "bInfo": true,
-    "sDom": 'rpitip',
+    "aaSorting": [[0,'asc']],
     "aoColumnDefs": [
       { "bVisible": false, "aTargets": [ 8 ] }
     ],
     "fnInitComplete" : function() {
+      initPageSelect();
       jQuery("#datatable").css("width","100%");
     },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
       jQuery.getJSON( sSource, aoData, function (json) {
         fnCallback(json);
+        initPaging();
       });
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
@@ -39,7 +44,6 @@ jQuery(document).ready(function() {
     jQuery('#datatable').dataTable(dataTableOptions);
 });
 
-
 function addLinkToJob(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/jobs/' + id + '">' + id + '</a>' );
@@ -52,4 +56,15 @@ function addLinkToTitle(nRow, aData) {
     var row = jQuery('<a href="' + link + '">' + "Database Janitorial Work" + '</a>' );
     jQuery('td:nth-child(5)', nRow).empty().append(row);
   }
+}
+
+function initPaging() {
+  jQuery('#datatable_wrapper > div.dataTables_paginate > span.fg-button').click(function(){
+    return false;
+  });
+
+  jQuery('#datatable_wrapper > div.dataTables_paginate > span > span.fg-button').click(function(){
+    jQuery('#datatable').dataTable().fnDraw();
+    return false;
+  });
 }

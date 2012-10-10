@@ -1,20 +1,20 @@
 <% content_for :body do %>
     <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
     <%= render :partial => 'naf/shared/search_container' %>
-
+    <%= render :partial => 'naf/shared/select_per_page' %>
     <table id='datatable'>
       <thead>
         <tr>
-          <th>Id</th>
-          <th>Server</th>
-          <th>Pid</th>
-          <th>Queued Time</th>
-          <th style='min-width:100px;'>Title</th>
-          <th>Started At</th>
-          <th>Finished At</th>
-          <th>Status</th>
+          <th style='padding-right:5px;'>Id</th>
+          <th style='padding-right:5px;'>Server</th>
+          <th style='padding-right:5px;'>Pid</th>
+          <th style='padding-right:5px;'>Queued Time</th>
+          <th style='padding-right:5px;'>Title</th>
+          <th style='padding-right:5px;'>Started At</th>
+          <th style='padding-right:5px;'>Finished At</th>
+          <th style='padding-right:5px;'>Status</th>
           <th></th>
-          <th>Actions</th>
+          <th style='padding-right:5px;'>Actions</th>
       </thead>
       <tbody>
 
