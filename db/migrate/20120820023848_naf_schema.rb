@@ -96,15 +96,6 @@ class NafSchema < ActiveRecord::Migration
           title                           text not null,
           log_level                       text null
       );
-      create table #{schema_name}.application_prerequisites
-      (
-          id                              serial not null primary key,
-          created_at                      timestamp not null default now(),
-          application_id                  integer not null references #{schema_name}.applications,
-          prerequisite_application_id     integer not null references #{schema_name}.applications,
-          UNIQUE (application_id, prerequisite_application_id),
-          CHECK (application_id <> prerequisite_application_id)
-      );
       insert into #{schema_name}.applications (application_type_id, command, title) values
         (
           (select id from #{schema_name}.application_types where script_type_name = 'rails'),
@@ -156,6 +147,15 @@ class NafSchema < ActiveRecord::Migration
           application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
           affinity_id           	     integer not null references #{schema_name}.affinities,
           UNIQUE (application_schedule_id, affinity_id)
+      );
+      create table #{schema_name}.application_schedule_prerequisites
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          application_schedule_id                integer not null references #{schema_name}.application_schedules,
+          prerequisite_application_schedule_id   integer not null references #{schema_name}.application_schedules,
+          UNIQUE (application_schedule_id, prerequisite_application_schedule_id),
+          CHECK (application_schedule_id <> prerequisite_application_schedule_id)
       );
       create table #{schema_name}.jobs
       (

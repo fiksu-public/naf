@@ -16,6 +16,9 @@ module Naf
     has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
     has_many :affinities, :through => :application_schedule_affinity_tabs
 
+    has_many :application_schedule_prerequisites, :class_name => "::Naf::ApplicationSchedulePrerequisite", :dependent => :destroy
+    has_many :prerequisites, :class_name => "::Naf::ApplicationSchedule", :through => :application_schedule_prerequisites
+
     delegate :title, :to => :application
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction

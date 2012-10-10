@@ -34,7 +34,8 @@ module Logical
                             application_run_group_name,
                             application_run_group_limit = 1,
                             priority = 0,
-                            affinities = [])
+                            affinities = [],
+                            prerequisites = [])
         ::Naf::Job.transaction do
           job = ::Naf::Job.create(:application_id => application.id,
                                   :application_type_id => application.application_type_id,
@@ -46,18 +47,32 @@ module Logical
           affinities.each do |affinity|
             ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
           end
-          # XXX check prerequisites
+          job.verify_prerequisites(prerequisites)
+          prerequisites.each do |prerequisite|
+            ::Naf::JobPrerequisite.create(:job_id => job.id,
+                                          :job_created_id => job.created_at,
+                                          :prerequisite_job_id => prerequisite.id)
+          end
           return job
         end
       end
 
-      def queue_application_schedule(application_schedule)
+      def queue_application_schedule(application_schedule, schedules_queued_already = [])
+        prerequisite_jobs = []
+        application_schedule.prerequisites.each do |application_schedule_prerequisite|
+          if schedules_queued_already.include? application_schedule.id
+            raise ::Naf::Job::JobPrerequisiteLoop.new(application_schedule)
+          end
+          schedules_queued_already << application_schedule.id
+          prerequisite_jobs += queue_application_schedule(application_schedule_prerequisite, schedules_queued_already)
+        end
         return queue_application(application_schedule.application,
                                  application_schedule.application_run_group_restriction,
                                  application_schedule.application_run_group_name,
                                  application_schedule.application_run_group_limit,
                                  application_schedule.priority,
-                                 application_schedule.affinities)
+                                 application_schedule.affinities,
+                                 prerequisite_jobs)
       end
     end
 
