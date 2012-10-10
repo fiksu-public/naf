@@ -46,7 +46,7 @@ module Logical
                 next
               end
             elsif possible_job.application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines.id
-              if (recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count + 1) > limit
+              if (::Naf::Job.recently_queued.started.not_finished.in_run_group(possible_job.application_run_group_name).count + 1) > limit
                 logger.debug "already running"
                 next
               end
