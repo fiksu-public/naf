@@ -12,6 +12,12 @@ module Process::Naf
       update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
+
+      # will help forked processes, not the runner
+      ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
+      ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
+      ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
+      ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
     end
 
     def work
