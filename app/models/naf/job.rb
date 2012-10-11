@@ -27,7 +27,7 @@ module Naf
     has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
     has_many :job_affinities, :class_name => "::Naf::Affinity", :through => :job_affinity_tabs
     has_many :job_prerequisites, :class_name => "::Naf::JobPrerequisite", :dependent => :destroy
-    has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites
+    has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites, :source => :prerequisite_job
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
     delegate :script_type_name, :to => :application_type
