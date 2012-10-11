@@ -128,15 +128,14 @@ class NafSchema < ActiveRecord::Migration
           check (run_start_minute is null OR run_interval is null)
       );
       insert into #{schema_name}.application_schedules
-        (application_id, application_run_group_restriction_id, application_run_group_name, application_run_group_limit, run_start_minute, run_interval, enabled) values
+        (application_id, application_run_group_restriction_id, application_run_group_name, application_run_group_limit, run_start_minute, run_interval) values
         (
           (select id from #{schema_name}.applications where command = '::Process::Naf::Janitor.run'),
           (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'limited per all machines'),
           '::Process::Naf::Janitor.run',
           1,
           5,
-          null,
-          false
+          null
         );
       create unique index applications_have_one_schedule_udx on #{schema_name}.application_schedules (application_id) where enabled = true;
       create table #{schema_name}.application_schedule_affinity_tabs
