@@ -4,11 +4,9 @@ module Naf
     before_filter :set_cols_and_attributes
   
     def index
-      @rows = []
       if params[:job_id]
-        @rows = Naf::JobAffinityTab.where(:job_id => params[:job_id])
+        @tabs = Naf::JobAffinityTab.where(:job_id => params[:job_id])
       end
-      render :template => 'naf/datatable'
     end
     
     def show

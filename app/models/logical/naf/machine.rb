@@ -7,7 +7,7 @@ module Logical
       
       include ActionView::Helpers::DateHelper
       
-      COLUMNS = [:server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]
+      COLUMNS = [:id, :server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]
       
       def initialize(naf_machine)
         @machine = naf_machine

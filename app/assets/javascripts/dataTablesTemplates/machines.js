@@ -4,12 +4,15 @@ jQuery(document).ready(function() {
   // Prepare for setup the datatable.
   var dataTableOptions = {
     "sAjaxSource": sAjaxSource,
+    "aoColumnDefs": [
+      { "bVisible": false, "aTargets": [ 0 ] }
+    ],
     "fnInitComplete" : function() {
       initPageSelect();
       jQuery("#datatable").css("width","100%");
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-      addLinkToApplication(nRow, aData);
+      addLinkToMachines(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -18,11 +21,9 @@ jQuery(document).ready(function() {
     jQuery('#datatable').addDataTable(dataTableOptions);
 });
 
-function addLinkToApplication(nRow, aData) {
-  var title = aData[0];
-  var id = aData[7];
-  var row = jQuery('<a href="/job_system/applications/' + id + '">' + title + '</a>' );
-  jQuery('td:nth-child(8)', nRow).empty();
-  jQuery('td:nth-child(1)', nRow).empty().append(row);
+function addLinkToMachines(nRow, aData) {
+  var id = aData[0];
+  var ip = aData[2];
+  var row = jQuery('<a href="/job_system/machines/' + id + '">' + ip + '</a>' );
+  jQuery('td:nth-child(2)', nRow).empty().append(row);
 }
-

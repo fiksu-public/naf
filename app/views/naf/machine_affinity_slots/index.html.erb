@@ -1,0 +1,39 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <br>
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th style='padding-right:5px;'>Id</th>
+          <th style='padding-right:5px;'>Machine Server Name</th>
+          <th style='padding-right:5px;'>Machine Server Address</th>
+          <th style='padding-right:5px;'>Affinity Name</th>
+          <th style='padding-right:5px;'>Affinity Classification Name</th>
+          <th style='padding-right:5px;'>Required</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @slots.each do |slot| %>
+          <tr>
+            <td><%= link_to slot.id, machine_machine_affinity_slot_path(slot.machine_id, slot.id) %></td>
+            <td><%= slot.machine_server_name %></td>
+            <td><%= slot.machine_server_address %></td>
+            <td><%= slot.affinity_name %></td>
+            <td><%= slot.affinity_classification_name %></td>
+            <td><%= slot.required %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <script type='text/javascript'>
+        jQuery(document).ready(function() {
+          jQuery('#datatable').addDataTable({});
+        });
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

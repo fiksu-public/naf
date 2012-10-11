@@ -1,4 +1,6 @@
-<%= link_to 'Show search container', '#', :id => 'search_container_link' %>
+<div id='show_search_container_link'>
+  <%= link_to 'Show search container', '#', :id => 'search_container_link' %>
+</div>
 <div id="search_container">
   <%= form_tag(naf.jobs_path, :method => "get", :id => 'job_search') do %>
       <div style="width:30%; display: inline-block;">

@@ -1,0 +1,34 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <%= render :partial => 'naf/shared/select_per_page' %>
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th></th>
+          <th style='padding-right:5px;'>Server Name</th>
+          <th style='padding-right:5px;'>Server Address</th>
+          <th style='padding-right:5px;'>Server Note</th>
+          <th style='padding-right:5px;'>Enabled</th>
+          <th style='padding-right:5px;'>Process Pool Size</th>
+          <th style='padding-right:5px;'>Last Checked Schedules At</th>
+          <th style='padding-right:5px;'>Last Seen Alive At</th>
+          <th style='padding-right:5px;'>Log Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr></tr>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <%= javascript_include_tag("dataTablesTemplates/machines.js") %>
+      <script type='text/javascript'>
+
+        var sAjaxSource = "<%= naf.machines_path(:json) %>";
+
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

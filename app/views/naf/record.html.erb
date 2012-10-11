@@ -4,6 +4,9 @@
     <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => model_name } %>
 
     <%= generate_back_link %>
+    <% if !generate_edit_link.blank? && !generate_back_link.blank? %>
+      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <% end %>
     <%= generate_edit_link %>
 
     <p id="notice"><%= notice %></p>
@@ -50,7 +53,7 @@
           </tr>
 
           <tr>
-            <td colspan="2" style="text-align:center">
+            <td>
               <a href="#" id="<%= @record.id %>" class="enqueue">
                 Manually Schedule
               </a>
@@ -62,26 +65,12 @@
     </table>
     <br/><br/>
     <%= generate_child_resources_link %>
+    <% if !generate_destroy_link.blank? && !generate_child_resources_link.blank? %>
+      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <% end %>
     <%= generate_destroy_link %>
   </div>
 
-
-  <form id="enqueue_form" style="display:none; cursor: default" action="<%= url_for(:controller => 'jobs', :action => 'index') %>">
-    <p> You are manually scheduling this application. </p>
-
-    <p> Are you sure you want to do this? </p>
-    <input type="hidden" name="job[application_id]" id="application_id" value=""/>
-    <input type="button" id="cancel" value="Cancel"/>
-    <input type="submit" id="add" value="Schedule"/>
-  </form>
-
-
-  <div id="iframeContainer" style="display:none;">
-    <input type="button" id="close" value="Close"/>
-    <iframe style="" class="papertrail" src="" height="100%" width="100%">
-      <p>Your browser does not support iframes.</p>
-    </iframe>
-  </div>
 <% end %>
 
 <%= render :partial => 'naf/shared/application' %>

@@ -16,11 +16,10 @@ module Naf
           params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
-          records = Logical::Naf::Job.search(params[:search])
           @total_records = Naf::Job.count(:all)
           @jobs = []
           job =[]
-          records.map(&:to_hash).map do |hash|
+          Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
             add_urls(hash).map do |key, value|
               value ||= ''
               job << value

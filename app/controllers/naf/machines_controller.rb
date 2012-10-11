@@ -2,10 +2,29 @@ module Naf
   class MachinesController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
+    before_filter :set_rows_per_page
 
     def index
-      @rows = Logical::Naf::Machine.all
-      render :template => 'naf/datatable'
+      respond_to do |format|
+        format.html do
+        end
+        format.json do
+          set_page
+          machines = []
+          machine = []
+          @total_records = Naf::Machine.count(:all)
+          Logical::Naf::Machine.all.map(&:to_hash).map do |hash|
+            hash.map do |key, value|
+              value = '' if value.nil?
+              machine << value
+            end
+            machines << machine
+            machine =[]
+          end
+          @machines = machines.paginate(:page => @page, :per_page => @rows_per_page)
+          render :layout => 'naf/layouts/jquery_datatables'
+        end
+      end
     end
 
     def show

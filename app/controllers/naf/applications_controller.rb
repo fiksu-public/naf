@@ -2,22 +2,26 @@ module Naf
   class ApplicationsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
+    before_filter :set_rows_per_page
 
     def index
       respond_to do |format|
         format.html do
         end
         format.json do
-          @applications = []
+          set_page
+          applications = []
           application = []
+          @total_records = Naf::Application.count(:all)
           Logical::Naf::Application.all.map(&:to_hash).map do |hash|
             hash.map do |key, value|
               value = '' if value.nil?
               application << value
             end
-            @applications << application
+            applications << application
             application =[]
           end
+          @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
           render :layout => 'naf/layouts/jquery_datatables'
         end
       end
@@ -72,7 +76,5 @@ module Naf
     end
 
   end
-
-  
 
 end

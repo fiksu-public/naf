@@ -2,10 +2,9 @@ module Naf
   class AffinitiesController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
-  
+
     def index
-      @rows = Naf::Affinity.all
-      render :template => 'naf/datatable'
+      @affinities = Naf::Affinity.all
     end
     
     def show
