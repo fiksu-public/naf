@@ -64,7 +64,7 @@ module Logical
             raise ::Naf::Job::JobPrerequisiteLoop.new(application_schedule)
           end
           schedules_queued_already << application_schedule.id
-          prerequisite_jobs += queue_application_schedule(application_schedule_prerequisite, schedules_queued_already)
+          prerequisite_jobs << queue_application_schedule(application_schedule_prerequisite, schedules_queued_already)
         end
         return queue_application(application_schedule.application,
                                  application_schedule.application_run_group_restriction,
