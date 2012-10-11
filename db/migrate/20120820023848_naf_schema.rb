@@ -122,10 +122,9 @@ class NafSchema < ActiveRecord::Migration
           application_run_group_name               text null,
           application_run_group_limit              integer null default 1,
           run_start_minute                         integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
-          run_interval                             integer null check (run_interval > 0),
+          run_interval                             integer null check (run_interval >= 0),
           priority                                 integer not null default 0,
           check (visible = true OR enabled = false),
-          check (run_start_minute is not null OR run_interval is not null),
           check (run_start_minute is null OR run_interval is null)
       );
       insert into #{schema_name}.application_schedules
