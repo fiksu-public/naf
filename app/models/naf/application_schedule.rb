@@ -7,8 +7,7 @@ module Naf
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validates :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
-    validates :run_interval, :numericality => {:only_integer => true}, :unless => :run_start_minute
+    validates :application_run_group_name, :presence => true
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
