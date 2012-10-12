@@ -3,6 +3,7 @@
 echo 'Dropping your naf_development database if it exists'
 
 psql -U postgres -c "drop database if exists naf_development"
+psql -U postgres -c "drop database if exists primary_development"
 
 echo 'Removing existing migration in dummy application'
 

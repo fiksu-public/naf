@@ -5,12 +5,12 @@ common: &common
 
 development:
   <<: *common
-  database: naf_development
+  database: primary_development
 
 test:
   <<: *common
-  database: naf_test
+  database: primary_test
 
 production:
   <<: *common
-  database: naf_development
+  database: primary_development
