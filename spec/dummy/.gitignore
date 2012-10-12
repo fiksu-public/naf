@@ -1,1 +1,6 @@
 tmp/
+app/models/other/base.rb
+config/initializers/naf.rb
+config/database.yml
+db/migrate/
+db/naf/migrate/

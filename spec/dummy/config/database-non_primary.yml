@@ -1,0 +1,20 @@
+common: &common
+  adapter: postgresql
+  username: postgres
+  encoding: UTF8
+
+development:
+  <<: *common
+  database: main_development
+
+test:
+  <<: *common
+  database: main_test
+
+naf_development:
+  <<: *common
+  database: naf_development
+
+naf_test:
+  <<: *common
+  database: naf_test
