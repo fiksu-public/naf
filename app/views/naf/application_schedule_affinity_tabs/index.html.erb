@@ -1,0 +1,35 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <br>
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th style='padding-right:5px;'>Id</th>
+          <th style='padding-right:5px;'>Script Title</th>
+          <th style='padding-right:5px;'>Affinity Name</th>
+          <th style='padding-right:5px;'>Affinity Classification Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @application_schedule_affinity_tabs.each do |app_sch_aff_tab| %>
+          <tr>
+            <td><%= link_to app_sch_aff_tab.id, application_application_schedule_application_schedule_affinity_tab_path(app_sch_aff_tab.application.id, app_sch_aff_tab.application_schedule_id, app_sch_aff_tab.id) %></td>
+            <td><%= app_sch_aff_tab.script_title %></td>
+            <td><%= app_sch_aff_tab.affinity_name %></td>
+            <td><%= app_sch_aff_tab.affinity_classification_name %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <script type='text/javascript'>
+        jQuery(document).ready(function() {
+          jQuery('#datatable').addDataTable({});
+        });
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

@@ -5,8 +5,9 @@ module Naf
     before_filter :coerce_start_run_minute, :only => [:create, :update]
   
     def index
-      @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
-      render :template => 'naf/datatable'
+      if params[:application_id]
+        @application_schedules = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
+      end
     end
     
     def show

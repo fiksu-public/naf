@@ -100,7 +100,13 @@ module Naf
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
       when "applications"
         if @record.application_schedule
-          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
+          link_to "Application Schedules", :controller => 'application_schedules', :action => 'index', :application_id => @record.id
+        else
+          ""
+        end
+      when "application_schedules"
+        if @record.application_schedule_affinity_tabs
+          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.id, :application_id => @record.application_id
         else
           ""
         end
