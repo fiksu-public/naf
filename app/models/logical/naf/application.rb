@@ -6,7 +6,7 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval, :deleted, :id, :command]
+      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval, :deleted, :command]
       
       def initialize(naf_app)
         @app = naf_app

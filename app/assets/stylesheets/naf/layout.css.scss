@@ -159,6 +159,10 @@ html {
         .ui-icon {
             float: left;
         }
+
+        .center {
+            text-align: center;
+        }
     }
 
     .ui-buttonset .ui-button {
@@ -200,6 +204,24 @@ html {
         cursor: pointer;
         float: right;
         width: 95px;
+    }
+
+
+    #errorExplanation {
+         background-color: #FEF1EC;
+         border: 1px solid #FFE4D8;
+         color: #CD0A0A;
+         line-height: 24px;
+         margin: 0 0 0.8em;
+         padding: 12px;
+     }
+
+    #notice {
+        background-color: #E1FFD1;
+        border: 1px solid #C5F8AC;
+        color: #499524;
+        margin: 0 0 0.8em;
+        padding: 12px;
     }
 }
     

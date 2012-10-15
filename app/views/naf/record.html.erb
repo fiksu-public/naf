@@ -9,7 +9,9 @@
     <% end %>
     <%= generate_edit_link %>
 
-    <p id="notice"><%= notice %></p>
+    <% unless notice.blank? %>
+      <p id="notice"><%= notice %></p>
+    <% end %>
 
     <table id="record">
 
@@ -47,6 +49,21 @@
 
 
       <% elsif controller_name == 'applications' %>
+        <% content_for :javascripts do %>
+          <script type='text/javascript'>
+            jQuery(document).ready(function() {
+              jQuery('.enqueue').click(function(){
+                var postSource = "<%= naf.jobs_path %>";
+                var answer = confirm("Adding application as a job on the queue?");
+                if (!answer) {
+                  return false;
+                }
+                jQuery.post(postSource, { "job[application_id]": <%= @record.id %> });
+                return false;
+              });
+            });
+          </script>
+        <% end %>
           <tr>
             <td scope="row">Last Queued At:</td>
             <td> <%= last_queued_at_link(@record) %> </td>
@@ -54,9 +71,7 @@
 
           <tr>
             <td>
-              <a href="#" id="<%= @record.id %>" class="enqueue">
-                Manually Schedule
-              </a>
+              <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => @record.id} %>
             </td>
           </tr>
 

@@ -5,6 +5,7 @@
     <table id='datatable'>
       <thead>
         <tr>
+          <th style='padding-right:5px;'>Id</th>
           <th style='padding-right:5px;'>Title</th>
           <th style='padding-right:5px;'>Script Type Name</th>
           <th style='padding-right:5px;'>Application Run Group Name</th>
@@ -26,6 +27,7 @@
       <script type='text/javascript'>
 
         var sAjaxSource = "<%= naf.applications_path(:json) %>";
+        var postSource = "<%= naf.jobs_path(:json) %>";
 
       </script>
     <% end %>

@@ -37,7 +37,7 @@ module Naf
       @record = Logical::Naf::Job.new(@record)
       respond_to do |format|
         format.json do
-          render :json => {:cols => @attributes, :job => @record.to_detailed_hash}.to_json
+          render :json => { :success => true }.to_json
         end
         format.html do
           render :template => 'naf/record'
@@ -57,10 +57,17 @@ module Naf
         @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
         @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
       end
-      if @job.save
-        redirect_to(@job, :notice => 'Job was successfully created.')
-      else
-        render :action => "new"
+      respond_to do |format|
+        format.json do
+          render :json => { :success => true }.to_json if @job.save
+        end
+        format.html do
+          if @job.save
+            redirect_to(@job, :notice => 'Job was successfully created.')
+          else
+            render :action => "new"
+          end
+        end
       end
     end
 

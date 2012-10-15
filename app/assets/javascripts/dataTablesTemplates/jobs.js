@@ -24,12 +24,30 @@ jQuery(document).ready(function() {
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToJob(nRow, aData);
       addLinkToTitle(nRow, aData);
+      jQuery('td:nth-child(9)', nRow).addClass('center');
       return nRow;
     }
   }; // datatable
 
    // Setup the datatable.
-    jQuery('#datatable').addDataTable(dataTableOptions);
+  jQuery('#datatable').addDataTable(dataTableOptions);
+
+  jQuery('.terminate').live("click", function(){
+    var answer = confirm("You are terminating this job. Are you sure you want to do this?");
+    if (!answer) {
+      return false;
+    }
+    var id = jQuery(this).attr('id');
+    var url = '/job_system/jobs/' + id;
+    jQuery.ajax({
+      url: url,
+      type: 'PUT',
+      dataType: 'json',
+      data: { "job[request_to_terminate]": 1, "job_id": id }
+    });
+    jQuery('#datatable').dataTable().fnDraw();
+    return false;
+  });
 });
 
 function addLinkToJob(nRow, aData) {
@@ -40,8 +58,9 @@ function addLinkToJob(nRow, aData) {
 
 function addLinkToTitle(nRow, aData) {
   var link = aData[8];
+  var title = aData[4];
   if ( link != "" ) {
-    var row = jQuery('<a href="' + link + '">' + "Database Janitorial Work" + '</a>' );
+    var row = jQuery('<a href="' + link + '">' + title + '</a>' );
     jQuery('td:nth-child(5)', nRow).empty().append(row);
   }
 }
