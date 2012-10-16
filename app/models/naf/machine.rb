@@ -3,6 +3,7 @@ require 'socket'
 module Naf
   class Machine < NafBase
     include ::Af::Application::SafeProxy
+    include PgAdvisoryLocker
 
     IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
 
@@ -14,6 +15,14 @@ module Naf
     has_many :affinities, :through => :machine_affinity_slots
 
     attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level, :marked_down
+
+    def try_lock_for_runner_use(&block)
+      return advisory_try_lock(&block)
+    end
+
+    def unlock_for_runner_use
+      return advisory_unlock
+    end
 
     def machine_logger
       return af_logger(self.class.name)
@@ -126,14 +135,6 @@ module Naf
       self.marked_down_at = marking_at
       save!
       mark_processes_as_dead(by_machine)
-    end
-
-    def assigned_jobs
-      return ::Naf::Job.fetch_assigned_jobs(self)
-    end
-
-    def fetch_next_job
-      return ::Naf::Job.fetch_next_job(self)
     end
   end
 end

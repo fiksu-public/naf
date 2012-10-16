@@ -5,6 +5,8 @@ require 'fileutils'
 
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
+    raise "Task '#{fq_name}' not found" unless @tasks.has_key?(fq_name)
+
     new_name = "#{fq_name}:original"
     @tasks[new_name] = @tasks.delete(fq_name)
   end
@@ -31,7 +33,7 @@ namespace :naf do
 
   namespace :isolate do
     desc "Custom isolation Engine migrations to db/naf/migrate folder, for use on non-primary database"
-    task :migrations => :environment do
+    task :migrations do
 
       puts "Moving naf migration files to folder: #{isolated_naf_migrations_folder}"
       
@@ -57,7 +59,7 @@ namespace :naf do
   namespace :janitor do
     desc "create partitioning infrastructure for naf tables"
     task :infrastructure => :environment do
-      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name]
+      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name,::Naf::ApplicationSchedulePrerequisite.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
     
@@ -65,7 +67,7 @@ namespace :naf do
 
   namespace :db do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
-    override_task :migrate => :environment do
+    task :migrate => :environment do
       if using_another_database? and naf_migrations.size > 0
         puts "Running naf migrations with database configuration: #{naf_environment}"
         puts naf_migrations
@@ -80,7 +82,7 @@ namespace :naf do
       end
     end
     
-    desc "Perform a rollback on the warehousing database within the data_api schema"
+    desc "Perform a rollback on the on the naf migrations"
     task :rollback => :environment do
       if using_another_database? and naf_migrations.size > 0
         connect_to_naf_database do
@@ -156,6 +158,57 @@ namespace :naf do
       end
     end
 
+
+
+
+  namespace :structure do
+
+    desc "Dump the naf_development schema"
+    task :dump => :environment do
+      env = "naf_#{::Rails.env}"
+      config = ActiveRecord::Base.configurations[env]
+      ENV['PGHOST'] = config["host"] if config["host"]
+      ENV['PGPORT'] = config["port"].to_s if config["port"]
+      ENV['PGPASSWORD'] = config["password"].to_s if config["password"]
+      search_path = "naf*"
+      command = "pg_dump -i -U \"#{config["username"]}\" -s -x -O"
+      ( config["exclude"] || [] ).each {|e| command << " -T \"#{e}\""}
+      command << " -f db/#{env}_structure.sql --schema=#{search_path} #{config["database"]} > /dev/null 2>&1"
+      `#{command}`
+      raise "Error dumping database structure for #{env}" if $?.exitstatus == 1
+    end
+  end
+
+    
+  namespace :test do
+     desc "Drop the Naf Test database"
+      task :purge => :environment do
+        abcs = ActiveRecord::Base.configurations
+        config = abcs['naf_test']
+        ActiveRecord::Base.clear_active_connections! 
+        ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public')) 
+        ActiveRecord::Base.connection.drop_database config['database']
+        @encoding = config['encoding'] || ENV['CHARSET'] || 'utf8'
+        begin
+          ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
+          ActiveRecord::Base.connection.create_database(config['database'], config.merge('encoding' => @encoding))
+          ActiveRecord::Base.establish_connection(config)
+        rescue Exception => e
+          $stderr.puts e, *(e.backtrace)
+          $stderr.puts "Couldn't create database for #{config.inspect}"
+        end
+      end
+      desc "Clone naf_development to naf_test"
+      task :clone_structure => [ "naf:db:structure:dump", "naf:db:test:purge" ] do
+        abcs = ActiveRecord::Base.configurations
+        config = abcs['naf_test']
+        ENV['PGHOST'] = config["host"] if config["host"]
+        ENV['PGPORT'] = config["port"].to_s if config["port"]
+        ENV['PGPASSWORD'] = config["password"].to_s if config["password"]
+        `psql -U "#{config["username"]}" -f db/naf_#{::Rails.env}_structure.sql #{config["database"]}`
+        raise "Error loading database structure for #{env}" if $?.exitstatus == 1
+      end
+    end
   end
 
   desc "Undo all of the naf schema migrations"

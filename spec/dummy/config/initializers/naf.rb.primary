@@ -1,0 +1,4 @@
+Naf.configure do |config|
+  config.schema_name = 'naf'
+end
+

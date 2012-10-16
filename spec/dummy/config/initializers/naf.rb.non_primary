@@ -1,0 +1,5 @@
+Naf.configure do |config|
+  config.schema_name = 'naf'
+  config.model_class = "::Other::Base"
+end
+

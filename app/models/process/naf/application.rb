@@ -40,6 +40,8 @@ module Process::Naf
     end
 
     def update_job_status
+      periodic_application_checkpoint
+
       job = fetch_naf_job
       if job
         unless @do_not_terminate

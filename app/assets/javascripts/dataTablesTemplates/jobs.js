@@ -7,8 +7,8 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
-      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 9 ] },
-      { "bVisible": false, "aTargets": [ 8 ] }
+      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 10 ] },
+      { "bVisible": false, "aTargets": [ 9 ] }
     ],
     "fnInitComplete" : function() {
       initPageSelect();
@@ -58,7 +58,7 @@ function addLinkToJob(nRow, aData) {
 }
 
 function addLinkToTitle(nRow, aData) {
-  var link = aData[8];
+  var link = aData[9];
   var title = aData[4];
   if ( link != "" ) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );

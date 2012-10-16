@@ -26,7 +26,7 @@ FactoryGirl.find_definitions
 # Create the DB Seed Records via Factories
 affinities = [:normal_affinity, :canary_affinity, :perennial_affinity]
 classifications = [:location_affinity_classification, :purpose_affinity_classification, :application_affinity_classification]
-restrictions = [:no_restriction, :one_at_a_time_restriction, :one_per_machine_restriction]
+restrictions = [:no_limit, :limited_per_machine, :limited_per_all_machines]
 
 (affinities + classifications + restrictions).each do |seed|
   FactoryGirl.create(seed)

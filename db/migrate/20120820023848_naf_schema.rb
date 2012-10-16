@@ -96,14 +96,6 @@ class NafSchema < ActiveRecord::Migration
           title                           text not null,
           log_level                       text null
       );
-      create table #{schema_name}.application_prerequisites
-      (
-          id                              serial not null primary key,
-          created_at                      timestamp not null default now(),
-          application_id                  integer not null references #{schema_name}.applications,
-          prerequisite_application_id     integer not null references #{schema_name}.applications,
-          CHECK (application_id <> prerequisite_application_id)
-      );
       insert into #{schema_name}.applications (application_type_id, command, title) values
         (
           (select id from #{schema_name}.application_types where script_type_name = 'rails'),
@@ -117,30 +109,31 @@ class NafSchema < ActiveRecord::Migration
           application_run_group_restriction_name    text unique not null
       );
       insert into #{schema_name}.application_run_group_restrictions (application_run_group_restriction_name) values
-         ('no restrictions'), ('one at a time'), ('one per machine');
+         ('no limit'), ('limited per machine'), ('limited per all machines');
       create table #{schema_name}.application_schedules
       (
-          id                                     serial not null primary key,
-          created_at                             timestamp not null default now(),
-          updated_at                             timestamp,
-          enabled                                boolean not null default true,
-          visible                                boolean not null default true,
-          application_id                         integer unique not null references #{schema_name}.applications,
-          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
-          application_run_group_name             text null,
-          run_start_minute                       integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
-          run_interval                           integer null check (run_interval > 0),
-          priority                               integer not null default 0,
+          id                                       serial not null primary key,
+          created_at                               timestamp not null default now(),
+          updated_at                               timestamp,
+          enabled                                  boolean not null default true,
+          visible                                  boolean not null default true,
+          application_id                           integer unique not null references #{schema_name}.applications,
+          application_run_group_restriction_id     integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name               text null,
+          application_run_group_limit              integer null default 1,
+          run_start_minute                         integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
+          run_interval                             integer null check (run_interval >= 0),
+          priority                                 integer not null default 0,
           check (visible = true OR enabled = false),
-          check (run_start_minute is not null OR run_interval is not null),
           check (run_start_minute is null OR run_interval is null)
       );
       insert into #{schema_name}.application_schedules
-        (application_id, application_run_group_restriction_id, application_run_group_name, run_start_minute, run_interval) values
+        (application_id, application_run_group_restriction_id, application_run_group_name, application_run_group_limit, run_start_minute, run_interval) values
         (
           (select id from #{schema_name}.applications where command = '::Process::Naf::Janitor.run'),
-          (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'one at a time'),
+          (select id from #{schema_name}.application_run_group_restrictions where application_run_group_restriction_name = 'limited per all machines'),
           '::Process::Naf::Janitor.run',
+          1,
           5,
           null
         );
@@ -151,7 +144,16 @@ class NafSchema < ActiveRecord::Migration
           created_at                         timestamp not null default now(),
           application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
           affinity_id           	     integer not null references #{schema_name}.affinities,
-          unique (application_schedule_id, affinity_id)
+          UNIQUE (application_schedule_id, affinity_id)
+      );
+      create table #{schema_name}.application_schedule_prerequisites
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          application_schedule_id                integer not null references #{schema_name}.application_schedules,
+          prerequisite_application_schedule_id   integer not null references #{schema_name}.application_schedules,
+          UNIQUE (application_schedule_id, prerequisite_application_schedule_id),
+          CHECK (application_schedule_id <> prerequisite_application_schedule_id)
       );
       create table #{schema_name}.jobs
       (
@@ -165,6 +167,7 @@ class NafSchema < ActiveRecord::Migration
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
+          application_run_group_limit            integer null default 1,
 
           priority                               integer not null default 0,
 
@@ -193,6 +196,7 @@ class NafSchema < ActiveRecord::Migration
           job_id                                 integer not null,
           job_created_at                         timestamp not null,
           prerequisite_job_id                    integer not null,
+          UNIQUE (job_id, prerequisite_job_id),
           CHECK (job_id <> prerequisite_job_id)
       );
       create table #{schema_name}.job_created_ats
@@ -229,6 +233,8 @@ class NafSchema < ActiveRecord::Migration
         ('Naf::JanitorialDropAssignment',   100, '::Naf::JobCreatedAt'),
         ('Naf::JanitorialCreateAssignment', 125, '::Naf::JobPrerequisite'),
         ('Naf::JanitorialDropAssignment',   125, '::Naf::JobPrerequisite'),
+        ('Naf::JanitorialCreateAssignment', 125, '::Naf::ApplicationSchedulePrerequisite'),
+        ('Naf::JanitorialDropAssignment',   125, '::Naf::ApplicationSchedulePrerequisite'),
         ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
         ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
@@ -253,6 +259,7 @@ class NafSchema < ActiveRecord::Migration
       drop table #{schema_name}.applications cascade;
       drop table #{schema_name}.application_types cascade;
       drop table #{schema_name}.application_run_group_restrictions cascade;
+      drop table #{schema_name}.application_schedule_prerequisites cascade;
       drop table #{schema_name}.application_schedules cascade;
       drop table #{schema_name}.application_schedule_affinity_tabs cascade;
     SQL

@@ -3,23 +3,18 @@ common: &common
   username: postgres
   encoding: UTF8
 
-nafdb: &nafdb
-  host: localhost
-
-local: &local
-  host: localhost
-
 development:
   <<: *common
-  <<: *nafdb
-  database: naf_development
-
-production:
-  <<: *common
-  <<: *nafdb
-  database: naf_development
+  database: main_development
 
 test:
   <<: *common
-  <<: *local
+  database: main_test
+
+naf_development:
+  <<: *common
+  database: naf_development
+
+naf_test:
+  <<: *common
   database: naf_test

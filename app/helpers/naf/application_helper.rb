@@ -22,7 +22,12 @@ module Naf
     def format_index_table_row(row, col)
       value = row.send(col)
       if value.is_a?(String)
-        return truncate(value)
+        case col
+        when :title
+          return value
+        else
+          return truncate(value)
+        end
       else
         return value
       end
@@ -159,13 +164,13 @@ module Naf
       return "" if READ_ONLY_RESOURCES.include?(controller_name) or DESTROY_BLOCKED_RESOURCES.include?(controller_name)
       case controller_name
       when "job_affinity_tabs"
-        link_to "Destroy", naf.job_job_affinity_tab_url(@job, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+        link_to "Destroy", job_job_affinity_tab_url(@job, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedule_affinity_tabs"
-        link_to "Destroy", naf.application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+        link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "machine_affinity_slots"
-        link_to "Destroy", naf.machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+        link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedules"
-        link_to "Destroy", naf.schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
+        link_to "Destroy", schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "applications"
         link_to "Destroy", @record.app, {:confirm => "Are you sure you want to destroy this application?", :method => :delete, :class => 'destroy'}
       else

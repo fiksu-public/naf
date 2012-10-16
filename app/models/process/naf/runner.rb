@@ -11,6 +11,13 @@ module Process::Naf
       super
       update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
+      @job_creator = ::Logical::Naf::JobCreator.new
+
+      # will help forked processes, not the runner
+      ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
+      ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
+      ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
+      ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
     end
 
     def work
@@ -23,6 +30,19 @@ module Process::Naf
         exit 1
       end
 
+      if machine.try_lock_for_runner_use
+        begin
+          work_machine(machine)
+        ensure
+          machine.unlock_for_runner_use
+        end
+      else
+        logger.fatal "There is already a runner running on this machine, exiting..."
+        exit 1
+      end
+    end
+
+    def work_machine(machine)
       machine.mark_alive
       machine.mark_up
 
@@ -60,6 +80,8 @@ module Process::Naf
           end
         end
 
+        job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
+
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
@@ -70,7 +92,9 @@ module Process::Naf
             # check scheduled tasks
             should_be_queued.each do |application_schedule|
               logger.info "schedule application: #{application_schedule}"
-              ::Naf::Job.queue_application_schedule(application_schedule)
+              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+                @job_creator.queue_application_schedule(application_schedule)
+              end
             end
 
             # check the runner machines
@@ -119,7 +143,7 @@ module Process::Naf
         logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
         while @children.length < machine.thread_pool_size
           begin
-            job = machine.fetch_next_job
+            job = job_fetcher.fetch_next_job
 
             unless job.present?
               logger.info "no more jobs to run"
@@ -259,7 +283,7 @@ module Process::Naf
     end
 
     def assigned_jobs(machine)
-      return machine.assigned_jobs.select do |job|
+      return ::Naf::Job.assigned_jobs(machine).select do |job|
         is_job_process_alive?(job)
       end
     end

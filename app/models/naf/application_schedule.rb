@@ -7,8 +7,7 @@ module Naf
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validates :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, :presence => true, :length => {:minimum => 3}
-    validates :run_interval, :numericality => {:only_integer => true}, :unless => :run_start_minute
+    validates :application_run_group_name, :presence => true
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
@@ -16,11 +15,15 @@ module Naf
     has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
     has_many :affinities, :through => :application_schedule_affinity_tabs
 
+    has_many :application_schedule_prerequisites, :class_name => "::Naf::ApplicationSchedulePrerequisite", :dependent => :destroy
+    has_many :prerequisites, :class_name => "::Naf::ApplicationSchedule", :through => :application_schedule_prerequisites, :source => :prerequisite_application_schedule
+
     delegate :title, :to => :application
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
     attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled, :run_start_minute
+    attr_accessible :application_run_group_limit
 
     SCHEDULES_LOCK_ID = 0
 

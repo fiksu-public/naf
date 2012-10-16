@@ -6,7 +6,7 @@ module Naf
     it "should respond with the index action" do
       Logical::Naf::Job.should_not_receive(:all).and_return([])
       get :index
-      response.should render_template("naf/datatable")
+      response.should render_template("naf/jobs/index")
       response.should be_success
     end
 
