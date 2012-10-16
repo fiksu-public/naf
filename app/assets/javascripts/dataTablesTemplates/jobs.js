@@ -5,7 +5,7 @@ jQuery(document).ready(function() {
   var dataTableOptions = {
     "bSort": true,
     "sAjaxSource": sAjaxSource,
-    "aaSorting": [[3,'asc']],
+    "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
       { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 9 ] },
       { "bVisible": false, "aTargets": [ 8 ] }
