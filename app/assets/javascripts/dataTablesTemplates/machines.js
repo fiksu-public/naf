@@ -4,9 +4,6 @@ jQuery(document).ready(function() {
   // Prepare for setup the datatable.
   var dataTableOptions = {
     "sAjaxSource": sAjaxSource,
-    "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 0 ] }
-    ],
     "fnInitComplete" : function() {
       initPageSelect();
       jQuery("#datatable").css("width","100%");
@@ -23,7 +20,6 @@ jQuery(document).ready(function() {
 
 function addLinkToMachines(nRow, aData) {
   var id = aData[0];
-  var ip = aData[2];
-  var row = jQuery('<a href="/job_system/machines/' + id + '">' + ip + '</a>' );
-  jQuery('td:nth-child(2)', nRow).empty().append(row);
+  var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
+  jQuery('td:nth-child(1)', nRow).empty().append(row);
 }

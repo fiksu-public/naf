@@ -4,10 +4,12 @@ module Naf
     before_filter :set_cols_and_attributes
   
     def index
+      @rows = []
       if params[:application_schedule_id]
-        @application_schedule_affinity_tabs = Naf::ApplicationScheduleAffinityTab.
+        @rows = Naf::ApplicationScheduleAffinityTab.
             where(:application_schedule_id => params[:application_schedule_id])
       end
+      render :template => 'naf/datatable'
     end
     
     def show
@@ -59,10 +61,11 @@ module Naf
       end
     end
 
+
     private
     
     def set_cols_and_attributes
-      @cols = [:script_title, :affinity_name, :affinity_classification_name]
+      @cols = [:id, :script_title, :affinity_name, :affinity_classification_name]
       @attributes = Naf::ApplicationScheduleAffinityTab.attribute_names.map(&:to_sym) | @cols
     end
 

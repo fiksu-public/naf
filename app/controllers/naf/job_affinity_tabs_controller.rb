@@ -4,9 +4,11 @@ module Naf
     before_filter :set_cols_and_attributes
   
     def index
+      @rows = []
       if params[:job_id]
-        @tabs = Naf::JobAffinityTab.where(:job_id => params[:job_id])
+        @rows = Naf::JobAffinityTab.where(:job_id => params[:job_id])
       end
+      render :template => 'naf/datatable'
     end
     
     def show
@@ -53,15 +55,12 @@ module Naf
     end
 
 
-    
     private
     
     def set_cols_and_attributes
-      @cols = [:title, :script_type_name, :command, :affinity_name, :affinity_classification_name]
+      @cols = [:id, :title, :script_type_name, :command, :affinity_name, :affinity_classification_name]
       @attributes = Naf::JobAffinityTab.attribute_names.map(&:to_sym) | @cols
     end
-
-
 
   end
 end

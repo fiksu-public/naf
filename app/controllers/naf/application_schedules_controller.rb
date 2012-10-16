@@ -5,9 +5,11 @@ module Naf
     before_filter :coerce_start_run_minute, :only => [:create, :update]
   
     def index
+      @rows = []
       if params[:application_id]
-        @application_schedules = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
+        @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
       end
+      render :template => 'naf/datatable'
     end
     
     def show
@@ -51,11 +53,12 @@ module Naf
         render :action => "edit", :id => @application_schedule.id, :application_id => @application.id
       end
     end
-    
+
+
     private
     
     def set_cols_and_attributes
-      @cols = [:title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
+      @cols = [:id, :title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
       @attributes = Naf::ApplicationSchedule.attribute_names.map(&:to_sym) | @cols
     end
 

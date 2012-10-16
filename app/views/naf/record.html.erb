@@ -65,11 +65,12 @@
           </script>
         <% end %>
           <tr>
-            <td scope="row">Last Queued At:</td>
+            <td scope="row">Last Queued At</td>
             <td> <%= last_queued_at_link(@record) %> </td>
           </tr>
 
           <tr>
+            <td>Add Script to Jobs Queue</td>
             <td>
               <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => @record.id} %>
             </td>

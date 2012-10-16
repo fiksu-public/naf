@@ -4,9 +4,11 @@ module Naf
     before_filter :set_cols_and_attributes
     
     def index
+      @rows = []
       if params[:machine_id]
-        @slots = Naf::MachineAffinitySlot.where(:machine_id => params[:machine_id])
+        @rows = Naf::MachineAffinitySlot.where(:machine_id => params[:machine_id])
       end
+      render :template => 'naf/datatable'
     end
 
     def show
@@ -52,11 +54,12 @@ module Naf
       end
     end
 
+
     private 
 
     def set_cols_and_attributes
       @attributes = Naf::MachineAffinitySlot.attribute_names.map(&:to_sym)
-      @cols = [:machine_server_name, :machine_server_address, :affinity_name, :affinity_classification_name, :required]
+      @cols = [:id, :machine_server_name, :machine_server_address, :affinity_name, :affinity_classification_name, :required]
     end
 
   end

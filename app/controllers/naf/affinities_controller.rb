@@ -4,7 +4,8 @@ module Naf
     before_filter :set_cols_and_attributes
 
     def index
-      @affinities = Naf::Affinity.all
+      @rows = Naf::Affinity.all
+      render :template => 'naf/datatable'
     end
     
     def show
@@ -43,13 +44,13 @@ module Naf
         render :action => "edit"
       end
     end
-    
-    
+
+
     private
     
     def set_cols_and_attributes
       @attributes = Naf::Affinity.attribute_names.map(&:to_s) << :affinity_classification_name
-      @cols = [:affinity_name, :affinity_classification_name, :selectable]
+      @cols = [:id, :affinity_name, :affinity_classification_name, :selectable]
     end
 
   end

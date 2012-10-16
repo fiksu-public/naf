@@ -65,7 +65,6 @@ module Naf
       end
     end
 
-    
 
     private
 
@@ -75,7 +74,5 @@ module Naf
     end
 
   end
-
-  
 
 end

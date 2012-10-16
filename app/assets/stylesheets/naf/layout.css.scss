@@ -78,7 +78,7 @@ html {
                 @include margin-padding-null;
                 padding-bottom: 10px;
             }
-            #parent_links {
+            #parent_links, #record {
                 padding-top: 10px;
             }
         }
@@ -154,6 +154,10 @@ html {
         td, th {
             margin: 0;
             padding: 3px 0 3px 3px;
+        }
+
+        th {
+          padding-right:5px;
         }
 
         .ui-icon {
