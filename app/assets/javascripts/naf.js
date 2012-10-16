@@ -12,8 +12,7 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require_tree './naf'
-//= require_tree './blockUI'
+//= require jquery-ui
 //= require_tree './timepicker'
-//= require_tree .
+//= require_tree './dataTables'
 

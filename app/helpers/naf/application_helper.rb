@@ -13,7 +13,7 @@ module Naf
 
     def last_queued_at_link(app)
       if job = app.last_queued_job
-        link_to "#{time_ago_in_words(job.created_at, true)} ago", job_path(job)
+        link_to "#{time_ago_in_words(job.created_at, true)} ago", naf.job_path(job)
       else
         ""
       end
@@ -105,7 +105,13 @@ module Naf
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
       when "applications"
         if @record.application_schedule
-          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
+          link_to "Application Schedules", :controller => 'application_schedules', :action => 'index', :application_id => @record.id
+        else
+          ""
+        end
+      when "application_schedules"
+        if @record.application_schedule_affinity_tabs
+          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.id, :application_id => @record.application_id
         else
           ""
         end
@@ -122,7 +128,7 @@ module Naf
 
     def generate_create_link
       return "" if READ_ONLY_RESOURCES.include?(controller_name) or CREATE_BLOCKED_RESOURCES.include?(controller_name)
-      return link_to "Add a Job", "#", {:class => 'add_job'} if display_job_search_link?
+      return link_to "Add a Job", naf.new_job_path, {:class => 'add_job'} if display_job_search_link?
       link_to "Create new #{model_name}", {:controller => controller_name, :action => 'new'}
     end
 
@@ -170,23 +176,6 @@ module Naf
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end
-    end
-
-    def use_refreshing?
-      Naf.job_refreshing
-    end
-
-    def per_page_array
-      options = [10, 25, 50, 100]
-      default = Naf.jobs_per_page
-      default = 10  unless default > 0
-      default = 100 unless default < 101
-      if options.include?(default)
-        result = [default] + (options - [default])
-      else
-        result = [default] + options
-      end
-      return result
     end
 
     def include_actions_in_table?

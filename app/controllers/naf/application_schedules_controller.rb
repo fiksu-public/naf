@@ -5,7 +5,10 @@ module Naf
     before_filter :coerce_start_run_minute, :only => [:create, :update]
   
     def index
-      @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
+      @rows = []
+      if params[:application_id]
+        @rows = Naf::ApplicationSchedule.where(:application_id => params[:application_id])
+      end
       render :template => 'naf/datatable'
     end
     
@@ -30,7 +33,7 @@ module Naf
       @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.new(params[:application_schedule])
       if  @application_schedule.save
-        redirect_to(application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully created.') 
+        redirect_to(naf.application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully created.')
       else
         render :action => "new", :application_id => @application.id
       end
@@ -45,16 +48,17 @@ module Naf
       @application = Naf::Application.find(params[:application_id])
       @application_schedule = Naf::ApplicationSchedule.find(params[:id])
       if @application_schedule.update_attributes(params[:application_schedule])
-        redirect_to(application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully updated.')
+        redirect_to(naf.application_application_schedule_path(@application, @application_schedule), :notice => 'Application Schedule was successfully updated.')
       else
         render :action => "edit", :id => @application_schedule.id, :application_id => @application.id
       end
     end
-    
+
+
     private
     
     def set_cols_and_attributes
-      @cols = [:title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
+      @cols = [:id, :title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
       @attributes = Naf::ApplicationSchedule.attribute_names.map(&:to_sym) | @cols
     end
 

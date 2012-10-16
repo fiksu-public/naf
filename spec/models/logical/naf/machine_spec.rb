@@ -8,7 +8,7 @@ module Logical
 
       let(:physical_machine_two) { FactoryGirl.create(:machine_two) }
 
-      let(:columns) {[:server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]}
+      let(:columns) {[:id, :server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]}
       
 
       it "to_hash should return with the specified columns" do

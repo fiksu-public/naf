@@ -2,11 +2,29 @@ module Naf
   class ApplicationsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
+    before_filter :set_rows_per_page
 
- 
     def index
-      @rows = Logical::Naf::Application.all
-      render :template => 'naf/datatable'
+      respond_to do |format|
+        format.html do
+        end
+        format.json do
+          set_page
+          applications = []
+          application = []
+          @total_records = Naf::Application.count(:all)
+          Logical::Naf::Application.all.map(&:to_hash).map do |hash|
+            hash.map do |key, value|
+              value = '' if value.nil?
+              application << value
+            end
+            applications << application
+            application =[]
+          end
+          @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
+          render :layout => 'naf/layouts/jquery_datatables'
+        end
+      end
     end
 
     def show
@@ -17,7 +35,7 @@ module Naf
     def destroy
       @application = Naf::Application.find(params[:id])
       @application.destroy
-      redirect_to applications_path
+      redirect_to naf.applications_path
     end
 
     def new
@@ -58,7 +76,5 @@ module Naf
     end
 
   end
-
-  
 
 end

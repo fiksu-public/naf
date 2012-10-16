@@ -1,0 +1,12 @@
+<%
+  rows = @jobs.each do |job|
+    job[10] = link_to image_tag('application_view_list.png', :class => 'action', :title => 'View Log in Papertrail'), job[10], {:class => "papertrail", :id => job[0]}
+    job[10] << "&nbsp;&nbsp;&nbsp;".html_safe
+    unless job[8] == "Canceled"
+      job[10] << (link_to image_tag('terminate.png', :class => 'action', :title => 'Terminate Job'), "#", {:class => "terminate", :id => job[0]})
+    else
+      job[10] << "&nbsp;&nbsp;&nbsp;&nbsp;".html_safe
+    end
+  end
+%>
+<%= raw rows %>

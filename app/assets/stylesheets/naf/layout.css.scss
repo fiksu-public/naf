@@ -1,0 +1,245 @@
+html {
+	background-color:#f1f1f1;
+}
+#naf {
+    color:#333;
+    background: url(/assets/bg-grad.png) repeat-x 0px 0px;
+    height: 100%;
+    min-width: 100%;
+    display: inline-block;
+    font: {
+        family: arial, helvetica, clean, sans-serif;
+    }
+
+    @mixin rounded-top {
+        border-top-left-radius: 7px;
+        border-top-right-radius: 7px;
+    }
+
+    @mixin rounded-bottom {
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+
+    @mixin margin-padding-null {
+        margin: 0;
+        padding: 0;
+    }
+
+    a {
+        color: #0085CF;
+        text-decoration: none;
+    }
+
+    select {
+        width: 12em;
+    }
+
+    input {
+        width: 15em;
+    }
+
+    .clear {
+        clear: both;
+    }
+
+    #fluid {
+        margin: 0 0 6px 6px;
+        text-align: left;
+        width: 99%;
+    }
+
+    div {
+        #hd {
+            div#header {
+                h3 {
+                    display: inline-block;
+                    font-size: 130%;
+                    padding-left: 10px;
+                    a {
+                      color: #FFFFFF;
+                    }
+                }
+            }
+        }
+        #bd {
+            font: 13px/1.231 arial,helvetica,clean,sans-serif;
+            @include rounded-bottom;
+            background-color: #FFFFFF;
+            border-bottom: 1px solid #E1E1E1;
+            border-left: 1px solid #E1E1E1;
+            border-right: 1px solid #E1E1E1;
+            padding: 10px;
+            #record h3#record_name {
+                padding-top: 10px;
+            }
+            h3#record_name {
+                font-size: 130%;
+                @include margin-padding-null;
+                padding-bottom: 10px;
+            }
+            #parent_links, #record {
+                padding-top: 10px;
+            }
+        }
+    }
+
+    #navigation {
+        border-bottom: 4px solid #2D2D2D;
+        margin-top: 1.4em;
+        ul {
+            @include margin-padding-null;
+            li {
+                list-style: none outside none;
+            	float:left;
+	            display:inline;
+                a {
+                    @include rounded-top;
+                    font-size:11px;
+                    padding:6px 10px 4px 10px;
+                    background-color: #808080;
+                    font-weight: normal;
+                    margin: 0 0.2em 0 0;
+                    color: #fff;
+                    display: block;
+                    &:hover { background-color: #2d2d2d; }
+                }
+            }
+            li#on {
+                a {
+                    background-color: #2D2D2D !important;
+                }
+            }
+        }
+    }
+
+    #show_search_container_link {
+        margin-top: 10px;
+    }
+
+    #search_container {
+        border: 1px solid #E1E1E1;
+        @include rounded-top;
+        @include rounded-bottom;
+        padding: 15px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        #job_search {
+            padding: 10px;
+            div.field{
+                clear:both;
+                text-align:right;
+                line-height:15px;
+
+                label {
+                    float:left;
+                }
+            }
+        }
+    }
+
+    .dataTables_processing {
+        color: #45a113;
+        font-style: bold;
+        font-size: 14px;
+        margin: 0 0 6px 0;
+        background-color: #e5f4e1;
+        border: 1px solid #d5f1cd;
+        padding: 4px 8px 4px 8px;
+    }
+
+    #datatable {
+        width:100%;
+        border-collapse: collapse;
+        td, th {
+            margin: 0;
+            padding: 3px 0 3px 3px;
+        }
+
+        th {
+          padding-right:5px;
+        }
+
+        .ui-icon {
+            float: left;
+        }
+
+        .center {
+            text-align: center;
+        }
+    }
+
+    .ui-buttonset .ui-button {
+        border: 1px solid #CECECE;
+        color: #333333;
+        margin: 0;
+        padding: 4px 12px;
+    }
+
+    .ui-state-default {
+        background-color: #F4F4F4;
+        background-image: none;
+        border: 1px solid #E1E1E1;
+        font-weight: normal;
+    }
+
+    #datatable_info {
+        margin: 6px 0 8px 0 ;
+    }
+
+    .dataTables_info {
+        margin: 8px 0 6px 0 ;
+    }
+
+    #page-select-container, #refresh-page-container {
+        display: none;
+        float: right;
+        margin-top: -1px;
+        padding: 2px 2px;
+        width: 205px;
+    }
+
+    #page-select-container {
+        label {
+            position: relative;
+            top: 4px;
+        }
+    }
+
+    #refresh-page-container {
+        margin-right: 200px;
+        input {
+          width: 13px;
+        }
+    }
+
+    #iDisplayLength {
+        background-color: #FFFFFF;
+    }
+
+    .page-select {
+        border: 1px solid #E1E1E1;
+        cursor: pointer;
+        float: right;
+        width: 95px;
+    }
+
+
+    #errorExplanation {
+         background-color: #FEF1EC;
+         border: 1px solid #FFE4D8;
+         color: #CD0A0A;
+         line-height: 24px;
+         margin: 0 0 0.8em;
+         padding: 12px;
+     }
+
+    #notice {
+        background-color: #E1FFD1;
+        border: 1px solid #C5F8AC;
+        color: #499524;
+        margin: 0;
+        padding: 12px;
+    }
+}
+    

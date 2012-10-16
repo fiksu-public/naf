@@ -7,7 +7,7 @@ module Logical
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
       
-      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status,]
+      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status]
       
       ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address, 
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_restriction_name]
@@ -15,6 +15,8 @@ module Logical
       FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
       
       SEARCH_FIELDS = [:command, :application_run_group_name]
+
+      ORDER = { '3' => "created_at", '5' => "started_at", '6' => "finished_at" }
      
       def initialize(naf_job)
         @job = naf_job

@@ -6,7 +6,8 @@ module Naf
     def index
       @rows = []
       if params[:application_schedule_id]
-        @rows = Naf::ApplicationScheduleAffinityTab.where(:application_schedule_id => params[:application_schedule_id])
+        @rows = Naf::ApplicationScheduleAffinityTab.
+            where(:application_schedule_id => params[:application_schedule_id])
       end
       render :template => 'naf/datatable'
     end
@@ -37,7 +38,7 @@ module Naf
       @application = Naf::Application.find(params[:application_id])
       @tab = Naf::ApplicationScheduleAffinityTab.new(params[:application_schedule_affinity_tab])
       if @tab.save
-        redirect_to(application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully created.') 
+        redirect_to(naf.application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully created.')
       else
         render route_params.merge(:action => "new")
       end
@@ -54,22 +55,19 @@ module Naf
       @application_schedule = Naf::ApplicationSchedule.find(params[:application_schedule_id])
       @application = Naf::Application.find(params[:application_id])
       if @tab.update_attributes(params[:application_schedule_affinity_tab])
-        redirect_to(application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully updated.') 
+        redirect_to(naf.application_application_schedule_application_schedule_affinity_tab_path(@application, @application_schedule, @tab), :notice => 'Application Schedule Affinity Tab was successfully updated.')
       else
         render :action => "edit", :application_schedule_id => @application_schedule.id, :application_id => @application.id
       end
     end
 
 
-    
     private
     
     def set_cols_and_attributes
-      @cols = [:script_title, :affinity_name, :affinity_classification_name]
+      @cols = [:id, :script_title, :affinity_name, :affinity_classification_name]
       @attributes = Naf::ApplicationScheduleAffinityTab.attribute_names.map(&:to_sym) | @cols
     end
-
-
 
   end
 end

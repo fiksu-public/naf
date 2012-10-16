@@ -1,0 +1,6 @@
+{
+  "sEcho": <%= raw ( params[:sEcho] || -1 ).to_json %>,
+  "iTotalRecords": <%= @total_records.to_json %>,
+  "iTotalDisplayRecords": <%= ( @total_display_records || @total_records ).to_json %>,
+  "aaData": <%= yield %>
+}

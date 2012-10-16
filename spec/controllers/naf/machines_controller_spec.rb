@@ -5,9 +5,9 @@ module Naf
 
     
     it "should respond with the index action" do
-      Machine.should_receive(:all).and_return([])
+      Machine.should_not_receive(:all).and_return([])
       get :index
-      response.should render_template("naf/datatable")
+      response.should render_template("naf/machines/index")
       response.should be_success
     end
 

@@ -1,9 +1,11 @@
-<div id="record">
-  <%= link_to 'Back', {:controller => 'machines', :action => 'index' }%>
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', { :controller => 'machines', :action => 'index' } %>
 
-  <h3 id="record_name">Create a Machine</h3>
- 
-  <%= render 'form' %>
+    <h3 id="record_name">Create a Machine</h3>
 
+    <%= render 'form' %>
+  </div>
+<% end %>
 
-</div>
+<%= render :partial => 'naf/shared/application' %>

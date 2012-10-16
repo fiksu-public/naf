@@ -4,9 +4,9 @@ module Naf
   describe ApplicationsController  do
 
     it "should respond with the index action" do
-      ::Logical::Naf::Application.should_receive(:all).and_return([])
+      ::Logical::Naf::Application.should_not_receive(:all).and_return([])
       get :index
-      response.should render_template("naf/datatable")
+      response.should render_template("naf/applications/index")
       response.should be_success
     end
 

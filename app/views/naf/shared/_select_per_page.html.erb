@@ -1,0 +1,69 @@
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+
+    function initPageSelect() {
+      var pageSelect = jQuery('#page-select-container');
+      var refreshPage = jQuery('#refresh-page-container');
+      jQuery('#datatable_paginate').append(pageSelect).append(refreshPage);
+      pageSelect.show();
+      refreshPage.show();
+    }
+
+    function getDisplayLength() {
+      return parseInt(jQuery('#iDisplayLength').val());
+    }
+
+    // Global to store the current timout id value.
+    var timeout_id = null;
+
+    // Redraw datatable.
+    var redrawDatatable = function() {
+      jQuery("#datatable").dataTable().fnDraw(false);
+      if ( jQuery('#auto_refresh').is(':checked') ) {
+        timeout_id = setTimeout(redrawDatatable, 10000);
+      }
+    };
+
+    jQuery(document).ready(function() {
+      jQuery('#page-select-container form select').change(function() {
+        var ddTable = jQuery('#datatable');
+        ddTable.dataTableSettings[0]._iDisplayStart = 0;
+        ddTable.dataTableSettings[0]._iDisplayLength = parseInt(this.value);
+        jQuery('#datatable').dataTable().fnDraw();
+      });
+
+      jQuery('#refresh_datatable').click(function(){
+        jQuery('#datatable').dataTable().fnDraw();
+      });
+
+      // Set change event to enabled/disable auto-refresh
+      jQuery('#auto_refresh').change(function() {
+        if ( jQuery(this).is(':checked') ) {
+          timeout_id = setTimeout(redrawDatatable, 10000);
+        } else {
+          clearTimeout(timeout_id);
+          timout_id = null;
+        }
+      });
+
+    });
+
+  </script>
+<% end %>
+
+<div id='refresh-page-container'>
+  <%= link_to "Refresh Table", "#", :id => :refresh_datatable %>
+  &nbsp;&nbsp;
+  <%= label_tag :auto_refresh, 'Auto Refresh:' %>
+  <%= check_box_tag :auto_refresh, 1, false, :id => :auto_refresh %>
+</div>
+
+<div id="page-select-container" class="ui-state-default ui-corner-all">
+  <% default_page_options = [20, 50, 100, 250] %>
+  <%= form_tag({ :controller => params[:controller], :action => params[:action], :format => 'js' },
+    :method => :get) do %>
+    <%= label_tag :iDisplayLength, "Rows Per Page:", :class => "label" %> 
+    <%= select_tag :iDisplayLength, 
+      options_for_select(default_page_options, @rows_per_page), :class => "page-select datatable_variable ui-state-default ui-corner-all" %>
+  <% end %>
+</div>

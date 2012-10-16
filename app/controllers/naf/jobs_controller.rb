@@ -4,16 +4,30 @@ module Naf
     include Naf::ApplicationHelper
 
     before_filter :set_cols_and_attributes
+    before_filter :set_rows_per_page
 
     def index
       respond_to do |format|
-        format.html do 
-          @rows = []
-          render :template => 'naf/datatable'
+        format.html do
         end
         format.json do
-          job_hashes = Logical::Naf::Job.search(params[:search]).map(&:to_hash).map{|hash| add_urls(hash)}
-          render :json => {:job_root_url => naf.jobs_path, :cols => @cols, :jobs => job_hashes }.to_json
+          set_page
+          params[:search][:direction] = params['sSortDir_0']
+          params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
+          params[:search][:limit] = params['iDisplayLength']
+          params[:search][:offset] = @page - 1
+          @total_records = Naf::Job.count(:all)
+          @jobs = []
+          job =[]
+          Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
+            add_urls(hash).map do |key, value|
+              value ||= ''
+              job << value
+            end
+            @jobs << job
+            job = []
+          end
+          render :layout => 'naf/layouts/jquery_datatables'
         end
       end
     end
@@ -23,7 +37,7 @@ module Naf
       @record = Logical::Naf::Job.new(@record)
       respond_to do |format|
         format.json do
-          render :json => {:cols => @attributes, :job => @record.to_detailed_hash}.to_json
+          render :json => { :success => true }.to_json
         end
         format.html do
           render :template => 'naf/record'
@@ -31,31 +45,28 @@ module Naf
       end
     end
 
+    def new
+    end
+
     def create
-     @job = Naf::Job.new(params[:job])
-     if params[:job][:application_id] and app = Naf::Application.find(params[:job][:application_id])
-       @job.command = app.command
-       @job.application_type_id = app.application_type_id
-       schedule = app.application_schedule
-       @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
-       @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
-       post_source = "Application: #{app.title}"
-     else
-       post_source = "Job"
-     end
+      @job = Naf::Job.new(params[:job])
+      if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
+        @job.command = app.command
+        @job.application_type_id = app.application_type_id
+        schedule = app.application_schedule
+        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
+        @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
+      end
       respond_to do |format|
         format.json do
-          response = {}
+          render :json => { :success => true }.to_json if @job.save
+        end
+        format.html do
           if @job.save
-            response[:job_url] = url_for(@job)
-            response[:post_source] = post_source
-            response[:saved] = true
+            redirect_to(@job, :notice => 'Job was successfully created.')
           else
-            response[:saved] = false
-            response[:errors] = @job.errors.full_messages
+            render :action => "new"
           end
-          puts response
-          render :json => response.to_json
         end
       end
     end
@@ -105,7 +116,5 @@ module Naf
     end
 
   end
-
-  
 
 end

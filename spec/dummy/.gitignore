@@ -1,3 +1,9 @@
+db/*.sqlite3
+log/*.log
+tmp/
+.sass-cache
+config/database.yml
+db/structure.sql
 tmp/
 app/models/other/base.rb
 config/initializers/naf.rb
