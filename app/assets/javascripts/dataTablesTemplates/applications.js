@@ -23,9 +23,13 @@ jQuery(document).ready(function() {
     if (!answer) {
       return false;
     }
-    jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') });
-    jQuery('#datatable').dataTable().fnDraw();
-    return false;
+    jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
+      if (data.success) {
+        jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
+                appendTo('#flash_message').slideDown().delay(5000).slideUp();
+        jQuery('#datatable').dataTable().fnDraw();
+      }
+    });
   });
 });
 

@@ -191,12 +191,26 @@ html {
         margin: 8px 0 6px 0 ;
     }
 
-    #page-select-container {
+    #page-select-container, #refresh-page-container {
         display: none;
         float: right;
         margin-top: -1px;
         padding: 2px 2px;
         width: 205px;
+    }
+
+    #page-select-container {
+        label {
+            position: relative;
+            top: 4px;
+        }
+    }
+
+    #refresh-page-container {
+        margin-right: 200px;
+        input {
+          width: 13px;
+        }
     }
 
     #iDisplayLength {
@@ -224,7 +238,7 @@ html {
         background-color: #E1FFD1;
         border: 1px solid #C5F8AC;
         color: #499524;
-        margin: 0 0 0.8em;
+        margin: 0;
         padding: 12px;
     }
 }

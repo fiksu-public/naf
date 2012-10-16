@@ -46,7 +46,6 @@ jQuery(document).ready(function() {
       data: { "job[request_to_terminate]": 1, "job_id": id }
     });
     jQuery('#datatable').dataTable().fnDraw();
-    return false;
   });
 });
 

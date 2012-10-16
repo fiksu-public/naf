@@ -35,7 +35,7 @@ module Naf
     def destroy
       @application = Naf::Application.find(params[:id])
       @application.destroy
-      redirect_to applications_path
+      redirect_to naf.applications_path
     end
 
     def new

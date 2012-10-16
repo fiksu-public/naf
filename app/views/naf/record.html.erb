@@ -9,9 +9,15 @@
     <% end %>
     <%= generate_edit_link %>
 
-    <% unless notice.blank? %>
-      <p id="notice"><%= notice %></p>
-    <% end %>
+    <div id="flash_message">
+        <% unless notice.blank? %>
+          <script type='text/javascript'>
+            jQuery("<p id='notice'><%= notice %></p>")
+                .appendTo('#flash_message')
+                .slideDown().delay(5000).slideUp();
+          </script>
+        <% end %>
+    </div>
 
     <table id="record">
 
@@ -58,8 +64,12 @@
                 if (!answer) {
                   return false;
                 }
-                jQuery.post(postSource, { "job[application_id]": <%= @record.id %> });
-                return false;
+                jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
+                  if (data.success) {
+                      jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
+                              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                  }
+                });
               });
             });
           </script>
