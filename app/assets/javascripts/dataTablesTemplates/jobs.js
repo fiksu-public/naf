@@ -41,11 +41,13 @@ jQuery(document).ready(function() {
     var url = '/job_system/jobs/' + id;
     jQuery.ajax({
       url: url,
-      type: 'PUT',
+      type: 'POST',
       dataType: 'json',
-      data: { "job[request_to_terminate]": 1, "job_id": id }
+      data: { "job[request_to_terminate]": 1, "job_id": id, "_method": "put" },
+      success: function() {
+        jQuery('#datatable').dataTable().fnDraw();
+      }
     });
-    jQuery('#datatable').dataTable().fnDraw();
   });
 });
 
