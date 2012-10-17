@@ -58,7 +58,7 @@ module Naf
     private
     
     def set_cols_and_attributes
-      @cols = [:id, :title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :enabled, :visible]
+      @cols = [:id, :title, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :priority, :application_run_group_limit, :enabled, :visible]
       @attributes = Naf::ApplicationSchedule.attribute_names.map(&:to_sym) | @cols
     end
 

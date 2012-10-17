@@ -2,7 +2,7 @@ module Naf
   class ApplicationSchedule < NafBase
     include PgAdvisoryLocker
 
-    validates :priority, :numericality => {:only_integer => true}
+    validates :priority, :application_run_group_limit, :numericality => {:only_integer => true}
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique

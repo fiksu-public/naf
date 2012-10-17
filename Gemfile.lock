@@ -6,6 +6,7 @@ PATH
       log4r_remote_syslog_outputter (>= 0.0.1)
       partitioned (>= 1.1.0)
       rails (>= 3.2)
+      will_paginate
 
 PATH
   remote: vendor/private
