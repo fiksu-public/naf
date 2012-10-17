@@ -70,7 +70,7 @@ module Naf
       when "job_affinity_tabs"
         link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
       when "application_schedule_affinity_tabs"
-        link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
+        link_to "Back to Application Schedule", { :controller => 'application_schedules', :action => 'show', :application_id => params[:application_id], :id => params[:application_schedule_id] }
       when "machine_affinity_slots"
         link_to "Back to Machine", :controller => 'machines', :action => 'show', :id => params[:machine_id]
       else 
@@ -152,12 +152,7 @@ module Naf
     end
 
     def generate_back_link
-      case controller_name.to_sym
-      when :application_schedule_affinity_tabs
-        link_to "Back to Application", {:controller => 'applications', :action => 'show', :id => @record.application.id}, :class => 'back'
-      else
-        link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
-      end
+      link_to "Back to #{make_header(controller_name)}", {:controller => controller_name, :action => 'index'}, :class => 'back'
     end
 
     def generate_destroy_link
