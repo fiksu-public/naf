@@ -58,7 +58,9 @@
                           data:{ "job[request_to_terminate]":1, "job_id":id, "_method":"put" },
                           success:function (data) {
                               if (data.success == true) {
-                                  window.location.reload();
+                                  jQuery("<p id='notice'>A Job was terminated!</p>").
+                                      appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                                  setTimeout('window.location.reload()', 5600);
                               }
                           }
                       });
@@ -90,6 +92,7 @@
                           if (data.success) {
                               jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
                                       appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                              setTimeout('window.location.reload()', 5600);
                           }
                       });
                   });
