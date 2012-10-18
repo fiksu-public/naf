@@ -32,6 +32,12 @@ module Process::Naf
             find_or_create_by_affinity_classification_id_and_affinity_name(classification, @server_address)
           machine.machine_affinity_slots.create(:affinity_id => affinity.id)
         end
+
+        machine.server_note = @server_note unless @server_note.nil?
+        machine.server_name = @server_name unless @server_name.nil?
+        machine.enabled = @enabled unless @enabled.nil?
+        machine.thread_pool_size = @thread_pool_size unless @thread_pool_size.nil?
+        machine.save!
       else
         machine = ::Naf::Machine.find_by_server_address(@server_address)
 
@@ -41,12 +47,6 @@ module Process::Naf
         end
       end
         
-      machine.server_note = @server_note unless @server_note.nil?
-      machine.server_name = @server_name unless @server_name.nil?
-      machine.enabled = @enabled unless @enabled.nil?
-      machine.thread_pool_size = @thread_pool_size unless @thread_pool_size.nil?
-      machine.save!
-
       if @add_affinity
         @add_affinity.each do |affinity_string|
           parts = affinity_string.split('_')
@@ -100,7 +100,6 @@ module Process::Naf
           puts "  #{parts.join('_')}"
         end
       end
-      exit 0
     end
   end
 end
