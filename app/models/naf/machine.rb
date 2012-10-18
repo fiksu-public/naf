@@ -10,6 +10,8 @@ module Naf
     validates :server_address, :presence => true
     validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
     validates :server_address, :uniqueness => true, :if => :correct_server_address?
+    validates :thread_pool_size,
+              :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
 
     has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
     has_many :affinities, :through => :machine_affinity_slots
@@ -136,5 +138,6 @@ module Naf
       save!
       mark_processes_as_dead(by_machine)
     end
+
   end
 end
