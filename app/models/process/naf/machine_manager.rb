@@ -21,7 +21,7 @@ module Process::Naf
         parts.join('_').to_sym
       end
       update_opts :add_affinity, :choices => selectable_affinities
-      update_opts :add_required_affinity, :choices => selectable_affinities.map{|a| (a.to_s + '-required').to_sym}
+      update_opts :add_required_affinity, :choices => selectable_affinities.map{|a| (a.to_s + '_required').to_sym}
     end
 
     def pre_work
