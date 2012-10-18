@@ -70,7 +70,7 @@ module Naf
       when "job_affinity_tabs"
         link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
       when "application_schedule_affinity_tabs"
-        link_to "Back to Application Schedule", { :controller => 'application_schedules', :action => 'show', :application_id => params[:application_id], :id => params[:application_schedule_id] }
+        link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
       when "machine_affinity_slots"
         link_to "Back to Machine", :controller => 'machines', :action => 'show', :id => params[:machine_id]
       else 
@@ -105,13 +105,7 @@ module Naf
         link_to "Job Affinity Tabs", :controller => 'job_affinity_tabs', :action => 'index', :job_id => params[:id]
       when "applications"
         if @record.application_schedule
-          link_to "Application Schedules", :controller => 'application_schedules', :action => 'index', :application_id => @record.id
-        else
-          ""
-        end
-      when "application_schedules"
-        if @record.application_schedule_affinity_tabs
-          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.id, :application_id => @record.application_id
+          link_to "Application Schedule Affinity Tabs", :controller => 'application_schedule_affinity_tabs', :action => 'index', :application_schedule_id => @record.application_schedule.id, :application_id => @record.id
         else
           ""
         end

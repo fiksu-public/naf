@@ -36,13 +36,15 @@
     <%= f.text_field :log_level %>
   </div>
 
+  <div class="field">
+    <%= f.label :application_run_group_limit %>  <br />
+    <%= f.text_field :application_run_group_limit %>
+  </div>
 
-  <a name="terminate"></a>
   <div class="field">
     <%= f.label :request_to_terminate %> <br />
     <%= f.check_box :request_to_terminate %>
   </div>
-
 
   <br />
   <div class="actions">

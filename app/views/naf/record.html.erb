@@ -42,36 +42,58 @@
           </tr>
       <% end %>
       <% if controller_name == 'jobs' %>
-          <tr>
-            <td colspan="2" style="text-align:center">
-              <% if @record.has_started? %>
-                  <a href="#" class="papertrail" id="<%= @record.id %>"
-                     data-url='<%= papertrail_link(@record) %>'>
-                    View Log in Papertrail
-              <% end %>
-              </a>
-            </td>
-          </tr>
+          <script type='text/javascript'>
+              jQuery(document).ready(function () {
+                  jQuery('.terminate').click(function () {
+                      var answer = confirm("You are terminating this job. Are you sure you want to do this?");
+                      if (!answer) {
+                          return false;
+                      }
+                      var id = <%= @record.id %>;
+                      var url = '/job_system/jobs/' + id;
+                      jQuery.ajax({
+                          url:url,
+                          type:'POST',
+                          dataType:'json',
+                          data:{ "job[request_to_terminate]":1, "job_id":id, "_method":"put" },
+                          success:function (data) {
+                              if (data.success == true) {
+                                  window.location.reload();
+                              }
+                          }
+                      });
+                  });
+              });
+          </script>
+          <% unless @record.request_to_terminate %>
+            <tr>
+              <td>Terminate Job</td>
+              <td>
+                <%= link_to image_tag('terminate.png', :class => 'action', :title => 'Terminate Job'), "#", {:class => "terminate"} %>
+              </td>
+            </tr>
+          <% end %>
+
 
 
       <% elsif controller_name == 'applications' %>
         <% content_for :javascripts do %>
           <script type='text/javascript'>
-            jQuery(document).ready(function() {
-              jQuery('.enqueue').click(function(){
-                var postSource = "<%= naf.jobs_path %>";
-                var answer = confirm("Adding application as a job on the queue?");
-                if (!answer) {
-                  return false;
-                }
-                jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
-                  if (data.success) {
-                      jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
-                              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                  }
-                });
+              jQuery(document).ready(function () {
+                  jQuery('.enqueue').click(function () {
+                      var postSource = "<%= naf.jobs_path %>";
+                      var answer = confirm("Adding application as a job on the queue?");
+                      if (!answer) {
+                          return false;
+                      }
+                      jQuery.post(postSource, { "job[application_id]":jQuery(this).attr('id') }, function (data) {
+                          if (data.success) {
+                              jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
+                                      appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                          }
+                      });
+                  });
               });
-            });
           </script>
         <% end %>
           <tr>

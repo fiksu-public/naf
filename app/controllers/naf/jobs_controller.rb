@@ -54,8 +54,9 @@ module Naf
         @job.command = app.command
         @job.application_type_id = app.application_type_id
         schedule = app.application_schedule
-        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
+        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction.no_limit
         @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
+        @job.application_run_group_limit = schedule ? schedule.application_run_group_limit : 1
       end
       respond_to do |format|
         format.json do
