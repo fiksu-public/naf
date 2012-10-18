@@ -14,5 +14,16 @@ module Naf
     attr_accessible :affinity_classification_id, :affinity_name, :selectable
 
     scope :selectable,  where(:selectable => true)
+
+    def to_s
+      components = []
+      unless selectable
+        components << "UNSELECTABLE"
+      end
+      components << "classification: \"#{affinity_classification_name}\""
+      components << "name: \"#{affinity_name}\""
+      
+      return "::Naf::Affinity<#{components.join(', ')}>"
+    end
   end
 end
