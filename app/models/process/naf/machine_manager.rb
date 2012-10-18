@@ -1,8 +1,8 @@
 module Process::Naf
   class MachineManager < ::Process::Naf::Application
-    opt :server_name, "set the machines server name (use with --create-new-machine)", :type => :string
-    opt :server_note, "set the machines server note (use with --create-new-machine)", :type => :string
-    opt :server_address, "set the machines server address (use with --create-new-machine)", :type => :string, :default => ::Naf::Machine.machine_ip_address
+    opt :server_name, "set the machines server name (use with --update-machine)", :type => :string
+    opt :server_note, "set the machines server note (use with --update-machine)", :type => :string
+    opt :server_address, "set the machines server address (use with --update-machine)", :type => :string, :default => ::Naf::Machine.machine_ip_address
     opt :update_machine, "create or update an machine entry"
     opt :enabled, "enable machine"
     opt :disabled, "disable machine", :var => :enabled, :set => :false
@@ -26,7 +26,7 @@ module Process::Naf
       if @update_machine
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
-          machine = ::Naf::Machine.create_by_server_address(@server_address)
+          machine = ::Naf::Machine.create(:server_address => @server_address)
           classification = ::Naf::AffinityClassification.location.id
           affinity = ::Naf::Affinity.
             find_or_create_by_affinity_classification_id_and_affinity_name(classification, @server_address)
@@ -46,7 +46,7 @@ module Process::Naf
           exit 1
         end
       end
-        
+
       if @add_affinity
         @add_affinity.each do |affinity_string|
           parts = affinity_string.split('_')
@@ -80,11 +80,11 @@ module Process::Naf
         end
       end
 
-      puts "Address: #{@machine.server_address}"
-      puts "Name: #{@machine.server_name}" unless @machine.server_name.nil?
-      puts "Note: #{@machine.server_note}" unless @machine.server_note.nil?
-      puts "Enabled: #{@machine.enabled}"
-      puts "Thread Pool Size: #{@machine.thread_pool_size}"
+      puts "Address: #{machine.server_address}"
+      puts "Name: #{machine.server_name}" unless machine.server_name.nil?
+      puts "Note: #{machine.server_note}" unless machine.server_note.nil?
+      puts "Enabled: #{machine.enabled}"
+      puts "Thread Pool Size: #{machine.thread_pool_size}"
 
       if machine.affinities.empty?
         puts "No machine affinity slots"
