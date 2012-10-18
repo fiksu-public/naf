@@ -3,7 +3,7 @@ Naf::Engine.routes.draw do
     resources :job_affinity_tabs
   end
   resources :applications do
-    resources :application_schedules do
+    resources :application_schedules, :only => [] do
       resources :application_schedule_affinity_tabs
     end
   end
