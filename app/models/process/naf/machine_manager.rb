@@ -8,24 +8,9 @@ module Process::Naf
     opt :disabled, "disable machine", :var => :enabled, :set => :false
     opt :thread_pool_size, "how many scripts can run at once", :type => :int
     opt :list_affinities, "show all affinities"
-    opt :add_affinity, "add an affinity slot", :choices => []
-    opt :add_required_affinity, "add a required affinity slot", :choices => []
+    opt :add_affinity, "add an affinity slot", :type => :strings
 
-    def initialize
-      super
-      selectable_affinities = ::Naf::Affinity.selectable.map do |affinity|
-        parts = [
-                 affinity.affinity_classification_name,
-                 affinity.affinity_name,
-                ]
-        parts.join('_').to_sym
-      end
-      update_opts :add_affinity, :choices => selectable_affinities
-      update_opts :add_required_affinity, :choices => selectable_affinities.map{|a| (a.to_s + '_required').to_sym}
-    end
-
-    def pre_work
-      super
+    def work
       if @list_affinities
         puts "Affinities:"
         ::Naf::Affinity.all.each do |affinity|
@@ -62,6 +47,39 @@ module Process::Naf
       machine.thread_pool_size = @thread_pool_size unless @thread_pool_size.nil?
       machine.save!
 
+      if @add_affinity
+        @add_affinity.each do |affinity_string|
+          parts = affinity_string.split('_')
+          if parts.length == 2
+            classification_name = parts[0]
+            affinity_name = parts[1]
+            required = false
+          elsif parts.length == 3
+            classification_name = parts[0]
+            affinity_name = parts[1]
+            required = true
+          else
+            puts "no idea how to interpret affinity classification in: '#{affinity_string}'"
+            exit 1
+          end
+          affinity_classificiation = ::Naf::AffinityClassification.
+            find_by_affinity_classification_name(classification_name)
+          unless affinity_classificiation
+            puts "could not find affinity classification: '#{classification_name}'"
+            exit 1
+          end
+          affinity = ::Naf::Affinity.
+            find_by_affinity_classification_id_and_affinity_name(affinity_classification.id,
+                                                                 affinity_name)
+          unless affinity
+            puts "could not find affinity: '#{affinity_name}' with classification: '#{classification_name}'"
+            exit 1
+          end
+          machine.machine_affinity_slots.create(:affinity_id => affinity.id,
+                                                :required => required)
+        end
+      end
+
       puts "Address: #{@machine.server_address}"
       puts "Name: #{@machine.server_name}" unless @machine.server_name.nil?
       puts "Note: #{@machine.server_note}" unless @machine.server_note.nil?
@@ -83,19 +101,6 @@ module Process::Naf
         end
       end
       exit 0
-    end
-
-    def work
-      machine = ::Naf::Machine.local_machine
-
-      unless machine.present?
-        logger.fatal "This machine is not configued correctly (ipaddress: #{::Naf::Machine.machine_ip_address})."
-        logger.fatal "Please update #{::Naf::Machine.table_name} with an entry for this machine."
-        logger.fatal "Exiting..."
-        exit 1
-      end
-
-      logger.info machine
     end
   end
 end
