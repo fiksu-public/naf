@@ -136,5 +136,9 @@ module Naf
       save!
       mark_processes_as_dead(by_machine)
     end
+
+    def affinity
+      return ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(::Naf::AffinityClassification.location.id, server_address)
+    end
   end
 end
