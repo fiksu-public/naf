@@ -1,7 +1,20 @@
-html {
-	background-color:#f1f1f1;
+@mixin rounded-top {
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
 }
-#naf {
+
+@mixin rounded-bottom {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+@mixin margin-padding-null {
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    @include margin-padding-null;
     color:#333;
     background: url(/assets/bg-grad.png) repeat-x 0px 0px;
     height: 100%;
@@ -10,21 +23,13 @@ html {
     font: {
         family: arial, helvetica, clean, sans-serif;
     }
+}
 
-    @mixin rounded-top {
-        border-top-left-radius: 7px;
-        border-top-right-radius: 7px;
-    }
+html {
+	background-color:#f1f1f1;
+}
 
-    @mixin rounded-bottom {
-        border-bottom-left-radius: 5px;
-        border-bottom-right-radius: 5px;
-    }
-
-    @mixin margin-padding-null {
-        margin: 0;
-        padding: 0;
-    }
+#naf {
 
     a {
         color: #0085CF;
@@ -44,20 +49,50 @@ html {
     }
 
     #fluid {
-        margin: 0 0 6px 6px;
+        margin: 0 6px;
         text-align: left;
-        width: 99%;
     }
 
     div {
+        @include margin-padding-null;
         #hd {
             div#header {
                 h3 {
+                    margin: 20px 0;
                     display: inline-block;
-                    font-size: 130%;
+                    font-size: 20.8px;
+                    font-weight: bold;
                     padding-left: 10px;
                     a {
                       color: #FFFFFF;
+                    }
+                }
+            }
+        }
+        #navigation {
+            border-bottom: 4px solid #2D2D2D;
+            margin-top: 22px;
+            ul {
+                @include margin-padding-null;
+                li {
+                    list-style: none outside none;
+                    float:left;
+                    display:inline;
+                    a {
+                        @include rounded-top;
+                        font-size:11px;
+                        padding:6px 10px 4px 10px;
+                        background-color: #808080;
+                        font-weight: normal;
+                        margin: 0 0.2em 0 0;
+                        color: #fff;
+                        display: block;
+                        &:hover { background-color: #2d2d2d; }
+                    }
+                }
+                li#on {
+                    a {
+                        background-color: #2D2D2D !important;
                     }
                 }
             }
@@ -70,47 +105,28 @@ html {
             border-left: 1px solid #E1E1E1;
             border-right: 1px solid #E1E1E1;
             padding: 10px;
-            #record h3#record_name {
-                padding-top: 10px;
-            }
             h3#record_name {
                 font-size: 130%;
+                font-weight: bold;
                 @include margin-padding-null;
-                padding-bottom: 10px;
+                padding: 10px 0;
             }
-            #parent_links, #record {
+            #parent_links {
                 padding-top: 10px;
             }
+            #table_record {
+                margin-top: 10px;
+            }
+            #record {
+                td, th {
+                    padding-right: 30px;
+                }
+            }
+            #page-label {
+                float: none;
+            }
         }
-    }
 
-    #navigation {
-        border-bottom: 4px solid #2D2D2D;
-        margin-top: 1.4em;
-        ul {
-            @include margin-padding-null;
-            li {
-                list-style: none outside none;
-            	float:left;
-	            display:inline;
-                a {
-                    @include rounded-top;
-                    font-size:11px;
-                    padding:6px 10px 4px 10px;
-                    background-color: #808080;
-                    font-weight: normal;
-                    margin: 0 0.2em 0 0;
-                    color: #fff;
-                    display: block;
-                    &:hover { background-color: #2d2d2d; }
-                }
-            }
-            li#on {
-                a {
-                    background-color: #2D2D2D !important;
-                }
-            }
-        }
     }
 
     #show_search_container_link {
@@ -224,7 +240,6 @@ html {
         width: 95px;
     }
 
-
     #errorExplanation {
          background-color: #FEF1EC;
          border: 1px solid #FFE4D8;
@@ -240,6 +255,10 @@ html {
         color: #499524;
         margin: 0;
         padding: 12px;
+    }
+
+    input#affinity_tabs_submit_button {
+        width: 280px;
     }
 }
     
