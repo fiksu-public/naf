@@ -16,6 +16,7 @@ module Naf
           params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
+          @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
           @total_records = Naf::Job.count(:all)
           @jobs = []
           job =[]

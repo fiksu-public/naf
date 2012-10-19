@@ -140,6 +140,7 @@ html {
         padding: 15px;
         margin-top: 10px;
         margin-bottom: 5px;
+        display: none;
         #job_search {
             padding: 10px;
             div.field{
@@ -170,6 +171,10 @@ html {
         td, th {
             margin: 0;
             padding: 3px 0 3px 3px;
+        }
+
+        tr td a img {
+            margin: 0;
         }
 
         th {
