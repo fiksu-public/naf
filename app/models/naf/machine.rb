@@ -114,7 +114,9 @@ module Naf
     end
 
     def is_stale?(period)
-      return self.last_seen_alive_at.nil? || self.last_seen_alive_at < (Time.zone.now - period)
+      # if last_seen_alive_at is nil then the runner has not been started yet -- hold off
+      # claiming it is stale until the runner is run at least once.
+      return self.last_seen_alive_at.present? && self.last_seen_alive_at < (Time.zone.now - period)
     end
 
     def mark_processes_as_dead(by_machine)
@@ -139,5 +141,8 @@ module Naf
       mark_processes_as_dead(by_machine)
     end
 
+    def affinity
+      return ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(::Naf::AffinityClassification.location.id, server_address)
+    end
   end
 end
