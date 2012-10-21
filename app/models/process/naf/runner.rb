@@ -157,7 +157,8 @@ module Process::Naf
               child_job = @children.delete(pid)
               if child_job.present?
                 if status.nil? || status.exited? || status.signaled?
-                  child_job.reload
+                  # XXX child_job.reload
+                  child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
                   logger.info "cleaning up dead child: #{child_job}"
                   child_job.finished_at = Time.zone.now
                   if status
