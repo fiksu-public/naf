@@ -25,7 +25,7 @@ module Process::Naf
 
     def fetch_naf_job
       if @naf_job_id.is_a?(Integer) && @naf_job_id > 0
-        return ::Naf::Job.find_by_id(@naf_job_id)
+        return ::Naf::Job.from_partition(@naf_job_id).find(@naf_job_id)
       end
       return nil
     end

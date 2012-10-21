@@ -193,9 +193,10 @@ module Process::Naf
 
             logger.info "starting new job : #{job}"
 
-            job.started_on_machine_id = machine.id
-            job.started_at = Time.zone.now
-            job.save!
+            # XXX this is done in fetch_next_job
+            # job.started_on_machine_id = machine.id
+            # job.started_at = Time.zone.now
+            # job.save!
 
             pid = job.spawn
             if pid

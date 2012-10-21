@@ -33,7 +33,7 @@ module Logical
 
           # check prerequisites
           unfinished_prerequisites = ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).reject do |job_prerequisite|
-            job_prerequisite.prerequisite_job.finished_at.present?
+            ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.present?
           end
           next unless unfinished_prerequisites.blank?
 
