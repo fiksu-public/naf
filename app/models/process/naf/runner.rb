@@ -122,22 +122,21 @@ module Process::Naf
               begin
                 Timeout::timeout(@loop_sleep_time) do
                   pid, status = Process.waitpid2(-1)
-                rescue Timeout::Error
-                  # XXX is there a race condition where a child process exits
-                  # XXX has not set pid or status yet and timeout fires?
-                  # XXX i bet there is
-                  # XXX so this code is here:
-
-                  dead_children = []
-                  @children.each do |pid, child|
-                    unless is_job_process_alive?(child)
-                      dead_children << child
-                    end
+                end
+              rescue Timeout::Error
+                # XXX is there a race condition where a child process exits
+                # XXX has not set pid or status yet and timeout fires?
+                # XXX i bet there is
+                # XXX so this code is here:
+                dead_children = []
+                @children.each do |pid, child|
+                  unless is_job_process_alive?(child)
+                    dead_children << child
                   end
-                  unless dead_children.blank?
-                    logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
-                    logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
-                  end
+                end
+                unless dead_children.blank?
+                  logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+                  logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
                 end
               rescue Errno::ECHILD
                 logger.error "No child when we thought we had children #{@children.inspect}"
