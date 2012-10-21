@@ -114,7 +114,6 @@ module Process::Naf
         logger.info "cleaning up dead children: #{@children.length}"
 
         if @children.length > 0
-          cleaned_up_any_children = false
           while @children.length > 0
             begin
               pid = nil
@@ -148,7 +147,6 @@ module Process::Naf
 
               if pid
                 begin
-                  cleaned_up_any_children = true
                   child_job = @children.delete(pid)
                   if child_job.present?
                     if status.nil? || status.exited? || status.signaled?
@@ -178,11 +176,8 @@ module Process::Naf
             end
           end
         else
-          logger.info "cleaned_up_any_children: #{cleaned_up_any_children}"
-          unless cleaned_up_any_children
-            logger.info "SLEEEEEEPING #{@loop_sleep_time}"
-            sleep(@loop_sleep_time)
-          end
+          logger.debug_gross "sleeping in loop: #{@loop_sleep_time} seconds"
+          sleep(@loop_sleep_time)
         end
 
         # start new jobs
