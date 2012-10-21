@@ -113,12 +113,12 @@ module Process::Naf
 
         logger.info "cleaning up dead children: #{@children.length}"
 
-        cleaned_up_any_children = false
-        while @children.length > 0
-          begin
-            pid = nil
-            status = nil
-            if @children.length > 0
+        if @children.length > 0
+          cleaned_up_any_children = false
+          while @children.length > 0
+            begin
+              pid = nil
+              status = nil
               begin
                 Timeout::timeout(@loop_sleep_time) do
                   pid, status = Process.waitpid2(-1)
@@ -145,41 +145,43 @@ module Process::Naf
                 status = nil
                 logger.error "pulling first child off list to clean it up: pid=#{pid}"
               end
-            else
-              unless cleaned_up_any_children
-                sleep(@loop_sleep_time)
-              end
-            end
 
-            if pid
-              begin
-                cleaned_up_any_children = true
-                child_job = @children.delete(pid)
-                if child_job.present?
-                  if status.nil? || status.exited? || status.signaled?
-                    # XXX child_job.reload
-                    child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
-                    logger.info "cleaning up dead child: #{child_job}"
-                    child_job.finished_at = Time.zone.now
-                    if status
-                      child_job.exit_status = status.exitstatus
-                      child_job.termination_signal = status.termsig
+              if pid
+                begin
+                  cleaned_up_any_children = true
+                  child_job = @children.delete(pid)
+                  if child_job.present?
+                    if status.nil? || status.exited? || status.signaled?
+                      # XXX child_job.reload
+                      child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
+                      logger.info "cleaning up dead child: #{child_job}"
+                      child_job.finished_at = Time.zone.now
+                      if status
+                        child_job.exit_status = status.exitstatus
+                        child_job.termination_signal = status.termsig
+                      end
+                      child_job.save!
+                    else
+                      # this can happen if the child is sigstopped
+                      logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
                     end
-                    child_job.save!
                   else
-                    # this can happen if the child is sigstopped
-                    logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                    # XXX ERROR no child for returned pid -- this can't happen
+                    logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
                   end
-                else
-                  # XXX ERROR no child for returned pid -- this can't happen
-                  logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+                rescue StandardError => e
+                  # XXX just incase a job control failure -- more code here
+                  logger.error "some failure during child clean up"
+                  logger.error e
                 end
-              rescue StandardError => e
-                # XXX just incase a job control failure -- more code here
-                logger.error "some failure during child clean up"
-                logger.error e
               end
             end
+          end
+        else
+          logger.info "cleaned_up_any_children: #{cleaned_up_any_children}"
+          unless cleaned_up_any_children
+            logger.info "SLEEEEEEPING #{@loop_sleep_time}"
+            sleep(@loop_sleep_time)
           end
         end
 
