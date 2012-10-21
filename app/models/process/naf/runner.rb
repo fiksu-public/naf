@@ -152,31 +152,33 @@ module Process::Naf
             end
 
             if pid
-              cleaned_up_any_children = true
-              child_job = @children.delete(pid)
-              if child_job.present?
-                if status.nil? || status.exited? || status.signaled?
-                  # XXX child_job.reload
-                  child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
-                  logger.info "cleaning up dead child: #{child_job}"
-                  child_job.finished_at = Time.zone.now
-                  if status
-                    child_job.exit_status = status.exitstatus
-                    child_job.termination_signal = status.termsig
+              begin
+                cleaned_up_any_children = true
+                child_job = @children.delete(pid)
+                if child_job.present?
+                  if status.nil? || status.exited? || status.signaled?
+                    # XXX child_job.reload
+                    child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
+                    logger.info "cleaning up dead child: #{child_job}"
+                    child_job.finished_at = Time.zone.now
+                    if status
+                      child_job.exit_status = status.exitstatus
+                      child_job.termination_signal = status.termsig
+                    end
+                    child_job.save!
+                  else
+                    # this can happen if the child is sigstopped
+                    logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
                   end
-                  child_job.save!
                 else
-                  # this can happen if the child is sigstopped
-                  logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                  # XXX ERROR no child for returned pid -- this can't happen
+                  logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
                 end
-              else
-                # XXX ERROR no child for returned pid -- this can't happen
-                logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+              rescue StandardError => e
+                # XXX just incase a job control failure -- more code here
+                logger.error "some failure during child clean up"
+                logger.error e
               end
-            rescue StandardError => e
-              # XXX just incase a job control failure -- more code here
-              logger.error "some failure during child clean up"
-              logger.error e
             end
           end
         end
