@@ -31,8 +31,8 @@ module Naf
         Machine.enabled.should include(machine)
       end
 
-      it "should be stale" do
-        machine.is_stale?(1).should be_true
+      it "should not be stale" do
+        machine.is_stale?(1).should be_false
       end
     end
 
