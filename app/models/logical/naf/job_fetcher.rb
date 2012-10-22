@@ -7,6 +7,7 @@ module Logical
 
       def initialize(machine)
         @machine = machine
+        @disregarded_job_ids = Set.new
       end
 
       def logger
@@ -16,11 +17,17 @@ module Logical
       def fetch_next_job
         possible_jobs = ::Naf::Job.possible_jobs.order_by_priority
         possible_jobs.each do |possible_job|
+          if @disregarded_job_ids.include? possible_job.id
+            logger.debug "skipping job: #{possible_job}"
+            next
+          end
+
           job_affinity_ids = possible_job.affinity_ids
 
           # eliminate job if it can't run on this machine
           unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
             logger.debug "required affinity not found"
+            @disregarded_job_ids << possible_job.id
             next
           end
 
@@ -29,6 +36,7 @@ module Logical
           # eliminate job if machine can not run this it
           unless job_affinity_ids.all? { |job_affinity_id| machine.affinity_ids.include? job_affinity_id }
             logger.debug "machine does not meet affinity requirements"
+            @disregarded_job_ids << possible_job.id
             next
           end
 
