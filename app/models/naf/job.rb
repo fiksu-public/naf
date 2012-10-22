@@ -200,7 +200,8 @@ module Naf
 
     #
     def affinity_ids
-      return job_affinity_tabs.map{|jat| jat.affinity_id}
+      # XXX return job_affinity_tabs.map{|jat| jat.affinity_id}
+      return ::Naf::JobAffinityTab.from_partition(id).where(:job_id => id).map{|jat| jat.affinity_id}
     end
 
     def title

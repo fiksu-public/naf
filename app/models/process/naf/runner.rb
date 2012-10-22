@@ -60,12 +60,11 @@ module Process::Naf
         ::Af::Application.singleton.emergency_teardown
       }
 
+      job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
+
       while true
-        machine = ::Naf::Machine.find_by_server_address(@server_address)
-        if machine.nil?
-          logger.warn "this machine is misconfigued, server address: #{@server_address}"
-          break
-        elsif !machine.enabled
+        machine.reload
+        if !machine.enabled
           logger.warn "this machine is disabled #{machine}"
           break
         elsif machine.marked_down
@@ -81,8 +80,6 @@ module Process::Naf
             parse_and_set_logger_levels(@last_machine_log_level)
           end
         end
-
-        job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"

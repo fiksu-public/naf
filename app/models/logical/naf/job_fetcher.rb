@@ -14,7 +14,8 @@ module Logical
       end
 
       def fetch_next_job
-        ::Naf::Job.possible_jobs.order_by_priority.each do |possible_job|
+        possible_jobs = ::Naf::Job.possible_jobs.order_by_priority
+        possible_jobs.each do |possible_job|
           job_affinity_ids = possible_job.affinity_ids
 
           # eliminate job if it can't run on this machine
