@@ -180,8 +180,9 @@ module Process::Naf
             end
           end
         else
-          logger.debug_gross "sleeping in loop: #{@loop_sleep_time} seconds"
+          logger.info "sleeping in loop: #{@loop_sleep_time} seconds"
           sleep(@loop_sleep_time)
+          logger.info "sleeping done"
         end
 
         # start new jobs
