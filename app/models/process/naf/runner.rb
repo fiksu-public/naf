@@ -1,3 +1,5 @@
+require 'timeout'
+
 module Process::Naf
   class Runner < ::Af::Application
     opt :wait_time_for_processes_to_terminate, "time between askign processes to terminate and sending kill signals", :argument_note => "SECONDS", :default => 120
@@ -58,12 +60,11 @@ module Process::Naf
         ::Af::Application.singleton.emergency_teardown
       }
 
+      job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
+
       while true
-        machine = ::Naf::Machine.find_by_server_address(@server_address)
-        if machine.nil?
-          logger.warn "this machine is misconfigued, server address: #{@server_address}"
-          break
-        elsif !machine.enabled
+        machine.reload
+        if !machine.enabled
           logger.warn "this machine is disabled #{machine}"
           break
         elsif machine.marked_down
@@ -79,8 +80,6 @@ module Process::Naf
             parse_and_set_logger_levels(@last_machine_log_level)
           end
         end
-
-        job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"
@@ -110,38 +109,77 @@ module Process::Naf
         # clean up children that have exited
 
         logger.info "cleaning up dead children: #{@children.length}"
-        while @children.length > 0
-          begin
-            pid, status = Process.waitpid2(-1, Process::WNOHANG)
-            break if pid.nil?
-            child_job = @children.delete(pid)
-            if child_job.present?
-              if status.exited? || status.signaled?
-                child_job.reload
-                logger.info "cleaning up dead child: #{child_job}"
-                child_job.finished_at = Time.zone.now
-                child_job.exit_status = status.exitstatus
-                child_job.termination_signal = status.termsig
-                child_job.save!
-              else
-                # this can happen if the child is sigstopped
-                logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+
+        if @children.length > 0
+          while @children.length > 0
+            pid = nil
+            status = nil
+            begin
+              Timeout::timeout(@loop_sleep_time) do
+                pid, status = Process.waitpid2(-1)
               end
-            else
-              # XXX ERROR no child for returned pid -- this can't happen
-              logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+            rescue Timeout::Error
+              # XXX is there a race condition where a child process exits
+              # XXX has not set pid or status yet and timeout fires?
+              # XXX i bet there is
+              # XXX so this code is here:
+              dead_children = []
+              @children.each do |pid, child|
+                unless is_job_process_alive?(child)
+                  dead_children << child
+                end
+              end
+              unless dead_children.blank?
+                logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+                logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+              end
+              break
+            rescue Errno::ECHILD
+              logger.error "No child when we thought we had children #{@children.inspect}"
+              logger.error e
+              pid = @children.first.try(:first)
+              status = nil
+              logger.error "pulling first child off list to clean it up: pid=#{pid}"
             end
-          rescue StandardError => e
-            # XXX just incase a job control failure -- more code here
-            logger.error "some failure during child clean up"
-            logger.error e.message
-            logger.error e.backtrace.join("\n")
+
+            if pid
+              begin
+                child_job = @children.delete(pid)
+                if child_job.present?
+                  if status.nil? || status.exited? || status.signaled?
+                    # XXX child_job.reload
+                    child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
+                    logger.info "cleaning up dead child: #{child_job}"
+                    child_job.finished_at = Time.zone.now
+                    if status
+                      child_job.exit_status = status.exitstatus
+                      child_job.termination_signal = status.termsig
+                    end
+                    child_job.save!
+                  else
+                    # this can happen if the child is sigstopped
+                    logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                  end
+                else
+                  # XXX ERROR no child for returned pid -- this can't happen
+                  logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+                end
+              rescue StandardError => e
+                # XXX just incase a job control failure -- more code here
+                logger.error "some failure during child clean up"
+                logger.error e
+              end
+            end
           end
+        else
+          logger.info "sleeping in loop: #{@loop_sleep_time} seconds"
+          sleep(@loop_sleep_time)
         end
 
         # start new jobs
         logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
         while @children.length < machine.thread_pool_size
+          logger.info "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
           begin
             job = job_fetcher.fetch_next_job
 
@@ -152,9 +190,10 @@ module Process::Naf
 
             logger.info "starting new job : #{job}"
 
-            job.started_on_machine_id = machine.id
-            job.started_at = Time.zone.now
-            job.save!
+            # XXX this is done in fetch_next_job
+            # job.started_on_machine_id = machine.id
+            # job.started_at = Time.zone.now
+            # job.save!
 
             pid = job.spawn
             if pid
@@ -173,13 +212,10 @@ module Process::Naf
           rescue StandardError => e
             # XXX rescue for various issues
             logger.error "failure during job start"
-            logger.error e.message
-            logger.error e.backtrace.join("\n")
+            logger.error e
           end
         end
         logger.info "done starting jobs"
-
-        sleep(@loop_sleep_time)
       end
 
       logger.info "runner quitting"

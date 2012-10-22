@@ -172,7 +172,7 @@ module Naf
     end
 
     def self.not_started
-      return where({:started_at => nil})
+      return where(:started_at => nil)
     end
 
     def self.started
@@ -191,10 +191,6 @@ module Naf
       return order("priority,created_at")
     end
 
-    def self.select_affinity_ids
-      return select("array(select affinity_id from #{Naf.schema_name}.job_affinity_tabs where job_id = #{Naf.schema_name}.jobs.id order by affinity_id) as affinity_ids")
-    end
-
     def self.possible_jobs
       return recently_queued.not_started
     end
@@ -204,6 +200,10 @@ module Naf
     end
 
     #
+    def affinity_ids
+      # XXX return job_affinity_tabs.map{|jat| jat.affinity_id}
+      return ::Naf::JobAffinityTab.from_partition(id).where(:job_id => id).map{|jat| jat.affinity_id}
+    end
 
     def title
       return application.try(:title)

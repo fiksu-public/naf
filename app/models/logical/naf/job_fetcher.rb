@@ -7,6 +7,7 @@ module Logical
 
       def initialize(machine)
         @machine = machine
+        @disregarded_job_ids = Set.new
       end
 
       def logger
@@ -14,12 +15,19 @@ module Logical
       end
 
       def fetch_next_job
-        ::Naf::Job.possible_jobs.select("*").select_affinity_ids.order_by_priority.each do |possible_job|
-          job_affinity_ids = possible_job.affinity_ids[1..-2].split(',').map(&:to_i)
+        possible_jobs = ::Naf::Job.possible_jobs.order_by_priority
+        possible_jobs.each do |possible_job|
+          if @disregarded_job_ids.include? possible_job.id
+            logger.debug "skipping job: #{possible_job}"
+            next
+          end
+
+          job_affinity_ids = possible_job.affinity_ids
 
           # eliminate job if it can't run on this machine
           unless machine.machine_affinity_slots.select(&:required).all? { |slot| job_affinity_ids.include? slot.affinity_id }
             logger.debug "required affinity not found"
+            @disregarded_job_ids << possible_job.id
             next
           end
 
@@ -28,14 +36,14 @@ module Logical
           # eliminate job if machine can not run this it
           unless job_affinity_ids.all? { |job_affinity_id| machine.affinity_ids.include? job_affinity_id }
             logger.debug "machine does not meet affinity requirements"
+            @disregarded_job_ids << possible_job.id
             next
           end
 
           # check prerequisites
-          unfinished_prerequisites = ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).reject do |job_prerequisite|
-            job_prerequisite.prerequisite_job.finished_at.present?
+          next if ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).any? do |job_prerequisite|
+            ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.nil?
           end
-          next unless unfinished_prerequisites.blank?
 
           job = nil
           ::Naf::Job.lock_for_job_queue do
