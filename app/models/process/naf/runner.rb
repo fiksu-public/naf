@@ -188,6 +188,7 @@ module Process::Naf
         # start new jobs
         logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
         while @children.length < machine.thread_pool_size
+          logger.info "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
           begin
             job = job_fetcher.fetch_next_job
 
@@ -216,7 +217,9 @@ module Process::Naf
               logger.error "failed to execute #{job}"
             end
 
+            logger.info "saving job : #{job}"
             job.save!
+            logger.info "job saved : #{job}"
           rescue StandardError => e
             # XXX rescue for various issues
             logger.error "failure during job start"
