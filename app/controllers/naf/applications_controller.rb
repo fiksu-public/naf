@@ -34,6 +34,10 @@ module Naf
 
     def destroy
       @application = Naf::Application.find(params[:id])
+      @jobs = Naf::Job.where(:application_id => @application.id).each do |job|
+        job.application_id = nil
+        job.save!
+      end
       @application.destroy
       redirect_to naf.applications_path
     end

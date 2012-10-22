@@ -1,7 +1,15 @@
 <% content_for :body do %>
     <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
     <%= render :partial => 'naf/shared/select_per_page' %>
-    <div id="flash_message"></div>
+    <div id="flash_message">
+        <% unless notice.blank? %>
+          <script type='text/javascript'>
+            jQuery("<p id='notice'><%= notice %></p>")
+                .appendTo('#flash_message')
+                .slideDown().delay(5000).slideUp();
+          </script>
+        <% end %>
+    </div>
 
     <table id='datatable'>
       <thead>
