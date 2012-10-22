@@ -35,10 +35,9 @@ module Logical
 
           logger.info "checking prerequisites"
           # check prerequisites
-          unfinished_prerequisites = ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).reject do |job_prerequisite|
-            ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.present?
+          next if ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).any? do |job_prerequisite|
+            ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.nil?
           end
-          next unless unfinished_prerequisites.blank?
 
           logger.info "locking job queue"
           job = nil
