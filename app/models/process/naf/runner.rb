@@ -112,63 +112,62 @@ module Process::Naf
 
         if @children.length > 0
           while @children.length > 0
+            pid = nil
+            status = nil
             begin
-              pid = nil
-              status = nil
-              begin
-                Timeout::timeout(@loop_sleep_time) do
-                  pid, status = Process.waitpid2(-1)
-                end
-              rescue Timeout::Error
-                # XXX is there a race condition where a child process exits
-                # XXX has not set pid or status yet and timeout fires?
-                # XXX i bet there is
-                # XXX so this code is here:
-                dead_children = []
-                @children.each do |pid, child|
-                  unless is_job_process_alive?(child)
-                    dead_children << child
-                  end
-                end
-                unless dead_children.blank?
-                  logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
-                  logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
-                end
-              rescue Errno::ECHILD
-                logger.error "No child when we thought we had children #{@children.inspect}"
-                logger.error e
-                pid = @children.first.try(:first)
-                status = nil
-                logger.error "pulling first child off list to clean it up: pid=#{pid}"
+              Timeout::timeout(@loop_sleep_time) do
+                pid, status = Process.waitpid2(-1)
               end
-
-              if pid
-                begin
-                  child_job = @children.delete(pid)
-                  if child_job.present?
-                    if status.nil? || status.exited? || status.signaled?
-                      # XXX child_job.reload
-                      child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
-                      logger.info "cleaning up dead child: #{child_job}"
-                      child_job.finished_at = Time.zone.now
-                      if status
-                        child_job.exit_status = status.exitstatus
-                        child_job.termination_signal = status.termsig
-                      end
-                      child_job.save!
-                    else
-                      # this can happen if the child is sigstopped
-                      logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
-                    end
-                  else
-                    # XXX ERROR no child for returned pid -- this can't happen
-                    logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
-                  end
-                rescue StandardError => e
-                  # XXX just incase a job control failure -- more code here
-                  logger.error "some failure during child clean up"
-                  logger.error e
+            rescue Timeout::Error
+              # XXX is there a race condition where a child process exits
+              # XXX has not set pid or status yet and timeout fires?
+              # XXX i bet there is
+              # XXX so this code is here:
+              dead_children = []
+              @children.each do |pid, child|
+                unless is_job_process_alive?(child)
+                  dead_children << child
                 end
+              end
+              unless dead_children.blank?
+                logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+                logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+              end
+              break
+            rescue Errno::ECHILD
+              logger.error "No child when we thought we had children #{@children.inspect}"
+              logger.error e
+              pid = @children.first.try(:first)
+              status = nil
+              logger.error "pulling first child off list to clean it up: pid=#{pid}"
+            end
+
+            if pid
+              begin
+                child_job = @children.delete(pid)
+                if child_job.present?
+                  if status.nil? || status.exited? || status.signaled?
+                    # XXX child_job.reload
+                    child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
+                    logger.info "cleaning up dead child: #{child_job}"
+                    child_job.finished_at = Time.zone.now
+                    if status
+                      child_job.exit_status = status.exitstatus
+                      child_job.termination_signal = status.termsig
+                    end
+                    child_job.save!
+                  else
+                    # this can happen if the child is sigstopped
+                    logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                  end
+                else
+                  # XXX ERROR no child for returned pid -- this can't happen
+                  logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+                end
+              rescue StandardError => e
+                # XXX just incase a job control failure -- more code here
+                logger.error "some failure during child clean up"
+                logger.error e
               end
             end
           end
