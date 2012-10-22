@@ -14,9 +14,7 @@ module Logical
       end
 
       def fetch_next_job
-        logger.info "fetch_next_job"
         ::Naf::Job.possible_jobs.order_by_priority.each do |possible_job|
-          logger.info "fetch_next_job(in loop): #{possible_job}"
           job_affinity_ids = possible_job.affinity_ids
 
           # eliminate job if it can't run on this machine
@@ -33,13 +31,11 @@ module Logical
             next
           end
 
-          logger.info "checking prerequisites"
           # check prerequisites
           next if ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).any? do |job_prerequisite|
             ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.nil?
           end
 
-          logger.info "locking job queue"
           job = nil
           ::Naf::Job.lock_for_job_queue do
             limit = (possible_job.application_run_group_limit || 0)
@@ -68,9 +64,7 @@ module Logical
                  *
             SQL
 
-            logger.info "updating job: #{job}"
             job = ::Naf::Job.find_by_sql([sql, machine.id, possible_job.id]).first
-            logger.info "job updated: #{job}"
           end
 
           if job.present?

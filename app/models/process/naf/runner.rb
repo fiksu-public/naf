@@ -115,18 +115,14 @@ module Process::Naf
 
         if @children.length > 0
           while @children.length > 0
-            logger.info "in child loop because we have: #{@children.length} children"
             begin
               pid = nil
               status = nil
               begin
                 Timeout::timeout(@loop_sleep_time) do
-                  logger.info "before waitpid"
                   pid, status = Process.waitpid2(-1)
                 end
-                logger.info "found pid=#{pid}"
               rescue Timeout::Error
-                logger.info "timedout"
                 # XXX is there a race condition where a child process exits
                 # XXX has not set pid or status yet and timeout fires?
                 # XXX i bet there is
@@ -182,7 +178,6 @@ module Process::Naf
         else
           logger.info "sleeping in loop: #{@loop_sleep_time} seconds"
           sleep(@loop_sleep_time)
-          logger.info "sleeping done"
         end
 
         # start new jobs
@@ -217,9 +212,7 @@ module Process::Naf
               logger.error "failed to execute #{job}"
             end
 
-            logger.info "saving job : #{job}"
             job.save!
-            logger.info "job saved : #{job}"
           rescue StandardError => e
             # XXX rescue for various issues
             logger.error "failure during job start"
