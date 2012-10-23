@@ -11,5 +11,4 @@
  *= require_self
  *= require_tree ./jquery_ui
  *= require_tree './naf'
- *= require_tree './timepicker'
 */
