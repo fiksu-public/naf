@@ -34,6 +34,10 @@ module Naf
 
     def destroy
       @application = Naf::Application.find(params[:id])
+      @jobs = Naf::Job.where(:application_id => @application.id).each do |job|
+        job.application_id = nil
+        job.save!
+      end
       @application.destroy
       redirect_to naf.applications_path
     end
@@ -70,7 +74,7 @@ module Naf
     private
 
     def set_cols_and_attributes
-      more_attributes = [:script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :run_start_minute, :priority, :visible, :enabled ]
+      more_attributes = [:script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled ]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = Logical::Naf::Application::COLUMNS
     end

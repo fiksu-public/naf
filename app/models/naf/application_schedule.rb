@@ -2,7 +2,12 @@ module Naf
   class ApplicationSchedule < NafBase
     include PgAdvisoryLocker
 
-    validates :priority, :application_run_group_limit, :numericality => {:only_integer => true}
+    validates :priority, :application_run_group_limit,
+              :numericality => {:only_integer => true, :greater_than => -2147483648, :less_than => 2147483647}
+    validates :run_start_minute,
+              :numericality => { :only_integer => true, :greater_than => 0, :less_than => 24*60, :allow_blank => true }
+    validates :run_interval,
+              :numericality => { :only_integer => true, :greater_than => 0, :less_than => 2147483647, :allow_blank => true }
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
@@ -22,7 +27,7 @@ module Naf
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
-    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name,  :run_interval, :priority, :visible, :enabled, :run_start_minute
+    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name, :run_interval, :priority, :visible, :enabled, :run_start_minute
     attr_accessible :application_run_group_limit
 
     SCHEDULES_LOCK_ID = 0
@@ -88,10 +93,9 @@ module Naf
     end
 
     def run_interval_at_time_check
-      unless run_start_minute.blank?
-        if run_interval.present? and (run_interval % (60*24) != 0)
-          errors.add(:run_interval, "needs to be nil or a multiple of #{24*60} minutes (one day) since you specified a Run Start Time")
-        end
+      unless (run_start_minute.blank? || run_interval.blank?)
+        errors.add(:run_interval, "or Run start minute must be nil")
+        errors.add(:run_start_minute, "or Run interval must be nil")
       end
     end
   end

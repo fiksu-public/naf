@@ -22,7 +22,6 @@
   </div>
 
 
-
   <div class="field">
     <%= f.label :application_type %></br />
     <%= f.select(:application_type_id, ::Naf::ApplicationType.all.map{ |a| [a.script_type_name, a.id]}, {:include_blank => true} )%>
@@ -70,11 +69,14 @@
       <%= schedule_fields.text_field :run_interval %>
     </div>
     
-    
-
     <div class="field">
       <%= schedule_fields.label :priority %>  <br />
       <%= schedule_fields.text_field :priority %>
+    </div>
+
+    <div class="field">
+      <%= schedule_fields.label :application_run_group_limit %>  <br />
+      <%= schedule_fields.text_field :application_run_group_limit %>
     </div>
     
     <div class="field">
@@ -86,8 +88,7 @@
       <%= schedule_fields.label :visible %>  <br />
       <%= schedule_fields.check_box :visible %>
     </div>
-    
-    
+
   <% end %>
 
   <br />

@@ -24,7 +24,7 @@ jQuery(document).ready(function() {
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToJob(nRow, aData);
       addLinkToTitle(nRow, aData);
-      jQuery('td:nth-child(9)', nRow).addClass('center');
+      alignmentButtons(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -44,8 +44,12 @@ jQuery(document).ready(function() {
       type: 'POST',
       dataType: 'json',
       data: { "job[request_to_terminate]": 1, "job_id": id, "_method": "put" },
-      success: function() {
-        jQuery('#datatable').dataTable().fnDraw();
+      success:function (data) {
+          if (data.success) {
+              jQuery("<p id='notice'>A Job was terminated!</p>").
+                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              jQuery('#datatable').dataTable().fnDraw();
+          }
       }
     });
   });
@@ -64,4 +68,15 @@ function addLinkToTitle(nRow, aData) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );
     jQuery('td:nth-child(5)', nRow).empty().append(row);
   }
+}
+
+function alignmentButtons(nRow, aData) {
+  var data = aData[10];
+  var row;
+  if (aData[8] != "Canceled") {
+      row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
+  } else {
+      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 15px;'>" + data + "</div>";
+  }
+  jQuery('td:nth-child(10)', nRow).empty().append(row).addClass('center');
 }
