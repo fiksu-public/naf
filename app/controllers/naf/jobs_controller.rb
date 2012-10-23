@@ -16,6 +16,7 @@ module Naf
           params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
+          @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
           @total_records = Naf::Job.count(:all)
           @jobs = []
           job =[]
@@ -54,8 +55,9 @@ module Naf
         @job.command = app.command
         @job.application_type_id = app.application_type_id
         schedule = app.application_schedule
-        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction::NO_RESTRICTIONS
+        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction.no_limit
         @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
+        @job.application_run_group_limit = schedule ? schedule.application_run_group_limit : 1
       end
       respond_to do |format|
         format.json do

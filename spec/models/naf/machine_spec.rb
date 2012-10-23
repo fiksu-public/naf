@@ -31,8 +31,8 @@ module Naf
         Machine.enabled.should include(machine)
       end
 
-      it "should be stale" do
-        machine.is_stale?(1).should be_true
+      it "should be not be stale" do
+        machine.is_stale?(1).should be_false
       end
     end
 
@@ -51,6 +51,12 @@ module Naf
         machine.mark_alive
         machine.last_seen_alive_at.should be > @time_before_update
         machine.last_seen_alive_at.should be < Time.zone.now
+      end
+
+      it "should become stale" do
+        machine.mark_alive
+        sleep(2.0)
+        machine.is_stale?(1).should be_true
       end
     end
 

@@ -9,8 +9,8 @@ module Logical
       
       COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status]
       
-      ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address, 
-                    :machine_started_on_server_name, :application_run_group_name, :application_run_group_restriction_name]
+      ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
+                    :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
       
       FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
       
@@ -84,24 +84,7 @@ module Logical
       #
       # We eventually build up these results over created_at/1.week partitions.
       def self.search(search)
-        status   = search[:status]
-        status ||= :all
-        case status.to_sym
-        when :canceled
-          job_scope = ::Naf::Job.canceled
-        when :failed_to_start
-          job_scope = ::Naf::Job.where(:failed_to_start => true)
-        when :error
-          job_scope = ::Naf::Job.where("exit_status > 0")
-        when :queued
-          job_scope = ::Naf::Job.not_started
-        when :running
-          job_scope = ::Naf::Job.started.not_finished
-        when :finished
-          job_scope = ::Naf::Job.finished
-        else
-          job_scope = ::Naf::Job.scoped
-        end
+        job_scope = self.get_job_scope(search)
         order, direction = search[:order], search[:direction]
         job_scope = job_scope.order("#{order} #{direction}").limit(search[:limit]).offset(search[:offset].to_i*search[:limit].to_i)
         FILTER_FIELDS.each do |field|
@@ -113,6 +96,40 @@ module Logical
         # Now return instantiations of all the logical job wrappers 
         # from the job scope
         return job_scope.map{|physical_job| new(physical_job) }
+      end
+
+      def self.total_display_records(search)
+        job_scope = self.get_job_scope(search)
+        FILTER_FIELDS.each do |field|
+          job_scope = job_scope.where(field => search[field]) if search[field].present?
+        end
+        SEARCH_FIELDS.each do |field|
+          job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
+        end
+
+        job_scope.count
+      end
+
+      def self.get_job_scope(search)
+        status = search[:status].nil? ? :all : search[:status]
+        case status.to_sym
+          when :canceled
+            job_scope = ::Naf::Job.canceled
+          when :failed_to_start
+            job_scope = ::Naf::Job.where(:failed_to_start => true)
+          when :error
+            job_scope = ::Naf::Job.where("exit_status > 0")
+          when :queued
+            job_scope = ::Naf::Job.not_started
+          when :running
+            job_scope = ::Naf::Job.started.not_finished
+          when :finished
+            job_scope = ::Naf::Job.finished
+          else
+            job_scope = ::Naf::Job.scoped
+        end
+
+        job_scope
       end
 
       def self.find(id)
@@ -167,7 +184,7 @@ module Logical
           ""
         end
       end
-      
+
     end
   end
 end
