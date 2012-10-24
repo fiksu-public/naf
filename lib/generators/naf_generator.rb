@@ -22,6 +22,18 @@ class NafGenerator < Rails::Generators::Base
     directory "config"
   end
 
+  def add_layouts_file
+    filename = "naf_layout.html.erb"
+    filepath = "app/views/layouts/#{filename}"
+    path = "#{Rails.root}/#{filepath}"
+    if File.exists?(path)
+      puts "Skipping #{filepath} creation, as file already exists!"
+    else
+      puts "Adding naf_layout (#{filepath})..."
+      template filename, path
+    end
+  end
+
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
     insert_into_file("#{Rails.root}/config/routes.rb", :after => /routes.draw.do\n/) do

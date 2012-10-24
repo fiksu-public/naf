@@ -8,6 +8,7 @@ module Naf
       @controller_class = "::ApplicationController"
       @title = "Naf - a Rails Job Scheduling Engine"
       @papertrail_group_id = nil
+      @layout = "naf_layout"
     end
 
   end
