@@ -21,7 +21,7 @@ Gem::Specification.new do |s|
  s.add_dependency 'log4r', '1.1.10'
  s.add_dependency "log4r_remote_syslog_outputter", "0.0.1"
  s.add_dependency 'reasonable_log4r', '>= 0.9.0'
- s.add_dependency 'uuid', '2.3.4'
+ s.add_dependency 'uuid'
  s.add_dependency "rails", '>= 3.0.0'
  s.add_dependency 'rspec-rails', '2.8.1'
 end

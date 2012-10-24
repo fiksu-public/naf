@@ -9,7 +9,7 @@ gem 'pg_application_name', '>= 1.0.0'
 gem 'pg_advisory_locker', '>= 0.9.0'
 gem 'log4r', '1.1.10'
 gem 'reasonable_log4r', '>= 0.9.0'
-gem 'uuid', '2.3.4'
+gem 'uuid'
 
 # Declare any dependencies that are still in development here instead of in
 # your gemspec. These might include edge Rails or gems from your path or
