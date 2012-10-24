@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    naf (0.9.2)
+    naf (0.9.3)
       jquery-rails
       log4r_remote_syslog_outputter (>= 0.0.1)
       partitioned (>= 1.1.0)
