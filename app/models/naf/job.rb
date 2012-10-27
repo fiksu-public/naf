@@ -25,10 +25,14 @@ module Naf
     belongs_to :started_on_machine, :class_name => '::Naf::Machine'
     belongs_to :application, :class_name => "::Naf::Application"
     belongs_to :application_run_group_restriction, :class_name => "::Naf::ApplicationRunGroupRestriction"
-    has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
-    has_many :job_affinities, :class_name => "::Naf::Affinity", :through => :job_affinity_tabs
-    has_many :job_prerequisites, :class_name => "::Naf::JobPrerequisite", :dependent => :destroy
-    has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites, :source => :prerequisite_job
+
+    # XXX access supported through instance methods
+    # has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
+    # has_many :job_affinities, :class_name => "::Naf::Affinity", :through => :job_affinity_tabs
+
+    # XXX must access instance methods job_prerequisites through helper methods so we can use partitioning sql
+    # has_many :job_prerequisites, :class_name => "::Naf::JobPrerequisite", :dependent => :destroy
+    # has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites, :source => :prerequisite_job
 
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
     delegate :script_type_name, :to => :application_type
@@ -200,10 +204,6 @@ module Naf
     end
 
     #
-    def affinity_ids
-      # XXX return job_affinity_tabs.map{|jat| jat.affinity_id}
-      return ::Naf::JobAffinityTab.from_partition(id).where(:job_id => id).map{|jat| jat.affinity_id}
-    end
 
     def title
       return application.try(:title)
@@ -218,6 +218,33 @@ module Naf
     end
 
     #
+
+
+    def job_affinity_tabs
+      return ::Naf::JobAffinityTab.
+        from_partition(id).
+        where(:job_id => id)
+    end
+
+    def job_affinities
+      return job_affinity_tabs.map{|jat| jat.affinity}
+    end
+
+    def affinity_ids
+      return job_affinity_tabs.map{|jat| jat.affinity_id}
+    end
+
+    def job_prerequisites
+      return ::Naf::JobPrerequisite.
+        from_partition(created_at).
+        where({ :job_created_at => created_at, :job_id => id })
+    end
+
+    def prerequisites
+      return job_prerequisites.
+        map{|jp| ::Naf::Job.from_partition(jp.prerequisite_job_id).find_by_id(jp.prerequisite_job_id)}.
+        reject{|j| j.nil?}
+    end
 
     def verify_prerequisites(these_jobs)
       these_jobs.each do |this_job|
