@@ -84,13 +84,13 @@ module Process::Naf
         if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
           logger.debug "it's time to check schedules"
           if ::Naf::ApplicationSchedule.try_lock_schedules
-            logger.info "checking schedules"
+            logger.debug_gross "checking schedules"
             machine.mark_checked_schedule
             ::Naf::ApplicationSchedule.unlock_schedules
 
             # check scheduled tasks
             should_be_queued.each do |application_schedule|
-              logger.info "schedule application: #{application_schedule}"
+              logger.info "scheduled application: #{application_schedule}"
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
                 @job_creator.queue_application_schedule(application_schedule)
               end
@@ -108,7 +108,7 @@ module Process::Naf
 
         # clean up children that have exited
 
-        logger.info "cleaning up dead children: #{@children.length}"
+        logger.detail "cleaning up dead children: #{@children.length}"
 
         if @children.length > 0
           while @children.length > 0
@@ -172,28 +172,23 @@ module Process::Naf
             end
           end
         else
-          logger.info "sleeping in loop: #{@loop_sleep_time} seconds"
+          logger.detail "sleeping in loop: #{@loop_sleep_time} seconds"
           sleep(@loop_sleep_time)
         end
 
         # start new jobs
-        logger.info "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
+        logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
         while @children.length < machine.thread_pool_size
-          logger.info "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
+          logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
           begin
             job = job_fetcher.fetch_next_job
 
             unless job.present?
-              logger.info "no more jobs to run"
+              logger.debug_gross "no more jobs to run"
               break
             end
 
             logger.info "starting new job : #{job}"
-
-            # XXX this is done in fetch_next_job
-            # job.started_on_machine_id = machine.id
-            # job.started_at = Time.zone.now
-            # job.save!
 
             pid = job.spawn
             if pid
@@ -215,7 +210,7 @@ module Process::Naf
             logger.error e
           end
         end
-        logger.info "done starting jobs"
+        logger.debug_gross "done starting jobs"
       end
 
       logger.info "runner quitting"
