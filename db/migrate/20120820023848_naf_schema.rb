@@ -38,6 +38,8 @@ class NafSchema < ActiveRecord::Migration
           selectable                    boolean not null default true,
           affinity_classification_id    integer not null references #{schema_name}.affinity_classifications,
           affinity_name                 text not null,
+          affinity_short_name           text unique check ( affinity_short_name ~ '^[a-zA-Z_][a-zA-Z0-9_]*$' ),
+          affinity_note                 text null,
           unique (affinity_classification_id, affinity_name)
       );
       insert into #{schema_name}.affinities (affinity_classification_id, affinity_name) values
@@ -51,6 +53,7 @@ class NafSchema < ActiveRecord::Migration
           updated_at                     timestamp,
           server_address                 inet not null unique,
           server_name                    text,
+          short_name                     text unique check ( short_name ~ '^[a-zA-Z_][a-zA-Z0-9_]*$' ),
           server_note                    text,
           enabled                        boolean not null default true,
           thread_pool_size               integer not null default 5,
@@ -94,6 +97,7 @@ class NafSchema < ActiveRecord::Migration
           application_type_id	          integer not null references #{schema_name}.application_types,
           command                         text not null,
           title                           text not null,
+          short_name                      text null unique check ( short_name ~ '^[a-zA-Z_][a-zA-Z0-9_]*$' ),
           log_level                       text null
       );
       insert into #{schema_name}.applications (application_type_id, command, title) values
