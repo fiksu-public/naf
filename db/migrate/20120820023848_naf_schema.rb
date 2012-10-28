@@ -233,8 +233,6 @@ class NafSchema < ActiveRecord::Migration
         ('Naf::JanitorialDropAssignment',   100, '::Naf::JobCreatedAt'),
         ('Naf::JanitorialCreateAssignment', 125, '::Naf::JobPrerequisite'),
         ('Naf::JanitorialDropAssignment',   125, '::Naf::JobPrerequisite'),
-        ('Naf::JanitorialCreateAssignment', 125, '::Naf::ApplicationSchedulePrerequisite'),
-        ('Naf::JanitorialDropAssignment',   125, '::Naf::ApplicationSchedulePrerequisite'),
         ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
         ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
 
