@@ -250,9 +250,21 @@ class NafSchema < ActiveRecord::Migration
           id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
-          name                                   text not null unique,
           level                                  text not null unique
       );
+      insert into #{schema_name}.logger_levels (name, level) values
+        ('ALL'),
+        ('DEBUG'),
+        ('DEBUG_FINE'),
+        ('DEBUG_MEDIUM'),
+        ('DEBUG_GROSS'),
+        ('DETAIL'),
+        ('INFO'),
+        ('WARN'),
+        ('ALARM'),
+        ('ERROR'),
+        ('FATAL'),
+        ('OFF');
       create table #{schema_name}.logger_style_names
       (
           id                                     serial not null primary key,
