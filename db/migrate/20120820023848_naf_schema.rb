@@ -230,6 +230,39 @@ class NafSchema < ActiveRecord::Migration
           assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
+      create table #{schema_name}.logger_styles
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          name                                   text not null unique,
+          note                                   text null
+      );
+      create table #{schema_name}.logger_names
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          name                                   text not null unique
+      );
+      create table #{schema_name}.logger_levels
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          name                                   text not null unique,
+          level                                  text not null unique
+      );
+      create table #{schema_name}.logger_style_names
+      (
+          id                                     serial not null primary key,
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+          logger_style_id                        integer not null references #{schema_name}.logger_styles,
+          logger_name_id                         integer not null references #{schema_name}.logger_names,
+          logger_level_id                        integer not null references #{schema_name}.logger_levels,
+          UNIQUE(logger_style_id, logger_name_id)
+      );
       insert into #{schema_name}.janitorial_assignments (type, assignment_order, model_name) values
         ('Naf::JanitorialCreateAssignment', 500, '::Naf::Job'),
         ('Naf::JanitorialDropAssignment',   500, '::Naf::Job'),
