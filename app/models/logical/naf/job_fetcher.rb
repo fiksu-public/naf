@@ -41,7 +41,7 @@ module Logical
           end
 
           # check prerequisites
-          next if ::Naf::JobPrerequisite.from_partition(possible_job.created_at).where(:job_id => possible_job.id).any? do |job_prerequisite|
+          next if ::Naf::JobPrerequisite.from_partition(possible_job.id).where(:job_id => possible_job.id).any? do |job_prerequisite|
             ::Naf::Job.from_partition(job_prerequisite.prerequisite_job_id).find(job_prerequisite.prerequisite_job_id).finished_at.nil?
           end
 
