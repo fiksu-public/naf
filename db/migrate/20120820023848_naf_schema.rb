@@ -197,9 +197,8 @@ class NafSchema < ActiveRecord::Migration
       (
           id                                     serial not null primary key,
           created_at                             timestamp not null default now(),
-          job_id                                 integer not null,
-          job_created_at                         timestamp not null,
-          prerequisite_job_id                    integer not null,
+          job_id                                 integer not null, -- references #{schema_name}.jobs,
+          prerequisite_job_id                    integer not null, -- references #{schema_name}.jobs,
           UNIQUE (job_id, prerequisite_job_id),
           CHECK (job_id <> prerequisite_job_id)
       );
@@ -207,15 +206,15 @@ class NafSchema < ActiveRecord::Migration
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
-          job_id                             integer not null unique,
+          job_id                             integer not null unique, -- references #{schema_name}.jobs,
           job_created_at                     timestamp not null
       );
       create table #{schema_name}.job_affinity_tabs
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
-          job_id		 	     integer not null references #{schema_name}.jobs,
-          affinity_id           	     integer not null references #{schema_name}.affinities,
+          job_id		 	     integer not null, -- references #{schema_name}.jobs,
+          affinity_id           	     integer not null, -- references #{schema_name}.affinities,
           unique (job_id, affinity_id)
       );
       create table #{schema_name}.janitorial_assignments

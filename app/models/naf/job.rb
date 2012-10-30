@@ -236,8 +236,8 @@ module Naf
 
     def job_prerequisites
       return ::Naf::JobPrerequisite.
-        from_partition(created_at).
-        where({ :job_created_at => created_at, :job_id => id })
+        from_partition(id).
+        where(:job_id => id)
     end
 
     def prerequisites
