@@ -251,7 +251,7 @@ class NafSchema < ActiveRecord::Migration
           updated_at                             timestamp,
           level                                  text not null unique
       );
-      insert into #{schema_name}.logger_levels (name, level) values
+      insert into #{schema_name}.logger_levels (level) values
         ('ALL'),
         ('DEBUG'),
         ('DEBUG_FINE'),
