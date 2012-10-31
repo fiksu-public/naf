@@ -32,16 +32,6 @@ module Naf
       render :template => 'naf/record'
     end
 
-    def destroy
-      @application = Naf::Application.find(params[:id])
-      @jobs = Naf::Job.where(:application_id => @application.id).each do |job|
-        job.application_id = nil
-        job.save!
-      end
-      @application.destroy
-      redirect_to naf.applications_path
-    end
-
     def new
       @application = Naf::Application.new
       @application.build_application_schedule

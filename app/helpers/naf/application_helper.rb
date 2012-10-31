@@ -2,10 +2,10 @@ module Naf
   module ApplicationHelper
     include ActionView::Helpers::TextHelper
 
-    DESTROY_BLOCKED_RESOURCES = ["jobs"]
+    DESTROY_BLOCKED_RESOURCES = ["jobs", "applications", "machines"]
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
     CREATE_BLOCKED_RESOURCES = []
-    ALL_VISIBLE_RESOURCES = [ "jobs",  "applications", "machines", "affinities"]
+    ALL_VISIBLE_RESOURCES = [ "jobs", "applications", "machines", "affinities"]
 
     def tabs
       ALL_VISIBLE_RESOURCES
@@ -160,8 +160,6 @@ module Naf
         link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "application_schedules"
         link_to "Destroy", schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
-      when "applications"
-        link_to "Destroy", @record.app, {:confirm => "Are you sure you want to destroy this application?", :method => :delete, :class => 'destroy'}
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end
