@@ -25,6 +25,7 @@ module Naf
       machine = mock_model(Machine, :id => 1)
       Machine.should_receive(:find).with("1").and_return(machine)
       model_class.should_receive(:find).with("5").and_return(slot)
+      slot.stub!(:affinity_name).and_return("Test Name")
       delete :destroy, :id => 5, :machine_id => 1
       index_path = machine_machine_affinity_slots_path(machine)
       response.should redirect_to(index_path)
@@ -61,6 +62,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:new).and_return(valid_slot)
+        valid_slot.stub!(:affinity_name).and_return("Test Name")
         path = machine_machine_affinity_slot_path(machine, valid_slot)
         subject.should redirect_to(path)
       end
@@ -85,6 +87,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:find).and_return(valid_slot)
+        valid_slot.stub!(:affinity_name).and_return("Test Name")
         path = machine_machine_affinity_slot_path(machine, valid_slot)
         subject.should redirect_to(path)
       end
