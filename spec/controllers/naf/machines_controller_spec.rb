@@ -33,15 +33,6 @@ module Naf
       response.should render_template("naf/machines/new")
       response.should be_success
     end
-
-
-    it "should delete the record and redirect ot index actions" do
-      machine = mock_model(Machine, :id => 5)
-      Machine.should_receive(:find).with("5").and_return(machine)
-      machine.should_receive(:destroy).and_return(true)
-      delete :destroy, :id => 5
-      response.should redirect_to machines_path
-    end
     
     context "on the create action" do
       let(:valid_machine)    { mock_model(Machine, :save => true, :id => 5)  }
