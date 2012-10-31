@@ -32,13 +32,6 @@ module Naf
       render :template => 'naf/record'
     end
 
-    def destroy
-      @machine = Naf::Machine.find(params[:id])
-      @machine.destroy
-      redirect_to naf.machines_path
-    end
-
-
     def new
       @machine = Naf::Machine.new
     end
