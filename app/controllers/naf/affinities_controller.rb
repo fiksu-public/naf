@@ -50,7 +50,7 @@ module Naf
     
     def set_cols_and_attributes
       @attributes = Naf::Affinity.attribute_names.map(&:to_s) << :affinity_classification_name
-      @cols = [:id, :affinity_name, :affinity_classification_name, :selectable]
+      @cols = [:id, :affinity_classification_name, :affinity_name]
     end
 
   end
