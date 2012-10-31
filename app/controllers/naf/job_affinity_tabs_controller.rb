@@ -17,14 +17,6 @@ module Naf
       render :template => 'naf/record'
     end
 
-    def destroy
-      @job = Naf::Job.find(params[:job_id])
-      @tab = Naf::JobAffinityTab.find(params[:id])
-      @tab.destroy
-      flash[:notice] = "Job Affinity Tab '#{@tab.affinity_name}' was successfully deleted."
-      redirect_to naf.job_job_affinity_tabs_path(@job)
-    end
-
     def new
       @job = Naf::Job.find(params[:job_id])
       @tab = Naf::JobAffinityTab.new

@@ -1,6 +1,6 @@
 Naf::Engine.routes.draw do
   resources :jobs do
-    resources :job_affinity_tabs
+    resources :job_affinity_tabs, :except => [:destroy]
   end
   resources :applications, :except => [:destroy] do
     resources :application_schedules, :only => [] do

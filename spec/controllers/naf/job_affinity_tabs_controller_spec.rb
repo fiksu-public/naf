@@ -19,17 +19,6 @@ module Naf
       response.should render_template("naf/record")
       response.should be_success
     end
-
-    it "should respond with the destroy action and redirect to nested index" do
-      tab = mock_model(model_class, :job_id => 1, :id => 5)
-      job = mock_model(Job, :id => 1)
-      Job.should_receive(:find).with("1").and_return(job)
-      model_class.should_receive(:find).with("5").and_return(tab)
-      tab.stub!(:affinity_name).and_return("Test Name")
-      delete :destroy, :id => 5, :job_id => 1
-      index_path = job_job_affinity_tabs_path(job)
-      response.should redirect_to(index_path)
-    end
     
     it "should respond with the edit action" do
       Job.should_receive(:find).with("1").and_return(nil)
