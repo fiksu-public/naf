@@ -25,6 +25,7 @@ jQuery(document).ready(function() {
       addLinkToJob(nRow, aData);
       addLinkToTitle(nRow, aData);
       alignmentButtons(nRow, aData);
+      colorizationStatus(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -79,4 +80,25 @@ function alignmentButtons(nRow, aData) {
       row = "<div style='text-align:left;width:50px;display: inline;padding-right: 17px;'>" + data + "</div>";
   }
   jQuery('td:nth-child(10)', nRow).empty().append(row).addClass('center');
+}
+
+function colorizationStatus(nRow, aData) {
+  jQuery('td:nth-child(9)', nRow).wrapInner('<div class="">');
+  switch(aData[8]) {
+    case 'Running':
+      jQuery('td:nth-child(9) div', nRow).addClass('script-running');
+      break;
+    case 'Queued':
+      jQuery('td:nth-child(9) div', nRow).addClass('script-queued');
+      break;
+    case 'Error':
+      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
+      break;
+    case  'Failed to Start':
+      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
+      break;
+    case 'Finished':
+      jQuery('td:nth-child(9) div', nRow).addClass('script-finished');
+      break;
+  }
 }

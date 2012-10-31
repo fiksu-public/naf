@@ -219,6 +219,22 @@ html {
                     .center {
                         text-align: center;
                     }
+
+                    .script-queued {
+                        color: #f8a800;
+                    }
+
+                    .script-running {
+                        color: #45a113;
+                    }
+
+                    .script-error {
+                        color: #CD0A0A;
+                    }
+
+                    .script-finished {
+                        color: #000000;
+                    }
                 }
 
                 #datatable_info {
