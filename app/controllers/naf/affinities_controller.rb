@@ -16,7 +16,8 @@ module Naf
     def destroy
       @affinity = Naf::Affinity.find(params[:id])
       @affinity.destroy
-      redirect_to :action => 'index'
+      flash[:notice] = "Affinity '#{@affinity.affinity_name}' was successfully deleted."
+      redirect_to(:action => "index")
     end
     
     def new
@@ -26,7 +27,7 @@ module Naf
     def create
       @affinity = Naf::Affinity.new(params[:affinity])
       if  @affinity.save
-        redirect_to(@affinity, :notice => 'Affinity was successfully created.') 
+        redirect_to(@affinity, :notice => "Affinity '#{@affinity.affinity_name}' was successfully created.")
       else
         render :action => "new"
       end
@@ -39,7 +40,7 @@ module Naf
     def update
       @affinity = Naf::Affinity.find(params[:id])
       if @affinity.update_attributes(params[:affinity])
-        redirect_to(@affinity, :notice => 'Affinity was successfully updated.') 
+        redirect_to(@affinity, :notice => "Affinity '#{@affinity.affinity_name}' was successfully updated.")
       else
         render :action => "edit"
       end

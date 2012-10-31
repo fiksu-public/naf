@@ -59,6 +59,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:new).and_return(valid_tab)
+        valid_tab.stub!(:affinity_name).and_return("Test Name")
         path = application_application_schedule_application_schedule_affinity_tab_path(application, schedule, valid_tab)
         subject.should redirect_to(path)
       end
@@ -85,6 +86,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:find).and_return(valid_tab)
+        valid_tab.stub!(:affinity_name).and_return("Test Name")
         path = application_application_schedule_application_schedule_affinity_tab_path(application, schedule, valid_tab)
         subject.should redirect_to(path)
       end
@@ -94,16 +96,11 @@ module Naf
       end
     end
 
-
-
     # Ensure that some instance variables are set
     after(:each) do
       cols = assigns(:cols)
       attributes = assigns(:attributes)
     end
-  
-  
 
-    
   end
 end

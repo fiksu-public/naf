@@ -40,7 +40,7 @@ module Naf
     def create
       @application = Naf::Application.new(params[:application])
       if @application.save
-        redirect_to(@application, :notice => 'Application was successfully created.') 
+        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully created.")
       else
         render :action => "new"
       end
@@ -54,7 +54,7 @@ module Naf
     def update
       @application = Naf::Application.find(params[:id])
       if @application.update_attributes(params[:application])
-        redirect_to(@application, :notice => 'Application was successfully updated.') 
+        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully updated.")
       else
         render :action => "edit"
       end

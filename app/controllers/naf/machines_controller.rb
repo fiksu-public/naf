@@ -39,7 +39,7 @@ module Naf
     def create
       @machine = Naf::Machine.new(params[:machine])
       if @machine.save
-        redirect_to(@machine, :notice => 'Machine was successfully created.') 
+        redirect_to(@machine, :notice => "Machine '#{@machine.server_name.blank? ? @machine.server_address : @machine.server_name}' was successfully created.")
       else
         render :action => "new"
       end
@@ -52,7 +52,7 @@ module Naf
     def update
       @machine = Naf::Machine.find(params[:id])
       if @machine.update_attributes(params[:machine])
-        redirect_to(@machine, :notice => 'Machine was successfully updated.') 
+        redirect_to(@machine, :notice => "Machine '#{@machine.server_name.blank? ? @machine.server_address : @machine.server_name}' was successfully updated.")
       else
         render :action => "edit"
       end

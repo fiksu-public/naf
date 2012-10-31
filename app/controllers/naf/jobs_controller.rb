@@ -65,7 +65,11 @@ module Naf
         end
         format.html do
           if @job.save
-            redirect_to(@job, :notice => 'Job was successfully created.')
+            prerequisites = "Prerequisites: "
+            @job.prerequisites.each do |prerequisite|
+              prerequisites << "'#{prerequisite.command}'; "
+            end
+            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created. #{prerequisites unless @job.prerequisites.blank? }")
           else
             render :action => "new"
           end
@@ -82,7 +86,7 @@ module Naf
         @job = Naf::Job.find(params[:id])
         if @job.update_attributes(params[:job])
           format.html do
-            redirect_to(@job, :notice => 'Job was successfully updated.') 
+            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully updated.")
           end
           format.json do
             render :json => {:success => true}.to_json

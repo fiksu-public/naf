@@ -21,6 +21,7 @@ module Naf
       @machine = Naf::Machine.find(params[:machine_id])
       @slot = Naf::MachineAffinitySlot.find(params[:id])
       @slot.destroy
+      flash[:notice] = "Machine Affinity Slot '#{@slot.affinity_name}' was successfully deleted."
       redirect_to naf.machine_machine_affinity_slots_path(@machine)
     end
 
@@ -33,7 +34,7 @@ module Naf
       @machine = Naf::Machine.find(params[:machine_affinity_slot][:machine_id])
       @slot = Naf::MachineAffinitySlot.new(params[:machine_affinity_slot])
       if  @slot.save
-        redirect_to(naf.machine_machine_affinity_slot_path(@machine, @slot), :notice => 'Machine Affinity Slot was successfully created.')
+        redirect_to(naf.machine_machine_affinity_slot_path(@machine, @slot), :notice => "Machine Affinity Slot '#{@slot.affinity_name}' was successfully created.")
       else
         render :action => "new", :machine_id => @machine.id
       end
@@ -48,7 +49,7 @@ module Naf
       @slot = Naf::MachineAffinitySlot.find(params[:id])
       @machine = Naf::Machine.find(@slot.machine_id)
       if @slot.update_attributes(params[:machine_affinity_slot])
-        redirect_to(naf.machine_machine_affinity_slot_path(@machine, @slot), :notice => "Machine Affinity Slot was successfully updated")
+        redirect_to(naf.machine_machine_affinity_slot_path(@machine, @slot), :notice => "Machine Affinity Slot '#{@slot.affinity_name}' was successfully updated")
       else
         render :action => "edit", :machine_id => @machine.id
       end
@@ -58,8 +59,8 @@ module Naf
     private 
 
     def set_cols_and_attributes
-      @attributes = Naf::MachineAffinitySlot.attribute_names.map(&:to_sym)
-      @cols = [:id, :machine_server_name, :machine_server_address, :affinity_name, :affinity_classification_name, :required]
+      @cols = [:id, :machine_server_name, :machine_server_address, :affinity_classification_name, :affinity_name, :required]
+      @attributes = Naf::MachineAffinitySlot.attribute_names.map(&:to_sym) | @cols
     end
 
   end
