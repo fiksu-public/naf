@@ -36,7 +36,7 @@
 
           <div class="field">
             <%= label(:application_type_id, "Script Type:") %>
-            <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }, { :include_blank => true }, { :class => 'datatable_variable' }) %>
+            <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
           </div>
           <br/>
 
@@ -54,7 +54,7 @@
       <div style="width:30%; display: inline-block; padding-left:40px;">
           <div class="field">
             <%= label(:application_run_group_restriction_id, "Run Group Restriction:") %>
-            <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }, { :include_blank => true }, { :class => 'datatable_variable' }) %>
+            <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
           </div>
           <br/>
 
@@ -72,7 +72,7 @@
 
           <div class="field">
             <%= label(:started_on_machine_id, "Machine:") %>
-            <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }, { :include_blank => true }, { :class => 'datatable_variable' }) %>
+            <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
           </div>
       </div>
       <br/><br/><br/>

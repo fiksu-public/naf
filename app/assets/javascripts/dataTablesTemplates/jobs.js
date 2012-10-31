@@ -76,7 +76,7 @@ function alignmentButtons(nRow, aData) {
   if (aData[8] != "Canceled") {
       row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
   } else {
-      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 15px;'>" + data + "</div>";
+      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 17px;'>" + data + "</div>";
   }
   jQuery('td:nth-child(10)', nRow).empty().append(row).addClass('center');
 }
