@@ -31,7 +31,7 @@ jQuery(document).ready(function() {
       data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
       success:function (data) {
           if (data.success) {
-              jQuery("<p id='notice'>A Job was terminated!</p>").
+              jQuery("<p id='notice'>Machine was marked down!</p>").
                   appendTo('#flash_message').slideDown().delay(5000).slideUp();
               jQuery('#datatable').dataTable().fnDraw();
           }
