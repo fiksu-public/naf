@@ -63,11 +63,15 @@ module Naf
     end
 
     def self.machine_ip_address
-      hostname = nil
-      hostname = Socket.gethostname
       return Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
-    rescue StandardError => e
+    rescue StandardError
       return "127.0.0.1"
+    end
+
+    def self.hostname
+      Socket.gethostname
+    rescue StandardError
+      return "local"
     end
 
     def self.local_machine
