@@ -7,7 +7,7 @@ module Logical
       
       include ActionView::Helpers::DateHelper
       
-      COLUMNS = [:id, :server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level]
+      COLUMNS = [:id, :server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level, :affinities, :marked_down]
       
       def initialize(naf_machine)
         @machine = naf_machine
@@ -47,6 +47,15 @@ module Logical
       
       def to_hash
         Hash[ COLUMNS.map{|m| [m, send(m)]} ]
+      end
+
+      def affinities
+        names = []
+        @machine.affinities.each do |affinity|
+          names << " #{affinity.affinity_name}"
+        end
+
+        names
       end
       
     end
