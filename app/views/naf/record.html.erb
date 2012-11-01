@@ -123,7 +123,7 @@
 
     <% if(controller_name == 'jobs' || controller_name == 'machines') %>
         <h4>Stdout</h4>
-        <iframe src="<%= papertrail_link(@record) %>" id="stdout" class="scrollable-output">
+        <iframe src="<%= papertrail_link(@record, true) %>" id="stdout" class="scrollable-output">
             Your browser doesn't support iframe!
         </iframe>
     <% end %>
