@@ -170,6 +170,20 @@
                      padding: 12px;
                 }
 
+                .scrollable-output {
+                    border: 1px solid #E1E1E1;
+                    height: 500px;
+                    min-width: 1200px;
+                    scrollbars: "auto";
+                    white-space: nowrap;
+                    width: 100%;
+                }
+
+                h4 {
+                    margin: 10px 0 5px 0;
+                    font-weight: bold;
+                }
+
             }
 
             #parent_links {

@@ -114,12 +114,19 @@
       <% end %>
       </tbody>
     </table>
-    <br/><br/>
+    <br/>
     <%= generate_child_resources_link %>
     <% if !generate_destroy_link.blank? && !generate_child_resources_link.blank? %>
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
     <%= generate_destroy_link %>
+
+    <% if controller_name == 'jobs' %>
+        <h4>Stdout</h4>
+        <iframe src="<%= papertrail_link(@record) %>" id="stdout" class="scrollable-output">
+            Your browser doesn't support iframe!
+        </iframe>
+    <% end %>
   </div>
 
 <% end %>
