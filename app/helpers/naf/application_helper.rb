@@ -169,12 +169,18 @@ module Naf
         current_page?(:controller => 'jobs', :action => 'index') 
     end
 
-    def papertrail_link(job)
+    def papertrail_link(record, runner = false)
       if group_id = Naf.papertrail_group_id
         url = "http://www.papertrailapp.com/groups/#{group_id}/events"
-        if job.pid.present?
-          query = "jid(#{job.id})"
-          url << "?q=#{CGI.escape(query)}"
+        if record.kind_of?(::Naf::Job) || record.kind_of?(::Logical::Naf::Job)
+          if record.pid.present?
+            query = "jid(#{record.id})"
+            url << "?q=#{CGI.escape(query)}"
+          end
+        elsif record.kind_of?(::Naf::Machine) || record.kind_of?(::Logical::Naf::Machine)
+            query = ::Naf::Machine.hostname
+            query << " runner" if runner
+            url << "?q=#{CGI.escape(query)}"
         end
       else
         url = "http://www.papertrailapp.com/dashboard"
