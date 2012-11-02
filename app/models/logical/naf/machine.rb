@@ -1,5 +1,5 @@
 # A wrapper around Naf::Machine
-# useed for rendering in views
+# used for rendering in views
 
 module Logical
   module Naf
@@ -52,7 +52,7 @@ module Logical
       def affinities
         names = []
         @machine.affinities.each do |affinity|
-          names << " #{affinity.affinity_name}"
+          names << " #{affinity.short_name_if_it_exist}"
         end
 
         names

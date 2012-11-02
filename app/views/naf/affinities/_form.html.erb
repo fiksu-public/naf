@@ -18,6 +18,11 @@
   </div>
 
   <div class="field">
+    <%= f.label :affinity_short_name %><br />
+    <%= f.text_field :affinity_short_name %>
+  </div>
+
+  <div class="field">
     <%= f.label :classification %><br />
     <%= f.select(:affinity_classification_id, Naf::AffinityClassification.all.map{|a| 
         [a.affinity_classification_name, a.id] 

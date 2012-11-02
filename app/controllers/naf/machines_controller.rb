@@ -77,7 +77,6 @@ module Naf
 
     def set_cols_and_attributes
       @attributes = Naf::Machine.attribute_names.map(&:to_sym)
-      @cols = Logical::Naf::Machine::COLUMNS
     end
 
     def add_urls(hash)

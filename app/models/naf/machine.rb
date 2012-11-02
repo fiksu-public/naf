@@ -8,6 +8,10 @@ module Naf
     IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
 
     validates :server_address, :presence => true
+    validates :short_name, :uniqueness => true, :allow_blank => true,
+              :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                           :message => "letters should be first" }
+    before_save :check_short_name
     validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
     validates :server_address, :uniqueness => true, :if => :correct_server_address?
     validates :thread_pool_size,
@@ -16,7 +20,7 @@ module Naf
     has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
     has_many :affinities, :through => :machine_affinity_slots
 
-    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level, :marked_down
+    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level, :marked_down, :short_name
 
     def try_lock_for_runner_use(&block)
       return advisory_try_lock(&block)
@@ -147,6 +151,16 @@ module Naf
 
     def affinity
       return ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(::Naf::AffinityClassification.location.id, server_address)
+    end
+
+    def short_name_if_it_exist
+      short_name || server_name
+    end
+
+    private
+
+    def check_short_name
+      self.short_name = nil if self.short_name.blank?
     end
   end
 end

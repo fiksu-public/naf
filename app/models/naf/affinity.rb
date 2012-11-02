@@ -3,6 +3,10 @@ module Naf
     
     validates :affinity_classification_id, :presence => true
     validates :affinity_name, :presence => true, :length => {:minimum => 1}
+    validates :affinity_short_name, :uniqueness => true, :allow_blank => true,
+              :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                           :message => "letters should be first" }
+    before_save :check_short_name
 
     belongs_to :affinity_classification, :class_name => '::Naf::AffinityClassification'
     has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
@@ -11,7 +15,7 @@ module Naf
 
     delegate :affinity_classification_name, :to => :affinity_classification
     
-    attr_accessible :affinity_classification_id, :affinity_name, :selectable
+    attr_accessible :affinity_classification_id, :affinity_name, :selectable, :affinity_short_name
 
     scope :selectable,  where(:selectable => true)
 
@@ -24,6 +28,16 @@ module Naf
       components << "name: \"#{affinity_name}\""
       
       return "::Naf::Affinity<#{components.join(', ')}>"
+    end
+
+    def short_name_if_it_exist
+      affinity_short_name || affinity_name
+    end
+
+    private
+
+    def check_short_name
+      self.affinity_short_name = nil if self.affinity_short_name.blank?
     end
   end
 end
