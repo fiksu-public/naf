@@ -1,6 +1,8 @@
 module Naf
   class MachinesController < Naf::ApplicationController
 
+    include Naf::ApplicationHelper
+
     before_filter :set_cols_and_attributes
     before_filter :set_rows_per_page
 
@@ -14,7 +16,7 @@ module Naf
           machine = []
           @total_records = Naf::Machine.count(:all)
           Logical::Naf::Machine.all.map(&:to_hash).map do |hash|
-            hash.map do |key, value|
+            add_urls(hash).map do |key, value|
               value = '' if value.nil?
               machine << value
             end
@@ -50,11 +52,23 @@ module Naf
     end
 
     def update
-      @machine = Naf::Machine.find(params[:id])
-      if @machine.update_attributes(params[:machine])
-        redirect_to(@machine, :notice => "Machine '#{@machine.server_name.blank? ? @machine.server_address : @machine.server_name}' was successfully updated.")
-      else
-        render :action => "edit"
+      respond_to do |format|
+        @machine = Naf::Machine.find(params[:id])
+        if params[:terminate]
+          @machine.mark_machine_down(::Naf::Machine.local_machine)
+          format.json do
+            render :json => {:success => true}.to_json
+          end
+        end
+        if @machine.update_attributes(params[:machine])
+          format.html do
+            redirect_to(@machine, :notice => "Machine '#{@machine.server_name.blank? ? @machine.server_address : @machine.server_name}' was successfully updated.")
+          end
+        else
+          format.html do
+            render :action => "edit"
+          end
+        end
       end
     end
 
@@ -64,6 +78,14 @@ module Naf
     def set_cols_and_attributes
       @attributes = Naf::Machine.attribute_names.map(&:to_sym)
       @cols = Logical::Naf::Machine::COLUMNS
+    end
+
+    def add_urls(hash)
+      machine = ::Naf::Machine.find(hash[:id])
+      hash[:papertrail_url] = papertrail_link(machine)
+      hash[:papertrail_runner_url] = papertrail_link(machine, true)
+
+      hash
     end
 
   end

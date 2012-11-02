@@ -1,1 +1,14 @@
-<%= raw @machines %>
+<%
+  rows = @machines.each do |machine|
+    machine[11] = link_to image_tag('papertrail_machine.png', :class => 'action', :title => 'View machine log in Papertrail'), machine[11], { :target => '_blank', :class => "papertrail", :id => machine[0] }
+    machine[11] << "&nbsp;&nbsp;".html_safe
+    machine[11] << (link_to image_tag('papertrail_machine_runner.png', :class => 'action', :title => 'View machine runner log in Papertrail'), machine[12], { :target => '_blank', :class => "papertrail", :id => machine[0] })
+    machine[11] << "&nbsp;&nbsp;".html_safe
+    unless machine[10]
+      machine[11] << (link_to image_tag('terminate.png', :class => 'action', :title => 'Mark machine down'), "#", {:class => "terminate", :id => machine[0]})
+    end
+    machine.delete_at(12)
+    machine.delete_at(10)
+  end
+%>
+<%= raw rows %>
