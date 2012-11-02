@@ -107,7 +107,6 @@ module Naf
 
     def set_cols_and_attributes
       @attributes = Logical::Naf::Job::ATTRIBUTES
-      @cols = Logical::Naf::Job::COLUMNS
     end
 
     def add_urls(hash)
