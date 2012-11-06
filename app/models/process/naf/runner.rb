@@ -364,10 +364,10 @@ module Process::Naf
     def memory_available_to_spawn?
       begin
         m = MemInfo.new
+        memory_used = (m.memused.to_f / m.memtotal)
       rescue
         return true
       end
-      memory_used = (m.memused / m.memtotal)
       if memory_used < @maximum_memory_usage
         logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
         return true
