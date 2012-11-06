@@ -1,5 +1,4 @@
 require 'timeout'
-require 'mem_info'
 
 module Process::Naf
   class Runner < ::Af::Application
