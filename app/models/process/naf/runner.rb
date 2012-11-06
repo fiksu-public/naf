@@ -65,160 +65,167 @@ module Process::Naf
         ::Af::Application.singleton.emergency_teardown
       }
 
-      job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
+      @job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
       while true
-        machine.reload
-        if !machine.enabled
-          logger.warn "this machine is disabled #{machine}"
-          break
-        elsif machine.marked_down
-          logger.warn "this machine is marked down #{machine}"
-          break
-        end
-
-        machine.mark_alive
-
-        if machine.log_level != @last_machine_log_level
-          @last_machine_log_level = machine.log_level
-          unless @last_machine_log_level.blank?
-            parse_and_set_logger_levels(@last_machine_log_level)
-          end
-        end
-
-        if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
-          logger.debug "it's time to check schedules"
-          if ::Naf::ApplicationSchedule.try_lock_schedules
-            logger.debug_gross "checking schedules"
-            machine.mark_checked_schedule
-            ::Naf::ApplicationSchedule.unlock_schedules
-
-            # check scheduled tasks
-            should_be_queued.each do |application_schedule|
-              logger.info "scheduled application: #{application_schedule}"
-              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-                @job_creator.queue_application_schedule(application_schedule)
-              end
-            end
-
-            # check the runner machines
-            ::Naf::Machine.enabled.up.each do |runner_to_check|
-              if runner_to_check.is_stale?(@runner_stale_period.minutes)
-                logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
-                runner_to_check.mark_machine_down(machine)
-              end
-            end
-          end
-        end
-
-        # clean up children that have exited
-
-        logger.detail "cleaning up dead children: #{@children.length}"
-
-        if @children.length > 0
-          while @children.length > 0
-            pid = nil
-            status = nil
-            begin
-              Timeout::timeout(@loop_sleep_time) do
-                pid, status = Process.waitpid2(-1)
-              end
-            rescue Timeout::Error
-              # XXX is there a race condition where a child process exits
-              # XXX has not set pid or status yet and timeout fires?
-              # XXX i bet there is
-              # XXX so this code is here:
-              dead_children = []
-              @children.each do |pid, child|
-                unless is_job_process_alive?(child)
-                  dead_children << child
-                end
-              end
-              unless dead_children.blank?
-                logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
-                logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
-              end
-              break
-            rescue Errno::ECHILD
-              logger.error "No child when we thought we had children #{@children.inspect}"
-              logger.error e
-              pid = @children.first.try(:first)
-              status = nil
-              logger.error "pulling first child off list to clean it up: pid=#{pid}"
-            end
-
-            if pid
-              begin
-                child_job = @children.delete(pid)
-                if child_job.present?
-                  if status.nil? || status.exited? || status.signaled?
-                    # XXX child_job.reload
-                    child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
-                    logger.info "cleaning up dead child: #{child_job}"
-                    child_job.finished_at = Time.zone.now
-                    if status
-                      child_job.exit_status = status.exitstatus
-                      child_job.termination_signal = status.termsig
-                    end
-                    child_job.save!
-                  else
-                    # this can happen if the child is sigstopped
-                    logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
-                  end
-                else
-                  # XXX ERROR no child for returned pid -- this can't happen
-                  logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
-                end
-              rescue StandardError => e
-                # XXX just incase a job control failure -- more code here
-                logger.error "some failure during child clean up"
-                logger.error e
-              end
-            end
-          end
-        else
-          logger.detail "sleeping in loop: #{@loop_sleep_time} seconds"
-          sleep(@loop_sleep_time)
-        end
-
-        # start new jobs
-        logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-        while @children.length < machine.thread_pool_size && memory_available_to_spawn?
-          logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
-          begin
-            job = job_fetcher.fetch_next_job
-
-            unless job.present?
-              logger.debug_gross "no more jobs to run"
-              break
-            end
-
-            logger.info "starting new job : #{job}"
-
-            pid = job.spawn
-            if pid
-              @children[pid] = job
-              job.pid = pid
-              job.failed_to_start = false
-              logger.info "job started : #{job}"
-            else
-              # should never get here (well, hopefully)
-              job.failed_to_start = true
-              job.finished_at = Time.zone.now
-              logger.error "failed to execute #{job}"
-            end
-
-            job.save!
-          rescue StandardError => e
-            # XXX rescue for various issues
-            logger.error "failure during job start"
-            logger.error e
-          end
-        end
-        logger.debug_gross "done starting jobs"
+        break unless work_machine_loop(machine)
+        GC.start
       end
 
       logger.info "runner quitting"
+    end
+
+    def work_machine_loop(machine)
+      machine.reload
+      if !machine.enabled
+        logger.warn "this machine is disabled #{machine}"
+        return false
+      elsif machine.marked_down
+        logger.warn "this machine is marked down #{machine}"
+        return false
+      end
+
+      machine.mark_alive
+
+      if machine.log_level != @last_machine_log_level
+        @last_machine_log_level = machine.log_level
+        unless @last_machine_log_level.blank?
+          parse_and_set_logger_levels(@last_machine_log_level)
+        end
+      end
+
+      if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
+        logger.debug "it's time to check schedules"
+        if ::Naf::ApplicationSchedule.try_lock_schedules
+          logger.debug_gross "checking schedules"
+          machine.mark_checked_schedule
+          ::Naf::ApplicationSchedule.unlock_schedules
+
+          # check scheduled tasks
+          should_be_queued.each do |application_schedule|
+            logger.info "scheduled application: #{application_schedule}"
+            Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+              @job_creator.queue_application_schedule(application_schedule)
+            end
+          end
+
+          # check the runner machines
+          ::Naf::Machine.enabled.up.each do |runner_to_check|
+            if runner_to_check.is_stale?(@runner_stale_period.minutes)
+              logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
+              runner_to_check.mark_machine_down(machine)
+            end
+          end
+        end
+      end
+
+      # clean up children that have exited
+
+      logger.detail "cleaning up dead children: #{@children.length}"
+
+      if @children.length > 0
+        while @children.length > 0
+          pid = nil
+          status = nil
+          begin
+            Timeout::timeout(@loop_sleep_time) do
+              pid, status = Process.waitpid2(-1)
+            end
+          rescue Timeout::Error
+            # XXX is there a race condition where a child process exits
+            # XXX has not set pid or status yet and timeout fires?
+            # XXX i bet there is
+            # XXX so this code is here:
+            dead_children = []
+            @children.each do |pid, child|
+              unless is_job_process_alive?(child)
+                dead_children << child
+              end
+            end
+            unless dead_children.blank?
+              logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+              logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+            end
+            break
+          rescue Errno::ECHILD
+            logger.error "No child when we thought we had children #{@children.inspect}"
+            logger.error e
+            pid = @children.first.try(:first)
+            status = nil
+            logger.error "pulling first child off list to clean it up: pid=#{pid}"
+          end
+
+          if pid
+            begin
+              child_job = @children.delete(pid)
+              if child_job.present?
+                if status.nil? || status.exited? || status.signaled?
+                  # XXX child_job.reload
+                  child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
+                  logger.info "cleaning up dead child: #{child_job}"
+                  child_job.finished_at = Time.zone.now
+                  if status
+                    child_job.exit_status = status.exitstatus
+                    child_job.termination_signal = status.termsig
+                  end
+                  child_job.save!
+                else
+                  # this can happen if the child is sigstopped
+                  logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                end
+              else
+                # XXX ERROR no child for returned pid -- this can't happen
+                logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
+              end
+            rescue StandardError => e
+              # XXX just incase a job control failure -- more code here
+              logger.error "some failure during child clean up"
+              logger.error e
+            end
+          end
+        end
+      else
+        logger.detail "sleeping in loop: #{@loop_sleep_time} seconds"
+        sleep(@loop_sleep_time)
+      end
+
+      # start new jobs
+      logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
+      while @children.length < machine.thread_pool_size && memory_available_to_spawn?
+        logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
+        begin
+          job = @job_fetcher.fetch_next_job
+
+          unless job.present?
+            logger.debug_gross "no more jobs to run"
+            break
+          end
+
+          logger.info "starting new job : #{job}"
+
+          pid = job.spawn
+          if pid
+            @children[pid] = job
+            job.pid = pid
+            job.failed_to_start = false
+            logger.info "job started : #{job}"
+          else
+            # should never get here (well, hopefully)
+            job.failed_to_start = true
+            job.finished_at = Time.zone.now
+            logger.error "failed to execute #{job}"
+          end
+
+          job.save!
+        rescue StandardError => e
+          # XXX rescue for various issues
+          logger.error "failure during job start"
+          logger.error e
+        end
+      end
+      logger.debug_gross "done starting jobs"
+
+      return true
     end
 
     # kill(0, pid) seems to fail during at_exit block
