@@ -1,4 +1,5 @@
 require 'timeout'
+require 'mem_info'
 
 module Process::Naf
   class Runner < ::Af::Application
@@ -8,21 +9,25 @@ module Process::Naf
     opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
     opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
     opt :server_address, "set the machines server address (dangerous)", :type => :string, :default => ::Naf::Machine.machine_ip_address, :hidden => true
+    opt :maximum_memory_usage, "percentage of memory used which will limit  process spawning", :default => 85.0, :argument_note => "PERCENT"
+    opt :enable_gc_modifications, "fix ruby GC", :default => true
 
     def initialize
       super
       update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
-
-      # will help forked processes, not the runner
-      ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
-      ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
-      ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
-      ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
     end
 
     def work
+      if @enable_gc_modifications
+        # will help forked processes, not the runner
+        ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
+        ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
+        ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
+        ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
+      end
+
       machine = ::Naf::Machine.find_by_server_address(@server_address)
 
       unless machine.present?
@@ -178,7 +183,7 @@ module Process::Naf
 
         # start new jobs
         logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-        while @children.length < machine.thread_pool_size
+        while @children.length < machine.thread_pool_size && memory_available_to_spawn?
           logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
           begin
             job = job_fetcher.fetch_next_job
@@ -355,5 +360,21 @@ module Process::Naf
 
       return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin
     end
+
+    def memory_available_to_spawn?
+      begin
+        m = MemInfo.new
+      rescue
+        return true
+      end
+      memory_used = (m.memused / m.memtotal)
+      if memory_used < @maximum_memory_usage
+        logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+        return true
+      end
+      logger.info "not enough memory to spawn: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+      return false
+    end
+
   end
 end
