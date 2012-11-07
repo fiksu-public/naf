@@ -9,7 +9,7 @@ module Process::Naf
     opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
     opt :server_address, "set the machines server address (dangerous)", :type => :string, :default => ::Naf::Machine.machine_ip_address, :hidden => true
     opt :maximum_memory_usage, "percentage of memory used which will limit  process spawning", :default => 85.0, :argument_note => "PERCENT"
-    opt :enable_gc_modifications, "fix ruby GC", :default => true
+    opt :disable_gc_modifications, "don't modify ruby GC parameters", :default => false
 
     def initialize
       super
@@ -19,7 +19,7 @@ module Process::Naf
     end
 
     def work
-      if @enable_gc_modifications
+      unless @disable_gc_modifications
         # will help forked processes, not the runner
         ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
         ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
