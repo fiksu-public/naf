@@ -2,10 +2,10 @@ module Naf
   module ApplicationHelper
     include ActionView::Helpers::TextHelper
 
-    DESTROY_BLOCKED_RESOURCES = ["jobs", "applications", "machines", "job_affinity_tabs"]
+    DESTROY_BLOCKED_RESOURCES = ["jobs", "applications", "machines", "job_affinity_tabs", "janitorial_assignments"]
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
     CREATE_BLOCKED_RESOURCES = []
-    ALL_VISIBLE_RESOURCES = [ "jobs", "applications", "machines", "affinities"]
+    ALL_VISIBLE_RESOURCES = ["jobs", "applications", "machines", "affinities"]
 
     def tabs
       ALL_VISIBLE_RESOURCES
