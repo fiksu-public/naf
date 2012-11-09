@@ -5,7 +5,7 @@ module Naf
     DESTROY_BLOCKED_RESOURCES = ["jobs", "applications", "machines", "job_affinity_tabs"]
     READ_ONLY_RESOURCES = ["application_types", "application_run_group_restrictions"]
     CREATE_BLOCKED_RESOURCES = []
-    ALL_VISIBLE_RESOURCES = [ "jobs", "applications", "machines", "affinities"]
+    ALL_VISIBLE_RESOURCES = [ "jobs", "applications", "machines", "affinities", "logger_styles"]
 
     def tabs
       ALL_VISIBLE_RESOURCES
@@ -33,23 +33,6 @@ module Naf
       end
     end
 
-    def application_url(app)
-      url_for({:controller => 'applications', :action => 'show', :id => app.id})
-    end
-
-    def schedule_url(schedule)
-      url_for({:controller => 'application_schedules', :action => 'show', :application_id => schedule.application_id, :id => schedule.id})
-    end
-
-    def generate_schedule_link(app)
-      schedule_button = image_tag('clock.png', :class => 'action', :title => 'Schedule')
-      if schedule = app.application_schedule
-        link_to schedule_button, {:controller => 'application_schedules', :action => 'show', :application_id => app.id, :id => schedule.id}
-      else
-        link_to schedule_button, {:controller => 'application_schedules', :action => 'new', :application_id => app.id}
-      end
-    end
-
     def highlight_tab?(tab)
       case tab
       when "machines"
@@ -57,7 +40,9 @@ module Naf
       when "jobs"
         [tab, "job_affinity_tabs"].include?(controller_name)
       when "applications"
-        [tab, "application_schedules", "application_schedule_affinity_tabs"].include?(controller_name)
+        [tab, "application_schedule_affinity_tabs"].include?(controller_name)
+      when "logger_styles"
+        [tab, "logger_names"].include?(controller_name)
       else
         tab == controller_name
       end
@@ -65,21 +50,23 @@ module Naf
 
     def parent_resource_link
       case controller_name
-      when "application_schedules"
-        link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
       when "job_affinity_tabs"
         link_to "Back to Job", :controller => 'jobs', :action => 'show', :id => params[:job_id]
       when "application_schedule_affinity_tabs"
         link_to "Back to Application", :controller => 'applications', :action => 'show', :id => params[:application_id]
       when "machine_affinity_slots"
         link_to "Back to Machine", :controller => 'machines', :action => 'show', :id => params[:machine_id]
+      when "logger_styles"
+        link_to "Go to Logger Names page", :controller => 'logger_names', :action => 'index'
+      when "logger_names"
+        link_to "Back to Logger Styles", :controller => 'logger_styles', :action => 'index'
       else 
         ""
       end
     end
 
     def nested_resource_index?
-      ["job_affinity_tabs", "application_schedule_affinity_tabs", "machine_affinity_slots", "application_schedules"].include?(controller_name) and !params[:id]
+      ["job_affinity_tabs", "application_schedule_affinity_tabs", "machine_affinity_slots", "logger_styles", "logger_names"].include?(controller_name) and !params[:id]
     end
 
     def table_title
@@ -156,8 +143,6 @@ module Naf
         link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       when "machine_affinity_slots"
         link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
-      when "application_schedules"
-        link_to "Destroy", schedule_url(@record), {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       else
         link_to "Destroy", @record, {:confirm => "Are you sure you want to destroy this #{model_name}?", :method => :delete, :class => 'destroy'}
       end

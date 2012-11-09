@@ -1,0 +1,11 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', { :controller => 'logger_styles', :action => 'index' } %>
+
+    <h3 id="record_name">Create a Logger Style</h3>
+
+    <%= render 'form' %>
+  </div>
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>
