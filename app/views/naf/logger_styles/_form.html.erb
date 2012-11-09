@@ -1,0 +1,48 @@
+<%= nested_form_for @logger_style do |f| %>
+  <% if @logger_style.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@logger_style.errors.count, "error") %> prohibited Logger Style from being saved:</h2>
+    
+    <ul>
+      <% @logger_style.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+ 
+  <div class="field">
+    <%= f.label :name %><br />
+    <%= f.text_field :name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :note %><br />
+    <%= f.text_field :note %>
+  </div>
+
+  <%= f.fields_for :logger_style_names do |l_fields| %>
+
+    <%= l_fields.hidden_field :logger_style_id %>
+
+    <div class="field">
+      <%= l_fields.label :logger_name %>&nbsp;&nbsp;(<%= link_to "Create a new Logger name", naf.new_logger_name_path %>)
+      <br/>
+      <%= l_fields.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, :include_blank => true) %>
+    </div>
+
+    <div class="field">
+      <%= l_fields.label :logger_level %>
+      <br/>
+      <%= l_fields.select(:logger_level_id, ::Naf::LoggerLevel.all.map { |a| [a.level, a.id] }, :include_blank => true) %>
+    </div>
+    <br>
+  <% end %>
+  <%= f.link_to_add "Add the following pair of Name - Level", :logger_style_names %>
+  <br>
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
+

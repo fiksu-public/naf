@@ -50,12 +50,9 @@ module Logical
       end
 
       def affinities
-        names = []
-        @machine.affinities.each do |affinity|
-          names << " #{affinity.short_name_if_it_exist}"
-        end
-
-        names
+        @machine.affinities.map do |affinity|
+          affinity.short_name_if_it_exist
+        end.join(', ')
       end
       
     end

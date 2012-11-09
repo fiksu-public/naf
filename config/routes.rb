@@ -10,6 +10,8 @@ Naf::Engine.routes.draw do
   resources :machines, :except => [:destroy] do
     resources :machine_affinity_slots
   end
+  resources :logger_styles
+  resources :logger_names
   resources :affinities
 
   resources :janitorial_archive_assignments, :controller => "janitorial_assignments", :type => "Naf::JanitorialArchiveAssignment", :except => [:destroy]
