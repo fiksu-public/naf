@@ -20,7 +20,7 @@ module Naf
     def create
       @janitorial_assignment = janitorial_assignment_type.new(params[params_name])
       if  @janitorial_assignment.save
-        redirect_to(@janitorial_assignment, :notice => "Janitorial Assignment '#{@janitorial_assignment.type}' was successfully created.")
+        redirect_to(@janitorial_assignment, :notice => "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully created.")
       else
         render :action => "new"
       end
@@ -33,7 +33,7 @@ module Naf
     def update
       @janitorial_assignment = janitorial_assignment_type.find(params[:id])
       if @janitorial_assignment.update_attributes(params[params_name])
-        redirect_to(@janitorial_assignment, :notice => "Janitorial Assignment '#{@janitorial_assignment.type}' was successfully updated.")
+        redirect_to(@janitorial_assignment, :notice => "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully updated.")
       else
         render :action => "edit"
       end

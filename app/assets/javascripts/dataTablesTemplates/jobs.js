@@ -8,11 +8,25 @@ jQuery(document).ready(function() {
     "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
       { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 10 ] },
-      { "bVisible": false, "aTargets": [ 9 ] }
+      { "bVisible": false, "aTargets": [ 9 ] },
+      { "sClass": "center", "aTargets": [ 10 ] }
+    ],
+    "bAutoWidth": false,
+    "aoColumns": [
+        null,
+        null,
+        null,
+        null,
+        { "sWidth": "25%"},
+        null,
+        null,
+        null,
+        null,
+        null,
+        { "sWidth": "6%"}
     ],
     "fnInitComplete" : function() {
       initPageSelect();
-      jQuery("#datatable").css("width","100%");
     },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
@@ -77,9 +91,9 @@ function alignmentButtons(nRow, aData) {
   if (aData[8] != "Canceled") {
       row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
   } else {
-      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 17px;'>" + data + "</div>";
+      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 16px;'>" + data + "</div>";
   }
-  jQuery('td:nth-child(10)', nRow).empty().append(row).addClass('center');
+  jQuery('td:nth-child(10)', nRow).empty().append(row);
 }
 
 function colorizationStatus(nRow, aData) {

@@ -6,8 +6,20 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "fnInitComplete" : function() {
       initPageSelect();
-      jQuery("#datatable").css("width","100%");
     },
+    "bAutoWidth": false,
+    "aoColumns": [
+        null,
+        { "sWidth": "15%"},
+        null,
+        { "sWidth": "20%"},
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+    ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
       jQuery('td:nth-child(10)', nRow).addClass('center');

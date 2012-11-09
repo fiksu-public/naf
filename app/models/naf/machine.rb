@@ -130,7 +130,7 @@ module Naf
     def mark_processes_as_dead(by_machine)
       ::Naf::Job.recently_queued.not_finished.started_on(self).each do |job|
         marking_at = Time.zone.now
-        machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
+#        machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
         job.request_to_terminate = true
         job.marked_dead_by_machine_id = by_machine.id
         job.marked_dead_at = marking_at
@@ -141,7 +141,7 @@ module Naf
 
     def mark_machine_down(by_machine)
       marking_at = Time.zone.now
-      machine_logger.alarm "#{by_machine.id} marking #{self} as down at #{marking_at}"
+#      machine_logger.alarm "#{by_machine.id} marking #{self} as down at #{marking_at}"
       self.marked_down = true
       self.marked_down_by_machine_id = by_machine.id
       self.marked_down_at = marking_at

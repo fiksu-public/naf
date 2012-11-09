@@ -2,7 +2,7 @@
 
     #fluid {
 
-        #bd {
+        #bd, #child_bd {
             padding: 10px;
 
             #page-label {
@@ -98,10 +98,6 @@
 
                     tr td a img {
                         margin: 0;
-                    }
-
-                    th {
-                      padding-right:5px;
                     }
 
                     .ui-icon {
