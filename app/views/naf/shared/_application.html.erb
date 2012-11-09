@@ -7,7 +7,7 @@
     </div>
     <div id="navigation">
       <ul id="tabs">
-        <% tabs.each do |tab| %>
+        <% tabs.each_key do |tab| %>
             <% if highlight_tab?(tab) %>
                 <li id="on">
             <% else %>
@@ -20,9 +20,31 @@
       <div class="clear"></div>
     </div>
     <div id='bd'>
-      <%= yield :body %>
+      <% tabs.each do |tab, child_tabs| %>
+          <% if highlight_tab?(tab) && !child_tabs.blank? %>
+            <div id="child_navigation">
+                <ul id="child_tabs">
+                  <% child_tabs.each do |child_tab| %>
+                    <% if highlight_tab?(child_tab) %>
+                      <li id="on">
+                    <% else %>
+                      <li>
+                  <% end %>
+                  <%= generate_index_link(child_tab) %>
+                  </li>
+                  <% end %>
+                </ul>
+                <div class="clear"></div>
+            </div>
+            <div id='child_bd'>
+              <% @render_body = true %>
+              <%= yield :body %>
+            </div>
+          <% end %>
+      <% end %>
+      <% unless @render_body %>
+        <%= yield :body %>
+      <% end %>
     </div>
   </div>
 </div>
-
-

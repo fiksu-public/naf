@@ -71,7 +71,7 @@ html {
             }
         }
 
-        #navigation {
+        #navigation, #child_navigation {
             border-bottom: 4px solid #2D2D2D;
             margin-top: 22px;
             ul {
@@ -100,7 +100,11 @@ html {
             }
         }
 
-        #bd {
+        #child_navigation {
+          margin-top: 0px;
+        }
+
+        #bd, #child_bd {
             font: 13px/1.231 arial,helvetica,clean,sans-serif;
             @include rounded-bottom;
             background-color: #FFFFFF;
@@ -208,10 +212,6 @@ html {
                         margin: 0;
                     }
 
-                    th {
-                      padding-right:5px;
-                    }
-
                     .ui-icon {
                         float: left;
                     }
@@ -278,8 +278,12 @@ html {
                      padding: 12px;
                 }
 
-                input#affinity_tabs_submit_button {
+                input#affinity_tabs_submit_button, input#janitors_submit_button {
                     width: 280px;
+                }
+
+                input.check_box_input {
+                    width: 13px;
                 }
 
                 .scrollable-output {

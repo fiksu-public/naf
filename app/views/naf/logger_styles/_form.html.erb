@@ -26,7 +26,7 @@
     <%= l_fields.hidden_field :logger_style_id %>
 
     <div class="field">
-      <%= l_fields.label :logger_name %>&nbsp;&nbsp;(<%= link_to "Create a new Logger name", naf.new_logger_name_path %>)
+      <%= l_fields.label :logger_name %>
       <br/>
       <%= l_fields.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, :include_blank => true) %>
     </div>

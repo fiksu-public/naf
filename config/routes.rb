@@ -13,5 +13,10 @@ Naf::Engine.routes.draw do
   resources :logger_styles
   resources :logger_names
   resources :affinities
+
+  resources :janitorial_archive_assignments, :controller => "janitorial_assignments", :type => "Naf::JanitorialArchiveAssignment", :except => [:destroy]
+  resources :janitorial_create_assignments, :controller => "janitorial_assignments", :type => "Naf::JanitorialCreateAssignment", :except => [:destroy]
+  resources :janitorial_drop_assignments, :controller => "janitorial_assignments", :type => "Naf::JanitorialDropAssignment", :except => [:destroy]
+
   root :to => "jobs#index"
 end
