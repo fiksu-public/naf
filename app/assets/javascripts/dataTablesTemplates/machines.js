@@ -23,7 +23,6 @@ jQuery(document).ready(function() {
     ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToMachines(nRow, aData);
-      alignmentButtons(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -58,15 +57,4 @@ function addLinkToMachines(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
-}
-
-function alignmentButtons(nRow, aData) {
-  var data = aData[10];
-  var row;
-//  if (aData[8] != "Canceled") {
-      row = "<div style='text-align:left;width:70px;display: inline;'>" + data + "</div>";
-//  } else {
-//      row = "<div style='text-align:left;width:50px;display: inline;padding-right: 16px;'>" + data + "</div>";
-//  }
-  jQuery('td:nth-child(11)', nRow).empty().append(row);
 }

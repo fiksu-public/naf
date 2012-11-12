@@ -65,7 +65,7 @@ module Logical
       context "with regard to the to_hash" do
         let(:job) { Job.new(FactoryGirl.create(:finished_job)) }
         before(:all) do
-          @columns = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status]
+          @columns = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :affinities, :status]
         end
         it "should have the following columns" do
           job.to_hash.keys.should eql(@columns)
