@@ -89,6 +89,8 @@
                 }
 
                 #datatable {
+                    table-layout:fixed;
+
                     width:100%;
                     border-collapse: collapse;
                     td, th {
@@ -98,6 +100,12 @@
 
                     tr td a img {
                         margin: 0;
+                    }
+
+                    td {
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        overflow: hidden;
                     }
 
                     .ui-icon {
