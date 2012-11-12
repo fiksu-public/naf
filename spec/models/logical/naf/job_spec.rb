@@ -29,8 +29,8 @@ module Logical
           end
         end
         context "for an ad hoc job" do
-          it "should get the title, truncated from its command" do
-            job.title.should eql(job.truncate(job.command))
+          it "should get the title, formed from its command" do
+            job.title.should eql(job.command)
           end
         end
 
