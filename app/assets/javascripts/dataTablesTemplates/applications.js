@@ -6,19 +6,20 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "fnInitComplete" : function() {
       initPageSelect();
+      addTitles();
     },
     "bAutoWidth": false,
     "aoColumns": [
-        null,
-        { "sWidth": "15%"},
-        null,
-        { "sWidth": "20%"},
-        null,
-        null,
-        null,
+        { "sWidth": "2%"},
+        { "sWidth": "10%"},
+        { "sWidth": "9%"},
+        { "sWidth": "18%"},
+        { "sWidth": "18%"},
         null,
         null,
-        null
+        null,
+        null,
+        { "sWidth": "4%"}
     ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);

@@ -64,7 +64,7 @@ module Logical
         if application and application.application_schedule
           application.application_schedule.title
         else
-          truncate(command)
+          command
         end
       end
       

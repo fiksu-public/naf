@@ -25,20 +25,6 @@ module Naf
         ""
       end
     end
-    
-    def format_index_table_row(row, col)
-      value = row.send(col)
-      if value.is_a?(String)
-        case col
-          when :title
-            return value
-          else
-            return truncate(value)
-        end
-      else
-        return value
-      end
-    end
 
     def highlight_tab?(tab)
       case tab

@@ -13,10 +13,10 @@ jQuery(document).ready(function() {
     ],
     "bAutoWidth": false,
     "aoColumns": [
-        null,
-        null,
-        null,
-        null,
+        { "sWidth": "2%"},
+        { "sWidth": "7%"},
+        { "sWidth": "4%"},
+        { "sWidth": "14%"},
         { "sWidth": "25%"},
         null,
         null,
@@ -27,6 +27,7 @@ jQuery(document).ready(function() {
     ],
     "fnInitComplete" : function() {
       initPageSelect();
+      addTitles();
     },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });

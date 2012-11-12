@@ -6,19 +6,20 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "fnInitComplete" : function() {
       initPageSelect();
+      addTitles();
     },
     "bAutoWidth": false,
     "aoColumns": [
+        { "sWidth": "2%"},
+        { "sWidth": "12%"},
+        { "sWidth": "8%"},
+        { "sWidth": "14%"},
+        { "sWidth": "5%"},
+        { "sWidth": "10%"},
         null,
         null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
-        null,
+        { "sWidth": "6%"},
+        { "sWidth": "6%"},
         { "sWidth": "70px"}
     ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
