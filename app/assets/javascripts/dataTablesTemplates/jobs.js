@@ -27,13 +27,13 @@ jQuery(document).ready(function() {
     ],
     "fnInitComplete" : function() {
       initPageSelect();
-      addTitles();
     },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
       jQuery.getJSON( sSource, aoData, function (json) {
         fnCallback(json);
         initPaging();
+        addTitles();
       });
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {

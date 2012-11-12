@@ -21,6 +21,7 @@ jQuery.fn.addDataTable = function(dataTableOptions) {
       jQuery.getJSON( sSource, aoData, function (json) {
         fnCallback(json);
         initPaging();
+        addTitles();
       });
     }
   };

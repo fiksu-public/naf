@@ -6,7 +6,6 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "fnInitComplete" : function() {
       initPageSelect();
-      addTitles();
     },
     "bAutoWidth": false,
     "aoColumns": [
