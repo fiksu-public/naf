@@ -7,9 +7,9 @@ jQuery(document).ready(function() {
     "sAjaxSource": sAjaxSource,
     "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
-      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 10 ] },
-      { "bVisible": false, "aTargets": [ 9 ] },
-      { "sClass": "center", "aTargets": [ 10 ] }
+      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 9, 11 ] },
+      { "bVisible": false, "aTargets": [ 10 ] },
+      { "sClass": "center", "aTargets": [ 11 ] }
     ],
     "bAutoWidth": false,
     "aoColumns": [
@@ -18,6 +18,7 @@ jQuery(document).ready(function() {
         { "sWidth": "4%"},
         { "sWidth": "14%"},
         { "sWidth": "25%"},
+        null,
         null,
         null,
         null,
@@ -78,7 +79,7 @@ function addLinkToJob(nRow, aData) {
 }
 
 function addLinkToTitle(nRow, aData) {
-  var link = aData[9];
+  var link = aData[10];
   var title = aData[4];
   if ( link != "" ) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );
@@ -87,33 +88,33 @@ function addLinkToTitle(nRow, aData) {
 }
 
 function alignmentButtons(nRow, aData) {
-  var data = aData[10];
+  var data = aData[11];
   var row;
-  if (aData[8] != "Canceled") {
+  if (aData[9] != "Canceled") {
       row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
   } else {
       row = "<div style='text-align:left;width:50px;display: inline;padding-right: 16px;'>" + data + "</div>";
   }
-  jQuery('td:nth-child(10)', nRow).empty().append(row);
+  jQuery('td:nth-child(11)', nRow).empty().append(row);
 }
 
 function colorizationStatus(nRow, aData) {
-  jQuery('td:nth-child(9)', nRow).wrapInner('<div class="">');
-  switch(aData[8]) {
+  jQuery('td:nth-child(10)', nRow).wrapInner('<div class="">');
+  switch(aData[9]) {
     case 'Running':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-running');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-running');
       break;
     case 'Queued':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-queued');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-queued');
       break;
     case 'Error':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
       break;
     case  'Failed to Start':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
       break;
     case 'Finished':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-finished');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-finished');
       break;
   }
 }

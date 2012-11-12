@@ -15,10 +15,10 @@ jQuery(document).ready(function() {
         { "sWidth": "14%"},
         { "sWidth": "5%"},
         { "sWidth": "10%"},
-        null,
+        { "sWidth": "175px"},
         null,
         { "sWidth": "6%"},
-        { "sWidth": "6%"},
+        { "sWidth": "10%"},
         { "sWidth": "70px"}
     ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {

@@ -7,7 +7,7 @@ module Logical
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
       
-      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status]
+      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :affinities, :status]
       
       ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
@@ -183,6 +183,14 @@ module Logical
         else
           ""
         end
+      end
+
+      def affinities
+        @job.job_affinities.map do |job_affinity|
+          name = job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
+
+          name
+        end.join(", \n")
       end
 
     end
