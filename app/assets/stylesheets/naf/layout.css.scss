@@ -13,6 +13,10 @@
     padding: 0;
 }
 
+@mixin display-inline-block {
+    display: inline-block;
+}
+
 html, body {
     @include margin-padding-null;
     color:#333;
@@ -50,6 +54,10 @@ html {
 
         .clear {
             clear: both;
+        }
+
+        .display-inline-block {
+            @include display-inline-block;
         }
 
         div {
@@ -144,6 +152,9 @@ html {
                         label {
                             float:left;
                         }
+                    }
+                    div {
+                        vertical-align: top;
                     }
                 }
             }

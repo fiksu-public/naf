@@ -9,7 +9,7 @@ module Logical
       STATUS_MAP = {
         :job => "Queued", :canceled_job => "Canceled", :running_job => "Running",
         :failed_to_start_job => "Failed to Start", :finished_job => "Finished", 
-        :job_with_error => "Error"
+        :job_with_error => "Error 1"
       }
 
       it "should return the correct statuses" do

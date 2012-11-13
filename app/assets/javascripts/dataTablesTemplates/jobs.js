@@ -107,14 +107,13 @@ function colorizationStatus(nRow, aData) {
     case 'Queued':
       jQuery('td:nth-child(10) div', nRow).addClass('script-queued');
       break;
-    case 'Error':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
-      break;
-    case  'Failed to Start':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
+    case  'Canceled':
       break;
     case 'Finished':
       jQuery('td:nth-child(10) div', nRow).addClass('script-finished');
+      break;
+    default:
+      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
       break;
   }
 }

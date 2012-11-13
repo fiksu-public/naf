@@ -38,9 +38,11 @@ module Logical
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
           "Failed to Start"
         elsif @job.exit_status and @job.exit_status > 0
-          "Error"
+          "Error #{@job.exit_status}"
         elsif @job.started_at and @job.finished_at
           "Finished"
+        elsif @job.termination_signal
+          "Signaled #{@job.termination_signal}"
         else
           "Queued"
         end
@@ -113,18 +115,12 @@ module Logical
       def self.get_job_scope(search)
         status = search[:status].nil? ? :all : search[:status]
         case status.to_sym
-          when :canceled
-            job_scope = ::Naf::Job.canceled
-          when :failed_to_start
-            job_scope = ::Naf::Job.where(:failed_to_start => true)
-          when :error
-            job_scope = ::Naf::Job.where("exit_status > 0")
           when :queued
-            job_scope = ::Naf::Job.not_started
-          when :running
-            job_scope = ::Naf::Job.started.not_finished
+            job_scope = ::Naf::Job.queued_and_running
           when :finished
             job_scope = ::Naf::Job.finished
+          when :errored
+            job_scope = ::Naf::Job.errored
           else
             job_scope = ::Naf::Job.scoped
         end

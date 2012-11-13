@@ -2,6 +2,10 @@
 
     #fluid {
 
+        .display-inline-block {
+            display: inline-block;
+        }
+
         #bd, #child_bd {
             padding: 10px;
 
@@ -32,6 +36,9 @@
                         label {
                             float:left;
                         }
+                    }
+                    div {
+                        vertical-align: top;
                     }
                 }
             }
