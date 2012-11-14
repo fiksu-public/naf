@@ -1,3 +1,11 @@
+require 'rubygems'
+require 'nested_form'
+require 'will_paginate'
+require 'mem_info'
+require 'jquery-rails'
+require 'log4r_remote_syslog_outputter'
+require 'partitioned'
+
 module Naf
   class Engine < ::Rails::Engine
     isolate_namespace Naf
