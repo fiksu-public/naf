@@ -18,16 +18,20 @@ module Naf
           params[:search][:offset] = @page - 1
           @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
           @total_records = Naf::Job.count(:all)
-          @jobs = []
+          jobs = []
           job =[]
           Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
             add_urls(hash).map do |key, value|
               value ||= ''
               job << value
             end
-            @jobs << job
+            jobs << job
             job = []
           end
+          queued = jobs.select{ |j| j[9] == "Queued" }.sort{ |a, b| a[3] <=> b[3] }.reverse
+          running = jobs.select{ |j| j[9] == "Running" }.sort{ |a, b| a[5] <=> b[5] }.reverse
+          errors = (jobs - queued - running).sort{ |a, b| a[6] <=> b[6] }.reverse
+          @jobs = queued + running + errors
           render :layout => 'naf/layouts/jquery_datatables'
         end
       end
