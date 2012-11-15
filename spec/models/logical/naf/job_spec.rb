@@ -9,7 +9,7 @@ module Logical
       STATUS_MAP = {
         :job => "Queued", :canceled_job => "Canceled", :running_job => "Running",
         :failed_to_start_job => "Failed to Start", :finished_job => "Finished", 
-        :job_with_error => "Error 1"
+        :job_with_error => "Error 1", :job_with_signal => "Signaled 1"
       }
 
       it "should return the correct statuses" do
@@ -84,13 +84,13 @@ module Logical
         
         it "should filter by status correctly" do
           @job_status_type_map.each do |status, logical_job|
-            Job.search(:status => status).map(&:id).should include(logical_job.id)
+            Job.search(:status => status, :limit => 10).map(&:id).should include(logical_job.id)
           end
         end
         
-        it "should not filter by status when 'all' is specified" do
+       it "should not filter by status when 'all' is specified" do
           job_ids = @job_status_type_map.values.map(&:id)
-          result_ids = Job.search(:status => 'all').map(&:id)
+          result_ids = Job.search(:status => 'all', :limit => 10).map(&:id)
           job_ids.each do |job_id|
             result_ids.should include job_id
           end
@@ -111,40 +111,41 @@ module Logical
 
           it "should filter by application type" do
             id_one = job_one.application_type_id
-            Job.search(:application_type_id => id_one).map(&:id).should eql([job_one.id])
+            Job.search(:application_type_id => id_one, :limit => 10).map(&:id).should eql([job_one.id])
             id_two = job_two.application_type_id
-            Job.search(:application_type_id => id_two).map(&:id).should eql([job_two.id])
+            Job.search(:application_type_id => id_two, :limit => 10).map(&:id).should eql([job_two.id])
           end
 
           it "should filter by run_group_restriction" do
             id_one = job_one.application_run_group_restriction_id
-            Job.search(:application_run_group_restriction_id => id_one).map(&:id).should eql([job_one.id])
+            Job.search(:application_run_group_restriction_id => id_one, :limit => 10).map(&:id).should eql([job_one.id])
             id_two = job_two.application_run_group_restriction_id
-            Job.search(:application_run_group_restriction_id => id_two).map(&:id).should eql([job_two.id])
+            Job.search(:application_run_group_restriction_id => id_two, :limit => 10).map(&:id).should eql([job_two.id])
           end
           it "should filter by priority" do
             priority_one = job_one.priority
-            Job.search(:priority => priority_one).map(&:id).should eql([job_one.id])
+            Job.search(:priority => priority_one, :limit => 10).map(&:id).should eql([job_one.id])
             priority_two = job_two.priority
-            Job.search(:priority => priority_two).map(&:id).should eql([job_two.id])
+            Job.search(:priority => priority_two, :limit => 10).map(&:id).should eql([job_two.id])
           end
           it "should filter by pid" do
             pid_one = job_one.pid
-            Job.search(:pid => pid_one).map(&:id).should eql([job_one.id])
+            Job.search(:pid => pid_one, :limit => 10).map(&:id).should eql([job_one.id])
             pid_two = job_two.pid
-            Job.search(:pid => pid_two).map(&:id).should eql([job_two.id])
+            Job.search(:pid => pid_two, :limit => 10).map(&:id).should eql([job_two.id])
           end
           
           it "should find jobs where the command is like the query" do
-            Job.search(:command => "friend").map(&:id).should eql([job_one.id])
-            Job.search(:command => "ssh").map(&:id).should eql([job_two.id])
+            Job.search(:command => "friend", :limit => 10).map(&:id).should eql([job_one.id])
+            Job.search(:command => "ssh", :limit => 10).map(&:id).should eql([job_two.id])
           end
           
           it "should find jobs where the application_run_group_name is like the query" do
-            Job.search(:application_run_group_name => "crazy").map(&:id).should eql([job_two.id])
+            Job.search(:application_run_group_name => "crazy", :limit => 10).map(&:id).should eql([job_two.id])
           end
         end
       end
+
 
     end
   end

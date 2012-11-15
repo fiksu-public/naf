@@ -3,11 +3,8 @@ jQuery(document).ready(function() {
 
   // Prepare for setup the datatable.
   var dataTableOptions = {
-    "bSort": true,
     "sAjaxSource": sAjaxSource,
-    "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
-      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 9, 11 ] },
       { "bVisible": false, "aTargets": [ 10 ] },
       { "sClass": "center", "aTargets": [ 11 ] }
     ],

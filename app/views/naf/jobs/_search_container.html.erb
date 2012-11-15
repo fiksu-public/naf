@@ -72,6 +72,12 @@
           <br/>
 
           <div class="field">
+            <%= label(:sort_direction, "Sort Direction:") %>
+            <%= select(:search, :sort_direction, [["Desc", :desc], ["Asc", :asc]], {}, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
             <%= label(:exit_status, "Exit Status:") %>
             <%= text_field(:search, :exit_status, { :class => 'datatable_variable' }) %>
           </div>
