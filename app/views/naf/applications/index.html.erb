@@ -1,5 +1,6 @@
 <% content_for :body do %>
     <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <%= render :partial => 'search_container' %>
     <%= render :partial => 'naf/shared/select_per_page' %>
     <div id="flash_message">
         <% unless notice.blank? %>

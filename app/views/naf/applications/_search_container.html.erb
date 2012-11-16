@@ -1,0 +1,68 @@
+<div id='show_search_container_link' class="display-inline-block">
+  <%= link_to 'Show search parameters', '#', :id => 'search_container_link' %>
+</div>
+<div id="search_container">
+  <%= form_tag(naf.applications_path, :method => "get", :id => 'job_search') do %>
+      <div style="width:30%;" class="display-inline-block">
+          <div class="field">
+            <%= label(:title, "Title:") %>
+            <%= text_field(:search, :title, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:application_run_group_name, "Run Group:") %>
+            <%= text_field(:search, :application_run_group_name, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+      </div>
+      <div style="width:30%; padding-left:40px;" class="display-inline-block">
+          <div class="field">
+            <%= label(:command, "Command:") %>
+            <%= text_field(:search, :command, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:short_name, "Short name:") %>
+            <%= text_field(:search, :short_name, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+      </div>
+      <div style="width:30%; padding-left:40px;" class="display-inline-block">
+          <div class="field">
+            <%= label(:deleted, "Applications deleted:") %>
+            <%= select(:search, :deleted , [["Ignore", nil], ["True", true], ["False", false]], {}, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:enabled, "App schedules enabled:") %>
+            <%= select(:search, :enabled, [["Ignore", nil], ["True", true], ["False", false]], {}, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+      </div>
+      <br/><br/><br/>
+      <%= submit_tag("Search") %>
+  <% end %>
+</div>
+
+<% content_for :javascripts do %>
+    <script type='text/javascript'>
+        jQuery(document).ready(function() {
+            jQuery("#search_container").hide();
+            jQuery("#search_container_link").click(function () {
+                if (jQuery("#search_container").css('display') == 'none') {
+                    jQuery("#search_container_link").text("Hide search parameters");
+                }else {
+                    jQuery("#search_container_link").text("Show search parameters");
+                }
+                jQuery("#search_container").slideToggle("slow");
+            });
+            jQuery("#job_search").submit(function () {
+                jQuery('#datatable').dataTable().fnDraw();
+                return false;
+            });
+        });
+    </script>
+<% end %>

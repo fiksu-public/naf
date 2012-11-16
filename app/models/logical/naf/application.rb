@@ -8,12 +8,40 @@ module Logical
 
       COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval]
 
+      FILTER_FIELDS = [:deleted, :enabled]
+
+      SEARCH_FIELDS = [:title, :application_run_group_name, :command, :short_name]
+
       def initialize(naf_app)
         @app = naf_app
       end
       
-      def self.all
-        ::Naf::Application.all.map{|a| new(a)}
+      def self.search(search)
+        application_scope = ::Naf::Application.
+            joins("LEFT JOIN naf.application_schedules ON naf.application_schedules.application_id = naf.applications.id").
+            order("id desc")
+        FILTER_FIELDS.each do |field|
+          if search[field].present?
+            application_scope =
+            if field == :enabled
+              application_scope.where(:application_schedules => { field => search[field] })
+            else
+              application_scope.where(field => search[field])
+            end
+          end
+        end
+        SEARCH_FIELDS.each do |field|
+          if search[field].present?
+            application_scope =
+            if field == :application_run_group_name
+              application_scope.where(["lower(naf.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+            else
+              application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
+            end
+          end
+        end
+
+        application_scope.map{ |physical_app| new(physical_app) }
       end
       
       def to_hash

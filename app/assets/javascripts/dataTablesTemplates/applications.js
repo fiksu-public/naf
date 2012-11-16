@@ -19,6 +19,14 @@ jQuery(document).ready(function() {
         null,
         { "sWidth": "4%"}
     ],
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
+      _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
+      jQuery.getJSON( sSource, aoData, function (json) {
+        fnCallback(json);
+        initPaging();
+        addTitles();
+      });
+    },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
       jQuery('td:nth-child(9)', nRow).addClass('center');

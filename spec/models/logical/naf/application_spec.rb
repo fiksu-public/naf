@@ -12,11 +12,11 @@ module Logical
       
 
       context "Class Methods" do
-        it "all method should return array of wrapper around physical application" do
+        it "search method should return array of wrapper around physical application" do
           app = logical_app
-          Application.all.map(&:id).should include(app.id)
-          Application.all.should have(1).items
-          Application.all.should be_a(Array)
+          Application.search(:params => nil).map(&:id).should include(app.id)
+          Application.search(:params => nil).should have(1).items
+          Application.search(:params => nil).should be_a(Array)
         end
       end
 
