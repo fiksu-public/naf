@@ -146,7 +146,7 @@ module Process::Naf
               logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
             end
             break
-          rescue Errno::ECHILD
+          rescue Errno::ECHILD => e
             logger.error "No child when we thought we had children #{@children.inspect}"
             logger.error e
             pid = @children.first.try(:first)
