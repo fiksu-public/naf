@@ -125,14 +125,14 @@ module Logical
             WHEN 4 THEN finished_at
             ELSE  null
           END AS sort
-          from (SELECT "naf"."jobs".*,
+          from (SELECT "#{::Naf.schema_name}"."jobs".*,
           CASE
             WHEN (started_at is null and request_to_terminate = false) THEN 1
             WHEN (started_at is not null and finished_at is null) THEN 2
             WHEN (exit_status > 0 or request_to_terminate = true) THEN 3
             ELSE 4
           END AS status
-          FROM "naf"."jobs"
+          FROM "#{::Naf.schema_name}"."jobs"
           ) tbl
           #{conditions}
           ORDER BY status, sort #{search[:sort_direction]}
