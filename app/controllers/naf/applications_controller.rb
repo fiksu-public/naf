@@ -13,7 +13,7 @@ module Naf
           applications = []
           application = []
           @total_records = Naf::Application.count(:all)
-          Logical::Naf::Application.all.map(&:to_hash).map do |hash|
+          Logical::Naf::Application.search(params[:search]).map(&:to_hash).map do |hash|
             hash.map do |key, value|
               value = '' if value.nil?
               application << value
@@ -21,6 +21,7 @@ module Naf
             applications << application
             application =[]
           end
+          @total_display_records = applications.count
           @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
           render :layout => 'naf/layouts/jquery_datatables'
         end

@@ -12,8 +12,8 @@ module Logical
       ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
       
-      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
-      
+      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :running]
+
       SEARCH_FIELDS = [:command, :application_run_group_name]
 
       def initialize(naf_job)
@@ -90,8 +90,20 @@ module Logical
         values[:offset]= search[:offset].to_i*search[:limit].to_i
         FILTER_FIELDS.each do |field|
           if search[field].present?
-            conditions << "#{field} = :#{field}"
-            values[field.to_sym] = search[field]
+            case field
+              when :running
+                if search[field] == "true"
+                  conditions << "(status = 2)"
+                else
+                  conditions << "(status = 1 or status = 3 or status = 4)"
+                end
+              when :failed_to_start, :request_to_terminate
+                values[field.to_sym] = search[field]
+                conditions << "#{field} = :#{field}"
+              else
+                values[field.to_sym] = search[field].to_i
+                conditions << "#{field} = :#{field}"
+            end
             conditions << " AND "
           end
         end
@@ -147,7 +159,19 @@ module Logical
       def self.total_display_records(search)
         job_scope = self.get_job_scope(search)
         FILTER_FIELDS.each do |field|
-          job_scope = job_scope.where(field => search[field]) if search[field].present?
+          if search[field].present?
+            if field == :running
+              condition =
+              if search[field] == "true"
+                "(started_at is not null and finished_at is null)"
+              else
+                "not (started_at is not null and finished_at is null)"
+              end
+              job_scope = job_scope.where(condition)
+            else
+              job_scope = job_scope.where(field => search[field])
+            end
+          end
         end
         SEARCH_FIELDS.each do |field|
           job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?

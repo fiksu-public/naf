@@ -17,12 +17,19 @@ jQuery(document).ready(function() {
         null,
         null,
         null,
-        null,
         { "sWidth": "4%"}
     ],
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
+      _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
+      jQuery.getJSON( sSource, aoData, function (json) {
+        fnCallback(json);
+        initPaging();
+        addTitles();
+      });
+    },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
-      jQuery('td:nth-child(10)', nRow).addClass('center');
+      jQuery('td:nth-child(9)', nRow).addClass('center');
       return nRow;
     }
   }; // datatable
