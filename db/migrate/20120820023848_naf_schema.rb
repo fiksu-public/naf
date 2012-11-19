@@ -301,7 +301,6 @@ class NafSchema < ActiveRecord::Migration
       drop table #{schema_name}.affinity_classifications cascade;
       drop table #{schema_name}.machines cascade;
       drop table #{schema_name}.machine_affinity_slots cascade;
-      drop table #{schema_name}.application_prerequisites cascade;
       drop table #{schema_name}.applications cascade;
       drop table #{schema_name}.application_types cascade;
       drop table #{schema_name}.application_run_group_restrictions cascade;
