@@ -60,7 +60,7 @@
                 jQuery("#search_container").slideToggle("slow");
             });
             jQuery("#job_search").submit(function () {
-                jQuery('#datatable').dataTable().fnDraw();
+                SetFirstPage();
                 return false;
             });
         });

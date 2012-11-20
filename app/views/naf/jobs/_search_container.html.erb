@@ -100,15 +100,15 @@
                 jQuery("#search_container").slideToggle("slow");
             });
             jQuery("#job_search").submit(function () {
-                jQuery('#datatable').dataTable().fnDraw();
+                SetFirstPage();
                 return false;
             });
             jQuery("#search_status").change(function () {
-                jQuery('#datatable').dataTable().fnDraw();
+                SetFirstPage();
                 return false;
             });
             jQuery("#search_started_on_machine_id").change(function () {
-                jQuery('#datatable').dataTable().fnDraw();
+                SetFirstPage();
                 return false;
             });
         });
