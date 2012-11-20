@@ -5,14 +5,14 @@ module Naf
     validates :priority, :application_run_group_limit,
               :numericality => {:only_integer => true, :greater_than => -2147483648, :less_than => 2147483647}
     validates :run_start_minute,
-              :numericality => { :only_integer => true, :greater_than => 0, :less_than => 24*60, :allow_blank => true }
+              :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 24*60, :allow_blank => true }
     validates :run_interval,
-              :numericality => { :only_integer => true, :greater_than => 0, :less_than => 2147483647, :allow_blank => true }
+              :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 2147483647, :allow_blank => true }
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validates :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, :presence => true
+    validates :application_run_group_name, {:presence => true, :length => {:minimum => 3}}
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
