@@ -18,10 +18,10 @@ module Logical
       
       def self.search(search)
         application_scope = ::Naf::Application.
-            joins("LEFT JOIN naf.application_schedules ON naf.application_schedules.application_id = naf.applications.id").
+          joins("LEFT JOIN #{::Naf.schema_name}.application_schedules ON #{::Naf.schema_name}.application_schedules.application_id = #{::Naf.schema_name}.applications.id").
             order("id desc")
         FILTER_FIELDS.each do |field|
-          if search[field].present?
+          if search.present? and search[field].present?
             application_scope =
             if field == :enabled
               application_scope.where(:application_schedules => { field => search[field] })
@@ -31,7 +31,7 @@ module Logical
           end
         end
         SEARCH_FIELDS.each do |field|
-          if search[field].present?
+          if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
               application_scope.where(["lower(naf.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
