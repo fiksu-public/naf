@@ -1,7 +1,7 @@
 <%
   rows = @applications.each do |application|
-    application.insert(7, last_queued_at_link(Naf::Application.find(application.first)))
-    application[8] = link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => application[0]}
+    application.insert(6, last_queued_at_link(Naf::Application.find(application.first)))
+    application[7] = link_to image_tag('control_play_blue.png', :class => 'action', :title => 'Enqueue Now'), "#", {:class => "enqueue", :id => application[0]}
   end
 %>
 <%= raw rows %>

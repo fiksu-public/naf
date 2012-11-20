@@ -6,7 +6,7 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval]
+      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time]
 
       FILTER_FIELDS = [:deleted, :enabled]
 
@@ -63,6 +63,32 @@ module Logical
         end
 
         return output
+      end
+
+      def run_time
+        run_time = run_start_minute.blank? ? run_interval : run_start_minute
+        run_time = "not scheduled" if run_time.blank?
+
+        run_time
+      end
+
+      def run_interval
+        output = ""
+        if schedule = @app.application_schedule and schedule.run_interval.present?
+          time = schedule.run_interval
+          output =
+          if time == 0
+            "run constantly"
+          elsif time < 60
+            pluralize(time, "minute")
+          elsif time % 60 == 0
+            pluralize(time / 60, "hour")
+          else
+            pluralize(time / 60, "hour") + ', ' + pluralize(time % 60, "minute")
+          end
+        end
+
+        output
       end
 
       def method_missing(method_name, *arguments, &block)

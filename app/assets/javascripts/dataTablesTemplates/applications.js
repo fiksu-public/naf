@@ -10,14 +10,13 @@ jQuery(document).ready(function() {
     "bAutoWidth": false,
     "aoColumns": [
         { "sWidth": "2%"},
-        { "sWidth": "10%"},
+        { "sWidth": "13%"},
         { "sWidth": "9%"},
-        { "sWidth": "18%"},
-        { "sWidth": "18%"},
+        { "sWidth": "20%"},
+        { "sWidth": "20%"},
         null,
         null,
-        null,
-        { "sWidth": "4%"}
+        { "sWidth": "50px"}
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
@@ -29,7 +28,7 @@ jQuery(document).ready(function() {
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
-      jQuery('td:nth-child(9)', nRow).addClass('center');
+      jQuery('td:nth-child(8)', nRow).addClass('center');
       return nRow;
     }
   }; // datatable
