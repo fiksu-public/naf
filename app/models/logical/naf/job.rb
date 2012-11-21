@@ -128,7 +128,7 @@ module Logical
           from (SELECT "#{::Naf.schema_name}"."jobs".*,
           CASE
             WHEN (started_at is null and request_to_terminate = false) THEN 1
-            WHEN (started_at is not null and finished_at is null) THEN 2
+            WHEN (started_at is not null and finished_at is null and request_to_terminate = false) THEN 2
             WHEN (exit_status > 0 or request_to_terminate = true) THEN 3
             ELSE 4
           END AS status

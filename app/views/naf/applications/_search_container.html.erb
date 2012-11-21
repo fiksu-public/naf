@@ -2,7 +2,7 @@
   <%= link_to 'Show search parameters', '#', :id => 'search_container_link' %>
 </div>
 <div id="search_container">
-  <%= form_tag(naf.applications_path, :method => "get", :id => 'job_search') do %>
+  <%= form_tag(naf.applications_path, :method => "get", :id => 'application_search') do %>
       <div style="width:30%;" class="display-inline-block">
           <div class="field">
             <%= label(:title, "Title:") %>
@@ -59,7 +59,7 @@
                 }
                 jQuery("#search_container").slideToggle("slow");
             });
-            jQuery("#job_search").submit(function () {
+            jQuery("#application_search").submit(function () {
                 SetFirstPage();
                 return false;
             });

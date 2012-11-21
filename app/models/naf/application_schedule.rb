@@ -28,7 +28,9 @@ module Naf
     delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
 
     attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name, :run_interval, :priority, :visible, :enabled, :run_start_minute
-    attr_accessible :application_run_group_limit
+    attr_accessible :application_run_group_limit, :application_schedule_prerequisites_attributes
+
+    accepts_nested_attributes_for :application_schedule_prerequisites, :allow_destroy => true
 
     SCHEDULES_LOCK_ID = 0
 
@@ -69,7 +71,7 @@ module Naf
     end
 
     def self.relative_schedules
-      return where('run_interval > 0')
+      return where('run_interval >= 0')
     end
 
     # accessors

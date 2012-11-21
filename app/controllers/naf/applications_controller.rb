@@ -35,7 +35,8 @@ module Naf
 
     def new
       @application = Naf::Application.new
-      @application.build_application_schedule
+      app_schedule = @application.build_application_schedule
+      app_schedule.application_schedule_prerequisites.build
     end
 
     def create
@@ -49,7 +50,14 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
-      @application.build_application_schedule if @application.application_schedule.blank?
+      if @application.application_schedule.blank?
+        app_schedule = @application.build_application_schedule
+        app_schedule.application_schedule_prerequisites.build
+      else
+        if @application.application_schedule.application_schedule_prerequisites.blank?
+          @application.application_schedule.application_schedule_prerequisites.build
+        end
+      end
     end
 
     def update

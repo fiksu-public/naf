@@ -10,12 +10,13 @@ jQuery(document).ready(function() {
     "bAutoWidth": false,
     "aoColumns": [
         { "sWidth": "2%"},
-        { "sWidth": "13%"},
+        { "sWidth": "12%"},
         { "sWidth": "9%"},
-        { "sWidth": "20%"},
+        { "sWidth": "15%"},
         { "sWidth": "20%"},
         null,
         null,
+        { "sWidth": "8%"},
         { "sWidth": "50px"}
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
@@ -28,7 +29,7 @@ jQuery(document).ready(function() {
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
-      jQuery('td:nth-child(8)', nRow).addClass('center');
+      jQuery('td:nth-child(9)', nRow).addClass('center');
       return nRow;
     }
   }; // datatable
