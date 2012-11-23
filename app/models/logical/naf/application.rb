@@ -6,7 +6,7 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :schedule_prerequisites]
+      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites]
 
       FILTER_FIELDS = [:deleted, :enabled]
 
@@ -91,14 +91,10 @@ module Logical
         output
       end
 
-      def schedule_prerequisites
+      def prerequisites
         if schedule = @app.application_schedule and schedule.application_schedule_prerequisites.present?
-          schedule.application_schedule_prerequisites.map do |schedule_prerequisite|
-            prerequisites = schedule_prerequisite.
-                prerequisite_application_schedule.application.short_name_if_it_exist
-            schedule_prerequisite
-
-            prerequisites
+          schedule.prerequisites.map do |schedule_prerequisite|
+            schedule_prerequisite.application.short_name_if_it_exist
           end.join(", \n")
         end
       end

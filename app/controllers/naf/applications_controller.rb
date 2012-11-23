@@ -42,7 +42,14 @@ module Naf
     def create
       @application = Naf::Application.new(params[:application])
       if @application.save
-        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully created.")
+        app_schedule = @application.application_schedule
+        if app_schedule.present?
+          prerequisites =
+          app_schedule.application_schedule_prerequisites.map do |prerequisite|
+            Naf::ApplicationSchedule.find(prerequisite.prerequisite_application_schedule_id).title
+          end.join(', ')
+        end
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:application_schedule_prerequisites).try(:present?) }")
       else
         render :action => "new"
       end
@@ -64,7 +71,14 @@ module Naf
     def update
       @application = Naf::Application.find(params[:id])
       if @application.update_attributes(params[:application])
-        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully updated.")
+        app_schedule = @application.application_schedule
+        if app_schedule.present?
+          prerequisites =
+          app_schedule.application_schedule_prerequisites.map do |prerequisite|
+            Naf::ApplicationSchedule.find(prerequisite.prerequisite_application_schedule_id).title
+          end.join(', ')
+        end
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:application_schedule_prerequisites).try(:present?) }")
       else
         render :action => "edit"
       end

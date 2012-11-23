@@ -251,9 +251,7 @@ module Logical
 
       def affinities
         @job.job_affinities.map do |job_affinity|
-          name = job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
-
-          name
+          job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
         end.join(", \n")
       end
 
