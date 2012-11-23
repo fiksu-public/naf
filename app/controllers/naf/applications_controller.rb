@@ -45,11 +45,11 @@ module Naf
         app_schedule = @application.application_schedule
         if app_schedule.present?
           prerequisites =
-          app_schedule.application_schedule_prerequisites.map do |prerequisite|
-            Naf::ApplicationSchedule.find(prerequisite.prerequisite_application_schedule_id).title
+          app_schedule.prerequisites.map do |prerequisite|
+            prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:application_schedule_prerequisites).try(:present?) }")
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         render :action => "new"
       end
@@ -74,11 +74,11 @@ module Naf
         app_schedule = @application.application_schedule
         if app_schedule.present?
           prerequisites =
-          app_schedule.application_schedule_prerequisites.map do |prerequisite|
-            Naf::ApplicationSchedule.find(prerequisite.prerequisite_application_schedule_id).title
+          app_schedule.prerequisites.map do |prerequisite|
+            prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:application_schedule_prerequisites).try(:present?) }")
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         render :action => "edit"
       end
