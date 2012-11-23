@@ -4,6 +4,7 @@ module Naf
     belongs_to :prerequisite_application_schedule, :class_name => "::Naf::ApplicationSchedule"
 
     validates :prerequisite_application_schedule_id, :presence => true
+    validates :application_schedule_id, :uniqueness => { :scope => :prerequisite_application_schedule_id }
 
     attr_accessible :application_schedule_id, :prerequisite_application_schedule_id
   end

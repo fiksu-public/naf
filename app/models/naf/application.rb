@@ -5,6 +5,7 @@ module Naf
     validates :short_name, :uniqueness => true, :allow_blank => true,
               :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                            :message => "letters should be first" }
+    validate :check_references_with_application_schedule_prerequisites
     before_save :check_short_name
     attr_accessible :title, :command, :application_type_id, :log_level, :application_schedule_attributes, :short_name
 
@@ -40,6 +41,15 @@ module Naf
 
     def check_short_name
       self.short_name = nil if self.short_name.blank?
+    end
+
+    def check_references_with_application_schedule_prerequisites
+      if application_schedule.try(:marked_for_destruction?)
+        prerequisites = Naf::ApplicationSchedulePrerequisite.where(:prerequisite_application_schedule_id => application_schedule.id).all
+        unless prerequisites.blank?
+          errors.add(:base, "Cannot delete scheduler, because the following applications are referenced to it: #{prerequisites.map{ |pre| pre.application_schedule.title }.join(', ') }")
+        end
+      end
     end
   end
 end

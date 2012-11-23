@@ -11,6 +11,7 @@ module Naf
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
+    validate :prerequisite_application_schedule_id_uniqueness
     validates :application_run_group_restriction_id, :presence => true
     validates :application_run_group_name, {:presence => true, :length => {:minimum => 3}}
 
@@ -100,5 +101,14 @@ module Naf
         errors.add(:run_start_minute, "or Run interval must be nil")
       end
     end
+
+    private
+
+    def prerequisite_application_schedule_id_uniqueness
+      if application_schedule_prerequisites.map{ |asp| asp.prerequisite_application_schedule_id }.uniq!
+        errors.add(:prerequisite_application_schedule_id, "should be an uniqueness")
+      end
+    end
+
   end
 end

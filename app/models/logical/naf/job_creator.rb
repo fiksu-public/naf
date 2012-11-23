@@ -22,7 +22,6 @@ module Logical
           job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
             ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :created_at => job.created_at,
                                           :prerequisite_job_id => prerequisite.id)
           end
           return job
@@ -50,7 +49,6 @@ module Logical
           job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
             ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :created_at => job.created_at,
                                           :prerequisite_job_id => prerequisite.id)
           end
           return job

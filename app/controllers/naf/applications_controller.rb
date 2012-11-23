@@ -50,12 +50,13 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
-      if @application.application_schedule.blank?
-        app_schedule = @application.build_application_schedule
-        app_schedule.application_schedule_prerequisites.build
+      app_schedule = @application.application_schedule
+      if app_schedule.blank?
+        build_app_schedule = @application.build_application_schedule
+        build_app_schedule.application_schedule_prerequisites.build
       else
-        if @application.application_schedule.application_schedule_prerequisites.blank?
-          @application.application_schedule.application_schedule_prerequisites.build
+        if app_schedule.application_schedule_prerequisites.blank?
+          app_schedule.application_schedule_prerequisites.build
         end
       end
     end
