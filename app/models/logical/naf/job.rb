@@ -61,8 +61,8 @@ module Logical
       end
       
       def title
-        if application and application.application_schedule
-          application.application_schedule.title
+        if application
+          application.title
         else
           command
         end

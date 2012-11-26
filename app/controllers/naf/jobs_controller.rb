@@ -62,10 +62,14 @@ module Naf
       end
       respond_to do |format|
         format.json do
-          render :json => { :success => true }.to_json if @job.save!
+          render :json => {
+                            :success => true,
+                            :title => @job.title,
+                            :command => @job.command,
+                           }.to_json if @job.save
         end
         format.html do
-          if @job.save!
+          if @job.save
             prerequisites = "Prerequisites: "
             @job.prerequisites.each do |prerequisite|
               prerequisites << "'#{prerequisite.command}'; "
@@ -90,7 +94,7 @@ module Naf
             redirect_to(@job, :notice => "Job '#{@job.command}' was successfully updated.")
           end
           format.json do
-            render :json => {:success => true}.to_json
+            render :json => { :success => true, :title => @job.title, :command => @job.command }.to_json
           end
         else
           format.html do 

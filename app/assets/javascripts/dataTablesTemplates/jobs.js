@@ -60,8 +60,9 @@ jQuery(document).ready(function() {
       data: { "job[request_to_terminate]": 1, "job_id": id, "_method": "put" },
       success:function (data) {
           if (data.success) {
-              jQuery("<p id='notice'>A Job was terminated!</p>").
-                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              var title = data.title ? data.title : data.command
+              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
               jQuery('#datatable').dataTable().fnDraw();
           }
       }

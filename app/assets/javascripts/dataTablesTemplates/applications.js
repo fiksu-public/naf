@@ -44,7 +44,7 @@ jQuery(document).ready(function() {
     }
     jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
       if (data.success) {
-        jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
+        jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
                 appendTo('#flash_message').slideDown().delay(5000).slideUp();
         jQuery('#datatable').dataTable().fnDraw();
       }
