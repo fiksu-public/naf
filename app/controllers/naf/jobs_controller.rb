@@ -62,10 +62,10 @@ module Naf
       end
       respond_to do |format|
         format.json do
-          render :json => { :success => true }.to_json if @job.save
+          render :json => { :success => true }.to_json if @job.save!
         end
         format.html do
-          if @job.save
+          if @job.save!
             prerequisites = "Prerequisites: "
             @job.prerequisites.each do |prerequisite|
               prerequisites << "'#{prerequisite.command}'; "
