@@ -7,7 +7,7 @@ module Naf
     belongs_to :machine, :class_name => '::Naf::Machine'
     belongs_to :affinity, :class_name => '::Naf::Affinity'
 
-    delegate :affinity_name, :affinity_classification_name, :to => :affinity
+    delegate :affinity_name, :affinity_classification_name, :short_name_if_it_exist, :to => :affinity
 
     attr_accessible :machine_id, :affinity_id, :required
 

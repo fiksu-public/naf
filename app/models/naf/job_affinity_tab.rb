@@ -7,9 +7,8 @@ module Naf
     belongs_to :affinity, :class_name => "::Naf::Affinity"
 
     delegate :title, :script_type_name, :command, :to => :job
-    delegate :affinity_name, :to => :affinity
 
-    delegate :affinity_classification_name, :to => :affinity
+    delegate :affinity_name, :affinity_classification_name, :short_name_if_it_exist, :to => :affinity
 
     attr_accessible :affinity_id
 

@@ -2,6 +2,10 @@
 
     #fluid {
 
+        .display-inline-block {
+            display: inline-block;
+        }
+
         #bd, #child_bd {
             padding: 10px;
 
@@ -23,7 +27,7 @@
                 margin-top: 10px;
                 margin-bottom: 5px;
                 display: none;
-                #job_search {
+                #job_search, #application_search {
                     padding: 10px;
                     div.field{
                         clear:both;
@@ -32,6 +36,9 @@
                         label {
                             float:left;
                         }
+                    }
+                    div {
+                        vertical-align: top;
                     }
                 }
             }
@@ -89,6 +96,8 @@
                 }
 
                 #datatable {
+                    table-layout:fixed;
+
                     width:100%;
                     border-collapse: collapse;
                     td, th {
@@ -98,6 +107,12 @@
 
                     tr td a img {
                         margin: 0;
+                    }
+
+                    td {
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        overflow: hidden;
                     }
 
                     .ui-icon {

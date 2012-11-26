@@ -22,7 +22,6 @@ module Logical
           job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
             ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :job_created_at => job.created_at,
                                           :prerequisite_job_id => prerequisite.id)
           end
           return job
@@ -50,7 +49,6 @@ module Logical
           job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
             ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :job_created_at => job.created_at,
                                           :prerequisite_job_id => prerequisite.id)
           end
           return job
@@ -59,11 +57,11 @@ module Logical
 
       def queue_application_schedule(application_schedule, schedules_queued_already = [])
         prerequisite_jobs = []
+        if schedules_queued_already.include? application_schedule.id
+          raise ::Naf::Job::JobPrerequisiteLoop.new(application_schedule)
+        end
+        schedules_queued_already << application_schedule.id
         application_schedule.prerequisites.each do |application_schedule_prerequisite|
-          if schedules_queued_already.include? application_schedule.id
-            raise ::Naf::Job::JobPrerequisiteLoop.new(application_schedule)
-          end
-          schedules_queued_already << application_schedule.id
           prerequisite_jobs << queue_application_schedule(application_schedule_prerequisite, schedules_queued_already)
         end
         return queue_application(application_schedule.application,

@@ -7,17 +7,15 @@ module Logical
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
       
-      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :status]
+      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :affinities, :status]
       
       ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
       
-      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
-      
+      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id, :running]
+
       SEARCH_FIELDS = [:command, :application_run_group_name]
 
-      ORDER = { '3' => "created_at", '5' => "started_at", '6' => "finished_at" }
-     
       def initialize(naf_job)
         @job = naf_job
       end
@@ -38,9 +36,11 @@ module Logical
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
           "Failed to Start"
         elsif @job.exit_status and @job.exit_status > 0
-          "Error"
+          "Error #{@job.exit_status}"
         elsif @job.started_at and @job.finished_at
           "Finished"
+        elsif @job.termination_signal
+          "Signaled #{@job.termination_signal}"
         else
           "Queued"
         end
@@ -61,10 +61,10 @@ module Logical
       end
       
       def title
-        if application and application.application_schedule
-          application.application_schedule.title
+        if application
+          application.title
         else
-          truncate(command)
+          command
         end
       end
       
@@ -84,24 +84,94 @@ module Logical
       #
       # We eventually build up these results over created_at/1.week partitions.
       def self.search(search)
-        job_scope = self.get_job_scope(search)
-        order, direction = search[:order], search[:direction]
-        job_scope = job_scope.order("#{order} #{direction}").limit(search[:limit]).offset(search[:offset].to_i*search[:limit].to_i)
+        conditions = "WHERE "
+        values = {}
+        values[:limit] = search[:limit].to_i
+        values[:offset]= search[:offset].to_i*search[:limit].to_i
         FILTER_FIELDS.each do |field|
-          job_scope = job_scope.where(field => search[field]) if search[field].present?
+          if search[field].present?
+            case field
+              when :running
+                if search[field] == "true"
+                  conditions << "(status = 2)"
+                else
+                  conditions << "(status = 1 or status = 3 or status = 4)"
+                end
+              when :failed_to_start, :request_to_terminate
+                values[field.to_sym] = search[field]
+                conditions << "#{field} = :#{field}"
+              else
+                values[field.to_sym] = search[field].to_i
+                conditions << "#{field} = :#{field}"
+            end
+            conditions << " AND "
+          end
         end
         SEARCH_FIELDS.each do |field|
-          job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
+          if search[field].present?
+            conditions << "lower(#{field}) ~ :#{field}"
+            values[field.to_sym] = search[field].downcase
+            conditions << " AND "
+          end
         end
-        # Now return instantiations of all the logical job wrappers 
-        # from the job scope
-        return job_scope.map{|physical_job| new(physical_job) }
+        conditions << self.get_status(search)
+
+        sql = <<-SQL
+          select *,
+          CASE status
+            WHEN 1 THEN created_at
+            WHEN 2 THEN started_at
+            WHEN 3 THEN finished_at
+            WHEN 4 THEN finished_at
+            ELSE  null
+          END AS sort
+          from (SELECT "#{::Naf.schema_name}"."jobs".*,
+          CASE
+            WHEN (started_at is null and request_to_terminate = false) THEN 1
+            WHEN (started_at is not null and finished_at is null and request_to_terminate = false) THEN 2
+            WHEN (exit_status > 0 or request_to_terminate = true) THEN 3
+            ELSE 4
+          END AS status
+          FROM "#{::Naf.schema_name}"."jobs"
+          ) tbl
+          #{conditions}
+          ORDER BY status, sort #{search[:sort_direction]}
+          LIMIT :limit OFFSET :offset
+        SQL
+
+        ::Naf::Job.find_by_sql([sql, values]).map{ |physical_job| new(physical_job) }
+      end
+
+      def self.get_status(search)
+        status = search[:status].nil? ? :all : search[:status]
+        case status.to_sym
+          when :queued
+            "(status = 1 or status = 2)"
+          when :finished
+            "(status = 3 or status = 4)"
+          when :errored
+            "status = 3"
+          else
+            "(status = 1 or status = 2 or status = 3 or status = 4)"
+        end
       end
 
       def self.total_display_records(search)
         job_scope = self.get_job_scope(search)
         FILTER_FIELDS.each do |field|
-          job_scope = job_scope.where(field => search[field]) if search[field].present?
+          if search[field].present?
+            if field == :running
+              condition =
+              if search[field] == "true"
+                "(started_at is not null and finished_at is null)"
+              else
+                "not (started_at is not null and finished_at is null)"
+              end
+              job_scope = job_scope.where(condition)
+            else
+              job_scope = job_scope.where(field => search[field])
+            end
+          end
         end
         SEARCH_FIELDS.each do |field|
           job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
@@ -113,18 +183,12 @@ module Logical
       def self.get_job_scope(search)
         status = search[:status].nil? ? :all : search[:status]
         case status.to_sym
-          when :canceled
-            job_scope = ::Naf::Job.canceled
-          when :failed_to_start
-            job_scope = ::Naf::Job.where(:failed_to_start => true)
-          when :error
-            job_scope = ::Naf::Job.where("exit_status > 0")
           when :queued
-            job_scope = ::Naf::Job.not_started
-          when :running
-            job_scope = ::Naf::Job.started.not_finished
+            job_scope = ::Naf::Job.queued_and_running
           when :finished
             job_scope = ::Naf::Job.finished
+          when :errored
+            job_scope = ::Naf::Job.errored
           else
             job_scope = ::Naf::Job.scoped
         end
@@ -183,6 +247,12 @@ module Logical
         else
           ""
         end
+      end
+
+      def affinities
+        @job.job_affinities.map do |job_affinity|
+          job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
+        end.join(", \n")
       end
 
     end

@@ -3,21 +3,19 @@ jQuery(document).ready(function() {
 
   // Prepare for setup the datatable.
   var dataTableOptions = {
-    "bSort": true,
     "sAjaxSource": sAjaxSource,
-    "aaSorting": [[3,'desc']],
     "aoColumnDefs": [
-      { "bSortable": false, "aTargets": [ 0, 1, 2, 4, 7, 8, 10 ] },
-      { "bVisible": false, "aTargets": [ 9 ] },
-      { "sClass": "center", "aTargets": [ 10 ] }
+      { "bVisible": false, "aTargets": [ 10 ] },
+      { "sClass": "center", "aTargets": [ 11 ] }
     ],
     "bAutoWidth": false,
     "aoColumns": [
-        null,
-        null,
-        null,
-        null,
+        { "sWidth": "2%"},
+        { "sWidth": "7%"},
+        { "sWidth": "4%"},
+        { "sWidth": "14%"},
         { "sWidth": "25%"},
+        null,
         null,
         null,
         null,
@@ -33,6 +31,7 @@ jQuery(document).ready(function() {
       jQuery.getJSON( sSource, aoData, function (json) {
         fnCallback(json);
         initPaging();
+        addTitles();
       });
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
@@ -61,8 +60,9 @@ jQuery(document).ready(function() {
       data: { "job[request_to_terminate]": 1, "job_id": id, "_method": "put" },
       success:function (data) {
           if (data.success) {
-              jQuery("<p id='notice'>A Job was terminated!</p>").
-                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              var title = data.title ? data.title : data.command
+              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
               jQuery('#datatable').dataTable().fnDraw();
           }
       }
@@ -77,7 +77,7 @@ function addLinkToJob(nRow, aData) {
 }
 
 function addLinkToTitle(nRow, aData) {
-  var link = aData[9];
+  var link = aData[10];
   var title = aData[4];
   if ( link != "" ) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );
@@ -86,33 +86,32 @@ function addLinkToTitle(nRow, aData) {
 }
 
 function alignmentButtons(nRow, aData) {
-  var data = aData[10];
+  var data = aData[11];
   var row;
-  if (aData[8] != "Canceled") {
+  if (aData[9] != "Canceled") {
       row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
   } else {
       row = "<div style='text-align:left;width:50px;display: inline;padding-right: 16px;'>" + data + "</div>";
   }
-  jQuery('td:nth-child(10)', nRow).empty().append(row);
+  jQuery('td:nth-child(11)', nRow).empty().append(row);
 }
 
 function colorizationStatus(nRow, aData) {
-  jQuery('td:nth-child(9)', nRow).wrapInner('<div class="">');
-  switch(aData[8]) {
+  jQuery('td:nth-child(10)', nRow).wrapInner('<div class="">');
+  switch(aData[9]) {
     case 'Running':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-running');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-running');
       break;
     case 'Queued':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-queued');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-queued');
       break;
-    case 'Error':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
-      break;
-    case  'Failed to Start':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-error');
+    case  'Canceled':
       break;
     case 'Finished':
-      jQuery('td:nth-child(9) div', nRow).addClass('script-finished');
+      jQuery('td:nth-child(10) div', nRow).addClass('script-finished');
+      break;
+    default:
+      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
       break;
   }
 }

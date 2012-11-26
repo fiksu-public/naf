@@ -27,7 +27,7 @@
                 <% if col == :id %>
                   <%= link_to row.id, { :action => 'show', :id => row.id, :controller => controller_name } %>
                 <% else %>
-                  <%= format_index_table_row(row, col) %>
+                  <%= row.send(col) %>
                 <% end %>
               </td>
             <% end %>

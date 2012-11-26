@@ -9,20 +9,27 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumns": [
-        null,
+        { "sWidth": "2%"},
+        { "sWidth": "12%"},
+        { "sWidth": "9%"},
         { "sWidth": "15%"},
-        null,
         { "sWidth": "20%"},
         null,
         null,
-        null,
-        null,
-        null,
-        null
+        { "sWidth": "8%"},
+        { "sWidth": "50px"}
     ],
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
+      _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
+      jQuery.getJSON( sSource, aoData, function (json) {
+        fnCallback(json);
+        initPaging();
+        addTitles();
+      });
+    },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
-      jQuery('td:nth-child(10)', nRow).addClass('center');
+      jQuery('td:nth-child(9)', nRow).addClass('center');
       return nRow;
     }
   }; // datatable
@@ -37,7 +44,7 @@ jQuery(document).ready(function() {
     }
     jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
       if (data.success) {
-        jQuery("<p id='notice'>Congratulations, a Job was added!</p>").
+        jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
                 appendTo('#flash_message').slideDown().delay(5000).slideUp();
         jQuery('#datatable').dataTable().fnDraw();
       }

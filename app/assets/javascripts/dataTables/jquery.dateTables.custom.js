@@ -14,10 +14,14 @@ jQuery.fn.addDataTable = function(dataTableOptions) {
     "sDom": 'rpitip',
     "bInfo": true,
     "isPaginate": true,
+    "fnInitComplete" : function() {
+      addTitles();
+    },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       jQuery.getJSON( sSource, aoData, function (json) {
         fnCallback(json);
         initPaging();
+        addTitles();
       });
     }
   };
@@ -44,4 +48,15 @@ function initPaging() {
     jQuery('#datatable').dataTable().fnDraw();
     return false;
   });
+}
+
+function addTitles() {
+  jQuery('#datatable tbody tr td').each( function() {
+    this.setAttribute( 'title', $(this).text().trim());
+  });
+}
+
+function SetFirstPage() {
+  jQuery('#datatable').dataTableSettings[0]._iDisplayStart = 0;
+  jQuery('#datatable').dataTable().fnDraw();
 }

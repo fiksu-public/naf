@@ -12,8 +12,6 @@ module Naf
         end
         format.json do
           set_page
-          params[:search][:direction] = params['sSortDir_0']
-          params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
           @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
@@ -64,7 +62,11 @@ module Naf
       end
       respond_to do |format|
         format.json do
-          render :json => { :success => true }.to_json if @job.save
+          render :json => {
+                            :success => true,
+                            :title => @job.title,
+                            :command => @job.command,
+                           }.to_json if @job.save
         end
         format.html do
           if @job.save
@@ -92,7 +94,7 @@ module Naf
             redirect_to(@job, :notice => "Job '#{@job.command}' was successfully updated.")
           end
           format.json do
-            render :json => {:success => true}.to_json
+            render :json => { :success => true, :title => @job.title, :command => @job.command }.to_json
           end
         else
           format.html do 

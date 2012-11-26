@@ -25,20 +25,6 @@ module Naf
         ""
       end
     end
-    
-    def format_index_table_row(row, col)
-      value = row.send(col)
-      if value.is_a?(String)
-        case col
-          when :title
-            return value
-          else
-            return truncate(value)
-        end
-      else
-        return value
-      end
-    end
 
     def highlight_tab?(tab)
       case tab
@@ -191,7 +177,7 @@ module Naf
             url << "?q=#{CGI.escape(query)}"
           end
         elsif record.kind_of?(::Naf::Machine) || record.kind_of?(::Logical::Naf::Machine)
-            query = ::Naf::Machine.hostname
+            query = record.server_name
             query << " runner" if runner
             url << "?q=#{CGI.escape(query)}"
         end

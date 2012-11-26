@@ -13,6 +13,10 @@
     padding: 0;
 }
 
+@mixin display-inline-block {
+    display: inline-block;
+}
+
 html, body {
     @include margin-padding-null;
     color:#333;
@@ -50,6 +54,10 @@ html {
 
         .clear {
             clear: both;
+        }
+
+        .display-inline-block {
+            @include display-inline-block;
         }
 
         div {
@@ -135,7 +143,7 @@ html {
                 margin-top: 10px;
                 margin-bottom: 5px;
                 display: none;
-                #job_search {
+                #job_search, #application_search {
                     padding: 10px;
                     div.field{
                         clear:both;
@@ -144,6 +152,9 @@ html {
                         label {
                             float:left;
                         }
+                    }
+                    div {
+                        vertical-align: top;
                     }
                 }
             }
@@ -201,6 +212,8 @@ html {
                 }
 
                 #datatable {
+                    table-layout:fixed;
+
                     width:100%;
                     border-collapse: collapse;
                     td, th {
@@ -210,6 +223,12 @@ html {
 
                     tr td a img {
                         margin: 0;
+                    }
+
+                    td {
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                        overflow: hidden;
                     }
 
                     .ui-icon {

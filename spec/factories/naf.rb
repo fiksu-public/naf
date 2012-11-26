@@ -49,6 +49,10 @@ FactoryGirl.define do
     exit_status 1
   end
 
+  factory :job_with_signal, :parent => :job_picked_by_machine do
+    termination_signal 1
+  end
+
   factory :stale_job, :parent => :job_picked_by_machine do
     created_at  Time.zone.now - 1.week - 3.days - 5.minutes
     started_at  Time.zone.now - 1.week - 3.days - 3.minutes
