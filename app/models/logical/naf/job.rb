@@ -41,6 +41,8 @@ module Logical
           "Finished"
         elsif @job.termination_signal
           "Signaled #{@job.termination_signal}"
+        elsif @job.prerequisites.select { |pre| pre.started_at.nil? }.size > 0
+          "Waiting"
         else
           "Queued"
         end
