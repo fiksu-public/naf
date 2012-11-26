@@ -52,12 +52,15 @@ module Naf
     def create
       @job = Naf::Job.new(params[:job])
       if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
-        @job.command = app.command
-        @job.application_type_id = app.application_type_id
-        schedule = app.application_schedule
-        @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction.no_limit
-        @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
-        @job.application_run_group_limit = schedule ? schedule.application_run_group_limit : 1
+        if schedule = app.application_schedule
+          @job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
+        else
+          @job.command = app.command
+          @job.application_type_id = app.application_type_id
+          @job.application_run_group_restriction_id = schedule ? schedule.application_run_group_restriction_id : Naf::ApplicationRunGroupRestriction.no_limit
+          @job.application_run_group_name = schedule ? schedule.application_run_group_name : "Manually Enqueued Group"
+          @job.application_run_group_limit = schedule ? schedule.application_run_group_limit : 1
+        end
       end
       respond_to do |format|
         format.json do
