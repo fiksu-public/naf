@@ -25,7 +25,7 @@ module Logical
 
         context "for a job scheduled from an application" do
           it "should get the title from the application_schedule" do
-            scheduled_job.title.should eql(scheduled_job.application.application_schedule.title)
+            scheduled_job.title.should eql(scheduled_job.application.title)
           end
         end
         context "for an ad hoc job" do
