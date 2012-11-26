@@ -12,7 +12,7 @@ module Logical
       ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
                     :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
       
-      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :running]
+      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id, :running]
 
       SEARCH_FIELDS = [:command, :application_run_group_name]
 
@@ -128,7 +128,7 @@ module Logical
           from (SELECT "#{::Naf.schema_name}"."jobs".*,
           CASE
             WHEN (started_at is null and request_to_terminate = false) THEN 1
-            WHEN (started_at is not null and finished_at is null) THEN 2
+            WHEN (started_at is not null and finished_at is null and request_to_terminate = false) THEN 2
             WHEN (exit_status > 0 or request_to_terminate = true) THEN 3
             ELSE 4
           END AS status
@@ -251,9 +251,7 @@ module Logical
 
       def affinities
         @job.job_affinities.map do |job_affinity|
-          name = job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
-
-          name
+          job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
         end.join(", \n")
       end
 

@@ -6,7 +6,7 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_start_minute, :run_interval]
+      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites]
 
       FILTER_FIELDS = [:deleted, :enabled]
 
@@ -65,9 +65,43 @@ module Logical
         return output
       end
 
+      def run_time
+        run_time = run_start_minute.blank? ? run_interval : run_start_minute
+        run_time = "not scheduled" if run_time.blank?
+
+        run_time
+      end
+
+      def run_interval
+        output = ""
+        if schedule = @app.application_schedule and schedule.run_interval.present?
+          time = schedule.run_interval
+          output =
+          if time == 0
+            "run constantly"
+          elsif time < 60
+            pluralize(time, "minute")
+          elsif time % 60 == 0
+            pluralize(time / 60, "hour")
+          else
+            pluralize(time / 60, "hour") + ', ' + pluralize(time % 60, "minute")
+          end
+        end
+
+        output
+      end
+
+      def prerequisites
+        if schedule = @app.application_schedule and schedule.application_schedule_prerequisites.present?
+          schedule.prerequisites.map do |schedule_prerequisite|
+            schedule_prerequisite.application.short_name_if_it_exist
+          end.join(", \n")
+        end
+      end
+
       def method_missing(method_name, *arguments, &block)
         case method_name
-        when :application_run_group_restriction_name, :run_interval, :application_run_group_name, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled
+        when :application_run_group_restriction_name, :application_run_group_name, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled
           if schedule = @app.application_schedule
             schedule.send(method_name, *arguments, &block)
           else

@@ -177,7 +177,7 @@ module Naf
             url << "?q=#{CGI.escape(query)}"
           end
         elsif record.kind_of?(::Naf::Machine) || record.kind_of?(::Logical::Naf::Machine)
-            query = ::Naf::Machine.hostname
+            query = record.server_name
             query << " runner" if runner
             url << "?q=#{CGI.escape(query)}"
         end

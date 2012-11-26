@@ -54,5 +54,9 @@ function addTitles() {
   jQuery('#datatable tbody tr td').each( function() {
     this.setAttribute( 'title', $(this).text().trim());
   });
+}
 
+function SetFirstPage() {
+  jQuery('#datatable').dataTableSettings[0]._iDisplayStart = 0;
+  jQuery('#datatable').dataTable().fnDraw();
 }
