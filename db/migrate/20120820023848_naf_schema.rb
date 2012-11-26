@@ -307,6 +307,10 @@ class NafSchema < ActiveRecord::Migration
       drop table #{schema_name}.application_schedule_prerequisites cascade;
       drop table #{schema_name}.application_schedules cascade;
       drop table #{schema_name}.application_schedule_affinity_tabs cascade;
+      drop table #{schema_name}.logger_levels cascade;
+      drop table #{schema_name}.logger_names cascade;
+      drop table #{schema_name}.logger_styles cascade;
+      drop table #{schema_name}.logger_style_names cascade;
     SQL
 
     if schema_name != "public"
@@ -323,5 +327,21 @@ class NafSchema < ActiveRecord::Migration
         $$;
       SQL
     end
+
+    schemas = execute <<-SQL
+      select 'drop schema ' || nspname ||' cascade;'
+        from pg_namespace
+        where nspname = 'naf_job_affinity_tabs_partitions'
+        OR nspname = 'naf_job_created_ats_partitions'
+        OR nspname ='naf_job_prerequisites_partitions'
+        OR nspname = 'naf_jobs_partitions';
+    SQL
+
+    schemas.values.each do |schema|
+      execute <<-SQL
+        #{schema.first}
+      SQL
+    end
+
   end
 end
