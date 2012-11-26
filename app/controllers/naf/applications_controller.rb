@@ -35,13 +35,21 @@ module Naf
 
     def new
       @application = Naf::Application.new
-      @application.build_application_schedule
+      app_schedule = @application.build_application_schedule
+      app_schedule.application_schedule_prerequisites.build
     end
 
     def create
       @application = Naf::Application.new(params[:application])
       if @application.save
-        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully created.")
+        app_schedule = @application.application_schedule
+        if app_schedule.present?
+          prerequisites =
+          app_schedule.prerequisites.map do |prerequisite|
+            prerequisite.title
+          end.join(', ')
+        end
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         render :action => "new"
       end
@@ -49,13 +57,28 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
-      @application.build_application_schedule if @application.application_schedule.blank?
+      app_schedule = @application.application_schedule
+      if app_schedule.blank?
+        build_app_schedule = @application.build_application_schedule
+        build_app_schedule.application_schedule_prerequisites.build
+      else
+        if app_schedule.application_schedule_prerequisites.blank?
+          app_schedule.application_schedule_prerequisites.build
+        end
+      end
     end
 
     def update
       @application = Naf::Application.find(params[:id])
       if @application.update_attributes(params[:application])
-        redirect_to(@application, :notice => "Application '#{@application.command}' was successfully updated.")
+        app_schedule = @application.application_schedule
+        if app_schedule.present?
+          prerequisites =
+          app_schedule.prerequisites.map do |prerequisite|
+            prerequisite.title
+          end.join(', ')
+        end
+        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         render :action => "edit"
       end

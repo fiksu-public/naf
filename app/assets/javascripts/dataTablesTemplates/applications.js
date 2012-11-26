@@ -10,14 +10,14 @@ jQuery(document).ready(function() {
     "bAutoWidth": false,
     "aoColumns": [
         { "sWidth": "2%"},
-        { "sWidth": "10%"},
+        { "sWidth": "12%"},
         { "sWidth": "9%"},
-        { "sWidth": "18%"},
-        { "sWidth": "18%"},
+        { "sWidth": "15%"},
+        { "sWidth": "20%"},
         null,
         null,
-        null,
-        { "sWidth": "4%"}
+        { "sWidth": "8%"},
+        { "sWidth": "50px"}
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });

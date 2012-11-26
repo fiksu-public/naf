@@ -23,17 +23,24 @@ module Naf
       it "should build a new application schedule if it was destroyed" do
         @id = 5
         app_mock = mock_model(Application)
+        schedule_mock = mock_model(ApplicationSchedule)
+        schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)
         Application.should_receive(:find).with("5").and_return(app_mock)
         app_mock.should_receive(:application_schedule).and_return(nil)
-        app_mock.should_receive(:build_application_schedule).and_return(nil)
+        app_mock.should_receive(:build_application_schedule).and_return(schedule_mock)
+        schedule_mock.should_receive(:application_schedule_prerequisites).and_return(schedule_prerequisites)
+        schedule_prerequisites.should_receive(:build).and_return(nil)
       end
 
       it "should respond without building a new application schedule" do
         @id = 5
         app_mock = mock_model(Application)
-        schedule_mock = mock_model(ApplicationSchedule) 
+        schedule_mock = mock_model(ApplicationSchedule)
+        schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)
         app_mock.should_receive(:application_schedule).and_return(schedule_mock)
         Application.should_receive(:find).with("5").and_return(app_mock)
+        schedule_mock.should_receive(:application_schedule_prerequisites).and_return(schedule_prerequisites)
+        schedule_prerequisites.should_not_receive(:build)
         app_mock.should_not_receive(:build_application_schedule)
       end
 
@@ -41,21 +48,24 @@ module Naf
         get :edit, :id => @id
         response.should render_template("naf/applications/edit")
         response.should be_success
-
       end
     end
 
     it "should respond with affinity new" do
       app = mock('app')
+      app_schedule = mock('application_schedule')
+      schedule_prerequisites = mock('schedule_prerequisites')
       Application.should_receive(:new).and_return(app)
-      app.should_receive(:build_application_schedule).and_return(nil)
+      app.should_receive(:build_application_schedule).and_return(app_schedule)
+      app_schedule.should_receive(:application_schedule_prerequisites).and_return(schedule_prerequisites)
+      schedule_prerequisites.should_receive(:build).and_return(nil)
       get :new
       response.should render_template("naf/applications/new")
       response.should be_success
     end
     
     context "on the create action" do
-      let(:valid_app)        { mock_model(Application, :save => true, :id => 5)  }
+      let(:valid_app)        { mock_model(Application, :save => true, :application_schedule => nil, :id => 5)  }
       let(:invalid_app)      { mock_model(Application, :save => false) }
       it "should redirect to show when valid" do
         Application.should_receive(:new).and_return(valid_app)
@@ -70,8 +80,8 @@ module Naf
     end
 
     context "on the updated action" do
-      let(:valid_app)   { mock_model(Application, :update_attributes => true, :id => 5) }
-      let(:invalid_app) { mock_model(Application, :update_attributes => false,:id => 5) }
+      let(:valid_app)   { mock_model(Application, :update_attributes => true, :application_schedule => nil, :id => 5) }
+      let(:invalid_app) { mock_model(Application, :update_attributes => false, :id => 5) }
      
       it "should redirect to show when valid" do
         Application.should_receive(:find).with("5").and_return(valid_app)
