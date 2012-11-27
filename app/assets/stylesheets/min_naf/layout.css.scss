@@ -105,6 +105,12 @@
                         padding: 3px 0 3px 3px;
                     }
 
+                    tbody tr {
+                        &:nth-child(even) {
+                          background-color: #F4F4F4;
+                        }
+                    }
+
                     tr td a img {
                         margin: 0;
                     }

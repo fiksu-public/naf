@@ -70,11 +70,7 @@ module Naf
         end
         format.html do
           if @job.save
-            prerequisites = "Prerequisites: "
-            @job.prerequisites.each do |prerequisite|
-              prerequisites << "'#{prerequisite.command}'; "
-            end
-            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created. #{prerequisites unless @job.prerequisites.blank? }")
+            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created.")
           else
             render :action => "new"
           end
