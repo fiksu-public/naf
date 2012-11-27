@@ -1,7 +1,7 @@
 <br/>
 <div class="display-inline-block">
   <%= label(:status, "Status:") %>
-  <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
+  <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Waiting", :waiting], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
 </div>
 &nbsp;&nbsp;
 <div class="display-inline-block">
