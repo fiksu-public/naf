@@ -72,11 +72,11 @@ module Logical
       
       def server
         if started_on_machine 
-          name = started_on_machine.server_name
-          if name and name.length > 0
-            name
-          else
+          name = started_on_machine.short_name_if_it_exist
+          if name.blank?
             started_on_machine.server_address
+          else
+            name
           end
         end
       end
@@ -260,7 +260,11 @@ module Logical
 
       def affinities
         @job.job_affinities.map do |job_affinity|
-          job_affinity.affinity_classification_name + '_' + job_affinity.short_name_if_it_exist
+          if job_affinity.affinity_short_name
+            job_affinity.affinity_short_name
+          else
+            job_affinity.affinity_classification_name + '_' + job_affinity.affinity_name
+          end
         end.join(", \n")
       end
 

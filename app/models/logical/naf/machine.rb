@@ -51,10 +51,13 @@ module Logical
 
       def affinities
         @machine.machine_affinity_slots.map do |slot|
-          name = slot.affinity_classification_name + '_' + slot.short_name_if_it_exist
-          name = name + '_required' if slot.required
-
-          name
+          if slot.affinity_short_name
+            slot.affinity_short_name
+          else
+            name = slot.affinity_classification_name + '_' + slot.affinity_name
+            name = name + '_required' if slot.required
+            name
+          end
         end.join(", \n")
       end
       

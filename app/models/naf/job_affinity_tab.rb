@@ -6,7 +6,7 @@ module Naf
 
     belongs_to :affinity, :class_name => "::Naf::Affinity"
 
-    delegate :affinity_name, :affinity_classification_name, :short_name_if_it_exist, :to => :affinity
+    delegate :affinity_name, :affinity_classification_name, :affinity_short_name, :to => :affinity
 
     attr_accessible :affinity_id
 

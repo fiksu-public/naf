@@ -6,7 +6,7 @@
 &nbsp;&nbsp;
 <div class="display-inline-block">
   <%= label(:started_on_machine_id, "Machine:") %>
-  <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
+  <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.short_name_if_it_exist.blank? ? m.server_address : m.short_name_if_it_exist, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
 </div>
 &nbsp;&nbsp;
 <div id='show_search_container_link' class="display-inline-block">

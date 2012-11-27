@@ -30,10 +30,6 @@ module Naf
       return "::Naf::Affinity<#{components.join(', ')}>"
     end
 
-    def short_name_if_it_exist
-      affinity_short_name || affinity_name
-    end
-
     private
 
     def check_short_name
