@@ -124,7 +124,7 @@ module Logical
             WHEN 1 THEN created_at
             WHEN 2 THEN started_at
             WHEN 3 THEN finished_at
-            WHEN 4 THEN finished_at
+            WHEN 4 THEN started_at
             ELSE  null
           END AS sort
           from (SELECT "#{::Naf.schema_name}"."jobs".*,
