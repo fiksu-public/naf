@@ -41,6 +41,8 @@ module Logical
           "Finished"
         elsif @job.termination_signal
           "Signaled #{@job.termination_signal}"
+        elsif @job.prerequisites.select { |pre| pre.started_at.nil? }.size > 0
+          "Waiting"
         else
           "Queued"
         end
@@ -139,13 +141,16 @@ module Logical
           LIMIT :limit OFFSET :offset
         SQL
 
-        ::Naf::Job.find_by_sql([sql, values]).map{ |physical_job| new(physical_job) }
+        jobs = ::Naf::Job.find_by_sql([sql, values])
+        jobs = jobs.select{|job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 } if search[:status] == 'waiting'
+
+        jobs.map{ |physical_job| new(physical_job) }
       end
 
       def self.get_status(search)
         status = search[:status].nil? ? :all : search[:status]
         case status.to_sym
-          when :queued
+          when :queued, :waiting
             "(status = 1 or status = 2)"
           when :finished
             "(status = 3 or status = 4)"
@@ -177,13 +182,17 @@ module Logical
           job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
         end
 
+        if search[:status] == 'waiting'
+          job_scope = job_scope.select{|job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 }
+        end
+
         job_scope.count
       end
 
       def self.get_job_scope(search)
         status = search[:status].nil? ? :all : search[:status]
         case status.to_sym
-          when :queued
+          when :queued, :waiting
             job_scope = ::Naf::Job.queued_and_running
           when :finished
             job_scope = ::Naf::Job.finished
