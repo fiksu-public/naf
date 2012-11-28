@@ -19,8 +19,9 @@ module Naf
 
     validates :application_type_id, :application_run_group_restriction_id, :presence => true
     validates :command,  {:presence => true, :length => {:minimum => 3}}
-    validates :application_run_group_limit, :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
-    
+    validates :application_run_group_limit,
+              :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
+
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
     belongs_to :started_on_machine, :class_name => '::Naf::Machine'
     belongs_to :application, :class_name => "::Naf::Application"
