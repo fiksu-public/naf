@@ -18,7 +18,7 @@ module Naf
     JOB_STALE_TIME = 1.week
 
     validates :application_type_id, :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, :command,  {:presence => true, :length => {:minimum => 3}}
+    validates :command,  {:presence => true, :length => {:minimum => 3}}
     validates :application_run_group_limit, :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
     
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'

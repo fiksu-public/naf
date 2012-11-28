@@ -13,7 +13,6 @@ module Naf
     validate :enabled_application_id_unique
     validate :prerequisite_application_schedule_id_uniqueness
     validates :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, {:presence => true, :length => {:minimum => 3}}
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
