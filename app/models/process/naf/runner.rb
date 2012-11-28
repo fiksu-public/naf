@@ -103,8 +103,16 @@ module Process::Naf
           # check scheduled tasks
           should_be_queued.each do |application_schedule|
             logger.info "scheduled application: #{application_schedule}"
-            Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-              @job_creator.queue_application_schedule(application_schedule)
+            begin
+              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+                @job_creator.queue_application_schedule(application_schedule)
+              end
+            rescue ::Naf::Job::JobPrerequisiteLoop => jpl
+              logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
+              logger.error jpl
+              application_schedule.enabled = false
+              application_schedule.save!
+              logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"
             end
           end
 
