@@ -1,5 +1,16 @@
+<br/>
+<div class="display-inline-block">
+  <%= label_tag :visible, 'Show hidden:' %>
+  <%= check_box_tag("search[visible]", true, false, { :class => 'datatable_variable' }) %>
+</div>
+&nbsp;&nbsp;
+<div class="display-inline-block">
+  <%= label_tag :deleted, 'Show deleted:' %>
+  <%= check_box_tag("search[deleted]", true, false, { :class => 'datatable_variable' }) %>
+</div>
+&nbsp;&nbsp;
 <div id='show_search_container_link' class="display-inline-block">
-  <%= link_to 'Show search parameters', '#', :id => 'search_container_link' %>
+  <%= link_to 'Show additional search parameters', '#', :id => 'search_container_link' %>
 </div>
 <div id="search_container">
   <%= form_tag(naf.applications_path, :method => "get", :id => 'application_search') do %>
@@ -31,16 +42,9 @@
       </div>
       <div style="width:30%; padding-left:40px;" class="display-inline-block">
           <div class="field">
-            <%= label(:deleted, "Applications deleted:") %>
-            <%= select(:search, :deleted , [["Ignore", nil], ["True", true], ["False", false]], {}, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
             <%= label(:enabled, "App schedules enabled:") %>
             <%= select(:search, :enabled, [["Ignore", nil], ["True", true], ["False", false]], {}, { :class => 'datatable_variable' }) %>
           </div>
-          <br/>
       </div>
       <br/><br/><br/>
       <%= submit_tag("Search") %>
@@ -53,13 +57,21 @@
             jQuery("#search_container").hide();
             jQuery("#search_container_link").click(function () {
                 if (jQuery("#search_container").css('display') == 'none') {
-                    jQuery("#search_container_link").text("Hide search parameters");
+                    jQuery("#search_container_link").text("Hide additional search parameters");
                 }else {
-                    jQuery("#search_container_link").text("Show search parameters");
+                    jQuery("#search_container_link").text("Show additional search parameters");
                 }
                 jQuery("#search_container").slideToggle("slow");
             });
             jQuery("#application_search").submit(function () {
+                SetFirstPage();
+                return false;
+            });
+            jQuery("#search_visible").change(function () {
+                SetFirstPage();
+                return false;
+            });
+            jQuery("#search_deleted").change(function () {
                 SetFirstPage();
                 return false;
             });

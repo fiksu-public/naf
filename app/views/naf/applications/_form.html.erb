@@ -36,9 +36,13 @@
     </div>
 
     <div class="field">
-      <%= f.label :log_level %>
-      <br/>
+      <%= f.label :log_level %><br/>
       <%= f.text_field :log_level %>
+    </div>
+
+    <div class="field">
+      <%= f.label :deleted %><br/>
+      <%= f.check_box :deleted %>
     </div>
 
     <%= f.fields_for :application_schedule do |schedule_fields| %>

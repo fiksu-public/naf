@@ -52,6 +52,17 @@ html {
             width: 15em;
         }
 
+        input[type=checkbox] {
+            width: 13px;
+            height: 13px;
+            padding: 0;
+            margin:0;
+            vertical-align: bottom;
+            position: relative;
+            top: -1px;
+            *overflow: hidden;
+        }
+
         .clear {
             clear: both;
         }
@@ -259,6 +270,10 @@ html {
 
                     .script-finished {
                         color: #000000;
+                    }
+
+                    .deleted_or_hidden {
+                        background-color: #ffcccc !important;
                     }
                 }
 
