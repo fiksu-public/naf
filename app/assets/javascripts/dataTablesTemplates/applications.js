@@ -8,16 +8,22 @@ jQuery(document).ready(function() {
       initPageSelect();
     },
     "bAutoWidth": false,
+    "aoColumnDefs": [
+      { "bVisible": false, "aTargets": [ 9, 10 ] },
+      { "sClass": "center", "aTargets": [ 8 ] }
+    ],
     "aoColumns": [
         { "sWidth": "2%"},
-        { "sWidth": "12%"},
+        { "sWidth": "15%"},
         { "sWidth": "9%"},
         { "sWidth": "15%"},
         { "sWidth": "20%"},
         null,
         null,
         { "sWidth": "8%"},
-        { "sWidth": "50px"}
+        { "sWidth": "50px"},
+        null,
+        null
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
@@ -29,7 +35,7 @@ jQuery(document).ready(function() {
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
-      jQuery('td:nth-child(9)', nRow).addClass('center');
+      colorizationDeletedOrHidden(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -56,4 +62,10 @@ function addLinkToApplication(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/applications/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
+}
+
+function colorizationDeletedOrHidden(nRow, aData) {
+  if (aData[9] == 'true' || aData[10] == 'false' || aData[10] == '') {
+    jQuery(nRow).addClass('deleted_or_hidden');
+  }
 }

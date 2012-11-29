@@ -144,6 +144,10 @@
                     .script-finished {
                         color: #000000;
                     }
+
+                    .deleted_or_hidden {
+                        background-color: #ffcccc !important;
+                    }
                 }
 
                 #datatable_info {
