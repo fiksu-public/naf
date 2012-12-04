@@ -188,12 +188,23 @@ module Naf
       return where("finished_at is not null or request_to_terminate = true")
     end
 
-    def self.queued_and_running
-      return where("(started_at is null and request_to_terminate = false) or (started_at is not null and finished_at is null and request_to_terminate = false)")
+    def self.queued_status
+      return where("(started_at is null and request_to_terminate = false)
+                    or (finished_at > '#{Time.zone.now - 1.minute}')
+                    or (started_at is not null and finished_at is null and request_to_terminate = false)")
+    end
+
+    def self.running_status
+      return where("(started_at is not null and finished_at is null and request_to_terminate = false)
+                    or (finished_at > '#{Time.zone.now - 1.minute}')")
+    end
+
+    def self.queued_with_waiting
+      return where("(started_at is null and request_to_terminate = false)")
     end
 
     def self.errored
-      return where("exit_status > 0 or request_to_terminate = true")
+      return where("finished_at is not null and exit_status > 0")
     end
 
     def self.in_run_group(run_group_name)

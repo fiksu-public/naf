@@ -12,6 +12,8 @@ module Naf
         end
         format.json do
           set_page
+          params[:search][:direction] = params['sSortDir_0']
+          params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
           @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
