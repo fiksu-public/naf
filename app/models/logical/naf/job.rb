@@ -161,7 +161,7 @@ module Logical
           if search[:status].blank? # the same thing as status == :all
             sql << " WHEN (j.finished_at is NOT NULL OR j.request_to_terminate = true) THEN 4 \n"
           elsif search[:status] == "errored"
-            sql << " WHEN (j.finished_at is NOT NULL AND j.exit_status > 0) THEN 4 \n"
+            sql << " WHEN (j.finished_at is NOT NULL AND j.exit_status > 0 OR j.request_to_terminate = true) THEN 4 \n"
           else
             sql << <<-SQL
                       WHEN (j.finished_at > '#{Time.zone.now - 1.minute}') THEN 4

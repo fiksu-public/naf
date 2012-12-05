@@ -204,7 +204,7 @@ module Naf
     end
 
     def self.errored
-      return where("finished_at is not null and exit_status > 0")
+      return where("finished_at is not null and exit_status > 0 or request_to_terminate = true")
     end
 
     def self.in_run_group(run_group_name)
