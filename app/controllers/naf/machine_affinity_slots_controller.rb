@@ -60,7 +60,7 @@ module Naf
 
     def set_cols_and_attributes
       @cols = [:id, :machine_server_name, :machine_server_address, :affinity_classification_name, :affinity_name, :required]
-      @attributes = Naf::MachineAffinitySlot.attribute_names.map(&:to_sym) | @cols
+      @attributes = Naf::MachineAffinitySlot.attribute_names.map(&:to_sym) | @cols << :affinity_short_name
     end
 
   end

@@ -124,7 +124,7 @@ class NafSchema < ActiveRecord::Migration
           application_id                           integer unique not null references #{schema_name}.applications,
           application_run_group_restriction_id     integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name               text null,
-          application_run_group_limit              integer null default 1,
+          application_run_group_limit              integer null check (application_run_group_limit >= 1 or application_run_group_limit is null),
           run_start_minute                         integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
           run_interval                             integer null check (run_interval >= 0),
           priority                                 integer not null default 0,
@@ -171,7 +171,7 @@ class NafSchema < ActiveRecord::Migration
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
-          application_run_group_limit            integer null default 1,
+          application_run_group_limit            integer null check (application_run_group_limit >= 1 or application_run_group_limit is null),
 
           priority                               integer not null default 0,
 

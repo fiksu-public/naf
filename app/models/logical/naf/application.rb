@@ -6,9 +6,9 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites]
+      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites, :deleted, :visible]
 
-      FILTER_FIELDS = [:deleted, :enabled]
+      FILTER_FIELDS = [:deleted, :enabled, :visible]
 
       SEARCH_FIELDS = [:title, :application_run_group_name, :command, :short_name]
 
@@ -23,7 +23,7 @@ module Logical
         FILTER_FIELDS.each do |field|
           if search.present? and search[field].present?
             application_scope =
-            if field == :enabled
+            if field == :enabled || field == :visible
               application_scope.where(:application_schedules => { field => search[field] })
             else
               application_scope.where(field => search[field])

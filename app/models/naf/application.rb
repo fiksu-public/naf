@@ -7,7 +7,7 @@ module Naf
                            :message => "letters should be first" }
     validate :check_references_with_application_schedule_prerequisites
     before_save :check_short_name
-    attr_accessible :title, :command, :application_type_id, :log_level, :application_schedule_attributes, :short_name
+    attr_accessible :title, :command, :application_type_id, :log_level, :application_schedule_attributes, :short_name, :deleted
 
     has_one :application_schedule, :class_name => '::Naf::ApplicationSchedule', :dependent => :destroy
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'

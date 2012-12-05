@@ -52,6 +52,17 @@ html {
             width: 15em;
         }
 
+        input[type=checkbox] {
+            width: 13px;
+            height: 13px;
+            padding: 0;
+            margin:0;
+            vertical-align: bottom;
+            position: relative;
+            top: -1px;
+            *overflow: hidden;
+        }
+
         .clear {
             clear: both;
         }
@@ -221,6 +232,12 @@ html {
                         padding: 3px 0 3px 3px;
                     }
 
+                    tbody tr {
+                        &:nth-child(even) {
+                          background-color: #F4F4F4;
+                        }
+                    }
+
                     tr td a img {
                         margin: 0;
                     }
@@ -253,6 +270,10 @@ html {
 
                     .script-finished {
                         color: #000000;
+                    }
+
+                    .deleted_or_hidden {
+                        background-color: #ffcccc !important;
                     }
                 }
 

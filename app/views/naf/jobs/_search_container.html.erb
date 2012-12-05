@@ -1,12 +1,12 @@
 <br/>
 <div class="display-inline-block">
   <%= label(:status, "Status:") %>
-  <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
+  <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Running", :running], ["Waiting", :waiting], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
 </div>
 &nbsp;&nbsp;
 <div class="display-inline-block">
   <%= label(:started_on_machine_id, "Machine:") %>
-  <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.server_name.blank? ? m.server_address : m.server_name, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
+  <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.short_name_if_it_exist.blank? ? m.server_address : m.short_name_if_it_exist, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
 </div>
 &nbsp;&nbsp;
 <div id='show_search_container_link' class="display-inline-block">
@@ -68,12 +68,6 @@
           <div class="field">
             <%= label(:request_to_terminate, "Request to Terminate:") %>
             <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]], {}, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
-            <%= label(:sort_direction, "Sort Direction:") %>
-            <%= select(:search, :sort_direction, [["Desc", :desc], ["Asc", :asc]], {}, { :class => 'datatable_variable' }) %>
           </div>
           <br/>
 

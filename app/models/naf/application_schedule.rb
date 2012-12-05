@@ -2,8 +2,10 @@ module Naf
   class ApplicationSchedule < NafBase
     include PgAdvisoryLocker
 
-    validates :priority, :application_run_group_limit,
-              :numericality => {:only_integer => true, :greater_than => -2147483648, :less_than => 2147483647}
+    validates :priority,
+              :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
+    validates :application_run_group_limit,
+              :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
     validates :run_start_minute,
               :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 24*60, :allow_blank => true }
     validates :run_interval,
@@ -13,7 +15,6 @@ module Naf
     validate :enabled_application_id_unique
     validate :prerequisite_application_schedule_id_uniqueness
     validates :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, {:presence => true, :length => {:minimum => 3}}
 
     belongs_to :application, :class_name => '::Naf::Application'
     belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'

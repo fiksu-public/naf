@@ -18,9 +18,10 @@ module Naf
     JOB_STALE_TIME = 1.week
 
     validates :application_type_id, :application_run_group_restriction_id, :presence => true
-    validates :application_run_group_name, :command,  {:presence => true, :length => {:minimum => 3}}
-    validates :application_run_group_limit, :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
-    
+    validates :command,  {:presence => true, :length => {:minimum => 3}}
+    validates :application_run_group_limit,
+              :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
+
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
     belongs_to :started_on_machine, :class_name => '::Naf::Machine'
     belongs_to :application, :class_name => "::Naf::Application"
@@ -187,12 +188,23 @@ module Naf
       return where("finished_at is not null or request_to_terminate = true")
     end
 
-    def self.queued_and_running
-      return where("(started_at is null and request_to_terminate = false) or (started_at is not null and finished_at is null and request_to_terminate = false)")
+    def self.queued_status
+      return where("(started_at is null and request_to_terminate = false)
+                    or (finished_at > '#{Time.zone.now - 1.minute}')
+                    or (started_at is not null and finished_at is null and request_to_terminate = false)")
+    end
+
+    def self.running_status
+      return where("(started_at is not null and finished_at is null and request_to_terminate = false)
+                    or (finished_at > '#{Time.zone.now - 1.minute}')")
+    end
+
+    def self.queued_with_waiting
+      return where("(started_at is null and request_to_terminate = false)")
     end
 
     def self.errored
-      return where("exit_status > 0 or request_to_terminate = true")
+      return where("finished_at is not null and exit_status > 0 or request_to_terminate = true")
     end
 
     def self.in_run_group(run_group_name)

@@ -12,6 +12,8 @@ module Naf
           set_page
           applications = []
           application = []
+          params[:search][:visible] = params[:search][:visible] ? false : true
+          params[:search][:deleted] = params[:search][:deleted] ? false : "false"
           @total_records = Naf::Application.count(:all)
           Logical::Naf::Application.search(params[:search]).map(&:to_hash).map do |hash|
             hash.map do |key, value|

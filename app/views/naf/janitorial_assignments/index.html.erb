@@ -1,0 +1,57 @@
+<% content_for :body do %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <br/>
+    <div class="display-inline-block">
+      <%= label_tag :deleted, 'Show deleted:' %>
+      <%= check_box_tag(:deleted, true, false, { :class => 'datatable_variable' }) %>
+    </div>
+    <div id="flash_message">
+        <% unless notice.blank? %>
+          <script type='text/javascript'>
+            jQuery("<p id='notice'><%= notice %></p>")
+                .appendTo('#flash_message')
+                .slideDown().delay(5000).slideUp();
+          </script>
+        <% end %>
+    </div>
+
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Type</th>
+          <th>Enabled</th>
+          <th>Model Name</th>
+          <th>Assignment Order</th>
+        </tr>
+      </thead>
+      <tbody>
+        <%= render :partial => 'rows' %>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <script type='text/javascript'>
+          jQuery(document).ready(function () {
+              jQuery('#deleted').removeAttr('checked');
+              jQuery('#datatable').addDataTable({ "bProcessing": true });
+              jQuery('.datatable_variable').click(function () {
+                  var url = '/job_system/<%= @params_name.to_s + 's' %>';
+                  jQuery.ajax({
+                      url:url,
+                      type:'GET',
+                      dataType:'script',
+                      data:{ "deleted":jQuery('#deleted').is(':checked') },
+                      success:function() {
+                         jQuery('#datatable_processing').css({ visibility: "hidden" });
+                      }
+                  });
+                  jQuery('#datatable_processing').css({ visibility: "visible" });
+              });
+          });
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

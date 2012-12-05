@@ -4,8 +4,17 @@ module Naf
     before_filter :set_cols_and_attributes
 
     def index
-      @rows = janitorial_assignment_type.all
-      render :template => 'naf/datatable'
+      @params_name = params_name
+      @rows =
+      if params[:deleted].nil? || params[:deleted] == "false"
+        janitorial_assignment_type.where(:deleted => false).order("id desc")
+      else
+        janitorial_assignment_type.order("id desc")
+      end
+      respond_to do |format|
+        format.js
+        format.html
+      end
     end
 
     def show

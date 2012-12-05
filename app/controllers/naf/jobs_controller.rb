@@ -12,6 +12,8 @@ module Naf
         end
         format.json do
           set_page
+          params[:search][:direction] = params['sSortDir_0']
+          params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
           @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
@@ -56,8 +58,6 @@ module Naf
           @job.command = app.command
           @job.application_type_id = app.application_type_id
           @job.application_run_group_restriction_id = Naf::ApplicationRunGroupRestriction.no_limit.id
-          @job.application_run_group_name = "Manually Enqueued Group"
-          @job.application_run_group_limit = 1
         end
       end
       respond_to do |format|
@@ -70,11 +70,7 @@ module Naf
         end
         format.html do
           if @job.save
-            prerequisites = "Prerequisites: "
-            @job.prerequisites.each do |prerequisite|
-              prerequisites << "'#{prerequisite.command}'; "
-            end
-            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created. #{prerequisites unless @job.prerequisites.blank? }")
+            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created.")
           else
             render :action => "new"
           end

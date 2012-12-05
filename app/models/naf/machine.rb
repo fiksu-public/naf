@@ -10,7 +10,7 @@ module Naf
     validates :server_address, :presence => true
     validates :short_name, :uniqueness => true, :allow_blank => true,
               :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
-                           :message => "letters should be first" }
+                           :message => "letters should be first (use only letters and numbers)" }
     before_save :check_short_name
     validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
     validates :server_address, :uniqueness => true, :if => :correct_server_address?
