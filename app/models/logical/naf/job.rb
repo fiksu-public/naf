@@ -194,6 +194,10 @@ module Logical
           order, direction = search[:order], search[:direction]
           job_scope = job_scope.order("#{order} #{direction}").limit(search[:limit]).offset(search[:offset].to_i*search[:limit].to_i)
 
+          if search[:status] == 'waiting'
+            job_scope = job_scope.select{|job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 }
+          end
+
           job_scope.map{|physical_job| new(physical_job) }
         end
       end
@@ -218,7 +222,6 @@ module Logical
 
       def self.total_display_records(search)
         job_scope = self.get_job_scope(search)
-
 
         if search[:status] == 'waiting'
           job_scope = job_scope.select{|job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 }
