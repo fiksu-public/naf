@@ -4,13 +4,16 @@ jQuery(document).ready(function() {
   // Prepare for setup the datatable.
   var dataTableOptions = {
     "sAjaxSource": sAjaxSource,
+    "bSort": true,
+    "aaSorting": [[9, 'desc']],
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 10 ] },
-      { "sClass": "center", "aTargets": [ 11 ] }
+      { "bSortable": false, "aTargets": [1, 4, 7, 8, 11] },
+      { "bVisible": false, "aTargets": [10] },
+      { "sClass": "center", "aTargets": [11] }
     ],
     "bAutoWidth": false,
     "aoColumns": [
-        { "sWidth": "2%"},
+        { "sWidth": "4%"},
         { "sWidth": "7%"},
         { "sWidth": "4%"},
         { "sWidth": "14%"},
@@ -19,7 +22,7 @@ jQuery(document).ready(function() {
         null,
         null,
         null,
-        null,
+        { "asSorting": [ "desc" ] },
         null,
         { "sWidth": "6%"}
     ],
