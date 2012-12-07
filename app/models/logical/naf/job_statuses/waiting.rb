@@ -3,9 +3,9 @@ module Logical
     module JobStatuses
       class Waiting
 
-        def self.all(conditions, values)
-          sql = <<-SQL
-            SELECT DISTINCT j.*, jp."job_id"
+        def self.all(conditions)
+          <<-SQL
+            (SELECT DISTINCT j.*, jp."job_id"
               FROM "#{::Naf.schema_name}"."jobs" AS j
               LEFT JOIN  "#{::Naf.schema_name}"."job_prerequisites" AS jp
               ON j."id" = jp."job_id"
@@ -18,11 +18,8 @@ module Logical
                   AND "#{::Naf.schema_name}"."jobs"."started_at" is null
               )
               #{conditions}
-              ORDER BY created_at desc
-              LIMIT :limit OFFSET :offset
+              ORDER BY created_at desc)
           SQL
-
-          ::Naf::Job.find_by_sql([sql, values])
         end
 
       end

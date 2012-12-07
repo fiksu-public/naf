@@ -3,7 +3,7 @@ module Logical
     module JobStatuses
       class Running
 
-        def self.all(status = :running, conditions, values)
+        def self.all(status = :running, conditions)
           if status == :queued
             order = "created_at"
             direction = "desc"
@@ -11,16 +11,13 @@ module Logical
             order = "started_at"
             direction = "desc"
           end
-          sql = <<-SQL
-            SELECT j.*
+          <<-SQL
+            (SELECT j.*, null AS "job_id"
               FROM "#{::Naf.schema_name}"."jobs" AS j
               WHERE j.started_at is not null and j.finished_at is null and j.request_to_terminate = false
               #{conditions}
-              ORDER BY #{order} #{direction}
-              LIMIT :limit OFFSET :offset
+              ORDER BY #{order} #{direction})
           SQL
-
-          ::Naf::Job.find_by_sql([sql, values])
         end
 
       end

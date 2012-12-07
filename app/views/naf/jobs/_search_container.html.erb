@@ -88,14 +88,17 @@
                 jQuery("#search_container").slideToggle("slow");
             });
             jQuery("#job_search").submit(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });
             jQuery("#search_status").change(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });
             jQuery("#search_started_on_machine_id").change(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });

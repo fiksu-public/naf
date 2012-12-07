@@ -115,28 +115,31 @@ module Logical
           end
 
           status = search[:status].blank? ? :all : search[:status]
-          jobs =
+          sql =
           case status.to_sym
             when :queued
-              JobStatuses::Running.all(:queued, conditions, values) +
-              JobStatuses::Queued.all(conditions, values) +
-              JobStatuses::Waiting.all(conditions, values) +
-              JobStatuses::FinishedLessMinute.all(conditions, values)
+              JobStatuses::Running.all(:queued, conditions) + "union all\n" +
+              JobStatuses::Queued.all(conditions) + "union all\n" +
+              JobStatuses::Waiting.all(conditions) + "union all\n" +
+              JobStatuses::FinishedLessMinute.all(conditions)
             when :running
-              JobStatuses::Running.all(conditions, values) +
-              JobStatuses::FinishedLessMinute.all(conditions, values)
+              JobStatuses::Running.all(conditions) + "union all\n" +
+              JobStatuses::FinishedLessMinute.all(conditions)
             when :waiting
-              JobStatuses::Waiting.all(conditions, values)
+              JobStatuses::Waiting.all(conditions)
             when :finished
-              JobStatuses::Finished.all(conditions, values)
+              JobStatuses::Finished.all(conditions)
             when :errored
-              JobStatuses::Errored.all(conditions, values)
+              JobStatuses::Errored.all(conditions)
             else
-              JobStatuses::Running.all(:queued, conditions, values) +
-              JobStatuses::Queued.all(conditions, values) +
-              JobStatuses::Waiting.all(conditions, values) +
-              JobStatuses::Finished.all(conditions, values)
+              JobStatuses::Running.all(:queued, conditions) + "union all\n" +
+              JobStatuses::Queued.all(conditions) + "union all\n" +
+              JobStatuses::Waiting.all(conditions) + "union all\n" +
+              JobStatuses::Finished.all(conditions)
           end
+          sql << "LIMIT :limit OFFSET :offset"
+
+          jobs = ::Naf::Job.find_by_sql([sql, values])
 
           jobs.map{ |physical_job| new(physical_job) }
         else

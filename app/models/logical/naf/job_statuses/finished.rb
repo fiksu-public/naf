@@ -3,18 +3,14 @@ module Logical
     module JobStatuses
       class Finished
 
-        def self.all(conditions, values)
-
-          sql = <<-SQL
-            SELECT j.*
+        def self.all(conditions)
+          <<-SQL
+            (SELECT j.*, null AS "job_id"
               FROM "#{::Naf.schema_name}"."jobs" AS j
               WHERE j.finished_at is not null or j.request_to_terminate = true
               #{conditions}
-              ORDER BY finished_at desc
-              LIMIT :limit OFFSET :offset
+              ORDER BY finished_at desc)
           SQL
-
-          ::Naf::Job.find_by_sql([sql, values])
         end
 
       end
