@@ -16,18 +16,6 @@
   <%= form_tag(naf.jobs_path, :method => "get", :id => 'job_search') do %>
       <div style="width:30%;" class="display-inline-block">
           <div class="field">
-            <%= label(:application_type_id, "Script Type:") %>
-            <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
-            <%= label(:running, "Running:") %>
-            <%= select(:search, :running, [["Ignore", nil], ["True", true], ["False", false]], { }, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
             <%= label(:command, "Command:") %>
             <%= text_field(:search, :command, { :class => 'datatable_variable' }) %>
           </div>
@@ -38,8 +26,20 @@
             <%= text_field(:search, :application_run_group_name, { :class => 'datatable_variable' }) %>
           </div>
           <br/>
+
+          <div class="field">
+            <%= label(:pid, "Pid:") %>
+            <%= text_field(:search, :pid, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
       </div>
       <div style="width:30%; padding-left:40px;" class="display-inline-block">
+          <div class="field">
+            <%= label(:application_type_id, "Script Type:") %>
+            <%= select(:search, :application_type_id, Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
           <div class="field">
             <%= label(:application_run_group_restriction_id, "Run Group Restriction:") %>
             <%= select(:search, :application_run_group_restriction_id, Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
@@ -49,18 +49,6 @@
           <div class="field">
             <%= label(:failed_to_start, "Failed to Start:") %>
             <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", false], ["False", nil]], { }, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
-            <%= label(:priority, "Priority:") %>
-            <%= text_field(:search, :priority, { :class => 'datatable_variable' }) %>
-          </div>
-          <br/>
-
-          <div class="field">
-            <%= label(:pid, "Pid:") %>
-            <%= text_field(:search, :pid, { :class => 'datatable_variable' }) %>
           </div>
           <br/>
       </div>
@@ -74,6 +62,12 @@
           <div class="field">
             <%= label(:exit_status, "Exit Status:") %>
             <%= text_field(:search, :exit_status, { :class => 'datatable_variable' }) %>
+          </div>
+          <br/>
+
+          <div class="field">
+            <%= label(:priority, "Priority:") %>
+            <%= text_field(:search, :priority, { :class => 'datatable_variable' }) %>
           </div>
       </div>
       <br/><br/><br/>
@@ -94,14 +88,17 @@
                 jQuery("#search_container").slideToggle("slow");
             });
             jQuery("#job_search").submit(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });
             jQuery("#search_status").change(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });
             jQuery("#search_started_on_machine_id").change(function () {
+                setPageOrder();
                 SetFirstPage();
                 return false;
             });
