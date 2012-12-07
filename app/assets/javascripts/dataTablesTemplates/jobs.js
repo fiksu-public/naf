@@ -28,6 +28,7 @@ jQuery(document).ready(function() {
     ],
     "fnInitComplete" : function() {
       initPageSelect();
+      setPageOrder();
     },
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
@@ -119,5 +120,19 @@ function colorizationStatus(nRow, aData) {
     default:
       jQuery('td:nth-child(10) div', nRow).addClass('script-error');
       break;
+  }
+}
+
+function setPageOrder(){
+  var status = jQuery("#search_status").val();
+  if (status == 'finished' || status == 'errored') {
+    jQuery('#datatable').dataTableSettings[0].aoColumns[9].bSortable = false;
+    jQuery('#datatable thead tr th:nth-child(10) div span').css("display", "none");
+    jQuery('#datatable').dataTable().fnSort([ [6,'desc'] ]);
+
+  } else {
+    jQuery('#datatable').dataTableSettings[0].aoColumns[9].bSortable = true;
+    jQuery('#datatable').dataTable().fnSort([ [9,'desc'] ]);
+    jQuery('#datatable thead tr th:nth-child(10) div span').css("display", "block");
   }
 }
