@@ -161,6 +161,9 @@ module Naf
 
     def check_short_name
       self.short_name = nil if self.short_name.blank?
+      self.server_name = nil if self.server_name.blank?
+      self.server_note = nil if self.server_note.blank?
+      self.log_level = nil if self.log_level.blank?
     end
   end
 end
