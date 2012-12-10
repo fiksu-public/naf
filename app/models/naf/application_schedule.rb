@@ -10,6 +10,7 @@ module Naf
               :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 24*60, :allow_blank => true }
     validates :run_interval,
               :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 2147483647, :allow_blank => true }
+    before_save :check_blank_values
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
@@ -109,6 +110,10 @@ module Naf
       if application_schedule_prerequisites.map{ |asp| asp.prerequisite_application_schedule_id }.uniq!
         errors.add(:prerequisite_application_schedule_id, "should be an uniqueness")
       end
+    end
+
+    def check_blank_values
+      self.application_run_group_name = nil if self.application_run_group_name.blank?
     end
 
   end

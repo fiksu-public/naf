@@ -6,7 +6,7 @@ module Logical
       
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites, :deleted, :visible]
+      COLUMNS = [:id, :title, :short_name, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :application_run_group_limit, :priority, :run_time, :prerequisites, :deleted, :visible]
 
       FILTER_FIELDS = [:deleted, :enabled, :visible]
 
@@ -96,6 +96,18 @@ module Logical
           schedule.prerequisites.map do |schedule_prerequisite|
             schedule_prerequisite.application.short_name_if_it_exist
           end.join(", \n")
+        end
+      end
+
+      def application_run_group_name
+        if schedule = @app.application_schedule
+          if schedule.application_run_group_name.blank?
+            "not set"
+          elsif schedule.application_run_group_name == command
+            "command"
+          else
+            schedule.application_run_group_name
+          end
         end
       end
 
