@@ -6,7 +6,7 @@ module Naf
               :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                            :message => "letters should be first" }
     validate :check_references_with_application_schedule_prerequisites
-    before_save :check_short_name
+    before_save :check_blank_values
     attr_accessible :title, :command, :application_type_id, :log_level, :application_schedule_attributes, :short_name, :deleted
 
     has_one :application_schedule, :class_name => '::Naf::ApplicationSchedule', :dependent => :destroy
@@ -39,7 +39,7 @@ module Naf
 
     private
 
-    def check_short_name
+    def check_blank_values
       self.short_name = nil if self.short_name.blank?
     end
 

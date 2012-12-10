@@ -9,18 +9,21 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 9, 10 ] },
-      { "sClass": "center", "aTargets": [ 8 ] }
+      { "bVisible": false, "aTargets": [ 12, 13 ] },
+      { "sClass": "center", "aTargets": [ 6, 7, 11 ] }
     ],
     "aoColumns": [
         { "sWidth": "2%"},
-        { "sWidth": "15%"},
+        { "sWidth": "12%"},
+        { "sWidth": "7%"},
         { "sWidth": "9%"},
-        { "sWidth": "15%"},
-        { "sWidth": "20%"},
         null,
-        null,
+        { "sWidth": "14%"},
         { "sWidth": "8%"},
+        { "sWidth": "4%"},
+        { "sWidth": "8%"},
+        { "sWidth": "8%"},
+        { "sWidth": "7%"},
         { "sWidth": "50px"},
         null,
         null
@@ -65,7 +68,7 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[9] == 'true' || aData[10] == 'false' || aData[10] == '') {
+  if (aData[12] == 'true' || aData[13] == 'false' || aData[13] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
