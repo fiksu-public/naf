@@ -22,6 +22,7 @@ module Naf
 
       it "should build a new application schedule if it was destroyed" do
         @id = 5
+        controller.stub!(:check_application_run_group_name).and_return(nil)
         app_mock = mock_model(Application)
         schedule_mock = mock_model(ApplicationSchedule)
         schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)
@@ -34,6 +35,7 @@ module Naf
 
       it "should respond without building a new application schedule" do
         @id = 5
+        controller.stub!(:check_application_run_group_name).and_return(nil)
         app_mock = mock_model(Application)
         schedule_mock = mock_model(ApplicationSchedule)
         schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)

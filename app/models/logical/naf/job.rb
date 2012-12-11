@@ -71,7 +71,17 @@ module Logical
           command
         end
       end
-      
+
+      def application_run_group_name
+        if @job.application_run_group_name.blank?
+          "not set"
+        elsif @job.application_run_group_name == @job.command
+          "command"
+        else
+          @job.application_run_group_name
+        end
+      end
+
       def server
         if started_on_machine 
           name = started_on_machine.short_name_if_it_exist

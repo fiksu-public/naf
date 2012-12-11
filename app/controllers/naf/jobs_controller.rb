@@ -47,9 +47,11 @@ module Naf
     end
 
     def new
+      @job = Naf::Job.new
     end
 
     def create
+      set_application_run_group_name
       @job = Naf::Job.new(params[:job])
       if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
         if schedule = app.application_schedule
@@ -80,10 +82,12 @@ module Naf
 
     def edit
       @job = Naf::Job.find(params[:id])
+      check_application_run_group_name
     end
 
     def update
       respond_to do |format|
+        set_application_run_group_name
         @job = Naf::Job.find(params[:id])
         if @job.update_attributes(params[:job])
           format.html do
@@ -119,6 +123,27 @@ module Naf
       end
       hash[:papertrail_url] = papertrail_link(job)
       return hash
+    end
+
+    def set_application_run_group_name
+      @run_group_name_type = params[:run_group_name_type]
+      case @run_group_name_type
+        when "command"
+          params[:job][:application_run_group_name] = params[:job][:command]
+        when "not set"
+          params[:job][:application_run_group_name] = nil
+      end
+    end
+
+    def check_application_run_group_name
+      case @job.application_run_group_name
+        when @job.command
+          @run_group_name_type = "command"
+        when nil, ''
+          @run_group_name_type = "not set"
+        else
+          @run_group_name_type = "custom"
+      end
     end
 
   end

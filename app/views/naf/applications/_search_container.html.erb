@@ -13,7 +13,7 @@
   <%= link_to 'Show additional search parameters', '#', :id => 'search_container_link' %>
 </div>
 <div id="search_container">
-  <%= form_tag(naf.applications_path, :method => "get", :id => 'application_search') do %>
+  <%= form_tag(naf.applications_path, :method => "get", :id => 'application_search', :class => 'search_select_input') do %>
       <div style="width:30%;" class="display-inline-block">
           <div class="field">
             <%= label(:title, "Title:") %>

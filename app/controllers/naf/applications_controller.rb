@@ -42,6 +42,7 @@ module Naf
     end
 
     def create
+      set_application_run_group_name
       @application = Naf::Application.new(params[:application])
       if @application.save
         app_schedule = @application.application_schedule
@@ -59,6 +60,7 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
+      check_application_run_group_name
       app_schedule = @application.application_schedule
       if app_schedule.blank?
         build_app_schedule = @application.build_application_schedule
@@ -71,6 +73,7 @@ module Naf
     end
 
     def update
+      set_application_run_group_name
       @application = Naf::Application.find(params[:id])
       if @application.update_attributes(params[:application])
         app_schedule = @application.application_schedule
@@ -93,6 +96,27 @@ module Naf
       more_attributes = [:script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled ]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = Logical::Naf::Application::COLUMNS
+    end
+
+    def set_application_run_group_name
+      @run_group_name_type = params[:run_group_name_type]
+      case @run_group_name_type
+        when "command"
+          params[:application][:application_schedule_attributes][:application_run_group_name] = params[:application][:command]
+        when "not set"
+          params[:application][:application_schedule_attributes][:application_run_group_name] = nil
+      end
+    end
+
+    def check_application_run_group_name
+      case @application.application_run_group_name
+        when @application.command
+          @run_group_name_type = "command"
+        when nil, ''
+          @run_group_name_type = "not set"
+        else
+          @run_group_name_type = "custom"
+      end
     end
 
   end
