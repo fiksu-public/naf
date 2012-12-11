@@ -21,7 +21,7 @@ module Naf
     validates :command,  {:presence => true, :length => {:minimum => 3}}
     validates :application_run_group_limit,
               :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
-
+    before_save :check_blank_values
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
     belongs_to :started_on_machine, :class_name => '::Naf::Machine'
     belongs_to :application, :class_name => "::Naf::Application"
@@ -286,6 +286,13 @@ module Naf
 
     def create_tracking_row
       ::Naf::JobCreatedAt.create(:job_id => id, :job_created_at => created_at)
+    end
+
+    private
+
+    def check_blank_values
+      self.application_run_group_name = nil if self.application_run_group_name.blank?
+      self.log_level = nil if self.log_level.blank?
     end
   end
 end
