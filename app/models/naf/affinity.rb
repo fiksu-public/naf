@@ -15,7 +15,7 @@ module Naf
 
     delegate :affinity_classification_name, :to => :affinity_classification
     
-    attr_accessible :affinity_classification_id, :affinity_name, :selectable, :affinity_short_name
+    attr_accessible :affinity_classification_id, :affinity_name, :selectable, :affinity_short_name, :affinity_note
 
     scope :selectable,  where(:selectable => true)
 
@@ -34,6 +34,7 @@ module Naf
 
     def check_blank_values
       self.affinity_short_name = nil if self.affinity_short_name.blank?
+      self.affinity_note = nil if self.affinity_note.blank?
     end
   end
 end
