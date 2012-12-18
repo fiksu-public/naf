@@ -1,0 +1,51 @@
+<% unless @record.request_to_terminate %>
+    <tr>
+      <td>Terminate Job</td>
+      <td>
+        <%= link_to image_tag('terminate.png', :class => 'action', :title => "Terminate job(id: #{@record.id}, title: #{@record.title})"), "#", {:class => "terminate"} %>
+      </td>
+    </tr>
+<% end %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+      jQuery(document).ready(function () {
+          jQuery('.terminate').click(function () {
+              var answer = confirm("You are terminating this job. Are you sure you want to do this?");
+              if (!answer) {
+                  return false;
+              }
+              var id = <%= @record.id %>;
+              var url = '/job_system/jobs/' + id;
+              jQuery.ajax({
+                  url:url,
+                  type:'POST',
+                  dataType:'json',
+                  data:{ "job[request_to_terminate]":1, "job_id":id, "_method":"put" },
+                  success:function (data) {
+                      if (data.success) {
+                          var title = data.title ? data.title : data.command
+                          jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+                          appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                          setTimeout('window.location.reload()', 5600);
+                      }
+                  }
+              });
+          });
+
+          jQuery('#papertrail_search_submit').click(function () {
+              var url = 'https://papertrailapp.com/api/v1/events/search.json?system_id=prod-fma-svc-07&min_time=1355270400&max_time=1355616000';
+              jQuery.ajax({
+                  url:url,
+                  type:'POST',
+                  dataType:'json',
+
+                  success:function (data) {
+                      if (data.success) {
+                      }
+                  }
+              });
+          });
+      });
+  </script>
+<% end %>

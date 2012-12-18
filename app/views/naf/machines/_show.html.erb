@@ -1,0 +1,36 @@
+<% unless @record.marked_down %>
+  <tr>
+    <td>Mark machine down</td>
+    <td>
+      <%= link_to image_tag('terminate.png', :class => 'action', :title => "Mark machine(id: #{@record.id}, server:#{@record.server_name.blank? ? @record.server_address : @record.server_name}) down"), "#", {:class => "terminate"} %>
+    </td>
+  </tr>
+<% end %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+      jQuery(document).ready(function () {
+          jQuery('.terminate').live("click", function() {
+              var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
+              if (!answer) {
+                  return false;
+              }
+              var id = <%= @record.id %>;
+              var url = '/job_system/machines/' + id;
+              jQuery.ajax({
+                  url: url,
+                  type: 'POST',
+                  dataType: 'json',
+                  data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
+                  success:function (data) {
+                      if (data.success) {
+                          jQuery("<p id='notice'>Machine was marked down!</p>").
+                                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                          setTimeout('window.location.reload()', 5600);
+                      }
+                  }
+              });
+          });
+      });
+  </script>
+<% end %>

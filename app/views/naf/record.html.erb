@@ -42,106 +42,11 @@
           </tr>
       <% end %>
       <% if controller_name == 'jobs' %>
-          <script type='text/javascript'>
-              jQuery(document).ready(function () {
-                  jQuery('.terminate').click(function () {
-                      var answer = confirm("You are terminating this job. Are you sure you want to do this?");
-                      if (!answer) {
-                          return false;
-                      }
-                      var id = <%= @record.id %>;
-                      var url = '/job_system/jobs/' + id;
-                      jQuery.ajax({
-                          url:url,
-                          type:'POST',
-                          dataType:'json',
-                          data:{ "job[request_to_terminate]":1, "job_id":id, "_method":"put" },
-                          success:function (data) {
-                              if (data.success) {
-                                  var title = data.title ? data.title : data.command
-                                  jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
-                                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                                  setTimeout('window.location.reload()', 5600);
-                              }
-                          }
-                      });
-                  });
-              });
-          </script>
-          <% unless @record.request_to_terminate %>
-            <tr>
-              <td>Terminate Job</td>
-              <td>
-                <%= link_to image_tag('terminate.png', :class => 'action', :title => "Terminate job(id: #{@record.id}, title: #{@record.title})"), "#", {:class => "terminate"} %>
-              </td>
-            </tr>
-          <% end %>
+          <%= render :partial => 'naf/jobs/show' %>
       <% elsif controller_name == 'applications' %>
-        <% content_for :javascripts do %>
-          <script type='text/javascript'>
-              jQuery(document).ready(function () {
-                  jQuery('.enqueue').click(function () {
-                      var postSource = "<%= naf.jobs_path %>";
-                      var answer = confirm("Adding application as a job on the queue?");
-                      if (!answer) {
-                          return false;
-                      }
-                      jQuery.post(postSource, { "job[application_id]":jQuery(this).attr('id') }, function (data) {
-                          if (data.success) {
-                              jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
-                              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                              setTimeout('window.location.reload()', 5600);
-                          }
-                      });
-                  });
-              });
-          </script>
-        <% end %>
-          <tr>
-            <td scope="row">Last Queued At</td>
-            <td> <%= last_queued_at_link(@record) %> </td>
-          </tr>
-
-          <tr>
-            <td>Add Script to Jobs Queue</td>
-            <td>
-              <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => "Enqueue application(id: #{@record.id}, title: #{@record.title})"), "#", {:class => "enqueue", :id => @record.id} %>
-            </td>
-          </tr>
+          <%= render :partial => 'naf/applications/show' %>
       <% elsif controller_name == 'machines' %>
-          <script type='text/javascript'>
-              jQuery(document).ready(function () {
-                  jQuery('.terminate').live("click", function() {
-                      var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
-                      if (!answer) {
-                          return false;
-                      }
-                      var id = <%= @record.id %>;
-                      var url = '/job_system/machines/' + id;
-                      jQuery.ajax({
-                          url: url,
-                          type: 'POST',
-                          dataType: 'json',
-                          data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
-                          success:function (data) {
-                              if (data.success) {
-                                  jQuery("<p id='notice'>Machine was marked down!</p>").
-                                          appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                                  setTimeout('window.location.reload()', 5600);
-                              }
-                          }
-                      });
-                  });
-              });
-          </script>
-          <% unless @record.marked_down %>
-            <tr>
-              <td>Mark machine down</td>
-              <td>
-                <%= link_to image_tag('terminate.png', :class => 'action', :title => "Mark machine(id: #{@record.id}, server:#{@record.server_name.blank? ? @record.server_address : @record.server_name}) down"), "#", {:class => "terminate"} %>
-              </td>
-            </tr>
-          <% end %>
+          <%= render :partial => 'naf/machines/show' %>
       <% end %>
       </tbody>
     </table>
@@ -154,9 +59,9 @@
 
     <% if(controller_name == 'jobs' || controller_name == 'machines') %>
         <h4>Stdout</h4>
-        <iframe src="<%= papertrail_link(@record, true) %>" id="stdout" class="scrollable-output">
-            Your browser doesn't support iframe!
-        </iframe>
+        <%= submit_tag("Search", :id => 'papertrail_search_submit') %><br><br>
+        <div id="stdout" class="scrollable-output">
+        </div>
     <% end %>
   </div>
 
