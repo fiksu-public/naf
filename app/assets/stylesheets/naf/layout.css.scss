@@ -45,11 +45,21 @@ html {
         }
 
         select {
-            width: 12em;
+            width: 18em;
         }
 
         input {
-            width: 15em;
+            width: 22em;
+        }
+
+        .search_select_input {
+            select {
+                width: 12em;
+            }
+
+            input {
+                width: 15em;
+            }
         }
 
         input[type=checkbox] {
@@ -316,10 +326,6 @@ html {
                      line-height: 24px;
                      margin: 0 0 0.8em;
                      padding: 12px;
-                }
-
-                input#affinity_tabs_submit_button, input#janitors_submit_button {
-                    width: 280px;
                 }
 
                 input.check_box_input {

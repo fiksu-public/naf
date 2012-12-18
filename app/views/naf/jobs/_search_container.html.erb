@@ -1,10 +1,10 @@
 <br/>
-<div class="display-inline-block">
+<div class="display-inline-block search_select_input">
   <%= label(:status, "Status:") %>
   <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Running", :running], ["Waiting", :waiting], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
 </div>
 &nbsp;&nbsp;
-<div class="display-inline-block">
+<div class="display-inline-block search_select_input">
   <%= label(:started_on_machine_id, "Machine:") %>
   <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.short_name_if_it_exist.blank? ? m.server_address : m.short_name_if_it_exist, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
 </div>
@@ -13,7 +13,7 @@
   <%= link_to 'Show additional search parameters', '#', :id => 'search_container_link' %>
 </div>
 <div id="search_container">
-  <%= form_tag(naf.jobs_path, :method => "get", :id => 'job_search') do %>
+  <%= form_tag(naf.jobs_path, :method => "get", :id => 'job_search', :class => 'search_select_input') do %>
       <div style="width:30%;" class="display-inline-block">
           <div class="field">
             <%= label(:command, "Command:") %>

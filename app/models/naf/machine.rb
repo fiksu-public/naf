@@ -11,7 +11,7 @@ module Naf
     validates :short_name, :uniqueness => true, :allow_blank => true,
               :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                            :message => "letters should be first (use only letters and numbers)" }
-    before_save :check_short_name
+    before_save :check_blank_values
     validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
     validates :server_address, :uniqueness => true, :if => :correct_server_address?
     validates :thread_pool_size,
@@ -159,7 +159,7 @@ module Naf
 
     private
 
-    def check_short_name
+    def check_blank_values
       self.short_name = nil if self.short_name.blank?
       self.server_name = nil if self.server_name.blank?
       self.server_note = nil if self.server_note.blank?
