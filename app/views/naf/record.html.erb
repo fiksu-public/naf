@@ -56,12 +56,23 @@
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
     <%= generate_destroy_link %>
-
+    <br><br>
     <% if(controller_name == 'jobs' || controller_name == 'machines') %>
-        <h4>Stdout</h4>
-        <%= submit_tag("Search", :id => 'papertrail_search_submit') %><br><br>
-        <div id="stdout" class="scrollable-output">
+        <h4>STDOUT:</h4>
+        <div id="stdout_header">
+            <%= text_field_tag :papertrail_search, nil, :placeholder => "Search query: prod OR ('runner' AND access)" %>
+            &nbsp;&nbsp;&nbsp;
+            <%= submit_tag("Search the logs", :id => 'papertrail_search_submit') %>
+            &nbsp;&nbsp;&nbsp;
+            <%= link_to image_tag('clock.png', :style => 'margin-bottom: -11px;', :title => "Seek to date or time"), "#", :id => 'clock_button' %>
+            <%= text_field_tag :papertrail_time, nil, :placeholder => "Time: 7:02 am,  yesterday, at 5:00, jan 5 2:35pm" %>
+            <br><br>
         </div>
+        <div id="stdout" class="scrollable-output">
+          <ul id="event_list">
+          </ul>
+        </div>
+
     <% end %>
   </div>
 

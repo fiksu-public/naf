@@ -35,6 +35,10 @@ module Naf
       configuration.papertrail_group_id
     end
 
+    def papertrail_token
+      configuration.papertrail_token
+    end
+
     def layout
       configuration.layout
     end
