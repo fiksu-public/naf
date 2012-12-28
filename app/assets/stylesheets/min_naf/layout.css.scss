@@ -194,10 +194,50 @@
                 .scrollable-output {
                     border: 1px solid #E1E1E1;
                     height: 500px;
-                    min-width: 1200px;
-                    scrollbars: "auto";
-                    white-space: nowrap;
-                    width: 100%;
+                    overflow-x:auto;
+                    width: 98%;
+                    max-width: 1210px;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    padding: 5px 10px 5px 0px;
+
+                    #event_list {
+                        word-wrap: break-word;
+                        padding-left: 10px;
+                        margin: 0;
+                        list-style: none outside none;
+                        li {
+                            padding-left: 20px;
+                            text-indent: -15px;
+                        }
+                    }
+
+                    .msg {
+                        background: none repeat scroll 0 0 #202020;
+                        border: 1px solid #303030;
+                        box-shadow: 0 0 5px #000000;
+                        border-radius: 5px 5px 5px 5px;
+                        margin: 20px auto;
+                        min-width: 600px;
+                        padding: 40px 25px;
+                        position: relative;
+                        text-align: center;
+                        width: 65%;
+                        font-size: 20px;
+                    }
+                }
+
+                #stdout_header {
+                    width: 98%;
+                    input {
+                        width: 24em;
+                    }
+                    #papertrail_search_submit {
+                        width: 12em;
+                    }
+                    #papertrail_time {
+                        display: none;
+                    }
                 }
 
                 h4 {
