@@ -19,7 +19,7 @@
       jQuery(document).ready(function () {
 
           if(pid.length != 0 && jQuery('#papertrail_search').val().length == 0) {
-              jQuery('#papertrail_search').val('jid(<%= @record.id %>)');
+              jQuery('#papertrail_search').val('jid('+ id +')');
           }
 
           jQuery('.terminate').click(function () {
@@ -125,16 +125,16 @@
           var search_params = jQuery('#papertrail_search').val();
           var time = jQuery('#papertrail_time').val();
           var parseTime = parseInt(Date.parse(time) / 1000);
-          if(group_id.length != 0) {
-              data['group_id'] = group_id;
-          }
+
+          data['group_id'] = group_id;
+          data['tail'] = false;
+
           if(parseTime != 0) {
               data['min_time'] = parseTime;
           }
           if(search_params.length != 0){
               data['q'] = search_params;
           }
-          data['tail'] = false;
 
           return data;
       }
