@@ -77,7 +77,7 @@
                       max_id = response['max_id'];
                       var events = response["events"];
                       var text = "";
-                      if(parseInt(Date.parse(response["max_time_at"]) / 1000) > data['min_time']) {
+                      if(parseInt(Date.parse((-3).days().fromNow().toISOString()) / 1000) > data['min_time']) {
                           text = setNoticeText("Oldest event reached.<br><br>Need to search older events? Download \
                                     <a target='_blank' href='https://papertrailapp.com/account/archives'>archives</a> \
                                     or increase \
