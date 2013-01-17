@@ -1,13 +1,13 @@
 <% content_for :body do %>
   <div id="record">
 
-    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => model_name } %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => naf_model_name } %>
 
-    <%= generate_back_link %>
-    <% if !generate_edit_link.blank? && !generate_back_link.blank? %>
+    <%= naf_generate_back_link %>
+    <% if !naf_generate_edit_link.blank? && !naf_generate_back_link.blank? %>
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
-    <%= generate_edit_link %>
+    <%= naf_generate_edit_link %>
 
     <div id="flash_message">
         <% unless notice.blank? %>
@@ -29,7 +29,7 @@
       <tbody>
       <% @attributes.each do |a| %>
           <tr>
-            <td scope="row"><%= make_header(a.to_s) %></td>
+            <td scope="row"><%= naf_make_header(a.to_s) %></td>
             <% if a == :title and controller_name == 'jobs' %>
                 <% if application = @record.application %>
                     <td> <%= link_to @record.send(a), url_for(application) %> </td>
@@ -51,23 +51,31 @@
       </tbody>
     </table>
     <br/>
-    <%= generate_child_resources_link %>
-    <% if !generate_destroy_link.blank? && !generate_child_resources_link.blank? %>
+    <%= naf_generate_child_resources_link %>
+    <% if !naf_generate_destroy_link.blank? && !naf_generate_child_resources_link.blank? %>
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
-    <%= generate_destroy_link %>
+    <%= naf_generate_destroy_link %>
     <br><br>
     <% if(controller_name == 'jobs' || controller_name == 'machines') %>
         <h4>STDOUT:</h4>
         <div id="stdout_header">
-            <%= text_field_tag :papertrail_search, nil, :placeholder => "Search query: prod OR ('runner' AND access)" %>
-            &nbsp;&nbsp;&nbsp;
-            <%= submit_tag("Search the logs", :id => 'papertrail_search_submit') %>
-            &nbsp;&nbsp;&nbsp;
-            <%= link_to image_tag('clock.png', :style => 'margin-bottom: -11px;', :title => "Seek to date or time"), "#", :id => 'clock_button' %>
-            <%= text_field_tag :papertrail_time, nil, :placeholder => "Time: 7:02 am,  yesterday, at 5:00, jan 5 2:35pm" %>
-            <br><br>
+            <div class="display-inline-block">
+                <%= text_field_tag :papertrail_search, nil, :placeholder => "Search query: prod OR ('runner' AND access)" %>
+                &nbsp;&nbsp;&nbsp;
+                <%= submit_tag("Search the logs", :id => 'papertrail_search_submit') %>
+                &nbsp;&nbsp;&nbsp;
+                <%= link_to image_tag('clock.png', :style => 'margin-bottom: -11px;', :title => "Seek to date or time"), "#", :id => 'clock_button' %>
+                <%= text_field_tag :papertrail_time, nil, :placeholder => "Time: 7:02 am,  yesterday, at 5:00, jan 5 2:35pm" %>
+            </div>
+            <div id='automatic_data_update' class="display-inline-block">
+                <%= submit_tag("Clear stdout", :id => 'clear_stdout_submit') %>
+                &nbsp;&nbsp;
+                <%= label_tag :auto_update, 'Auto Update:' %>
+                <%= check_box_tag :auto_update, 1, true, :id => :auto_update %>
+            </div>
         </div>
+        <br>
         <div id="stdout" class="scrollable-output">
           <ul id="event_list">
           </ul>

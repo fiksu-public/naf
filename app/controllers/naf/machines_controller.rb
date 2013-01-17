@@ -81,8 +81,8 @@ module Naf
 
     def add_urls(hash)
       machine = ::Naf::Machine.find(hash[:id])
-      hash[:papertrail_url] = papertrail_link(machine)
-      hash[:papertrail_runner_url] = papertrail_link(machine, true)
+      hash[:papertrail_url] = naf_papertrail_link(machine)
+      hash[:papertrail_runner_url] = naf_papertrail_link(machine, true)
 
       hash
     end

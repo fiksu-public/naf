@@ -191,6 +191,10 @@
                      padding: 12px;
                 }
 
+                input.check_box_input {
+                    width: 13px;
+                }
+
                 .scrollable-output {
                     border: 1px solid #E1E1E1;
                     height: 500px;
@@ -232,11 +236,26 @@
                     input {
                         width: 24em;
                     }
+
                     #papertrail_search_submit {
                         width: 12em;
                     }
+
                     #papertrail_time {
                         display: none;
+                    }
+
+                    #automatic_data_update {
+                        float:right;
+                        padding-top: 4px;
+                        max-width: 215px;
+                        input[type=checkbox] {
+                            width: 13px;
+                            top: -5px;
+                        }
+                        input {
+                            width: 100px;
+                        }
                     }
                 }
 
