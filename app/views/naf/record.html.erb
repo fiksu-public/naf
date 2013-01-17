@@ -1,13 +1,13 @@
 <% content_for :body do %>
   <div id="record">
 
-    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => model_name } %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => naf_model_name } %>
 
-    <%= generate_back_link %>
-    <% if !generate_edit_link.blank? && !generate_back_link.blank? %>
+    <%= naf_generate_back_link %>
+    <% if !naf_generate_edit_link.blank? && !naf_generate_back_link.blank? %>
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
-    <%= generate_edit_link %>
+    <%= naf_generate_edit_link %>
 
     <div id="flash_message">
         <% unless notice.blank? %>
@@ -29,7 +29,7 @@
       <tbody>
       <% @attributes.each do |a| %>
           <tr>
-            <td scope="row"><%= make_header(a.to_s) %></td>
+            <td scope="row"><%= naf_make_header(a.to_s) %></td>
             <% if a == :title and controller_name == 'jobs' %>
                 <% if application = @record.application %>
                     <td> <%= link_to @record.send(a), url_for(application) %> </td>
@@ -51,11 +51,11 @@
       </tbody>
     </table>
     <br/>
-    <%= generate_child_resources_link %>
-    <% if !generate_destroy_link.blank? && !generate_child_resources_link.blank? %>
+    <%= naf_generate_child_resources_link %>
+    <% if !naf_generate_destroy_link.blank? && !naf_generate_child_resources_link.blank? %>
       &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <% end %>
-    <%= generate_destroy_link %>
+    <%= naf_generate_destroy_link %>
     <br><br>
     <% if(controller_name == 'jobs' || controller_name == 'machines') %>
         <h4>STDOUT:</h4>

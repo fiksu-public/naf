@@ -121,7 +121,7 @@ module Naf
       else
         hash[:application_url] = nil
       end
-      hash[:papertrail_url] = papertrail_link(job)
+      hash[:papertrail_url] = naf_papertrail_link(job)
       return hash
     end
 
