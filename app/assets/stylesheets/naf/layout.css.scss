@@ -377,11 +377,26 @@ html {
                     input {
                         width: 24em;
                     }
+
                     #papertrail_search_submit {
                         width: 12em;
                     }
+
                     #papertrail_time {
                         display: none;
+                    }
+
+                    #automatic_data_update {
+                        float:right;
+                        padding-top: 4px;
+                        max-width: 215px;
+                        input[type=checkbox] {
+                            width: 13px;
+                            top: -5px;
+                        }
+                        input {
+                            width: 100px;
+                        }
                     }
                 }
 
@@ -389,6 +404,7 @@ html {
                     margin: 10px 0 5px 0;
                     font-weight: bold;
                 }
+
             }
 
             #parent_links {

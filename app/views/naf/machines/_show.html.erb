@@ -15,15 +15,17 @@
       var group_id = '<%= Naf.papertrail_group_id %>';
       var url = 'https://papertrailapp.com/api/v1/events/search.json';
       var max_id = null;
+      var timeout_id = null;
 
       jQuery(document).ready(function () {
+          getLog();
 
           if(system_id.length != 0 && jQuery('#papertrail_search').val().length == 0) {
               jQuery('#papertrail_search').val(system_id + ' runner');
           }
 
           jQuery('.terminate').live("click", function() {
-              var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
+              var answer = confirm("You are going to mark machine down. Are you sure that you want to do this?");
               if (!answer) {
                   return false;
               }
@@ -44,24 +46,27 @@
           });
 
           jQuery('#papertrail_search_submit').click(function () {
-              jQuery('#event_list').empty();
-              max_id = null;
-              callAjax(getSearchData());
-          });
-
-          jQuery("#stdout").scroll(function(){
-              if(jQuery("#stdout")[0].scrollHeight - jQuery("#stdout").scrollTop() == (jQuery("#stdout").outerHeight() - 2)) {
-                  var data = getSearchData();
-                  data['min_id'] = max_id;
-                  delete data['min_time'];
-
-                  callAjax(data);
-              }
+              clearTimeout(timeout_id);
+              timeout_id = null;
+              getLog();
           });
 
           jQuery('#clock_button').click(function() {
               jQuery("#papertrail_time").animate({width:'toggle'},350);
               return false;
+          });
+
+          jQuery('#clear_stdout_submit').click(function() {
+              jQuery('#event_list').empty();
+          });
+
+          jQuery('#auto_update').change(function() {
+            if(jQuery(this).is(':checked')) {
+                getTail();
+            } else {
+                clearTimeout(timeout_id);
+                timeout_id = null;
+            }
           });
       });
 
@@ -93,9 +98,11 @@
                       if(response['backend_timeout']){
                           text = setNoticeText("Problems on server(backend_timeout = true), retry your query.");
                       }
-                      if(text == "") { text = "No results were found!<br>"; }
+                      if(text == "" && jQuery('#event_list')[0].children.length == 0) {
+                          text = "No results were found!<br>";
+                      }
                       jQuery('#event_list').append(text);
-                      jQuery('div#stdout').unblock();
+                      jQuery("#stdout").scrollTop(jQuery("#stdout")[0].scrollHeight);
                   },
                   error: function(request) {
                      if(request.status == 401) {
@@ -104,14 +111,7 @@
                      } else {
                         jQuery('#event_list').append(setNoticeText("Something went wrong, retry your query."));
                      }
-                     jQuery('div#stdout').unblock();
                   }
-              });
-              jQuery('div#stdout').block({
-                    message: '<h2><img src="<%= asset_path('fiksu_loading_spinner.gif') %>"><br>Searching...</h2>',
-                    centerX: true,
-                    centerY: false,
-                    css: { top: (jQuery("#stdout")[0].scrollHeight - 300) }
               });
           } else {
               jQuery('#event_list').append(setNoticeText("Papertrail group id is blank.<br><br> \
@@ -142,6 +142,24 @@
           return text = "<div class='msg'>"
                             + text +
                          "</div>";
+      }
+
+      function getTail() {
+          var data = getSearchData();
+          data['min_id'] = max_id;
+          delete data['min_time'];
+          callAjax(data);
+          if(jQuery('#auto_update').is(':checked')) {
+              timeout_id = setTimeout(getTail, 5000);
+          }
+      }
+
+      function getLog() {
+          max_id = null;
+          callAjax(getSearchData());
+          if(jQuery('#auto_update').is(':checked')) {
+             timeout_id = setTimeout(getTail, 5000);
+          }
       }
   </script>
 <% end %>
