@@ -37,12 +37,12 @@
                 <div class="clear"></div>
             </div>
             <div id='child_bd'>
-              <% @render_body = true %>
+              <% @naf_render_body = true %>
               <%= yield :body %>
             </div>
           <% end %>
       <% end %>
-      <% unless @render_body %>
+      <% unless @naf_render_body %>
         <%= yield :body %>
       <% end %>
     </div>
