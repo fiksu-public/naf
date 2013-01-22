@@ -25,7 +25,7 @@
               jQuery('#papertrail_search').val(system_id + ' runner');
           }
 
-          jQuery('.terminate').live("click", function() {
+          jQuery(document).on("click", '.terminate', function() {
               var answer = confirm("You are going to mark machine down. Are you sure that you want to do this?");
               if (!answer) {
                   return false;

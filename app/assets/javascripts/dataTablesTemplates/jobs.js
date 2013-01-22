@@ -50,7 +50,7 @@ jQuery(document).ready(function() {
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery('.terminate').live("click", function(){
+  jQuery(document).on("click", '.terminate', function(){
     var answer = confirm("You are terminating this job. Are you sure you want to do this?");
     if (!answer) {
       return false;
