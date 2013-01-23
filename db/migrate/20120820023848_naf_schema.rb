@@ -159,9 +159,9 @@ class NafSchema < ActiveRecord::Migration
           UNIQUE (application_schedule_id, prerequisite_application_schedule_id),
           CHECK (application_schedule_id <> prerequisite_application_schedule_id)
       );
-      create table #{schema_name}.jobs
+      create table #{schema_name}.historical_jobs
       (
-          id                                     serial not null primary key,
+          id                                     bigserial not null primary key,
           created_at                             timestamp not null default now(),
           updated_at                             timestamp,
 
@@ -171,7 +171,7 @@ class NafSchema < ActiveRecord::Migration
 
           application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
           application_run_group_name             text null,
-          application_run_group_limit            integer null check (application_run_group_limit >= 1 or application_run_group_limit is null),
+          application_run_group_limit            integer null default 1,
 
           priority                               integer not null default 0,
 
@@ -193,29 +193,64 @@ class NafSchema < ActiveRecord::Migration
 
           log_level                              text null
       );
-      create table #{schema_name}.job_prerequisites
+      create table #{schema_name}.historical_job_prerequisites
       (
-          id                                     serial not null primary key,
+          id                                     bigserial not null primary key,
           created_at                             timestamp not null default now(),
-          job_id                                 integer not null, -- references #{schema_name}.jobs,
-          prerequisite_job_id                    integer not null, -- references #{schema_name}.jobs,
-          UNIQUE (job_id, prerequisite_job_id),
-          CHECK (job_id <> prerequisite_job_id)
+          historical_job_id                      bigint not null, -- references #{schema_name}.historical_jobs,
+          prerequisite_historical_job_id         bigint not null, -- references #{schema_name}.historical_jobs,
+          UNIQUE (historical_job_id, prerequisite_historical_job_id),
+          CHECK (historical_job_id <> prerequisite_historical_job_id)
       );
-      create table #{schema_name}.job_created_ats
+      create table #{schema_name}.historical_job_affinity_tabs
       (
-          id                                 serial not null primary key,
+          id                                 bigserial not null primary key,
           created_at                         timestamp not null default now(),
-          job_id                             integer not null unique, -- references #{schema_name}.jobs,
-          job_created_at                     timestamp not null
+          historical_job_id	 	     bigint not null, -- references #{schema_name}.historical_jobs,
+          affinity_id           	     bigint not null references #{schema_name}.affinities,
+          UNIQUE (historical_job_id, affinity_id)
       );
-      create table #{schema_name}.job_affinity_tabs
+      create table #{schema_name}.queued_jobs
       (
-          id                                 serial not null primary key,
-          created_at                         timestamp not null default now(),
-          job_id		 	     integer not null, -- references #{schema_name}.jobs,
-          affinity_id           	     integer not null, -- references #{schema_name}.affinities,
-          unique (job_id, affinity_id)
+          id                                     bigint not null primary key, -- references #{schema_name}.historical_jobs
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+
+          application_id                         integer null references #{schema_name}.applications,
+          application_type_id                    integer not null references #{schema_name}.application_types,
+          command                                text not null,
+
+          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name             text null,
+          application_run_group_limit            integer null default 1,
+
+          priority                               integer not null default 0
+      );
+      create table #{schema_name}.running_jobs
+      (
+          id                                     bigint not null primary key, -- references #{schema_name}.historical_jobs
+          created_at                             timestamp not null default now(),
+          updated_at                             timestamp,
+
+          application_id                         integer null references #{schema_name}.applications,
+          application_type_id                    integer not null references #{schema_name}.application_types,
+          command                                text not null,
+
+          application_run_group_restriction_id   integer not null references #{schema_name}.application_run_group_restrictions,
+          application_run_group_name             text null,
+          application_run_group_limit            integer null default 1,
+
+          started_on_machine_id                  integer null references #{schema_name}.machines,
+
+          started_at                             timestamp null,
+          pid                                    integer null,
+
+          request_to_terminate                   boolean not null default false,
+
+          marked_dead_by_machine_id              integer null references #{schema_name}.machines,
+          marked_dead_at                         timestamp null,
+
+          log_level                              text null
       );
       create table #{schema_name}.janitorial_assignments
       (

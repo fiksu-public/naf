@@ -1,15 +1,15 @@
 module Naf
-  class ByJobId < ::Partitioned::ByIntegerField
+  class ByHistoricalJobId < ::Partitioned::ByIntegerField
     self.abstract_class = true
 
-    belongs_to :job, :class_name => "::Naf::Job"
-    attr_accessible :job_id
-    validates :job_id, :presence => true
+    belongs_to :historical_job, :class_name => "::Naf::HistoricalJob"
+    attr_accessible :historical_job_id
+    validates :historical_job_id, :presence => true
 
     # the field to partition on
     # @return [Integer] re-routed to {#self.partition_foreign_key}
     def self.partition_integer_field
-      return :job_id
+      return :historical_job_id
     end
 
     def self.connection
@@ -21,11 +21,11 @@ module Naf
     end
 
     def self.partition_table_size
-      return ::Naf::Job.partition_table_size
+      return ::Naf::HistoricalJob.partition_table_size
     end
 
     def self.partition_num_lead_buffers
-      return ::Naf::Job.partition_num_lead_buffers
+      return ::Naf::HistoricalJob.partition_num_lead_buffers
     end
 
     partitioned do |partition|
@@ -33,7 +33,7 @@ module Naf
       partition.foreign_key lambda {|model, *partition_key_values|
         return ::Partitioned::PartitionedBase::Configurator::Data::ForeignKey.
           new(model.partition_integer_field,
-              ::Naf::Job.partition_table_name(*partition_key_values),
+              ::Naf::HistoricalJob.partition_table_name(*partition_key_values),
               :id)
       }
 

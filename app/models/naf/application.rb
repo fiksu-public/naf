@@ -26,7 +26,7 @@ module Naf
     end
 
     def last_queued_job
-      last_queued_job = Naf::Job.recently_queued
+      last_queued_job = ::Naf::Job.recently_queued
         .where(:application_id => self.id)
         .group("application_id")
         .select("application_id, max(id) as id").first

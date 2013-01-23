@@ -1,8 +1,8 @@
 module Naf
-  class JobAffinityTab < ::Naf::ByJobId
+  class HistoricalJobAffinityTab < ::Naf::ByHistoricalJobId
     validates :affinity_id, :presence => true
 
-    validates_uniqueness_of :affinity_id, :scope => :job_id, :message => "has already been taken for this job"
+    validates_uniqueness_of :affinity_id, :scope => :historical_job_id, :message => "has already been taken for this job"
 
     belongs_to :affinity, :class_name => "::Naf::Affinity"
 
@@ -15,9 +15,9 @@ module Naf
     end
 
     def job
-      return ::Naf::Job.
+      return ::Naf::HistoricalJob.
         from_partition(id).
-        where(:id => job_id).first
+        where(:id => historical_job_id).first
     end
 
     def script_type_name

@@ -6,7 +6,7 @@ module Naf
   # for more than a 1.week (instead, have them exit and restarted periodically)
   #
 
-  class Job < ::Partitioned::ById
+  class HistoricalJob < ::Partitioned::ById
     class JobPrerequisiteLoop < StandardError
       def initialize(job)
         super("loop found in prerequisites for #{job}")
@@ -41,8 +41,6 @@ module Naf
     attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id
     attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
     attr_accessible :application_run_group_limit
-
-    after_create :create_tracking_row
 
     def to_s
       components = []
@@ -84,7 +82,7 @@ module Naf
       end
       components << "id: #{id}"
       components << "\"#{command}\""
-      return "::Naf::Job<#{components.join(', ')}>"
+      return "::Naf::HistoricalJob<#{components.join(', ')}>"
     end
 
     # partitioning
@@ -262,7 +260,8 @@ module Naf
 
     def prerequisites
       return job_prerequisites.
-        map{|jp| ::Naf::Job.from_partition(jp.prerequisite_job_id).find_by_id(jp.prerequisite_job_id)}.
+        map{|jp| ::Naf::HistoricalJob.from_partition(jp.prerequisite_historical_job_id).
+        find_by_id(jp.prerequisite_historical_job_id)}.
         reject{|j| j.nil?}
     end
 
@@ -282,10 +281,6 @@ module Naf
 
     def spawn
       application_type.spawn(self)
-    end
-
-    def create_tracking_row
-      ::Naf::JobCreatedAt.create(:job_id => id, :job_created_at => created_at)
     end
   end
 end
