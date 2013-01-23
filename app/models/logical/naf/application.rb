@@ -34,7 +34,7 @@ module Logical
           if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
-              application_scope.where(["lower(naf.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+              application_scope.where(["lower(#{Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
             else
               application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
             end
