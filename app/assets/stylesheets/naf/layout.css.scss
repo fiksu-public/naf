@@ -194,6 +194,14 @@ html {
                 }
             }
 
+            #page-select-container, #refresh-page-container {
+                display: none;
+                float: right;
+                margin-top: -1px;
+                padding: 2px 2px;
+                width: 205px;
+            }
+
             #datatable_wrapper {
                 #datatable_processing {
                     color: #45a113;
@@ -206,13 +214,6 @@ html {
                 }
 
                 #datatable_paginate {
-                    #page-select-container, #refresh-page-container {
-                        display: none;
-                        float: right;
-                        margin-top: -1px;
-                        padding: 2px 2px;
-                        width: 205px;
-                    }
                     #page-select-container {
                         label {
                             position: relative;
