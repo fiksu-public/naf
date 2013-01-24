@@ -9,21 +9,29 @@ module Logical
                           affinities = [],
                           prerequisites = [])
         application_run_group_name = command if application_run_group_name == :command
-        ::Naf::Job.transaction do
-          job = ::Naf::Job.create(:application_type_id => 1,
-                                  :command => command,
-                                  :application_run_group_restriction_id => application_run_group_restriction.id,
-                                  :application_run_group_name => application_run_group_name,
-                                  :application_run_group_limit => application_run_group_limit,
-                                  :priority => priority)
+        ::Naf::HistoricalJob.transaction do
+          job = ::Naf::HistoricalJob.create(:application_type_id => 1,
+                                            :command => command,
+                                            :application_run_group_restriction_id => application_run_group_restriction.id,
+                                            :application_run_group_name => application_run_group_name,
+                                            :application_run_group_limit => application_run_group_limit,
+                                            :priority => priority)
           affinities.each do |affinity|
-            ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
+            ::Naf::HistoricalJobAffinityTab.create(:historical_job_id => job.id, :affinity_id => affinity.id)
           end
           job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
-            ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :prerequisite_job_id => prerequisite.id)
+            ::Naf::HistoricalJobPrerequisite.create(:historical_job_id => job.id,
+                                                    :prerequisite_historical_job_id => prerequisite.id)
           end
+          ::Naf::QueuedJob.create(:id => job.id,
+                                  :application_id => job.application_id,
+                                  :application_type_id => job.application_type_id,
+                                  :command => job.command,
+                                  :application_run_group_restriction_id => job.application_run_group_restriction_id,
+                                  :application_run_group_name => job.application_run_group_name,
+                                  :application_run_group_limit => job.application_run_group_limit,
+                                  :priority => job.priority)
           return job
         end
       end
@@ -51,6 +59,14 @@ module Logical
             ::Naf::JobPrerequisite.create(:job_id => job.id,
                                           :prerequisite_job_id => prerequisite.id)
           end
+          ::Naf::QueuedJob.create(:id => job.id,
+                                  :application_id => job.application_id,
+                                  :application_type_id => job.application_type_id,
+                                  :command => job.command,
+                                  :application_run_group_restriction_id => job.application_run_group_restriction_id,
+                                  :application_run_group_name => job.application_run_group_name,
+                                  :application_run_group_limit => job.application_run_group_limit,
+                                  :priority => job.priority)
           return job
         end
       end

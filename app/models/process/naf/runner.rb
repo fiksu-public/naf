@@ -107,7 +107,7 @@ module Process::Naf
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
                 @job_creator.queue_application_schedule(application_schedule)
               end
-            rescue ::Naf::Job::JobPrerequisiteLoop => jpl
+            rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
               logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
               logger.error jpl
               application_schedule.enabled = false
@@ -167,18 +167,12 @@ module Process::Naf
               child_job = @children.delete(pid)
               if child_job.present?
                 if status.nil? || status.exited? || status.signaled?
-                  # XXX child_job.reload
-                  child_job = ::Naf::Job.from_partition(child_job.id).find(child_job.id)
-                  logger.info "cleaning up dead child: #{child_job}"
-                  child_job.finished_at = Time.zone.now
-                  if status
-                    child_job.exit_status = status.exitstatus
-                    child_job.termination_signal = status.termsig
-                  end
-                  child_job.save!
+                  logger.info { "cleaning up dead child: #{child_job.reload}" }
+                  finish_job(child_job,
+                             { :exit_status => (status && status.exitstatus), :terminal_signal => (status && status.termsig) })
                 else
                   # this can happen if the child is sigstopped
-                  logger.warn "child waited for did not exit: #{child_job.inspect}, status: #{status.inspect}"
+                  logger.warn "child waited for did not exit: #{child_job}, status: #{status.inspect}"
                 end
               else
                 # XXX ERROR no child for returned pid -- this can't happen
@@ -216,14 +210,12 @@ module Process::Naf
             job.pid = pid
             job.failed_to_start = false
             logger.info "job started : #{job}"
+            job.save!
           else
             # should never get here (well, hopefully)
-            job.failed_to_start = true
-            job.finished_at = Time.zone.now
             logger.error "failed to execute #{job}"
+            finish_job(job, {:failed_to_start => true})
           end
-
-          job.save!
         rescue StandardError => e
           # XXX rescue for various issues
           logger.error "failure during job start"
@@ -233,6 +225,27 @@ module Process::Naf
       logger.debug_gross "done starting jobs"
 
       return true
+    end
+
+    # XXX update_all doesn't support "from_partition" so we have this helper
+    def update_historical_job(updates, historical_job_id)
+      updates[:updated_at] = Time.zone.now
+      update_columns = updates.map{|k,v| "#{k} = ?"}.join(", ")
+      update_sql = <<-SQL
+         UPDATE #{::Naf::HistoricalJob.partition_table_name(historical_job.id)}
+           SET
+               #{update_columns}
+         WHERE
+           id = ?
+      SQL
+      :Naf::HistoricalJob.find_by_sql([update_sql] + updates.values + [historical_job_id])
+    end
+
+    def finish_job(running_job, updates = {})
+      :Naf::HistoricalJob.transaction do
+        update_historical_job(updates.merge({:finished_at => Time.zone.now}), running_job.id)
+        running_job.delete
+      end
     end
 
     # kill(0, pid) seems to fail during at_exit block
@@ -247,8 +260,7 @@ module Process::Naf
       @children.clone.each do |pid, child|
         send_signal_and_maybe_clean_up(child, "KILL")
         # force job down
-        child.finished_at = Time.zone.now
-        child.save!
+        finish_job(child)
       end
     end
 
@@ -303,15 +315,13 @@ module Process::Naf
         logger.alarm "sending SIG_KILL to process: #{job}"
         send_signal_and_maybe_clean_up(job, "KILL")
         # job force job down
-        job.finished_at = Time.zone.now
-        job.save!
+        finish_job(job)
       end
     end
 
     def send_signal_and_maybe_clean_up(job, signal)
       if job.pid.nil?
-        job.finished_at = Time.zone.now
-        job.save!
+        finish_job(job)
         return false
       end
 
@@ -321,8 +331,7 @@ module Process::Naf
       rescue Errno::ESRCH
         logger.detail "ESRCH = kill(#{signal}, #{job.pid})"
         # job does not exist -- mark it finished
-        job.finished_at = Time.zone.now
-        job.save!
+        finish_job(job)
         return false
       end
       return true
@@ -333,7 +342,7 @@ module Process::Naf
     end
 
     def assigned_jobs(machine)
-      return ::Naf::Job.assigned_jobs(machine).select do |job|
+      return ::Naf::RunningJob.assigned_jobs(machine).select do |job|
         is_job_process_alive?(job)
       end
     end

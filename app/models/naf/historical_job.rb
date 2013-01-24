@@ -143,43 +143,22 @@ module Naf
       return where(["created_at >= ? AND created_at <= ?", start_time, end_time])
     end
 
-    def self.recently_queued
-      return queued_between(Time.zone.now - JOB_STALE_TIME, Time.zone.now)
-    end
-
     def self.canceled
       return where(:request_to_terminate => true)
     end
 
     def self.application_last_runs
-      return recently_queued.
-        where("application_id is not null").
+      return where("application_id is not null").
         group("application_id").
         select("application_id,max(finished_at) as finished_at").
         reject{|job| job.finished_at.nil? }
     end
 
     def self.application_last_queued
-      return recently_queued.
+      return 
         where("application_id is not null").
         group("application_id").
         select("application_id,max(id) as id,max(created_at) as created_at")
-    end
-
-    def self.not_finished
-      return where("finished_at is null and request_to_terminate = false")
-    end
-
-    def self.started_on(machine)
-      return where({:started_on_machine_id => machine.id})
-    end
-
-    def self.not_started
-      return where(:started_at => nil)
-    end
-
-    def self.started
-      return where("started_at is not null")
     end
 
     def self.finished
@@ -203,22 +182,6 @@ module Naf
 
     def self.errored
       return where("finished_at is not null and exit_status > 0 or request_to_terminate = true")
-    end
-
-    def self.in_run_group(run_group_name)
-      return where(:application_run_group_name => run_group_name)
-    end
-
-    def self.order_by_priority
-      return order("priority,created_at")
-    end
-
-    def self.possible_jobs
-      return recently_queued.not_started
-    end
-
-    def self.assigned_jobs(machine)
-      return recently_queued.not_finished.started_on(machine)
     end
 
     #
