@@ -19,3 +19,15 @@
 //= require jquery.dataTables
 //= require jquery.dataTables.custom
 //= require jquery_nested_form
+
+
+function remove_fields(link) {
+  jQuery(link).prev("input[type=hidden]").val("1");
+  jQuery(link).closest(".fields").hide();
+}
+
+function add_fields(link, association, content) {
+  var new_id = new Date().getTime();
+  var regexp = new RegExp("new_" + association, "g");
+  jQuery(link).before(content.replace(regexp, new_id));
+}
