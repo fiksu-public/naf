@@ -1,0 +1,19 @@
+<div class="fields">
+    <h3 class="display-inline-block">Unique pair of Name - Level | </h3>
+    <%= link_to_remove_fields "Remove", f %>
+
+    <%= f.hidden_field :logger_style_id %>
+
+    <div class="field">
+      <%= f.label :logger_name %>
+      <br/>
+      <%= f.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, :include_blank => true) %>
+    </div>
+
+    <div class="field">
+      <%= f.label :logger_level %>
+      <br/>
+      <%= f.select(:logger_level_id, ::Naf::LoggerLevel.all.map { |a| [a.level, a.id] }, :include_blank => true) %>
+    </div>
+    <br>
+</div>

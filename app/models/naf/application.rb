@@ -13,7 +13,6 @@ module Naf
     has_one :application_schedule, :class_name => '::Naf::ApplicationSchedule', :dependent => :destroy
     belongs_to :application_type, :class_name => '::Naf::ApplicationType'
     delegate :script_type_name, :to => :application_type
-    delegate :application_run_group_name, :to => :application_schedule
 
     accepts_nested_attributes_for :application_schedule, :allow_destroy => true
 

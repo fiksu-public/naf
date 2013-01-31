@@ -5,7 +5,6 @@ PATH
       jquery-rails
       log4r_remote_syslog_outputter (>= 0.0.1)
       mem_info
-      nested_form
       partitioned (>= 1.1.0)
       rails (>= 3.2)
       will_paginate
@@ -56,6 +55,10 @@ GEM
     arel (3.0.2)
     awesome_print (1.1.0)
     builder (3.0.4)
+    bulk_data_methods (1.0.0)
+      pg
+      rails (>= 3.0.0)
+      rspec-rails
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
       railties (~> 3.2.0)
@@ -92,8 +95,8 @@ GEM
     mem_info (1.0.1)
     mime-types (1.19)
     multi_json (1.5.0)
-    nested_form (0.3.1)
-    partitioned (1.1.1)
+    partitioned (1.1.3)
+      bulk_data_methods (= 1.0.0)
       pg
       rails (>= 3.2.8)
       rspec-rails
@@ -188,7 +191,6 @@ DEPENDENCIES
   jquery-rails
   mem_info
   naf!
-  nested_form
   pg
   rspec-rails
   sass-rails (~> 3.2.3)
