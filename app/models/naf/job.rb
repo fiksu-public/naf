@@ -169,7 +169,7 @@ module Naf
     end
 
     def self.not_finished
-      return where("finished_at is null and request_to_terminate = false")
+      return where("finished_at is null")
     end
 
     def self.started_on(machine)
@@ -185,7 +185,7 @@ module Naf
     end
 
     def self.finished
-      return where("finished_at is not null or request_to_terminate = true")
+      return where("finished_at is not null")
     end
 
     def self.queued_status
