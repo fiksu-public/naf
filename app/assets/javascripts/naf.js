@@ -18,7 +18,6 @@
 //= require underscore
 //= require jquery.dataTables
 //= require jquery.dataTables.custom
-//= require jquery_nested_form
 
 
 function remove_fields(link) {

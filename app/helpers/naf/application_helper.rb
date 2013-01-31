@@ -195,5 +195,20 @@ module Naf
       link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", :id => 'add_prerequisite')
     end
 
+    def custom_full_messages(errors)
+      errors.map do |attribute, message|
+        if attribute == :base
+          message
+        else
+          attr_name = attribute.to_s.split('.').last.humanize
+          I18n.t(:"errors.format", {
+            :default   => "%{attribute} %{message}",
+            :attribute => attr_name,
+            :message   => message
+          })
+        end
+      end
+    end
+
   end
 end
