@@ -8,7 +8,7 @@
 <%= f.hidden_field :application_id %>
 
 <div class="field">
-  <%= f.label :application_run_group_restriction %>
+  <%= f.label :application_run_group_restriction_id, "Application run group restriction*" %>
   <br/>
   <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map { |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
 </div>
@@ -20,12 +20,12 @@
 </div>
 
 <div class="field">
-  <%= f.label "Run Start Time" %></br/>
+  <%= f.label :run_start_minute, "Run Start Time (count of minutes after 12:00 am)" %></br/>
   <%= f.text_field :run_start_minute %>
 </div>
 
 <div class="field">
-  <%= f.label "Run Interval (minutes)" %></br/>
+  <%= f.label :run_interval, "Run Interval (minutes)" %></br/>
   <%= f.text_field :run_interval %>
 </div>
 

@@ -3,17 +3,11 @@
   <% if @logger_name.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@logger_name.errors.count, "error") %> prohibited Logger Name from being saved:</h2>
-    
-    <ul>
-      <% @logger_name.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
   <div class="field">
-    <%= f.label :name %><br />
+    <%= f.label :name, "Name*" %><br />
     <%= f.text_field :name %>
   </div>
 

@@ -16,10 +16,10 @@ jQuery(document).ready(function() {
         { "sWidth": "4%"},
         { "sWidth": "7%"},
         { "sWidth": "4%"},
-        { "sWidth": "14%"},
+        { "sWidth": "13%"},
         { "sWidth": "25%"},
-        null,
-        null,
+        { "sWidth": "13%"},
+        { "sWidth": "13%"},
         null,
         null,
         { "asSorting": [ "desc" ] },
@@ -43,6 +43,7 @@ jQuery(document).ready(function() {
       addLinkToTitle(nRow, aData);
       alignmentButtons(nRow, aData);
       colorizationStatus(nRow, aData);
+      checkTimeFormat(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -87,6 +88,23 @@ function addLinkToTitle(nRow, aData) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );
     jQuery('td:nth-child(5)', nRow).empty().append(row);
   }
+}
+
+function checkTimeFormat(nRow, aData) {
+  var start_array = aData[5].split(',');
+  var finish_array = aData[6].split(',');
+  var started_at;
+  var finished_at;
+  if(jQuery('#time_format').val() == 'lexically') {
+    started_at = start_array[0];
+    finished_at = finish_array[0];
+  } else {
+    started_at = start_array[1];
+    finished_at = finish_array[1];
+  }
+
+  jQuery('td:nth-child(6)', nRow).empty().append(started_at);
+  jQuery('td:nth-child(7)', nRow).empty().append(finished_at);
 }
 
 function alignmentButtons(nRow, aData) {

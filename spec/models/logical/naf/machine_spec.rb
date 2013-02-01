@@ -26,14 +26,14 @@ module Logical
         physical_machine.mark_checked_schedule
         logical_machine = Machine.new(physical_machine)
         logical_machine.should_receive(:time_ago_in_words).and_return("")
-        logical_machine.last_checked_schedules_at.should =~ /ago$/
+        logical_machine.last_checked_schedules_at.split(',').first.should =~ /ago$/
       end
 
       it "should render last_seen_alive_at nicely" do
         physical_machine.mark_alive
         logical_machine = Machine.new(physical_machine)
         logical_machine.should_receive(:time_ago_in_words).and_return("")
-        logical_machine.last_seen_alive_at.should =~ /ago$/
+        logical_machine.last_seen_alive_at.split(',').first.should =~ /ago$/
       end
 
 

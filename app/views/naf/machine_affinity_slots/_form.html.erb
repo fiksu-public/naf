@@ -3,19 +3,13 @@
   <% if @slot.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@slot.errors.count, "error") %> prohibited this Machine Affinity Slot from being saved:</h2>
-    
-    <ul>
-      <% @slot.errors.full_messages.each do |msg| %> 
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
   <%= f.hidden_field :machine_id, :value => @machine.id %>
 
   <div class="field">
-    <%= f.label :affinity %><br />
+    <%= f.label :affinity_id, "Affinity*" %><br />
     <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>
   </div>
 
