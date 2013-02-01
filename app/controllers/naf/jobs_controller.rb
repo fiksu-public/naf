@@ -8,6 +8,7 @@ module Naf
 
     def index
       respond_to do |format|
+        set_status
         format.html do
         end
         format.json do
@@ -144,6 +145,17 @@ module Naf
         else
           @run_group_name_type = "custom"
       end
+    end
+
+    def set_status
+      if params[:search].try(:[], :status).present?
+        @status = (params[:search][:status] or "queued").to_sym
+      elsif cookies[:search_status].present?
+        @status = cookies[:search_status].to_sym
+      else
+        @status = :queued
+      end
+      cookies[:search_status] = @status
     end
 
   end

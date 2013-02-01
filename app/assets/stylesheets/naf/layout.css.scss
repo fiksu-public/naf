@@ -45,11 +45,11 @@ html {
         }
 
         select {
-            width: 18em;
+            width: 40em;
         }
 
         input {
-            width: 22em;
+            width: 40em;
         }
 
         .search_select_input {
@@ -331,6 +331,10 @@ html {
                      line-height: 24px;
                      margin: 0 0 0.8em;
                      padding: 12px;
+                }
+
+                .validation-error {
+                    color: #CD0A0A;
                 }
 
                 input.check_box_input {

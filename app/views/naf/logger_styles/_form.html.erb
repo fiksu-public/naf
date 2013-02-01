@@ -2,17 +2,11 @@
   <% if @logger_style.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@logger_style.errors.count, "error") %> prohibited Logger Style from being saved:</h2>
-    
-    <ul>
-      <% custom_full_messages(@logger_style.errors).each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
   <div class="field">
-    <%= f.label :name %><br />
+    <%= f.label :name, "Name*" %><br />
     <%= f.text_field :name %>
   </div>
 

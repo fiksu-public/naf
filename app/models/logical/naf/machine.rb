@@ -31,7 +31,7 @@ module Logical
  
       def last_checked_schedules_at
         if value = @machine.last_checked_schedules_at
-          "#{time_ago_in_words(value, true)} ago"
+          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end
@@ -39,7 +39,7 @@ module Logical
       
       def last_seen_alive_at
         if value = @machine.last_seen_alive_at
-        "#{time_ago_in_words(value, true)} ago"
+          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end

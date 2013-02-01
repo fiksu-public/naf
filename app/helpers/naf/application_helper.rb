@@ -1,4 +1,14 @@
 module Naf
+
+  ActionView::Base.field_error_proc = Proc.new do |html_tag, instance|
+    errors = Array(instance.error_message).join('; ')
+    if html_tag =~ /^<label for=/
+      %(<span class="validation-error">#{html_tag}</span>).html_safe
+    else
+      %(#{html_tag}<span class="validation-error">&nbsp;#{errors}</span>).html_safe
+    end
+  end
+
   module ApplicationHelper
     include ActionView::Helpers::TextHelper
 
@@ -20,7 +30,7 @@ module Naf
 
     def naf_last_queued_at_link(app)
       if job = app.last_queued_job
-        link_to "#{time_ago_in_words(job.created_at, true)} ago", naf.job_path(job)
+        link_to "#{time_ago_in_words(job.created_at, true)} ago, #{job.created_at.localtime.strftime("%Y-%m-%d %r")}", naf.job_path(job)
       else
         ""
       end
@@ -193,21 +203,6 @@ module Naf
         render(association.to_s, :f => builder)
       end
       link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", :id => 'add_prerequisite')
-    end
-
-    def custom_full_messages(errors)
-      errors.map do |attribute, message|
-        if attribute == :base
-          message
-        else
-          attr_name = attribute.to_s.split('.').last.humanize
-          I18n.t(:"errors.format", {
-            :default   => "%{attribute} %{message}",
-            :attribute => attr_name,
-            :message   => message
-          })
-        end
-      end
     end
 
   end

@@ -1,12 +1,17 @@
 <br/>
 <div class="display-inline-block search_select_input">
   <%= label(:status, "Status:") %>
-  <%= select_tag("search[status]", options_for_select([["All", nil], ["Queued", :queued], ["Running", :running], ["Waiting", :waiting], ["Finished", :finished], ["Errored", :errored]], :queued), { :class => 'datatable_variable' }) %> </b>
+  <%= select_tag("search[status]", options_for_select([["All", :all], ["Queued", :queued], ["Running", :running], ["Waiting", :waiting], ["Finished", :finished], ["Errored", :errored]], @status), { :class => 'datatable_variable' }) %>
 </div>
 &nbsp;&nbsp;
 <div class="display-inline-block search_select_input">
   <%= label(:started_on_machine_id, "Machine:") %>
   <%= select(:search, :started_on_machine_id, Naf::Machine.all.collect { |m| [m.short_name_if_it_exist.blank? ? m.server_address : m.short_name_if_it_exist, m.id] }.sort.unshift(["All", nil]), {}, { :class => 'datatable_variable' }) %>
+</div>
+&nbsp;&nbsp;
+<div class="display-inline-block search_select_input">
+  <%= label(:time_format, "Time format:") %>
+  <%= select_tag(:time_format, options_for_select([["Lexically", :lexically], ["Timestamp", :timestamp]])) %>
 </div>
 &nbsp;&nbsp;
 <div id='show_search_container_link' class="display-inline-block">
@@ -98,6 +103,11 @@
                 return false;
             });
             jQuery("#search_started_on_machine_id").change(function () {
+                setPageOrder();
+                SetFirstPage();
+                return false;
+            });
+            jQuery("#time_format").change(function () {
                 setPageOrder();
                 SetFirstPage();
                 return false;
