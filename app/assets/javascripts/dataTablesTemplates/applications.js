@@ -39,6 +39,7 @@ jQuery(document).ready(function() {
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
       colorizationDeletedOrHidden(nRow, aData);
+      checkTimeFormat(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -71,4 +72,16 @@ function colorizationDeletedOrHidden(nRow, aData) {
   if (aData[12] == 'true' || aData[13] == 'false' || aData[13] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
+}
+
+function checkTimeFormat(nRow, aData) {
+  var l_q_a_array = jQuery(aData[9]).text().split(',');
+  var last_queued_at;
+  if(jQuery('#time_format').val() == 'lexically') {
+    last_queued_at = l_q_a_array[0];
+  } else {
+    last_queued_at = l_q_a_array[1];
+  }
+
+  jQuery('td:nth-child(10)', nRow).empty().append(jQuery(aData[9]).text(last_queued_at));
 }

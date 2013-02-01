@@ -1,7 +1,7 @@
 module Logical
   module Naf
     module JobStatuses
-      class Finished
+      class Canceled
 
         def self.all(conditions)
           <<-SQL
@@ -13,7 +13,8 @@ module Logical
                #{::Naf::Job.table_name} AS j
               WHERE
                (
-                j.finished_at IS NOT NULL
+                j.finished_at IS NULL AND
+                j.request_to_terminate = true
                )
                #{conditions}
               ORDER BY

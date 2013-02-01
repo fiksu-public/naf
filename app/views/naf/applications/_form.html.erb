@@ -1,19 +1,13 @@
-<%= nested_form_for @application do |f| %>
+<%= form_for @application do |f| %>
 
     <% if @application.errors.any? %>
         <div id="errorExplanation">
           <h2><%= pluralize(@application.errors.count, "error") %> prohibited this application from being saved:</h2>
-
-          <ul>
-            <% @application.errors.full_messages.each do |msg| %>
-                <li><%= msg %></li>
-            <% end %>
-          </ul>
         </div>
     <% end %>
 
     <div class="field">
-      <%= f.label :title %>
+      <%= f.label :title, "Title*" %>
       <br/>
       <%= f.text_field :title %>
     </div>
@@ -25,13 +19,13 @@
     </div>
 
     <div class="field">
-      <%= f.label :command %>
+      <%= f.label :command, "Command*" %>
       <br/>
-      <%= f.text_area :command, :rows => 4, :cols => 32 %>
+      <%= f.text_area :command, :rows => 4, :cols => 60 %>
     </div>
 
     <div class="field">
-      <%= f.label :application_type %></br/>
+      <%= f.label :application_type_id, "Application type*" %></br/>
       <%= f.select(:application_type_id, ::Naf::ApplicationType.all.map { |a| [a.script_type_name, a.id] }, { :include_blank => true }) %>
     </div>
 
@@ -43,91 +37,17 @@
     <div class="field">
       <%= f.label :deleted %><br/>
       <%= f.check_box :deleted %>
+      <br/><br/>
     </div>
 
-    <%= f.fields_for :application_schedule do |schedule_fields| %>
-
-        <br/>
-        <br/>
-        <div class="field">
-          <%= schedule_fields.label :_destroy, "Remove Schedule" %>
-          <%= schedule_fields.check_box :_destroy %>
-        </div>
-
-        <h3>Schedule</h3>
-
-        <%= schedule_fields.hidden_field :application_id %>
-
-        <div class="field">
-          <%= schedule_fields.label :application_run_group_restriction %>
-          <br/>
-          <%= schedule_fields.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map { |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label :application_run_group_name %></br/>
-          <%= select_tag(:run_group_name_type, options_for_select([["command", "command"], ["not set", "not set"], ["custom", "custom"]], @run_group_name_type)) %><br/>
-          <%= schedule_fields.text_area :application_run_group_name, :rows => 4, :cols => 32, :placeholder => "Please input Application Run Group Name" %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label "Run Start Time" %></br/>
-          <%= schedule_fields.text_field :run_start_minute %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label "Run Interval (minutes)" %></br/>
-          <%= schedule_fields.text_field :run_interval %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label :priority %>  <br/>
-          <%= schedule_fields.text_field :priority %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label :application_run_group_limit %>  <br/>
-          <%= schedule_fields.text_field :application_run_group_limit %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label :enabled %>  <br/>
-          <%= schedule_fields.check_box :enabled %>
-        </div>
-
-        <div class="field">
-          <%= schedule_fields.label :visible %>  <br/>
-          <%= schedule_fields.check_box :visible %>
-        </div>
-
-        <br/>
-        <br/>
-        <%= schedule_fields.fields_for :application_schedule_prerequisites do |app_sch_pre| %>
-            <div class="field">
-              <%= app_sch_pre.label :_destroy, "Remove Application Schedule Prerequisite" %>
-              <%= app_sch_pre.check_box :_destroy %>
-            </div>
-
-            <h3>Application Schedule Prerequisite</h3>
-
-            <%= app_sch_pre.hidden_field :application_schedule_id %>
-
-            <div class="field">
-              <%= app_sch_pre.label :prerequisite_application_schedule %>
-              <br/>
-              <% schedules = ::Naf::ApplicationSchedule.all.map { |a| [a.title, a.id] unless a.id == @application.application_schedule.id }.compact %>
-              <%= app_sch_pre.select(:prerequisite_application_schedule_id, schedules, :include_blank => true) %>
-            </div>
-            <br/>
-        <% end %>
-
-        <%= schedule_fields.link_to_add "Add the following prerequisite", :application_schedule_prerequisites %>
-
-    <% end %>
-
-    <br/>
-    <br/>
+    <div id="application_schedule">
+      <%= f.fields_for :application_schedule do |builder| %>
+        <%= render "application_schedule", :f => builder %>
+      <% end %>
+    </div>
+    <%= link_to "Add the application schedule", "#" , :id => "add_application_schedule"%>
     <div class="actions">
+      <br/>
       <%= f.submit %>
     </div>
 <% end %>
@@ -135,6 +55,13 @@
 <% content_for :javascripts do %>
     <script type='text/javascript'>
         jQuery(document).ready(function() {
+
+            <% if @show_app_schedule %>
+               addSchedule();
+            <% else %>
+               removeSchedule();
+            <% end %>
+
             var run_group = jQuery("#application_application_schedule_attributes_application_run_group_name");
 
             if(jQuery("#run_group_name_type").val() != 'custom') {
@@ -154,6 +81,28 @@
                     run_group.slideToggle("slow");
                 }
             });
+
+            jQuery("#add_application_schedule").click(function() {
+                addSchedule();
+            });
+
+            jQuery("#remove_application_schedule").click(function() {
+                removeSchedule();
+            });
+
         });
+
+        function addSchedule(){
+            jQuery("#application_schedule").css("display", "block");
+            jQuery("#application_application_schedule_attributes__destroy").val("0");
+            jQuery("#add_application_schedule").hide();
+        }
+
+        function removeSchedule(){
+            jQuery("#application_schedule").hide();
+            jQuery("#application_application_schedule_attributes__destroy").val("1");
+            jQuery("#add_application_schedule").css("display", "block");
+        }
+
     </script>
 <% end %>

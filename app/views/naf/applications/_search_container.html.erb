@@ -1,4 +1,9 @@
 <br/>
+<div class="display-inline-block search_select_input">
+  <%= label(:time_format, "Time format:") %>
+  <%= select_tag(:time_format, options_for_select([["Lexically", :lexically], ["Timestamp", :timestamp]])) %>
+</div>
+&nbsp;&nbsp;
 <div class="display-inline-block">
   <%= label_tag :visible, 'Show hidden:' %>
   <%= check_box_tag("search[visible]", true, false, { :class => 'datatable_variable' }) %>
@@ -72,6 +77,10 @@
                 return false;
             });
             jQuery("#search_deleted").change(function () {
+                SetFirstPage();
+                return false;
+            });
+            jQuery("#time_format").change(function () {
                 SetFirstPage();
                 return false;
             });

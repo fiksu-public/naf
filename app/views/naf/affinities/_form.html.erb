@@ -3,17 +3,11 @@
   <% if @affinity.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@affinity.errors.count, "error") %> prohibited Affinity from being saved:</h2>
-    
-    <ul>
-      <% @affinity.errors.full_messages.each do |msg| %> 
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
   <div class="field">
-    <%= f.label :name %><br />
+    <%= f.label :affinity_name, "Name*" %><br />
     <%= f.text_field :affinity_name %>
   </div>
 
@@ -28,7 +22,7 @@
   </div>
 
   <div class="field">
-    <%= f.label :classification %><br />
+    <%= f.label :affinity_classification_id, "Classification*" %><br />
     <%= f.select(:affinity_classification_id, Naf::AffinityClassification.all.map{|a| 
         [a.affinity_classification_name, a.id] 
      }, {:include_blank => true}) %>

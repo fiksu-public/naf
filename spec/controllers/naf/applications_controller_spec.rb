@@ -75,6 +75,7 @@ module Naf
         response.should redirect_to(application_path(valid_app.id))
       end
       it "should re-render to new when invalid" do
+        invalid_app.stub!(:build_application_schedule)
         Application.should_receive(:new).and_return(invalid_app)
         post :create, :application => {}
         response.should render_template("naf/applications/new")

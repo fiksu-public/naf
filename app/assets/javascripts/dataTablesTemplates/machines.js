@@ -23,6 +23,7 @@ jQuery(document).ready(function() {
     ],
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToMachines(nRow, aData);
+      checkTimeFormat(nRow, aData);
       return nRow;
     }
   }; // datatable
@@ -57,4 +58,21 @@ function addLinkToMachines(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
+}
+
+function checkTimeFormat(nRow, aData) {
+  var last_checked_array = aData[6].split(',');
+  var last_seen_array = aData[7].split(',');
+  var last_checked;
+  var last_seen;
+  if(jQuery('#time_format').val() == 'lexically') {
+    last_checked = last_checked_array[0];
+    last_seen = last_seen_array[0];
+  } else {
+    last_checked = last_checked_array[1];
+    last_seen = last_seen_array[1];
+  }
+
+  jQuery('td:nth-child(7)', nRow).empty().append(last_checked);
+  jQuery('td:nth-child(8)', nRow).empty().append(last_seen);
 }

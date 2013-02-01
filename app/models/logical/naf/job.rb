@@ -145,7 +145,8 @@ module Logical
               JobStatuses::Running.all(:queued, conditions) + "union all\n" +
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
-              JobStatuses::Finished.all(conditions)
+              JobStatuses::Finished.all(conditions) + "union all\n" +
+              JobStatuses::Canceled.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
 
@@ -237,7 +238,7 @@ module Logical
       
       def started_at
         if value = @job.started_at
-          "#{time_ago_in_words(value, true)} ago"
+          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end
@@ -249,7 +250,7 @@ module Logical
       
       def finished_at
         if value = @job.finished_at
-          "#{time_ago_in_words(value, true)} ago"
+          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end
