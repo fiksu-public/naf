@@ -13,7 +13,7 @@ module Process::Naf
 
     def initialize
       super
-      update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
     end
