@@ -12,7 +12,7 @@ module Process::Naf
     opt :all, "process all models", :short => :a, :var => :assignments, :set => :all
     opt :all_enabled, "process all enabled models", :short => :E, :var => :assignments, :set => :all_enabled, :default => :all_enabled
     opt :assignment, "process specific assignment(s)", :short => :j, :var => :assignments, :type => :ints
-    opt :assignment_type, "process specific assignment types(s)", :short => :t, :var => :assignment_types, :type => :symbols, :choices => ASSIGNMENT_TYPES, :default => ASSIGNMENT_TYPES
+    opt :assignment_type, "process specific assignment types(s)", :short => :t, :var => :assignment_types, :type => :choices, :choices => ASSIGNMENT_TYPES, :default => ASSIGNMENT_TYPES
     opt :all_types, "process all assignment types", :short => :A, :var => :assignment_types, :set => ASSIGNMENT_TYPES
     opt :create_infrastructure, "create infrastructure for a given model", :type => :strings
 
