@@ -11,8 +11,10 @@ module Process::Naf
       end
     end
 
-    opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
-    opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
+    opt_group :advanced do
+      opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
+      opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
+    end
 
     def initialize 
       super
