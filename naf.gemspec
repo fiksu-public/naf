@@ -11,8 +11,8 @@ Gem::Specification.new do |s|
   s.date        = '2013-05-14'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
   s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
-  s.authors     = ["Keith Gabryelski", "Nathaniel Lim", "Aleksandr Dembskiy"]
-  s.email       = ['keith@fiksu.com', 'nlim@fiksu.com']
+  s.authors     = ["Keith Gabryelski", "Nathaniel Lim", "Aleksandr Dembskiy", "Leonardo Meira"]
+  s.email       = ['keith@fiksu.com', 'lmeira@fiksu.com']
   s.files       = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.homepage    = 'http://github.com/fiksu/naf'
