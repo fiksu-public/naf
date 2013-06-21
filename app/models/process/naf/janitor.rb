@@ -9,11 +9,13 @@ module Process::Naf
 
     opt :no_writes, "don't modify database"
     opt :list_assignments, "list models that would be processed (and exit without processing)", :short => :L
+    # the order over these three opts matter -- the second sets the default 
     opt :all, "process all models", :short => :a, :var => :assignments, :set => :all
-    opt :all_enabled, "process all enabled models", :short => :E, :var => :assignments, :set => :all_enabled, :default => :all_enabled
     opt :assignment, "process specific assignment(s)", :short => :j, :var => :assignments, :type => :ints
-    opt :assignment_type, "process specific assignment types(s)", :short => :t, :var => :assignment_types, :type => :symbols, :choices => ASSIGNMENT_TYPES, :default => ASSIGNMENT_TYPES
+    opt :all_enabled, "process all enabled models", :short => :E, :var => :assignments, :set => :all_enabled, :default => :all_enabled
+    # the order over these two opts matter -- the second sets the default 
     opt :all_types, "process all assignment types", :short => :A, :var => :assignment_types, :set => ASSIGNMENT_TYPES
+    opt :assignment_type, "process specific assignment types(s)", :short => :t, :var => :assignment_types, :type => :symbols, :choices => ASSIGNMENT_TYPES, :default => ASSIGNMENT_TYPES
     opt :create_infrastructure, "create infrastructure for a given model", :type => :strings
 
     def assignments_to_process(assignment_type = ::Naf::JanitorialAssignment)
