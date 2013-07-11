@@ -75,7 +75,7 @@ module Logical
       context "with regard to the search" do
         
         before(:all) do
-          ::Naf::Job.delete_all
+          ::Naf::HistoricalJob.delete_all
           @job_status_type_map = {}
           STATUS_MAP.each{ |factory, status| 
             @job_status_type_map[status.downcase.split(' ').join('_')] = Job.new(FactoryGirl.create(factory))
@@ -103,10 +103,10 @@ module Logical
           let(:job_two) { FactoryGirl.create(:running_job, :application_type => FactoryGirl.create(:bash_command_app_type), :pid => 500, :command => "ps aux | grep ssh", :priority => 5, :application_run_group_restriction => FactoryGirl.create(:limited_per_machine), :application_run_group_name => "crazy group") }
 
           before(:each) do
-            ::Naf::Job.delete_all
+            ::Naf::HistoricalJob.delete_all
             job_one
             job_two
-            ::Naf::Job.all.should have(2).items
+            ::Naf::HistoricalJob.all.should have(2).items
           end
 
           it "should filter by application type" do

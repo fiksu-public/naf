@@ -1,0 +1,54 @@
+<div id="record">
+  <%= link_to 'Back', naf.historical_jobs_path %>
+
+  <h3 id="record_name">Create a Job</h3>
+
+  <%= form_tag(naf.historical_jobs_path, id: 'job_add') do %>
+
+      <% if defined?(@historical_job) && @historical_job.errors.any? %>
+          <div id="errorExplanation">
+            <h2><%= pluralize(@job.errors.count, "error") %> prohibited job from being saved:</h2>
+
+            <ul>
+              <% @historical_job.errors.full_messages.each do |msg| %>
+                  <li><%= msg %></li>
+              <% end %>
+            </ul>
+          </div>
+      <% end %>
+
+      <div class="field">
+        <%= label :script_type, "Script Type" %>
+        <br/>
+        <%= select(:job, :application_type_id,
+                   Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] },
+                   { include_blank: true }) %>
+      </div>
+      <div class="field">
+        <%= label :command, "Command" %>
+        <br/>
+        <%= text_field(:job, :command) %>
+        <br/>
+      </div>
+      <div class="field">
+        <%= label :run_group_restriction, "Run Group Restriction" %>
+        <br/>
+        <%= select(:job, :application_run_group_restriction_id,
+                   Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] },
+                   { include_blank: true }) %>
+        <br/>
+      </div>
+      <div class="field">
+        <%= label :run_group_name, "Run Group Name" %>
+        <br/>
+        <%= text_field(:job, :application_run_group_name) %> <br/>
+      </div>
+      <div class="field">
+        <%= label :application_run_group_limit, "Application Run Group Limit" %>
+        <br/>
+        <%= text_field(:job, :application_run_group_limit) %>
+      </div>
+      <br/>
+      <%= submit_tag("Create job") %>
+  <% end %>
+</div>

@@ -37,7 +37,7 @@ module Naf
               :id)
       }
 
-      partition.janitorial_creates_needed lambda {|model, *partition_key_values|
+      partition.janitorial_creates_needed lambda { |model, *partition_key_values|
         sequence_name = model.connection.default_sequence_name(model.table_name)
         current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
         start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
@@ -45,7 +45,7 @@ module Naf
         return model.partition_generate_range(start_range, end_range).reject{|p| model.sql_adapter.partition_exists?(p)}
       }
       partition.janitorial_archives_needed []
-      partition.janitorial_drops_needed lambda {|model, *partition_key_values|
+      partition.janitorial_drops_needed lambda { |model, *partition_key_values|
         sequence_name = model.connection.default_sequence_name(model.table_name)
         current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
         partition_key_value = current_id - (model.partition_table_size * model.partition_num_lead_buffers)
@@ -57,5 +57,6 @@ module Naf
         return partition_key_values_to_drop
       }
     end
+
   end
 end

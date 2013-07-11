@@ -260,7 +260,7 @@ class NafSchema < ActiveRecord::Migration
           type                                   text not null,
           enabled                                boolean not null default true,
           deleted                                boolean not null default false,
-          model_name                             text not null,  -- ::Naf::Job
+          model_name                             text not null,  -- ::Naf::HistoricalJob
           assignment_order                       integer not null default 0,
           check (deleted = false OR enabled = false)
       );
@@ -310,14 +310,12 @@ class NafSchema < ActiveRecord::Migration
           UNIQUE(logger_style_id, logger_name_id)
       );
       insert into #{schema_name}.janitorial_assignments (type, assignment_order, model_name) values
-        ('Naf::JanitorialCreateAssignment', 500, '::Naf::Job'),
-        ('Naf::JanitorialDropAssignment',   500, '::Naf::Job'),
-        ('Naf::JanitorialCreateAssignment', 100, '::Naf::JobCreatedAt'),
-        ('Naf::JanitorialDropAssignment',   100, '::Naf::JobCreatedAt'),
-        ('Naf::JanitorialCreateAssignment', 125, '::Naf::JobPrerequisite'),
-        ('Naf::JanitorialDropAssignment',   125, '::Naf::JobPrerequisite'),
-        ('Naf::JanitorialCreateAssignment', 250, '::Naf::JobAffinityTab'),
-        ('Naf::JanitorialDropAssignment',   250, '::Naf::JobAffinityTab');
+        ('Naf::JanitorialCreateAssignment', 500, '::Naf::HistoricalJob'),
+        ('Naf::JanitorialDropAssignment',   500, '::Naf::HistoricalJob'),
+        ('Naf::JanitorialCreateAssignment', 125, '::Naf::HistoricalJobPrerequisite'),
+        ('Naf::JanitorialDropAssignment',   125, '::Naf::HistoricalJobPrerequisite'),
+        ('Naf::JanitorialCreateAssignment', 250, '::Naf::HistoricalJobAffinityTab'),
+        ('Naf::JanitorialDropAssignment',   250, '::Naf::HistoricalJobAffinityTab');
 
       set search_path = 'public';
 
@@ -328,10 +326,11 @@ class NafSchema < ActiveRecord::Migration
     schema_name = Naf.schema_name
     execute <<-SQL
       drop table #{schema_name}.janitorial_assignments cascade;
-      drop table #{schema_name}.job_affinity_tabs cascade;
-      drop table #{schema_name}.job_created_ats cascade;
-      drop table #{schema_name}.job_prerequisites cascade;
-      drop table #{schema_name}.jobs cascade;
+      drop table #{schema_name}.historical_job_affinity_tabs cascade;
+      drop table #{schema_name}.historical_job_prerequisites cascade;
+      drop table #{schema_name}.historical_jobs cascade;
+      drop table #{schema_name}.running_jobs cascade;
+      drop table #{schema_name}.queued_jobs cascade;
       drop table #{schema_name}.affinities cascade;
       drop table #{schema_name}.affinity_classifications cascade;
       drop table #{schema_name}.machines cascade;
@@ -354,7 +353,7 @@ class NafSchema < ActiveRecord::Migration
           begin
             if (SELECT COUNT(*) FROM pg_tables WHERE schemaname = '#{schema_name}') > 0 THEN
               raise notice 'Skipping drop of schema:: #{schema_name}, there are still other tables under it!';
-            else 
+            else
               raise notice 'Dropping schema #{schema_name}';
               drop schema #{schema_name} cascade;
             end if;
@@ -364,12 +363,11 @@ class NafSchema < ActiveRecord::Migration
     end
 
     schemas = execute <<-SQL
-      select 'drop schema ' || nspname ||' cascade;'
-        from pg_namespace
-        where nspname = 'naf_job_affinity_tabs_partitions'
-        OR nspname = 'naf_job_created_ats_partitions'
-        OR nspname ='naf_job_prerequisites_partitions'
-        OR nspname = 'naf_jobs_partitions';
+      SELECT 'drop schema ' || nspname ||' cascade;'
+      FROM pg_namespace
+      WHERE nspname = 'naf_historical_job_affinity_tabs_partitions' OR
+        nspname = 'naf_historical_job_prerequisites_partitions' OR
+        nspname = 'naf_historical_jobs_partitions';
     SQL
 
     schemas.values.each do |schema|

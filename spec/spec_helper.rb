@@ -1,5 +1,5 @@
 # Configure Rails Environment
-ENV["RAILS_ENV"] = "test"
+ENV["RAILS_ENV"] ||= "test"
 
 # What will our dummy Rails app be? 
 require File.expand_path("../dummy/config/environment.rb",  __FILE__)
@@ -7,7 +7,6 @@ require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 require 'rspec/rails'
 require 'rspec/autorun'
 require 'factory_girl'
-
 
 ENGINE_RAILS_ROOT = File.join(File.dirname(__FILE__), '../')
 

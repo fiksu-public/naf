@@ -11,12 +11,12 @@ module Process::Naf
       end
     end
 
-    opt :naf_job_id, "naf.jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
+    opt :naf_job_id, "naf.historical_jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
     opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
 
     def initialize 
       super
-      update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, :default => ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
     end
 
     def database_application_name
@@ -25,7 +25,7 @@ module Process::Naf
 
     def fetch_naf_job
       if @naf_job_id.is_a?(Integer) && @naf_job_id > 0
-        return ::Naf::Job.from_partition(@naf_job_id).find(@naf_job_id)
+        return ::Naf::HistoricalJob.from_partition(@naf_job_id).find(@naf_job_id)
       end
       return nil
     end

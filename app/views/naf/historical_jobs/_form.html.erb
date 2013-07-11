@@ -1,11 +1,11 @@
-<%= form_for(@job) do |f| %>
-  
-  <% if @job.errors.any? %>
+<%= form_for(@historical_job) do |f| %>
+
+  <% if @historical_job.errors.any? %>
   <div id="errorExplanation">
-    <h2><%= pluralize(@job.errors.count, "error") %> prohibited this application from being saved:</h2>
-    
+    <h2><%= pluralize(@historical_job.errors.count, "error") %> prohibited this application from being saved:</h2>
+
     <ul>
-      <% @job.errors.full_messages.each do |msg| %> 
+      <% @historical_job.errors.full_messages.each do |msg| %> 
         <li><%= msg %></li>
       <% end %>
     </ul>
@@ -13,7 +13,9 @@
   <% end %>
   <div class="field">
     <%= f.label :script_type %> <br />
-    <%= f.select(:application_type_id, Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id]}, {:include_blank => true}) %>
+    <%= f.select(:application_type_id,
+                 Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id] },
+                 { include_blank: true }) %>
   </div>
 
   <div class="field">
@@ -23,7 +25,9 @@
 
   <div class="field">
     <%= f.label :application_run_group_restriction %></br />
-    <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id]}, {:include_blank => true} )%>
+    <%= f.select(:application_run_group_restriction_id,
+                 Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] },
+                 { include_blank: true } )%>
   </div>
 
   <div class="field">

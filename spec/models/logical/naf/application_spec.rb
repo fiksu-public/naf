@@ -2,14 +2,22 @@ require 'spec_helper'
 
 module Logical
   module Naf
-    
+
     describe Application do
-      
-      let(:columns)      { [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites, :deleted, :visible] }
-      let(:physical_app) {  FactoryGirl.create(:application) }
-      let(:logical_app)  {  Application.new(physical_app)    }
-      let(:scheduled_physical_app) {  FactoryGirl.create(:scheduled_application, :application_schedule => FactoryGirl.create(:schedule_at_time)) }
-      
+      let(:columns) { [:id,
+                       :title,
+                       :script_type_name,
+                       :application_run_group_name,
+                       :application_run_group_restriction_name,
+                       :run_time,
+                       :prerequisites,
+                       :deleted,
+                       :visible] }
+      let(:physical_app) { FactoryGirl.create(:application) }
+      let(:logical_app) { Application.new(physical_app) }
+      let(:scheduled_physical_app) {
+        FactoryGirl.create(:scheduled_application, :application_schedule => FactoryGirl.create(:schedule_at_time))
+      }
 
       context "Class Methods" do
         it "search method should return array of wrapper around physical application" do
@@ -47,8 +55,7 @@ module Logical
           logical_scheduled_app.send(m)
         end
       end
-
     end
-    
+
   end
 end

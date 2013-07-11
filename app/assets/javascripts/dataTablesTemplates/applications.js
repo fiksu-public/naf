@@ -43,7 +43,7 @@ jQuery(document).ready(function() {
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery('.enqueue').live("click", function(){
+  jQuery(document).delegate('.enqueue', "click", function(){
     var answer = confirm("Adding application as a job on the queue?");
     if (!answer) {
       return false;

@@ -12,13 +12,12 @@
   </div>
   <% end %>
 
-  <%= f.hidden_field :job_id, :value => @job.id %>
+  <%= f.hidden_field :historical_job_id, :value => @job.id %>
 
   <div class="field">
     <%= f.label :affinity %><br />
-    <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>
-  </div>    
-
+    <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, include_blank: true) %>
+  </div>
 
   <br />
   <div class="actions">

@@ -6,16 +6,23 @@ FactoryGirl.define do
   #######   Jobs  #############################################
   #############################################################
 
-  factory :job_base, :class => ::Naf::Job do
+  factory :job_base, :class => ::Naf::HistoricalJob do
     association :application_type, :factory => :rails_app_type
     association :application_run_group_restriction, :factory => :no_limit
   end
 
   factory :job, :parent => :job_base do
-    command "::Naf::Job.test hello world"
+    command "::Naf::HistoricalJob.test hello world"
     sequence(:application_run_group_name) do |n|
       "Run Group #{n}"
     end
+  end
+
+  factory :queued_job, :class => ::Naf::QueuedJob do
+    association :historical_job, :factory => :job
+    association :application_type, :factory => :rails_app_type
+    association :application_run_group_restriction, :factory => :no_limit
+    command "::Naf::QueuedJob.test hello world"
   end
 
   factory :scheduled_job, :parent => :job do
@@ -29,7 +36,6 @@ FactoryGirl.define do
   factory :failed_to_start_job, :parent => :job_picked_by_machine do
     failed_to_start true
   end
-
 
   factory :running_job, :parent => :job_picked_by_machine do
     started_at Time.zone.now
@@ -106,7 +112,7 @@ FactoryGirl.define do
 
   factory :application, :parent => :application_base do
     sequence(:command) do |n|
-      "::Naf::Job.test hello_#{n}"
+      "::Naf::HistoricalJob.test hello_#{n}"
     end
     sequence(:title) do |n|
       "Test #{n}"
@@ -265,7 +271,7 @@ FactoryGirl.define do
   #############################################################
   #######   Affinity Classifications  #########################
   #############################################################
-  
+
   factory :location_affinity_classification, :class => ::Naf::AffinityClassification do
     id 1
     affinity_classification_name "location"
@@ -290,16 +296,14 @@ FactoryGirl.define do
     end
   end
 
-
-
   #############################################################
   #######   Affinity Tabs and Slots   #########################
   #############################################################
-  
+
   # Job Affinity Tabs
 
-  factory :job_affinity_tab_base, :class => ::Naf::JobAffinityTab do
-    association :job, :factory => :job
+  factory :job_affinity_tab_base, :class => ::Naf::HistoricalJobAffinityTab do
+    association :historical_job, :factory => :job
   end
 
   factory :normal_job_affinity_tab, :parent => :job_affinity_tab_base do
@@ -313,7 +317,6 @@ FactoryGirl.define do
   factory :canary_job_affinity_tab, :parent => :job_affinity_tab_base do
     association :affinity, :factory => :canary_affinity
   end
-
 
   # Application Schedule Affinity Tabs
 
@@ -329,9 +332,8 @@ FactoryGirl.define do
     association :affinity, :factory => :canary_affinity
   end
 
-
   # Machine Affinity Slots
-  
+
   factory :machine_affinity_slot_base, :class => ::Naf::MachineAffinitySlot do
     association :machine, :factory => :machine
   end
@@ -353,6 +355,5 @@ FactoryGirl.define do
     association :affinity, :factory => :canary_affinity
     required true
   end
-
 
 end

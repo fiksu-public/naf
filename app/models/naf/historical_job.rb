@@ -1,11 +1,9 @@
 module Naf
-
   #
   # Things you should know about jobs
   # new jobs older than 1.week will not be searched in the queue.  You should not run programs
   # for more than a 1.week (instead, have them exit and restarted periodically)
   #
-
   class HistoricalJob < ::Partitioned::ById
     class JobPrerequisiteLoop < StandardError
       def initialize(job)
@@ -15,77 +13,124 @@ module Naf
 
     include PgAdvisoryLocker
 
+    # Protect from mass-assignment issue
+    attr_accessible :application_id,
+                    :application_type_id,
+                    :command,
+                    :application_run_group_restriction_id,
+                    :application_run_group_name,
+                    :application_run_group_limit,
+                    :priority,
+                    :started_on_machine_id,
+                    :failed_to_start,
+                    :pid,
+                    :exit_status,
+                    :termination_signal,
+                    :state,
+                    :request_to_terminate,
+                    :marked_dead_by_machine_id,
+                    :log_level
+
     JOB_STALE_TIME = 1.week
 
-    validates :application_type_id, :application_run_group_restriction_id, :presence => true
-    validates :command,  {:presence => true, :length => {:minimum => 3}}
-    validates :application_run_group_limit,
-              :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
 
-    belongs_to :application_type, :class_name => '::Naf::ApplicationType'
-    belongs_to :started_on_machine, :class_name => '::Naf::Machine'
-    belongs_to :application, :class_name => "::Naf::Application"
-    belongs_to :application_run_group_restriction, :class_name => "::Naf::ApplicationRunGroupRestriction"
+    belongs_to :application_type,
+      class_name: '::Naf::ApplicationType'
+    belongs_to :started_on_machine,
+      class_name: '::Naf::Machine',
+      foreign_key: 'started_on_machine_id'
+    belongs_to :marked_dead_by_machine,
+      class_name: '::Naf::Machine',
+      foreign_key: 'marked_dead_by_machine_id'
+    belongs_to :application,
+      class_name: "::Naf::Application"
+    belongs_to :application_run_group_restriction,
+      class_name: "::Naf::ApplicationRunGroupRestriction"
+    # Must access instance methods job_prerequisites through helper methods so we can use partitioning sql
+    has_many :historical_job_prerequisites,
+      class_name: "::Naf::HistoricalJobPrerequisite",
+      dependent: :destroy
+    has_many :prerequisites,
+      class_name: "::Naf::HistoricalJob",
+      through: :historical_job_prerequisites,
+      source: :prerequisite_job
+    # Access supported through instance methods
+    has_many :historical_job_affinity_tabs,
+      class_name: "::Naf::HistoricalJobAffinityTab",
+      dependent: :destroy
+    has_many :historical_job_affinities,
+      class_name: "::Naf::Affinity",
+      through: :historical_job_affinity_tabs
 
-    # XXX access supported through instance methods
-    # has_many :job_affinity_tabs, :class_name => "::Naf::JobAffinityTab", :dependent => :destroy
-    # has_many :job_affinities, :class_name => "::Naf::Affinity", :through => :job_affinity_tabs
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
 
-    # XXX must access instance methods job_prerequisites through helper methods so we can use partitioning sql
-    # has_many :job_prerequisites, :class_name => "::Naf::JobPrerequisite", :dependent => :destroy
-    # has_many :prerequisites, :class_name => "::Naf::Job", :through => :job_prerequisites, :source => :prerequisite_job
+    validates :application_type_id,
+              :command,
+              :application_run_group_restriction_id, presence: true
 
-    delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
-    delegate :script_type_name, :to => :application_type
+    validates :command, length: {
+                          minimum: 3
+                        }
+    validates :application_run_group_limit, numericality: {
+                                              only_integer: true,
+                                              greater_than_or_equal_to: 1,
+                                              less_than: 2147483647,
+                                              allow_blank: true
+                                            }
 
-    attr_accessible :application_type_id, :application_id, :application_run_group_restriction_id
-    attr_accessible :application_run_group_name, :command, :request_to_terminate, :priority, :log_level
-    attr_accessible :application_run_group_limit
+    #--------------------
+    # *** Delegations ***
+    #++++++++++++++++++++
 
-    def to_s
-      components = []
-      if started_at.nil?
-        components << "QUEUED"
-      else
-        if finished_at.nil?
-          if pid
-            extras = []
-            extras << pid.to_s
-            if request_to_terminate
-              extras << 'RequestedToTerminate'
-            end
-            components << "RUNNING:#{extras.join(':')}"
-          else
-            components << "SPAWNING"
-          end
-        else
-          extras = []
-          if request_to_terminate
-            extras << 'RequestedToTerminate'
-          end
-          if failed_to_start
-            extras << "FailedToStart"
-          end
-          if termination_signal
-            extras << "SIG#{termination_signal}"
-          end
-          if exit_status && exit_status != 0
-            extras << "STATUS=#{exit_status}"
-          end
-          if extras.length
-            extras_str = " (#{extras.join(',')})"
-          else
-            extras_str = ""
-          end
-          components << "FINISHED#{extras_str}"
+    delegate :application_run_group_restriction_name, to: :application_run_group_restriction
+    delegate :script_type_name, to: :application_type
+
+    #------------------
+    # *** Partition ***
+    #++++++++++++++++++
+
+    partitioned do |partition|
+      partition.foreign_key :application_id, full_table_name_prefix + "applications"
+      partition.foreign_key :application_type_id, full_table_name_prefix + "application_types"
+      partition.foreign_key :application_run_group_restriction_id, full_table_name_prefix + "application_run_group_restrictions"
+      partition.foreign_key :started_on_machine_id, full_table_name_prefix + "machines"
+      partition.index :created_at
+      partition.index :application_id
+      partition.index :started_on_machine_id
+      partition.index :command
+      partition.index :application_run_group_name
+      partition.index :finished_at
+      partition.index :exit_status
+
+      partition.janitorial_creates_needed lambda { |model, *partition_key_values|
+        sequence_name = model.connection.default_sequence_name(model.table_name)
+        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
+        start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
+        end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
+        return model.partition_generate_range(start_range, end_range).reject{|p| model.sql_adapter.partition_exists?(p)}
+      }
+      partition.janitorial_archives_needed []
+      partition.janitorial_drops_needed lambda { |model, *partition_key_values|
+        sequence_name = model.connection.default_sequence_name(model.table_name)
+        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
+        partition_key_value = current_id - (model.partition_table_size * model.partition_num_lead_buffers)
+        partition_key_values_to_drop = []
+        while model.sql_adapter.partition_exists?(partition_key_value)
+          partition_key_values_to_drop << partition_key_value
+          partition_key_value -= model.partition_table_size
         end
-      end
-      components << "id: #{id}"
-      components << "\"#{command}\""
-      return "::Naf::HistoricalJob<#{components.join(', ')}>"
+        return partition_key_values_to_drop
+      }
     end
 
-    # partitioning
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
 
     def self.connection
       return ::Naf::NafBase.connection
@@ -103,88 +148,90 @@ module Naf
       return 10
     end
 
-    partitioned do |partition|
-      partition.foreign_key :application_id, full_table_name_prefix + "applications"
-      partition.foreign_key :application_type_id, full_table_name_prefix + "application_types"
-      partition.foreign_key :application_run_group_restriction_id, full_table_name_prefix + "application_run_group_restrictions"
-      partition.foreign_key :started_on_machine_id, full_table_name_prefix + "machines"
-      partition.index :created_at
-      partition.index :application_id
-      partition.index :started_on_machine_id
-      partition.index :command
-      partition.index :application_run_group_name
-      partition.index :finished_at
-      partition.index :exit_status
-
-      partition.janitorial_creates_needed lambda {|model, *partition_key_values|
-        sequence_name = model.connection.default_sequence_name(model.table_name)
-        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
-        start_range = [0, current_id - (model.partition_table_size * model.partition_num_lead_buffers)].max
-        end_range = current_id + (model.partition_table_size * model.partition_num_lead_buffers)
-        return model.partition_generate_range(start_range, end_range).reject{|p| model.sql_adapter.partition_exists?(p)}
-      }
-      partition.janitorial_archives_needed []
-      partition.janitorial_drops_needed lambda {|model, *partition_key_values|
-        sequence_name = model.connection.default_sequence_name(model.table_name)
-        current_id = model.find_by_sql("select last_value as id from #{sequence_name}").first.id
-        partition_key_value = current_id - (model.partition_table_size * model.partition_num_lead_buffers)
-        partition_key_values_to_drop = []
-        while model.sql_adapter.partition_exists?(partition_key_value)
-          partition_key_values_to_drop << partition_key_value
-          partition_key_value -= model.partition_table_size
-        end
-        return partition_key_values_to_drop
-      }
-    end
-
-    # scope like things
-
     def self.queued_between(start_time, end_time)
       return where(["created_at >= ? AND created_at <= ?", start_time, end_time])
     end
 
     def self.canceled
-      return where(:request_to_terminate => true)
+      return where(request_to_terminate: true)
     end
 
     def self.application_last_runs
-      return where("application_id is not null").
+      return where("application_id IS NOT NULL").
         group("application_id").
-        select("application_id,max(finished_at) as finished_at").
+        select("application_id, MAX(finished_at) AS finished_at").
         reject{|job| job.finished_at.nil? }
     end
 
     def self.application_last_queued
-      return 
-        where("application_id is not null").
+      return where("application_id IS NOT NULL").
         group("application_id").
-        select("application_id,max(id) as id,max(created_at) as created_at")
+        select("application_id, MAX(id) AS id, MAX(created_at) AS created_at")
     end
 
     def self.finished
-      return where("finished_at is not null or request_to_terminate = true")
+      return where("finished_at IS NOT NULL OR request_to_terminate = true")
     end
 
     def self.queued_status
-      return where("(started_at is null and request_to_terminate = false)
-                    or (finished_at > '#{Time.zone.now - 1.minute}')
-                    or (started_at is not null and finished_at is null and request_to_terminate = false)")
+      return where("(started_at IS NULL AND request_to_terminate = false)
+                    OR (finished_at > '#{Time.zone.now - 1.minute}')
+                    OR (started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false)")
     end
 
     def self.running_status
-      return where("(started_at is not null and finished_at is null and request_to_terminate = false)
-                    or (finished_at > '#{Time.zone.now - 1.minute}')")
+      return where("(started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false)
+                    OR (finished_at > '#{Time.zone.now - 1.minute}')")
     end
 
     def self.queued_with_waiting
-      return where("(started_at is null and request_to_terminate = false)")
+      return where("(started_at IS NULL AND request_to_terminate = false)")
     end
 
     def self.errored
-      return where("finished_at is not null and exit_status > 0 or request_to_terminate = true")
+      return where("finished_at IS NOT NULL AND exit_status > 0 OR request_to_terminate = true")
     end
 
-    #
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    def to_s
+      components = []
+
+      if started_at.nil?
+        components << "QUEUED"
+      else
+        if finished_at.nil?
+          if pid
+            extras = []
+            extras << pid.to_s
+            extras << 'RequestedToTerminate' if request_to_terminate
+            components << "RUNNING:#{extras.join(':')}"
+          else
+            components << "SPAWNING"
+          end
+        else
+          extras = []
+          extras << 'RequestedToTerminate' if request_to_terminate
+          extras << "FailedToStart" if failed_to_start
+          extras << "SIG#{termination_signal}" if termination_signal
+          if exit_status && exit_status != 0
+            extras << "STATUS=#{exit_status}"
+          end
+          if extras.length
+            extras_str = " (#{extras.join(',')})"
+          else
+            extras_str = ""
+          end
+          components << "FINISHED#{extras_str}"
+        end
+      end
+      components << "id: #{id}"
+      components << "\"#{command}\""
+
+      return "::Naf::HistoricalJob<#{components.join(', ')}>"
+    end
 
     def title
       return application.try(:title)
@@ -198,34 +245,31 @@ module Naf
       return started_on_machine.try(:server_address)
     end
 
-    #
-
-
-    def job_affinity_tabs
-      return ::Naf::JobAffinityTab.
+    def historical_job_affinity_tabs
+      return ::Naf::HistoricalJobAffinityTab.
         from_partition(id).
-        where(:job_id => id)
+        where(historical_job_id: id)
     end
 
     def job_affinities
-      return job_affinity_tabs.map{|jat| jat.affinity}
+      return historical_job_affinity_tabs.map{ |jat| jat.affinity }
     end
 
     def affinity_ids
-      return job_affinity_tabs.map{|jat| jat.affinity_id}
+      return historical_job_affinity_tabs.map{ |jat| jat.affinity_id }
     end
 
-    def job_prerequisites
-      return ::Naf::JobPrerequisite.
+    def historical_job_prerequisites
+      return ::Naf::HistoricalJobPrerequisite.
         from_partition(id).
-        where(:job_id => id)
+        where(historical_job_id: id)
     end
 
     def prerequisites
-      return job_prerequisites.
-        map{|jp| ::Naf::HistoricalJob.from_partition(jp.prerequisite_historical_job_id).
-        find_by_id(jp.prerequisite_historical_job_id)}.
-        reject{|j| j.nil?}
+      return historical_job_prerequisites.
+        map{ |hjp| ::Naf::HistoricalJob.from_partition(hjp.prerequisite_historical_job_id).
+        find_by_id(hjp.prerequisite_historical_job_id) }.
+        reject{ |j| j.nil? }
     end
 
     def verify_prerequisites(these_jobs)
@@ -245,5 +289,6 @@ module Naf
     def spawn
       application_type.spawn(self)
     end
+
   end
 end

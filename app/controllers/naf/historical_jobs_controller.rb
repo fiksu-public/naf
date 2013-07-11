@@ -1,6 +1,5 @@
 module Naf
-  class JobsController < Naf::ApplicationController
-
+  class HistoricalJobsController < Naf::ApplicationController
     include Naf::ApplicationHelper
 
     before_filter :set_cols_and_attributes
@@ -8,8 +7,7 @@ module Naf
 
     def index
       respond_to do |format|
-        format.html do
-        end
+        format.html
         format.json do
           set_page
           params[:search][:direction] = params['sSortDir_0']
@@ -17,31 +15,31 @@ module Naf
           params[:search][:limit] = params['iDisplayLength']
           params[:search][:offset] = @page - 1
           @total_display_records = Logical::Naf::Job.total_display_records(params[:search])
-          @total_records = Naf::Job.count(:all)
-          @jobs = []
+          @total_records = Naf::HistoricalJob.count(:all)
+          @historical_jobs = []
           job =[]
           Logical::Naf::Job.search(params[:search]).map(&:to_hash).map do |hash|
             add_urls(hash).map do |key, value|
               value ||= ''
               job << value
             end
-            @jobs << job
+            @historical_jobs << job
             job = []
           end
-          render :layout => 'naf/layouts/jquery_datatables'
+          render layout: 'naf/layouts/jquery_datatables'
         end
       end
     end
 
     def show
-      @record = Naf::Job.find(params[:id])
-      @record = Logical::Naf::Job.new(@record)
+      historical_job = Naf::HistoricalJob.find(params[:id])
+      @historical_job = Logical::Naf::Job.new(historical_job)
       respond_to do |format|
         format.json do
-          render :json => { :success => true }.to_json
+          render json: { success: true }.to_json
         end
         format.html do
-          render :template => 'naf/record'
+          render template: 'naf/record'
         end
       end
     end
@@ -50,59 +48,61 @@ module Naf
     end
 
     def create
-      @job = Naf::Job.new(params[:job])
+      @historical_job = Naf::HistoricalJob.new(params[:job])
       if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
         if schedule = app.application_schedule
-          @job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
+          @historical_job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
         else
-          @job.command = app.command
-          @job.application_type_id = app.application_type_id
-          @job.application_run_group_restriction_id = Naf::ApplicationRunGroupRestriction.no_limit.id
+          @historical_job.command = app.command
+          @historical_job.application_type_id = app.application_type_id
+          @historical_job.application_run_group_restriction_id = Naf::ApplicationRunGroupRestriction.no_limit.id
         end
       end
+
       respond_to do |format|
         format.json do
-          render :json => {
-                            :success => true,
-                            :title => @job.title,
-                            :command => @job.command,
-                           }.to_json if @job.save
+          render json: { success: true,
+                         title: @historical_job.title,
+                         command: @historical_job.command }.to_json if @historical_job.save
         end
+
         format.html do
-          if @job.save
-            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully created.")
+          if @historical_job.save
+            redirect_to(@historical_job,
+                        notice: "Job '#{@historical_job.command}' was successfully created.")
           else
-            render :action => "new"
+            render action: "new"
           end
         end
       end
     end
 
     def edit
-      @job = Naf::Job.find(params[:id])
+      @historical_job = Naf::HistoricalJob.find(params[:id])
     end
 
     def update
       respond_to do |format|
-        @job = Naf::Job.find(params[:id])
-        if @job.update_attributes(params[:job])
+        @historical_job = Naf::HistoricalJob.find(params[:id])
+        if @historical_job.update_attributes(params[:historical_job])
           format.html do
-            redirect_to(@job, :notice => "Job '#{@job.command}' was successfully updated.")
+            redirect_to(@historical_job, notice: "Job '#{@historical_job.command}' was successfully updated.")
           end
           format.json do
-            render :json => { :success => true, :title => @job.title, :command => @job.command }.to_json
+            render json: { success: true,
+                           title: @historical_job.title,
+                           command: @historical_job.command }.to_json
           end
         else
           format.html do 
-            render :action => "edit"
+            render action: "edit"
           end
           format.json do
-            render :json => {:success => false}.to_json
+            render json: { success: false }.to_json
           end
         end
       end
     end
-
 
     private
 
@@ -111,16 +111,16 @@ module Naf
     end
 
     def add_urls(hash)
-      job = ::Naf::Job.find(hash[:id])
+      job = ::Naf::HistoricalJob.find(hash[:id])
       if application = job.application
         hash[:application_url] = url_for(application)
       else
         hash[:application_url] = nil
       end
       hash[:papertrail_url] = papertrail_link(job)
+
       return hash
     end
 
   end
-
 end

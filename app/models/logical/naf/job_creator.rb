@@ -10,29 +10,32 @@ module Logical
                           prerequisites = [])
         application_run_group_name = command if application_run_group_name == :command
         ::Naf::HistoricalJob.transaction do
-          job = ::Naf::HistoricalJob.create(:application_type_id => 1,
-                                            :command => command,
-                                            :application_run_group_restriction_id => application_run_group_restriction.id,
-                                            :application_run_group_name => application_run_group_name,
-                                            :application_run_group_limit => application_run_group_limit,
-                                            :priority => priority)
+          historical_job = ::Naf::HistoricalJob.create!(application_type_id: 1,
+                                                        command: command,
+                                                        application_run_group_restriction_id: application_run_group_restriction.id,
+                                                        application_run_group_name: application_run_group_name,
+                                                        application_run_group_limit: application_run_group_limit,
+                                                        priority: priority)
           affinities.each do |affinity|
-            ::Naf::HistoricalJobAffinityTab.create(:historical_job_id => job.id, :affinity_id => affinity.id)
+            ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id, affinity_id: affinity.id)
           end
-          job.verify_prerequisites(prerequisites)
+          historical_job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
-            ::Naf::HistoricalJobPrerequisite.create(:historical_job_id => job.id,
-                                                    :prerequisite_historical_job_id => prerequisite.id)
+            ::Naf::HistoricalJobPrerequisite.create(historical_job_id: historical_job.id,
+                                                    prerequisite_historical_job_id: prerequisite.id)
           end
-          ::Naf::QueuedJob.create(:id => job.id,
-                                  :application_id => job.application_id,
-                                  :application_type_id => job.application_type_id,
-                                  :command => job.command,
-                                  :application_run_group_restriction_id => job.application_run_group_restriction_id,
-                                  :application_run_group_name => job.application_run_group_name,
-                                  :application_run_group_limit => job.application_run_group_limit,
-                                  :priority => job.priority)
-          return job
+          # Create a queued job
+          queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
+                                            application_type_id: historical_job.application_type_id,
+                                            command: historical_job.command,
+                                            application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
+                                            application_run_group_name: historical_job.application_run_group_name,
+                                            application_run_group_limit: historical_job.application_run_group_limit,
+                                            priority: historical_job.priority)
+          queued_job.id = historical_job.id
+          queued_job.save!
+
+          return historical_job
         end
       end
 
@@ -43,31 +46,34 @@ module Logical
                             priority = 0,
                             affinities = [],
                             prerequisites = [])
-        ::Naf::Job.transaction do
-          job = ::Naf::Job.create(:application_id => application.id,
-                                  :application_type_id => application.application_type_id,
-                                  :command => application.command,
-                                  :application_run_group_restriction_id => application_run_group_restriction.id,
-                                  :application_run_group_name => application_run_group_name,
-                                  :application_run_group_limit => application_run_group_limit,
-                                  :priority => priority)
+        ::Naf::HistoricalJob.transaction do
+          historical_job = ::Naf::HistoricalJob.create!(application_id: application.id,
+                                                        application_type_id: application.application_type_id,
+                                                        command: application.command,
+                                                        application_run_group_restriction_id: application_run_group_restriction.id,
+                                                        application_run_group_name: application_run_group_name,
+                                                        application_run_group_limit: application_run_group_limit,
+                                                        priority: priority)
           affinities.each do |affinity|
-            ::Naf::JobAffinityTab.create(:job_id => job.id, :affinity_id => affinity.id)
+            ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id, affinity_id: affinity.id)
           end
-          job.verify_prerequisites(prerequisites)
+          historical_job.verify_prerequisites(prerequisites)
           prerequisites.each do |prerequisite|
-            ::Naf::JobPrerequisite.create(:job_id => job.id,
-                                          :prerequisite_job_id => prerequisite.id)
+            ::Naf::HistoricalJobPrerequisite.create(historical_job_id: historical_job.id,
+                                                    prerequisite_historical_job_id: prerequisite.id)
           end
-          ::Naf::QueuedJob.create(:id => job.id,
-                                  :application_id => job.application_id,
-                                  :application_type_id => job.application_type_id,
-                                  :command => job.command,
-                                  :application_run_group_restriction_id => job.application_run_group_restriction_id,
-                                  :application_run_group_name => job.application_run_group_name,
-                                  :application_run_group_limit => job.application_run_group_limit,
-                                  :priority => job.priority)
-          return job
+          # Create a queued job
+          queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
+                                            application_type_id: historical_job.application_type_id,
+                                            command: historical_job.command,
+                                            application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
+                                            application_run_group_name: historical_job.application_run_group_name,
+                                            application_run_group_limit: historical_job.application_run_group_limit,
+                                            priority: historical_job.priority)
+          queued_job.id = historical_job.id
+          queued_job.save!
+
+          return historical_job
         end
       end
 

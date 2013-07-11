@@ -23,20 +23,17 @@ def override_task(*args, &block)
   Rake::Task.define_task(*args, &block)
 end
 
-
-
 # --------------------------------------------------
 # ---------------Custom Rake Tasks for Naf----------
 # --------------------------------------------------
 
 namespace :naf do
-
   namespace :isolate do
     desc "Custom isolation Engine migrations to db/naf/migrate folder, for use on non-primary database"
     task :migrations do
 
       puts "Moving naf migration files to folder: #{isolated_naf_migrations_folder}"
-      
+
       FileUtils.mkdir(isolated_naf_folder) unless Dir.exists?(isolated_naf_folder)
       FileUtils.mkdir(isolated_naf_migrations_folder) unless Dir.exists?(isolated_naf_migrations_folder)
 
@@ -59,10 +56,12 @@ namespace :naf do
   namespace :janitor do
     desc "create partitioning infrastructure for naf tables"
     task :infrastructure => :environment do
-      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name,::Naf::ApplicationSchedulePrerequisite.name]
+      model_names = [::Naf::HistoricalJob.name,
+                     ::Naf::HistoricalJobPrerequisite.name,
+                     ::Naf::HistoricalJobAffinityTab.name,
+                     ::Naf::ApplicationSchedulePrerequisite.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
-    
   end
 
   namespace :db do
@@ -81,7 +80,7 @@ namespace :naf do
         Rake::Task['db:migrate'].invoke
       end
     end
-    
+
     desc "Perform a rollback on the on the naf migrations"
     task :rollback => :environment do
       if using_another_database? and naf_migrations.size > 0
@@ -94,7 +93,7 @@ namespace :naf do
         Rake::Task['db:rollback'].invoke
       end
     end
-    
+
     namespace :migrate do
 
       desc 'Runs the "up" for a given migration VERSION.'
@@ -158,11 +157,7 @@ namespace :naf do
       end
     end
 
-
-
-
   namespace :structure do
-
     desc "Dump the naf_development schema"
     task :dump => :environment do
       env = "naf_#{::Rails.env}"
@@ -179,7 +174,6 @@ namespace :naf do
     end
   end
 
-    
   namespace :test do
      desc "Drop the Naf Test database"
       task :purge => :environment do
@@ -278,7 +272,7 @@ namespace :naf do
 
   desc "remove partitioning infrastructure for naf tables"
   task :remove_partitions => :environment do
-    klasses = [::Naf::Job,::Naf::JobCreatedAt,::Naf::JobPrerequisite,::Naf::JobAffinityTab]
+    klasses = [::Naf::HistoricalJob, ::Naf::HistoricalJobPrerequisite, ::Naf::HistoricalJobAffinityTab]
     existing_schemas = database_schemas
     schemas = klasses.map{ |klass| klass.configurator.schema_name }
     if using_another_database?
@@ -298,7 +292,6 @@ namespace :naf do
   end
 
 end
-
 
 # Helper Methods
 
@@ -376,5 +369,3 @@ end
 
 class NafConfigurationError < Exception
 end
-
-

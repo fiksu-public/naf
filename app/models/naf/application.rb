@@ -26,11 +26,12 @@ module Naf
     end
 
     def last_queued_job
-      last_queued_job = ::Naf::Job.recently_queued
-        .where(:application_id => self.id)
-        .group("application_id")
-        .select("application_id, max(id) as id").first
-      last_queued_job ? Naf::Job.find(last_queued_job.id) : nil
+      last_queued_job = ::Naf::HistoricalJob.
+        queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
+        where(application_id: self.id).
+        group(:application_id).
+        select("application_id, MAX(id) AS id").first
+      last_queued_job ? Naf::HistoricalJob.find(last_queued_job.id) : nil
     end
 
     def short_name_if_it_exist
@@ -45,11 +46,13 @@ module Naf
 
     def check_references_with_application_schedule_prerequisites
       if application_schedule.try(:marked_for_destruction?)
-        prerequisites = Naf::ApplicationSchedulePrerequisite.where(:prerequisite_application_schedule_id => application_schedule.id).all
+        prerequisites = Naf::ApplicationSchedulePrerequisite.
+          where(prerequisite_application_schedule_id: application_schedule.id).all
         unless prerequisites.blank?
           errors.add(:base, "Cannot delete scheduler, because the following applications are referenced to it: #{prerequisites.map{ |pre| pre.application_schedule.title }.join(', ') }")
         end
       end
     end
+
   end
 end

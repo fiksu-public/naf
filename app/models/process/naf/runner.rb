@@ -13,7 +13,7 @@ module Process::Naf
 
     def initialize
       super
-      update_opts :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
     end
@@ -169,7 +169,7 @@ module Process::Naf
                 if status.nil? || status.exited? || status.signaled?
                   logger.info { "cleaning up dead child: #{child_job.reload}" }
                   finish_job(child_job,
-                             { :exit_status => (status && status.exitstatus), :terminal_signal => (status && status.termsig) })
+                             { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
                 else
                   # this can happen if the child is sigstopped
                   logger.warn "child waited for did not exit: #{child_job}, status: #{status.inspect}"
@@ -195,26 +195,26 @@ module Process::Naf
       while @children.length < machine.thread_pool_size && memory_available_to_spawn?
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
-          job = @job_fetcher.fetch_next_job
+          running_job = @job_fetcher.fetch_next_job
 
-          unless job.present?
+          unless running_job.present?
             logger.debug_gross "no more jobs to run"
             break
           end
 
-          logger.info "starting new job : #{job}"
+          logger.info "starting new job : #{running_job}"
 
-          pid = job.spawn
+          pid = running_job.historical_job.spawn
           if pid
-            @children[pid] = job
-            job.pid = pid
-            job.failed_to_start = false
-            logger.info "job started : #{job}"
-            job.save!
+            @children[pid] = running_job
+            running_job.pid = pid
+            running_job.historical_job.failed_to_start = false
+            logger.info "job started : #{running_job}"
+            running_job.save!
           else
             # should never get here (well, hopefully)
-            logger.error "failed to execute #{job}"
-            finish_job(job, {:failed_to_start => true})
+            logger.error "failed to execute #{running_job}"
+            finish_job(running_job, { failed_to_start: true })
           end
         rescue StandardError => e
           # XXX rescue for various issues
@@ -230,20 +230,20 @@ module Process::Naf
     # XXX update_all doesn't support "from_partition" so we have this helper
     def update_historical_job(updates, historical_job_id)
       updates[:updated_at] = Time.zone.now
-      update_columns = updates.map{|k,v| "#{k} = ?"}.join(", ")
+      update_columns = updates.map{ |k,v| "#{k} = ?" }.join(", ")
       update_sql = <<-SQL
-         UPDATE #{::Naf::HistoricalJob.partition_table_name(historical_job.id)}
+         UPDATE #{::Naf::HistoricalJob.partition_table_name(historical_job_id)}
            SET
                #{update_columns}
          WHERE
            id = ?
       SQL
-      :Naf::HistoricalJob.find_by_sql([update_sql] + updates.values + [historical_job_id])
+      ::Naf::HistoricalJob.find_by_sql([update_sql] + updates.values + [historical_job_id])
     end
 
     def finish_job(running_job, updates = {})
-      :Naf::HistoricalJob.transaction do
-        update_historical_job(updates.merge({:finished_at => Time.zone.now}), running_job.id)
+      ::Naf::HistoricalJob.transaction do
+        update_historical_job(updates.merge({ finished_at: Time.zone.now }), running_job.id)
         running_job.delete
       end
     end
@@ -267,7 +267,6 @@ module Process::Naf
     def terminate_old_processes(machine)
       # check if any processes are hanging around and ask them
       # politely if they will please terminate
-
       jobs = assigned_jobs(machine)
       if jobs.length == 0
         logger.detail "no jobs to remove"
@@ -348,13 +347,14 @@ module Process::Naf
     end
 
     def should_be_queued
-      not_finished_applications = ::Naf::Job.recently_queued.
-        not_finished.
-        find_all{|job| job.application_id.present? }.
-        index_by{|job| job.application_id }
+      not_finished_applications = ::Naf::HistoricalJob.
+        queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
+        where("finished_at IS NULL AND request_to_terminate = false").
+        find_all{ |job| job.application_id.present? }.
+        index_by{ |job| job.application_id }
 
-      application_last_runs = ::Naf::Job.application_last_runs.
-        index_by{|job| job.application_id }
+      application_last_runs = ::Naf::HistoricalJob.application_last_runs.
+        index_by{ |job| job.application_id }
 
       # find the run_interval based schedules that should be queued
       # select anything that isn't currently running and completed
@@ -371,7 +371,6 @@ module Process::Naf
       #  hasn't run since run_start_time AND
       #  should have been run by now AND
       #  that should have run within fudge period AND
-
       exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).exact_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
@@ -391,11 +390,13 @@ module Process::Naf
       rescue
         return true
       end
+
       if memory_used < @maximum_memory_usage
         logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
         return true
       end
       logger.info "not enough memory to spawn: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+
       return false
     end
 

@@ -30,7 +30,7 @@ jQuery(document).ready(function() {
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery('.terminate').live("click", function(){
+  jQuery(document).delegate('.terminate', "click", function(){
     var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
     if (!answer) {
       return false;

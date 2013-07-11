@@ -50,18 +50,18 @@ jQuery(document).ready(function() {
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery('.terminate').live("click", function(){
+  jQuery(document).delegate('.terminate', "click", function(){
     var answer = confirm("You are terminating this job. Are you sure you want to do this?");
     if (!answer) {
       return false;
     }
     var id = jQuery(this).attr('id');
-    var url = '/job_system/jobs/' + id;
+    var url = '/job_system/historical_jobs/' + id;
     jQuery.ajax({
       url: url,
       type: 'POST',
       dataType: 'json',
-      data: { "job[request_to_terminate]": 1, "job_id": id, "_method": "put" },
+      data: { "historical_job[request_to_terminate]": 1, "historical_job_id": id, "_method": "put" },
       success:function (data) {
           if (data.success) {
               var title = data.title ? data.title : data.command
@@ -76,7 +76,7 @@ jQuery(document).ready(function() {
 
 function addLinkToJob(nRow, aData) {
   var id = aData[0];
-  var row = jQuery('<a href="/job_system/jobs/' + id + '">' + id + '</a>' );
+  var row = jQuery('<a href="/job_system/historical_jobs/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
 }
 

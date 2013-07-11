@@ -12,8 +12,8 @@ module Logical
             direction = "desc"
           end
           <<-SQL
-            (SELECT j.*, null AS "job_id"
-              FROM "#{::Naf.schema_name}"."jobs" AS j
+            (SELECT j.*, null AS "historical_job_id"
+              FROM "#{::Naf.schema_name}"."historical_jobs" AS j
               WHERE j.started_at is not null and j.finished_at is null and j.request_to_terminate = false
               #{conditions}
               ORDER BY #{order} #{direction})

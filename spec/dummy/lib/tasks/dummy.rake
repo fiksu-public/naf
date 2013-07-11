@@ -1,6 +1,6 @@
 require 'fileutils'
-# Add methods for aliasing and overriding rake tasks                                                                                                                                          
-# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task                                                                                                     
+# Add methods for aliasing and overriding rake tasks
+# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
     new_name = "#{fq_name}:original"
