@@ -58,8 +58,7 @@ namespace :naf do
     task :infrastructure => :environment do
       model_names = [::Naf::HistoricalJob.name,
                      ::Naf::HistoricalJobPrerequisite.name,
-                     ::Naf::HistoricalJobAffinityTab.name,
-                     ::Naf::ApplicationSchedulePrerequisite.name]
+                     ::Naf::HistoricalJobAffinityTab.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
   end

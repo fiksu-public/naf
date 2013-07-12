@@ -35,7 +35,7 @@ module Naf
     #++++++++++++++++++
 
     partitioned do |partition|
-      partition.foreign_key :affinity_id, full_table_name_prefix + "affinities"
+      partition.foreign_key :affinity_id, ::Naf::Affinity.table_name
     end
 
     #-------------------------

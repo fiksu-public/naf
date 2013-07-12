@@ -95,10 +95,10 @@ module Naf
     #++++++++++++++++++
 
     partitioned do |partition|
-      partition.foreign_key :application_id, full_table_name_prefix + "applications"
-      partition.foreign_key :application_type_id, full_table_name_prefix + "application_types"
-      partition.foreign_key :application_run_group_restriction_id, full_table_name_prefix + "application_run_group_restrictions"
-      partition.foreign_key :started_on_machine_id, full_table_name_prefix + "machines"
+      partition.foreign_key :application_id, ::Naf::Application.table_name
+      partition.foreign_key :application_type_id, ::Naf::ApplicationType.table_name
+      partition.foreign_key :application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.table_name
+      partition.foreign_key :started_on_machine_id, ::Naf::Machine.table_name
       partition.index :created_at
       partition.index :application_id
       partition.index :started_on_machine_id
