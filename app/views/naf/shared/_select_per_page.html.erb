@@ -55,7 +55,11 @@
   <%= link_to "Refresh Table", "#", :id => :refresh_datatable %>
   &nbsp;&nbsp;
   <%= label_tag :auto_refresh, 'Auto Refresh:' %>
-  <%= check_box_tag :auto_refresh, 1, false, :id => :auto_refresh %>
+  <% if controller_name == 'historical_jobs' %>
+    <%= check_box_tag :auto_refresh, 1, true, id: :auto_refresh %>
+  <% else %>
+    <%= check_box_tag :auto_refresh, 1, false, id: :auto_refresh %>
+  <% end %>
 </div>
 
 <div id="page-select-container" class="ui-state-default ui-corner-all">

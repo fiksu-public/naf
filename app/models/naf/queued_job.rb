@@ -38,7 +38,45 @@ module Naf
     #+++++++++++++++++++++++++
 
     def self.order_by_priority
-      return order("priority, created_at")
+      order("priority, created_at")
+    end
+
+    def self.exclude_run_group_names(names)
+      if names.present?
+        where("application_run_group_name NOT IN (?)", names)
+      else
+        where({})
+      end
+    end
+
+    def self.runnable_by_machine(machine)
+      where("NOT EXISTS (
+        SELECT 1
+        FROM naf.historical_job_affinity_tabs AS t
+        WHERE t.historical_job_id = naf.queued_jobs.id AND
+          NOT EXISTS (
+            SELECT 1
+            FROM naf.machine_affinity_slots AS s
+            WHERE s.affinity_id = t.affinity_id AND
+              s.machine_id = #{machine.id}
+          )
+        )"
+      )
+    end
+
+    def self.prerequisites_finished
+      where("NOT EXISTS (
+        SELECT 1
+        FROM naf.historical_job_prerequisites AS p
+        WHERE p.historical_job_id = naf.queued_jobs.id AND
+          EXISTS (
+            SELECT 1
+            FROM naf.historical_jobs AS j
+            WHERE p.prerequisite_historical_job_id = j.id AND
+              j.finished_at IS NULL
+          )
+        )"
+      )
     end
 
   end

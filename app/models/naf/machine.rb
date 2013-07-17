@@ -166,8 +166,9 @@ module Naf
     end
 
     def mark_processes_as_dead(by_machine)
-      ::Naf::HistoricalJob.queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-        where("finished_at is null and request_to_terminate = false").started_on(self).each do |job|
+      ::Naf::RunningJob.where(created_at: (Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME)..Time.zone.now).
+        where("request_to_terminate = false").
+        started_on(self).each do |job|
 
         marking_at = Time.zone.now
         machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
