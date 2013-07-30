@@ -53,5 +53,58 @@ module Naf
       end
     end
 
+    describe "#exclude_run_group_names" do
+      let!(:included_job) { FactoryGirl.create(:queued_job, application_run_group_name: 'test 1') }
+      let!(:excluded_job) { FactoryGirl.create(:queued_job, application_run_group_name: 'test 2') }
+
+      it "return queued jobs not included in the run group names" do
+        Naf::QueuedJob.exclude_run_group_names(['test 2']).
+          should == [included_job]
+      end
+
+      it "return all queued jobs when run group names are not specified" do
+        Naf::QueuedJob.exclude_run_group_names([]).
+          should == [included_job, excluded_job]
+      end
+    end
+
+    describe "#runnable_by_machine" do
+      let!(:included_job) { FactoryGirl.create(:queued_job, application_run_group_name: 'test 1') }
+      let!(:excluded_job) { FactoryGirl.create(:queued_job, application_run_group_name: 'test 2') }
+
+      it "return queued jobs not included in the run group names" do
+        Naf::QueuedJob.exclude_run_group_names(['test 2']).
+          should == [included_job]
+      end
+
+      it "return all queued jobs when run group names are not specified" do
+        Naf::QueuedJob.exclude_run_group_names([]).
+          should == [included_job, excluded_job]
+      end
+    end
+
+    describe "#prerequisites_finished" do
+      let!(:prerequesite_needed_historical_job) { FactoryGirl.create(:job, finished_at: nil) }
+      let!(:prerequesite_historical_job) { FactoryGirl.create(:job) }
+      let!(:historical_job) { FactoryGirl.create(:job) }
+      let!(:prerequesite_needed_queued_job) {
+        FactoryGirl.create(:queued_job, id: prerequesite_needed_historical_job.id,
+                                        historical_job: prerequesite_needed_historical_job)
+      }
+      let!(:queued_job) {
+        FactoryGirl.create(:queued_job, id: historical_job,
+                                        historical_job: historical_job)
+      }
+      let!(:prerequesite) {
+        FactoryGirl.create(:historical_job_prerequesite, prerequisite_historical_job: prerequesite_historical_job,
+                                                         historical_job: prerequesite_needed_historical_job)
+      }
+
+      it "return queued jobs not included in the run group names" do
+        Naf::QueuedJob.prerequisites_finished.
+          should == [queued_job]
+      end
+    end
+
   end
 end

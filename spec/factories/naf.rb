@@ -41,8 +41,14 @@ FactoryGirl.define do
     started_at Time.zone.now
   end
 
+  factory :terminating_job, :parent => :running_job do
+    request_to_terminate true
+    finished_at nil
+  end
+
   factory :canceled_job, :parent => :running_job do
     request_to_terminate true
+    finished_at Time.zone.now
   end
 
   factory :finished_job, :parent => :job_picked_by_machine do
@@ -77,7 +83,12 @@ FactoryGirl.define do
     started_at Time.zone.now - 3.minutes
     finished_at Time.zone.now
   end
-  
+
+  factory :historical_job_prerequesite, :class => ::Naf::HistoricalJobPrerequisite do
+    association :historical_job, :factory => :job
+    association :prerequisite_historical_job, :factory => :job
+  end
+
   #############################################################
   #######   Machines  #########################################
   #############################################################
@@ -100,7 +111,6 @@ FactoryGirl.define do
       ::Naf::Machine.find_or_initialize_by_id(id)
     end
   end
-
 
   #############################################################
   #######   Applications ######################################
@@ -144,7 +154,6 @@ FactoryGirl.define do
     run_start_minute 5
   end
 
-
   #############################################################
   #######   Application Run Group Restrictions ################
   #############################################################
@@ -157,7 +166,7 @@ FactoryGirl.define do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
     end
   end
-    
+
   factory :limited_per_machine, :class => ::Naf::ApplicationRunGroupRestriction do
     id 2
     application_run_group_restriction_name "limited per machine"
@@ -166,7 +175,7 @@ FactoryGirl.define do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
     end
   end
-  
+
   factory :limited_per_all_machines, :class => ::Naf::ApplicationRunGroupRestriction do
     id 3
     application_run_group_restriction_name "limited per all machines"
@@ -175,8 +184,6 @@ FactoryGirl.define do
       ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
     end
   end
-    
-    
 
   #############################################################
   #######   Application Types #################################
@@ -192,7 +199,6 @@ FactoryGirl.define do
       ::Naf::ApplicationType.find_or_initialize_by_id(id)
     end
   end
-
 
   factory :bash_command_app_type, :class => ::Naf::ApplicationType do
     id 2

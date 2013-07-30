@@ -213,15 +213,16 @@ module Naf
             url << "?q=#{CGI.escape(query)}"
           end
         elsif record.kind_of?(::Naf::Machine) || record.kind_of?(::Logical::Naf::Machine)
-            query = record.server_name
-            unless query.nil?
-              query << " runner" if runner
-              url << "?q=#{CGI.escape(query)}"
-            end
+          query = record.server_name
+          unless query.nil?
+            query << " runner" if runner
+            url << "?q=#{CGI.escape(query)}"
+          end
         end
       else
         url = "http://www.papertrailapp.com/dashboard"
       end
+
       return url
     end
 

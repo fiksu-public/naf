@@ -16,6 +16,7 @@ module Logical
                  :finished_at,
                  :run_time,
                  :affinities,
+                 :tags,
                  :status]
 
       ATTRIBUTES = [:title,
@@ -49,12 +50,13 @@ module Logical
 
       SEARCH_FIELDS = [:command, :application_run_group_name]
 
+      # Mapping of datatable column positions and job attributes
       ORDER = { '0' => "id",
                 '2' => "pid",
                 '3' => "created_at",
                 '5' => "started_at",
                 '6' => "finished_at",
-                '9' => "status" }
+                '10' => "status" }
 
       def initialize(naf_job)
         @job = naf_job
@@ -69,8 +71,10 @@ module Logical
       end
 
       def status
-        if @job.request_to_terminate
-          "Canceled"
+        if @job.request_to_terminate && @job.finished_at.nil?
+          "Terminating"
+        elsif @job.request_to_terminate && @job.finished_at.present?
+          "Terminated"
         elsif @job.started_at and (not @job.finished_at)
           "Running"
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
@@ -88,20 +92,6 @@ module Logical
         end
       end
 
-      def run_time
-        start_time = @job.started_at
-        end_time = @job.finished_at
-        if start_time and end_time
-          return Time.at((end_time - start_time).round).utc.strftime("%H:%M:%S")
-        else
-          return ""
-        end
-      end
-
-      def queued_time
-        created_at.localtime.strftime("%Y-%m-%d %r")
-      end
-
       def title
         if application
           application.title
@@ -111,7 +101,7 @@ module Logical
       end
 
       def server
-        if started_on_machine 
+        if started_on_machine
           name = started_on_machine.short_name_if_it_exist
           if name.blank?
             started_on_machine.server_address
@@ -159,10 +149,12 @@ module Logical
               JobStatuses::Running.all(:queued, conditions) + "union all\n" +
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
-              JobStatuses::FinishedLessMinute.all(conditions)
+              JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
+              JobStatuses::Cancelled.all(conditions)
             when :running
               JobStatuses::Running.all(conditions) + "union all\n" +
-              JobStatuses::FinishedLessMinute.all(conditions)
+              JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
+              JobStatuses::Cancelled.all(conditions)
             when :waiting
               JobStatuses::Waiting.all(conditions)
             when :finished
@@ -244,7 +236,7 @@ module Logical
       end
 
       def to_detailed_hash
-        Hash[ ATTRIBUTES.map{ |m| 
+        Hash[ ATTRIBUTES.map{ |m|
           case m
           when :started_at, :finished_at
             if value = @job.send(m)
@@ -253,7 +245,7 @@ module Logical
               [m, '']
             end
           else
-            [m, send(m)] 
+            [m, send(m)]
           end
         }]
       end
@@ -264,15 +256,53 @@ module Logical
       end
 
       def started_at
-        if value = @job.started_at
-          "#{time_ago_in_words(value, true)} ago"
+        if @job.started_at.present?
+          value = Time.zone.now - @job.started_at
+          if value < 60
+            "#{value.to_i} seconds ago"
+          elsif value < 172_800
+            time_difference(value)
+          elsif value >= 172_800
+            "#{time_ago_in_words(@job.started_at, true)} ago"
+          else
+            ""
+          end
         else
           ""
         end
       end
 
+      def time_difference(value)
+        seconds = value % 60
+        value = (value - seconds) / 60
+        minutes = value % 60
+        value = (value - minutes) / 60
+        hours = value % 24
+        value = (value - hours) / 24
+        days = value % 7
+        hours += days * 24 if days > 0
+
+        "-#{hours.to_i}h#{minutes.to_i}m"
+      end
+
       def has_started?
         @job.started_at.present?
+      end
+
+      def queued_time
+        created_at.localtime.strftime("%Y-%m-%d %r")
+      end
+
+      def run_time
+        if @job.started_at.present?
+          if @job.finished_at.present?
+            Time.at(@job.finished_at - @job.started_at).utc.strftime("%Hh%Mm%Ss")
+          else
+            Time.at(Time.zone.now - @job.started_at).utc.strftime("%Hh%Mm%Ss")
+          end
+        else
+          ""
+        end
       end
 
       def finished_at
@@ -293,6 +323,16 @@ module Logical
             end
           end
         end.join(", \n")
+      end
+
+      def tags
+        if @job.tags.present?
+          # Only show custom visible tags
+          job_tags = @job.tags.gsub(/[{}]/,'').split(',')
+          (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
+        else
+          nil
+        end
       end
 
     end

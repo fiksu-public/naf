@@ -3,19 +3,32 @@ module Logical
     class Application
 
       attr_reader :app
-      
+
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_time, :prerequisites, :deleted, :visible]
+      COLUMNS = [:id,
+                 :title,
+                 :script_type_name,
+                 :application_run_group_name,
+                 :application_run_group_restriction_name,
+                 :run_time,
+                 :prerequisites,
+                 :deleted,
+                 :visible]
 
-      FILTER_FIELDS = [:deleted, :enabled, :visible]
+      FILTER_FIELDS = [:deleted,
+                       :enabled,
+                       :visible]
 
-      SEARCH_FIELDS = [:title, :application_run_group_name, :command, :short_name]
+      SEARCH_FIELDS = [:title,
+                       :application_run_group_name,
+                       :command,
+                       :short_name]
 
       def initialize(naf_app)
         @app = naf_app
       end
-      
+
       def self.search(search)
         application_scope = ::Naf::Application.
           joins("LEFT JOIN #{::Naf.schema_name}.application_schedules ON #{::Naf.schema_name}.application_schedules.application_id = #{::Naf.schema_name}.applications.id").
@@ -43,7 +56,7 @@ module Logical
 
         application_scope.map{ |physical_app| new(physical_app) }
       end
-      
+
       def to_hash
         Hash[ COLUMNS.map{ |m| [m, send(m)] } ]
       end
@@ -51,7 +64,7 @@ module Logical
       def command
         @app.command
       end
-      
+
       def run_start_minute
         output = ""
         if schedule = @app.application_schedule and schedule.run_start_minute.present?
@@ -115,7 +128,7 @@ module Logical
           end
         end
       end
-      
+
     end
   end
 end

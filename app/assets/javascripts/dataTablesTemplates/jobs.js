@@ -1,30 +1,30 @@
 // When document is ready
 jQuery(document).ready(function() {
-
   // Prepare for setup the datatable.
   var dataTableOptions = {
     "sAjaxSource": sAjaxSource,
     "bSort": true,
-    "aaSorting": [[9, 'desc']],
+    "aaSorting": [[10, 'desc']],
     "aoColumnDefs": [
-      { "bSortable": false, "aTargets": [1, 4, 7, 8, 11] },
-      { "bVisible": false, "aTargets": [10] },
-      { "sClass": "center", "aTargets": [11] }
+      { "bSortable": false, "aTargets": [1, 4, 7, 8, 9, 11, 12] },  // turn off sorting
+      { "bVisible": false, "aTargets": [11] },                      // turn off visibility
+      { "sClass": "center", "aTargets": [12] }
     ],
     "bAutoWidth": false,
     "aoColumns": [
-        { "sWidth": "4%"},
-        { "sWidth": "7%"},
-        { "sWidth": "4%"},
-        { "sWidth": "14%"},
-        { "sWidth": "25%"},
-        null,
-        null,
-        null,
-        null,
-        { "asSorting": [ "desc" ] },
-        null,
-        { "sWidth": "6%"}
+        { "sWidth": "4%"},              // Id
+        { "sWidth": "7%"},              // Server
+        { "sWidth": "4%"},              // Pid
+        { "sWidth": "14%"},             // Queued Time
+        { "sWidth": "25%"},             // Title
+        null,                           // Started At
+        null,                           // Finished At
+        null,                           // Run Time
+        null,                           // Affinities
+        null,                           // Tags
+        { "asSorting": [ "desc" ] },    // Status
+        null,                           // Application URL
+        { "sWidth": "6%"}               // Actions
     ],
     "fnInitComplete" : function() {
       initPageSelect();
@@ -45,11 +45,12 @@ jQuery(document).ready(function() {
       colorizationStatus(nRow, aData);
       return nRow;
     }
-  }; // datatable
+  };
 
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
+  // Action: Terminate Job
   jQuery(document).delegate('.terminate', "click", function(){
     var answer = confirm("You are terminating this job. Are you sure you want to do this?");
     if (!answer) {
@@ -81,7 +82,7 @@ function addLinkToJob(nRow, aData) {
 }
 
 function addLinkToTitle(nRow, aData) {
-  var link = aData[10];
+  var link = aData[11];
   var title = aData[4];
   if ( link != "" ) {
     var row = jQuery('<a href="' + link + '">' + title + '</a>' );
@@ -90,35 +91,37 @@ function addLinkToTitle(nRow, aData) {
 }
 
 function alignmentButtons(nRow, aData) {
-  var data = aData[11];
+  // Action buttons
+  var data = aData[12];
   var row;
-  if (aData[9] != "Canceled") {
+  if (aData[10] != "Canceled") {
       row = "<div style='text-align:left;width:50px;display: inline;'>" + data + "</div>";
   } else {
       row = "<div style='text-align:left;width:50px;display: inline;padding-right: 16px;'>" + data + "</div>";
   }
-  jQuery('td:nth-child(11)', nRow).empty().append(row);
+  jQuery('td:nth-child(12)', nRow).empty().append(row);
 }
 
+// Function that changes the color of the job status
 function colorizationStatus(nRow, aData) {
-  jQuery('td:nth-child(10)', nRow).wrapInner('<div class="">');
-  switch(aData[9]) {
+  jQuery('td:nth-child(11)', nRow).wrapInner('<div class="">');
+  switch(aData[10]) {
     case 'Running':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-running');
+      jQuery('td:nth-child(11) div', nRow).addClass('script-running');
       break;
     case 'Queued':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-queued');
+      jQuery('td:nth-child(11) div', nRow).addClass('script-queued');
       break;
     case 'Waiting':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-queued');
+      jQuery('td:nth-child(11) div', nRow).addClass('script-queued');
       break;
     case 'Canceled':
       break;
     case 'Finished':
-      jQuery('td:nth-child(10) div', nRow).addClass('script-finished');
+      jQuery('td:nth-child(11) div', nRow).addClass('script-finished');
       break;
     default:
-      jQuery('td:nth-child(10) div', nRow).addClass('script-error');
+      jQuery('td:nth-child(11) div', nRow).addClass('script-error');
       break;
   }
 }
@@ -126,13 +129,12 @@ function colorizationStatus(nRow, aData) {
 function setPageOrder(){
   var status = jQuery("#search_status").val();
   if (status == 'finished' || status == 'errored') {
-    jQuery('#datatable').dataTableSettings[0].aoColumns[9].bSortable = false;
-    jQuery('#datatable thead tr th:nth-child(10) div span').css("display", "none");
+    jQuery('#datatable').dataTableSettings[0].aoColumns[10].bSortable = false;
+    jQuery('#datatable thead tr th:nth-child(11) div span').css("display", "none");
     jQuery('#datatable').dataTable().fnSort([ [6,'desc'] ]);
-
   } else {
-    jQuery('#datatable').dataTableSettings[0].aoColumns[9].bSortable = true;
-    jQuery('#datatable').dataTable().fnSort([ [9,'desc'] ]);
-    jQuery('#datatable thead tr th:nth-child(10) div span').css("display", "block");
+    jQuery('#datatable').dataTableSettings[0].aoColumns[10].bSortable = true;
+    jQuery('#datatable').dataTable().fnSort([ [10,'desc'] ]);
+    jQuery('#datatable thead tr th:nth-child(11) div span').css("display", "block");
   }
 }

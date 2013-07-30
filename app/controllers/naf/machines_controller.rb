@@ -3,7 +3,6 @@ module Naf
 
     include Naf::ApplicationHelper
 
-    before_filter :set_cols_and_attributes
     before_filter :set_rows_per_page
 
     def index
@@ -30,14 +29,13 @@ module Naf
     end
 
     def show
-      @record = Naf::Machine.find(params[:id])
-      render :template => 'naf/record'
+      @machine = Naf::Machine.find(params[:id])
     end
 
     def new
       @machine = Naf::Machine.new
     end
-    
+
     def create
       @machine = Naf::Machine.new(params[:machine])
       if @machine.save
@@ -72,12 +70,7 @@ module Naf
       end
     end
 
-
     private
-
-    def set_cols_and_attributes
-      @attributes = Naf::Machine.attribute_names.map(&:to_sym)
-    end
 
     def add_urls(hash)
       machine = ::Naf::Machine.find(hash[:id])
@@ -88,5 +81,4 @@ module Naf
     end
 
   end
-
 end

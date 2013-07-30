@@ -71,6 +71,12 @@ module Process::Naf
       end
     end
 
+    def update_job_tags(old_tags, new_tags)
+      job = fetch_naf_job
+      job.remove_tags(old_tags)
+      job.add_tags(new_tags)
+    end
+
     def work
     end
   end

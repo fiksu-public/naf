@@ -172,10 +172,10 @@ module Naf
 
         marking_at = Time.zone.now
         machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
-        job.request_to_terminate = true
-        job.marked_dead_by_machine_id = by_machine.id
-        job.marked_dead_at = marking_at
-        job.finished_at = marking_at
+        job.request_to_terminate = job.historical_job.request_to_terminate = true
+        job.marked_dead_by_machine_id = job.historical_job.marked_dead_by_machine_id = by_machine.id
+        job.marked_dead_at = job.historical_job.marked_dead_at = marking_at
+        job.historical_job.finished_at = marking_at
         job.save!
       end
     end

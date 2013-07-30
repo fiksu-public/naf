@@ -9,8 +9,7 @@ module Naf
     end
 
     def show
-      @record = Naf::LoggerStyle.find(params[:id])
-      render :template => 'naf/record'
+      @logger_style = Naf::LoggerStyle.find(params[:id])
     end
 
     def destroy

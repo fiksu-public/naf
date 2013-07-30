@@ -12,9 +12,11 @@ gem 'awesome_print'
 gem 'will_paginate'
 gem 'mem_info'
 gem "nested_form"
-# This gem should be encapsulated in test group, but test fails.
-# For now it will remain global.
-gem 'shoulda-matchers', '2.0.0'
 
 # For private repo testing on Travis
 gem 'af', '=0.9.6', path: 'vendor/private'
+
+# These gems should be encapsulated in test group, but test fails.
+# For now it will remain global.
+gem 'shoulda-matchers', '2.0.0'
+gem "timecop", '0.4.5'

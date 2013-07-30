@@ -1,0 +1,92 @@
+<% content_for :body do %>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <% content_for :javascripts do %>
+  <script type='text/javascript'>
+      jQuery(document).ready(function () {
+          jQuery(document).delegate('.terminate', "click", function(){
+              var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
+              if (!answer) {
+                  return false;
+              }
+              var id = <%= @machine.id %>;
+              var url = '/job_system/machines/' + id;
+              jQuery.ajax({
+                  url: url,
+                  type: 'POST',
+                  dataType: 'json',
+                  data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
+                  success:function (data) {
+                      if (data.success) {
+                          jQuery("<p id='notice'>Machine was marked down!</p>").
+                                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                          setTimeout('window.location.reload()', 5600);
+                      }
+                  }
+              });
+          });
+      });
+  </script>
+  <% end %>
+
+  <div id="record">
+    <h2>Machine</h2>
+    <%= link_to 'Back to Machine', machines_path %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to 'Edit', edit_machine_path(@machine) %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to "Add Affinity", new_machine_machine_affinity_slot_path(@machine) %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @machine.attributes.each do |key, value| -%>
+        <tr>
+          <td><%= make_header(key) %></td>
+          <td><%= value %></td>
+        </tr>
+        <% end -%>
+        <tr>
+          <td><%= link_to "Machine Affinity Slots",
+                  machine_machine_affinity_slots_path(@machine) %>
+          </td>
+          <td><%= @machine.affinities.map(&:affinity_name).join(', ') %></td>
+        </tr
+        <% unless @machine.marked_down %>
+          <tr>
+            <td>Mark machine down</td>
+            <td>
+              <%= link_to image_tag('terminate.png',
+                    class: 'action',
+                    title: "Mark machine(id: #{@machine.id}, server:#{@machine.server_name.blank? ? @machine.server_address : @machine.server_name}) down"),
+                    "#", { class: "terminate" } %>
+            </td>
+          </tr>
+        <% end %>
+
+      </tbody>
+    </table>
+    </br>
+
+    <h2>Stdout</h2>
+    <iframe src="<%= papertrail_link(@machine, true) %>" id="stdout" class="scrollable-output">
+      Your browser doesn't support iframe!
+    </iframe>
+  </div>
+<% end %>
+<%= render partial: 'naf/shared/application' %>

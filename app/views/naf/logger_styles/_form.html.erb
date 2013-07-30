@@ -15,14 +15,15 @@
     <%= f.label :name %><br />
     <%= f.text_field :name %>
   </div>
+  </br>
 
   <div class="field">
     <%= f.label :note %><br />
     <%= f.text_field :note %>
   </div>
+  </br>
 
   <%= f.fields_for :logger_style_names do |l_fields| %>
-
     <%= l_fields.hidden_field :logger_style_id %>
 
     <div class="field">
@@ -30,6 +31,7 @@
       <br/>
       <%= l_fields.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, :include_blank => true) %>
     </div>
+    </br>
 
     <div class="field">
       <%= l_fields.label :logger_level %>

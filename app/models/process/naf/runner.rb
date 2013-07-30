@@ -2,25 +2,53 @@ require 'timeout'
 
 module Process::Naf
   class Runner < ::Af::Application
-    opt :wait_time_for_processes_to_terminate, "time between askign processes to terminate and sending kill signals", :argument_note => "SECONDS", :default => 120
-    opt :check_schedules_period, "time between checking schedules", :argument_note => "MINUTES", :default => 1
-    opt :schedule_fudge_scale, "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)", :default => 5
-    opt :runner_stale_period, "amount of time to consider a machine out of touch if it hasn't updated its machine entry", :argument_note => "MINUTES", :default => 10
-    opt :loop_sleep_time, "runner main loop sleep time", :argument_note => "SECONDS", :default => 30
-    opt :server_address, "set the machines server address (dangerous)", :type => :string, :default => ::Naf::Machine.machine_ip_address, :hidden => true
-    opt :maximum_memory_usage, "percentage of memory used which will limit  process spawning", :default => 85.0, :argument_note => "PERCENT"
-    opt :disable_gc_modifications, "don't modify ruby GC parameters", :default => false
+
+    #----------------
+    # *** Options ***
+    #+++++++++++++++++
+
+    opt :wait_time_for_processes_to_terminate,
+        "time between askign processes to terminate and sending kill signals",
+        argument_note: "SECONDS",
+        default: 120
+    opt :check_schedules_period,
+        "time between checking schedules",
+        argument_note: "MINUTES",
+        default: 1
+    opt :schedule_fudge_scale,
+        "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)",
+        default: 5
+    opt :runner_stale_period,
+        "amount of time to consider a machine out of touch if it hasn't updated its machine entry",
+        argument_note: "MINUTES",
+        default: 10
+    opt :loop_sleep_time,
+        "runner main loop sleep time",
+        argument_note: "SECONDS",
+        default: 30
+    opt :server_address,
+        "set the machines server address (dangerous)",
+        type: :string,
+        default: ::Naf::Machine.machine_ip_address,
+        hidden: true
+    opt :maximum_memory_usage,
+        "percentage of memory used which will limit  process spawning",
+        default: 85.0,
+        argument_note: "PERCENT"
+    opt :disable_gc_modifications,
+        "don't modify ruby GC parameters",
+        default: false
 
     def initialize
       super
-      opt :log_configuration_files, :default => ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, default: ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
     end
 
     def work
       unless @disable_gc_modifications
-        # will help forked processes, not the runner
+        # These configuration changes will help forked processes, not the runner
         ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
         ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
         ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
@@ -52,8 +80,7 @@ module Process::Naf
       machine.mark_alive
       machine.mark_up
 
-      # make sure no processes are thought to be running on
-      # this machine
+      # Make sure no processes are thought to be running on this machine
       terminate_old_processes(machine)
 
       logger.info "working: #{machine}"
@@ -76,6 +103,8 @@ module Process::Naf
 
     def work_machine_loop(machine)
       machine.reload
+
+      # Check machine status
       if !machine.enabled
         logger.warn "this machine is disabled #{machine}"
         return false
@@ -127,7 +156,6 @@ module Process::Naf
       end
 
       # clean up children that have exited
-
       logger.detail "cleaning up dead children: #{@children.length}"
 
       if @children.length > 0
@@ -165,11 +193,18 @@ module Process::Naf
           if pid
             begin
               child_job = @children.delete(pid)
+              # Update job tags
+              child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+              child_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
               if child_job.present?
                 if status.nil? || status.exited? || status.signaled?
                   logger.info { "cleaning up dead child: #{child_job.reload}" }
                   finish_job(child_job,
                              { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
+
+                  # Update jog tags
+                  child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
                 else
                   # this can happen if the child is sigstopped
                   logger.warn "child waited for did not exit: #{child_job}, status: #{status.inspect}"
@@ -208,13 +243,22 @@ module Process::Naf
           if pid
             @children[pid] = running_job
             running_job.pid = pid
+            running_job.historical_job.pid = pid
             running_job.historical_job.failed_to_start = false
             logger.info "job started : #{running_job}"
             running_job.save!
+            running_job.historical_job.save!
           else
             # should never get here (well, hopefully)
             logger.error "failed to execute #{running_job}"
+            # Update job tags
+            running_job.historical_job.remove_all_tags
+            running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
             finish_job(running_job, { failed_to_start: true })
+
+            # Update job tags
+            running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
           end
         rescue StandardError => e
           # XXX rescue for various issues
@@ -232,11 +276,12 @@ module Process::Naf
       updates[:updated_at] = Time.zone.now
       update_columns = updates.map{ |k,v| "#{k} = ?" }.join(", ")
       update_sql = <<-SQL
-         UPDATE #{::Naf::HistoricalJob.partition_table_name(historical_job_id)}
-           SET
-               #{update_columns}
-         WHERE
-           id = ?
+        UPDATE
+          #{::Naf::HistoricalJob.partition_table_name(historical_job_id)}
+        SET
+          #{update_columns}
+        WHERE
+          id = ?
       SQL
       ::Naf::HistoricalJob.find_by_sql([update_sql] + updates.values + [historical_job_id])
     end
@@ -259,8 +304,16 @@ module Process::Naf
       sleep(2)
       @children.clone.each do |pid, child|
         send_signal_and_maybe_clean_up(child, "KILL")
+
+        # Update job tags
+        child.historical_job.remove_all_tags
+        child.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         # force job down
         finish_job(child)
+
+        # Update job tags
+        child.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
       end
     end
 
@@ -270,7 +323,7 @@ module Process::Naf
       jobs = assigned_jobs(machine)
       if jobs.length == 0
         logger.detail "no jobs to remove"
-        return 
+        return
       end
       logger.info "number of old jobs to sift through: #{jobs.length}"
       jobs.each do |job|
@@ -313,14 +366,30 @@ module Process::Naf
       assigned_jobs(machine).each do |job|
         logger.alarm "sending SIG_KILL to process: #{job}"
         send_signal_and_maybe_clean_up(job, "KILL")
+
+        # Update job tags
+        job.historical_job.remove_all_tags
+        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         # job force job down
         finish_job(job)
+
+        # Update job tags
+        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
       end
     end
 
     def send_signal_and_maybe_clean_up(job, signal)
       if job.pid.nil?
+        # Update job tags
+        job.historical_job.remove_all_tags
+        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         finish_job(job)
+
+        # Update job tags
+        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         return false
       end
 
@@ -329,8 +398,17 @@ module Process::Naf
         logger.detail "#{retval} = kill(#{signal}, #{job.pid})"
       rescue Errno::ESRCH
         logger.detail "ESRCH = kill(#{signal}, #{job.pid})"
+
+        # Update job tags
+        job.historical_job.remove_all_tags
+        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         # job does not exist -- mark it finished
         finish_job(job)
+
+        # Update job tags
+        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
         return false
       end
       return true

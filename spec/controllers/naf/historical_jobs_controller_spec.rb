@@ -14,7 +14,6 @@ module Naf
       Naf::HistoricalJob.should_receive(:find).with("5").and_return(nil)
       Logical::Naf::Job.should_receive(:new).and_return(nil)
       get :show, id: id
-      response.should render_template("naf/record")
       response.should be_success
     end
 

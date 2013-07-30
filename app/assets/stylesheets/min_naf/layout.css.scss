@@ -182,6 +182,40 @@
                     margin-top: 10px;
                 }
 
+                #naf_table_show {
+                    table-layout:fixed;
+                    width:50%;
+                    border-collapse: collapse;
+                    td, th {
+                      margin: 0;
+                      padding: 4px 0 4px 4px;
+                    }
+
+                    thead tr {
+                      background-color: #F4F4F4;
+                    }
+
+                    tbody tr {
+                      &:nth-child(even) {
+                        background-color: #F4F4F4;
+                      }
+                    }
+
+                    tr td a img {
+                      margin: 0;
+                    }
+
+                    td {
+                      text-overflow: ellipsis;
+                      white-space: nowrap;
+                      overflow: hidden;
+                    }
+
+                    .center {
+                      text-align: center;
+                    }
+                }
+
                 #errorExplanation {
                      background-color: #FEF1EC;
                      border: 1px solid #FFE4D8;

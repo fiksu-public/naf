@@ -1,0 +1,48 @@
+<% content_for :body do %>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <div id="record">
+    <h2>Affinity</h2>
+    <%= link_to 'Back to Affinities', affinities_path %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to 'Edit', edit_affinity_path(@affinity) %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @affinity.attributes.each do |key, value| -%>
+        <tr>
+          <td><%= make_header(key) %></td>
+          <td><%= value %></td>
+        </tr>
+        <% end -%>
+        <tr>
+          <td>Affinity Classification Name</td>
+          <td><%= @affinity.affinity_classification.affinity_classification_name %></td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+    <%= link_to "Destroy", @affinity,
+        { confirm: "Are you sure you want to destroy this Affinity?",
+          method: :delete,
+          class: 'destroy' } %>
+  </div>
+<% end %>
+<%= render partial: 'naf/shared/application' %>

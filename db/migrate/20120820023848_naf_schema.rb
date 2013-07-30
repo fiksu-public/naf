@@ -14,13 +14,13 @@ class NafSchema < ActiveRecord::Migration
         begin
           if (SELECT count(*) FROM pg_namespace WHERE nspname !~ '^pg_.*' AND nspname NOT IN ('information_schema') AND nspname = '#{schema_name}') > 0 THEN
             raise notice 'Skipping creation of schema: #{schema_name}, already exists';
-          else 
+          else
             raise notice 'Creating new schema #{schema_name}';
             create schema #{schema_name};
           end if;
         end;
       $$;
-      
+
       create table #{schema_name}.affinity_classifications
       (
           id                             serial not null primary key,
@@ -191,7 +191,8 @@ class NafSchema < ActiveRecord::Migration
           marked_dead_by_machine_id              integer null references #{schema_name}.machines,
           marked_dead_at                         timestamp null,
 
-          log_level                              text null
+          log_level                              text null,
+          tags                                   text[]
       );
       create table #{schema_name}.historical_job_prerequisites
       (
@@ -204,10 +205,10 @@ class NafSchema < ActiveRecord::Migration
       );
       create table #{schema_name}.historical_job_affinity_tabs
       (
-          id                                 bigserial not null primary key,
-          created_at                         timestamp not null default now(),
-          historical_job_id	 	     bigint not null, -- references #{schema_name}.historical_jobs,
-          affinity_id           	     bigint not null references #{schema_name}.affinities,
+          id                                     bigserial not null primary key,
+          created_at                             timestamp not null default now(),
+          historical_job_id                      bigint not null, -- references #{schema_name}.historical_jobs,
+          affinity_id                            bigint not null references #{schema_name}.affinities,
           UNIQUE (historical_job_id, affinity_id)
       );
       create table #{schema_name}.queued_jobs

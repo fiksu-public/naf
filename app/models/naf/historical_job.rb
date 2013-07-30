@@ -29,9 +29,15 @@ module Naf
                     :state,
                     :request_to_terminate,
                     :marked_dead_by_machine_id,
-                    :log_level
+                    :log_level,
+                    :tags
 
     JOB_STALE_TIME = 1.week
+    SYSTEM_TAGS = {
+      pre_work: '$pre-work',
+      work: '$work',
+      cleanup: '$cleanup'
+    }
 
     #---------------------
     # *** Associations ***
@@ -61,7 +67,7 @@ module Naf
     has_many :historical_job_affinity_tabs,
       class_name: "::Naf::HistoricalJobAffinityTab",
       dependent: :destroy
-    has_many :historical_job_affinities,
+    has_many :affinities,
       class_name: "::Naf::Affinity",
       through: :historical_job_affinity_tabs
 
@@ -192,6 +198,10 @@ module Naf
       return where("finished_at IS NOT NULL AND exit_status > 0 OR request_to_terminate = true")
     end
 
+    def self.lock_for_job_queue(&block)
+      return lock_record(0, &block)
+    end
+
     #-------------------------
     # *** Instance Methods ***
     #+++++++++++++++++++++++++
@@ -282,12 +292,36 @@ module Naf
       end
     end
 
-    def self.lock_for_job_queue(&block)
-      return lock_record(0, &block)
-    end
-
     def spawn
       application_type.spawn(self)
+    end
+
+    def add_tags(tags_to_add)
+      tags_array = nil
+      if self.tags.present?
+        tags_array = self.tags.gsub(/[{}]/,'').split(',')
+        new_tags = '{' + (tags_array | tags_to_add).join(',') + '}'
+      else
+        new_tags = '{' + tags_to_add.join(',') + '}'
+      end
+
+      self.tags = new_tags
+      self.save!
+    end
+
+    def remove_tags(tags_to_remove)
+      if self.tags.present?
+        tags_array = self.tags.gsub(/[{}]/,'').split(',')
+        new_tags = '{' + (tags_array - tags_to_remove).join(',') + '}'
+
+        self.tags = new_tags
+        self.save!
+      end
+    end
+
+    def remove_all_tags
+      self.tags = '{}'
+      self.save!
     end
 
   end

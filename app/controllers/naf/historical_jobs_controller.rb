@@ -2,7 +2,6 @@ module Naf
   class HistoricalJobsController < Naf::ApplicationController
     include Naf::ApplicationHelper
 
-    before_filter :set_cols_and_attributes
     before_filter :set_rows_per_page
 
     def index
@@ -10,6 +9,7 @@ module Naf
         format.html
         format.json do
           set_page
+
           params[:search][:direction] = params['sSortDir_0']
           params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]
           params[:search][:limit] = params['iDisplayLength']
@@ -26,22 +26,15 @@ module Naf
             @historical_jobs << job
             job = []
           end
+
           render layout: 'naf/layouts/jquery_datatables'
         end
       end
     end
 
     def show
-      historical_job = Naf::HistoricalJob.find(params[:id])
-      @historical_job = Logical::Naf::Job.new(historical_job)
-      respond_to do |format|
-        format.json do
-          render json: { success: true }.to_json
-        end
-        format.html do
-          render template: 'naf/record'
-        end
-      end
+      @historical_job = Naf::HistoricalJob.find(params[:id])
+      @logical_job = Logical::Naf::Job.new(@historical_job)
     end
 
     def new
@@ -85,6 +78,11 @@ module Naf
       respond_to do |format|
         @historical_job = Naf::HistoricalJob.find(params[:id])
         if @historical_job.update_attributes(params[:historical_job])
+          if params[:historical_job][:request_to_terminate].present?
+            running_job = ::Naf::RunningJob.find_by_id(params[:id])
+            running_job.update_attributes(request_to_terminate: true) if running_job.present?
+          end
+
           format.html do
             redirect_to(@historical_job, notice: "Job '#{@historical_job.command}' was successfully updated.")
           end
@@ -105,10 +103,6 @@ module Naf
     end
 
     private
-
-    def set_cols_and_attributes
-      @attributes = Logical::Naf::Job::ATTRIBUTES
-    end
 
     def add_urls(hash)
       job = ::Naf::HistoricalJob.find(hash[:id])

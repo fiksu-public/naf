@@ -20,7 +20,8 @@ module Naf
      :state,
      :request_to_terminate,
      :marked_dead_by_machine_id,
-     :log_level].each do |a|
+     :log_level,
+     :tags].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -42,7 +43,7 @@ module Naf
     it { should have_many(:historical_job_prerequisites) }
     it { should have_many(:prerequisites) }
     it { should have_many(:historical_job_affinity_tabs) }
-    it { should have_many(:historical_job_affinities) }
+    it { should have_many(:affinities) }
 
     #--------------------
     # *** Validations ***
@@ -112,6 +113,49 @@ module Naf
 
       it "should be found by the started scope" do
         HistoricalJob.where("started_at is not null").should include(finished_job)
+      end
+    end
+
+    describe "#add_tags" do
+      before do
+        historical_job.tags = "{$pre-work}"
+      end
+
+      it "insert unique tag" do
+        historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+        historical_job.tags.should == "{$pre-work,$work}"
+      end
+
+      it "not insert non-unique tag" do
+        historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+        historical_job.tags.should == "{$pre-work}"
+      end
+    end
+
+    describe "#remove_tags" do
+      before do
+        historical_job.tags = "{$pre-work}"
+      end
+
+      it "remove existing tag" do
+        historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+        historical_job.tags.should == "{}"
+      end
+
+      it "not update tags when removing non-existing tag" do
+        historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+        historical_job.tags.should == "{$pre-work}"
+      end
+    end
+
+    describe "#remove_all_tags" do
+      before do
+        historical_job.tags = "{$pre-work}"
+      end
+
+      it "remove any existing tags" do
+        historical_job.remove_all_tags
+        historical_job.tags.should == "{}"
       end
     end
 

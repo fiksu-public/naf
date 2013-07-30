@@ -17,6 +17,10 @@ module Logical
           end
 
           if running_job.present?
+            # Update tags
+            running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+            running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+
             # found a job
             parse_log_level(running_job)
 
@@ -62,9 +66,13 @@ module Logical
             group("required_affinities").
             first.required_affinities
 
-          # Retrieve queued jobs that have the required affinity/affinities
-          job_ids = ::Naf::QueuedJob.
-            group(:id).
+          # Choose queued jobs that can be run by the machine
+          possible_jobs = ::Naf::QueuedJob.
+            select("id, priority, created_at").
+            runnable_by_machine(machine).
+            exclude_run_group_names(run_group_names_above_limit).
+            prerequisites_finished.
+            group("id, priority, created_at").
             having("array(
               select affinity_id::integer
               from naf.historical_job_affinity_tabs
@@ -73,15 +81,8 @@ module Logical
                from naf.machine_affinity_slots
                where machine_id = #{machine.id} and required = true)
               order by affinity_id) = '#{required_machine_affinities}'").
-            limit(100).pluck(:id)
-
-          # Choose queued jobs that can be run by the machine
-          possible_jobs = ::Naf::QueuedJob.
-            where("id IN (?)", job_ids).
-            runnable_by_machine(machine).
-            exclude_run_group_names(run_group_names_above_limit).
-            prerequisites_finished.
-            order_by_priority.limit(100)
+            order_by_priority.
+            limit(100)
         elsif machine.machine_affinity_slots.present?
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.

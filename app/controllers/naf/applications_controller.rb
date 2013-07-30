@@ -31,8 +31,8 @@ module Naf
     end
 
     def show
-      @record = Logical::Naf::Application.new(Naf::Application.find(params[:id]))
-      render :template => 'naf/record'
+      @application = Naf::Application.find(params[:id])
+      @logical_application = Logical::Naf::Application.new(Naf::Application.find(params[:id]))
     end
 
     def new
