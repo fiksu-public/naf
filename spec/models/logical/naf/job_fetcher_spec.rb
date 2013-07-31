@@ -1,6 +1,5 @@
 require 'spec_helper'
 
-
 module Logical
   module Naf
     describe JobFetcher do

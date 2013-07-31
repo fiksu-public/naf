@@ -150,11 +150,11 @@ module Logical
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
               JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
-              JobStatuses::Cancelled.all(conditions)
+              JobStatuses::Terminated.all(conditions)
             when :running
               JobStatuses::Running.all(conditions) + "union all\n" +
               JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
-              JobStatuses::Cancelled.all(conditions)
+              JobStatuses::Terminated.all(conditions)
             when :waiting
               JobStatuses::Waiting.all(conditions)
             when :finished

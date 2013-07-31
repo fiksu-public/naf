@@ -27,7 +27,7 @@ module Logical
         end
       end
 
-      context "with regard to title" do
+      pending "#title" do
         let(:scheduled_job) { Job.new(FactoryGirl.create(:scheduled_job)) }
 
         context "for a job scheduled from an application" do
@@ -61,7 +61,7 @@ module Logical
         end
       end
 
-      context "with regard to the detailed_hash" do
+      context "#to_detailed_hash" do
         let(:detailed_hash) { Job.new(FactoryGirl.create(:finished_job)).to_detailed_hash }
 
         it "should display started_at, and finished_at explicitly as a string" do
@@ -72,7 +72,7 @@ module Logical
         end
       end
 
-      context "with regard to the to_hash" do
+      context "#to_hash" do
         let(:columns) { 
           [:id,
            :server,
@@ -91,7 +91,7 @@ module Logical
         end
       end
 
-      context "with regard to the search" do
+      context "#search" do
         before(:all) do
           ::Naf::HistoricalJob.delete_all
           @job_status_type_map = {}
@@ -169,6 +169,22 @@ module Logical
           it "should find jobs where the application_run_group_name is like the query" do
             Job.search(application_run_group_name: "crazy", limit: 10).map(&:id).should == [job_two.id]
           end
+        end
+      end
+
+      describe "#get_job_scope" do
+        before do
+          ::Naf::HistoricalJob.delete_all
+        end
+        let!(:finished_job) { FactoryGirl.create(:finished_job) }
+
+        it "return correct job when scope is specified" do
+          ::Logical::Naf::Job.get_job_scope({ status: :finished }).should == [finished_job]
+        end
+
+        it "return correct jobs when scope is not specified" do
+          historical_job = FactoryGirl.create(:job)
+          ::Logical::Naf::Job.get_job_scope({}).should == [finished_job, historical_job]
         end
       end
 

@@ -20,6 +20,11 @@ module Naf
     def new
       @job = Naf::HistoricalJob.find(params[:historical_job_id])
       @tab = Naf::HistoricalJobAffinityTab.new
+
+      if @job.present? && @job.finished_at.present?
+        flash[:error] = "Can't add an affinity tab to a finished job!"
+        redirect_to :back
+      end
     end
 
     def create

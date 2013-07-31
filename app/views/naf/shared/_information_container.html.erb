@@ -3,6 +3,10 @@
 </div>
 
 <% if current_page?(naf.root_url) or current_page?(action: 'index') %>
+  <% if flash[:error] -%>
+    <div class="error"><%= flash[:error] %></div></br>
+  <% end -%>
+
   <div id='create_links'>
     <span id="create">  <%= generate_create_link %> </span>
   </div>

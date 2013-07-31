@@ -9,19 +9,20 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 9, 10 ] },
-      { "sClass": "center", "aTargets": [ 8 ] }
+      { "bVisible": false, "aTargets": [ 10, 11 ] },  // turn off visibility
+      { "sClass": "center", "aTargets": [ 9 ] }
     ],
     "aoColumns": [
-        { "sWidth": "2%"},
-        { "sWidth": "15%"},
-        { "sWidth": "9%"},
-        { "sWidth": "15%"},
-        { "sWidth": "20%"},
-        null,
-        null,
-        { "sWidth": "8%"},
-        { "sWidth": "50px"},
+        { "sWidth": "2%"},      // Id
+        { "sWidth": "15%"},     // Title
+        { "sWidth": "9%"},      // Script Type Name
+        { "sWidth": "15%"},     // Application Run Group Name
+        { "sWidth": "20%"},     // Application Run Group Restriction Name
+        null,                   // Enabled
+        null,                   // Run Time
+        null,                   // Last Queued At
+        { "sWidth": "8%"},      // Prerequisites
+        { "sWidth": "50px"},    // Actions
         null,
         null
     ],
@@ -38,9 +39,9 @@ jQuery(document).ready(function() {
       colorizationDeletedOrHidden(nRow, aData);
       return nRow;
     }
-  }; // datatable
+  };
 
-   // Setup the datatable.
+  // Setup the datatable
   jQuery('#datatable').addDataTable(dataTableOptions);
 
   jQuery(document).delegate('.enqueue', "click", function(){
@@ -65,7 +66,8 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[9] == 'true' || aData[10] == 'false' || aData[10] == '') {
+  console.log(aData);
+  if (aData[10] == 'true' || aData[11] == 'false' || aData[11] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }

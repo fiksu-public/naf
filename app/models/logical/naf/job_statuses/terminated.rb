@@ -1,7 +1,7 @@
 module Logical
   module Naf
     module JobStatuses
-      class Cancelled
+      class Terminated
 
         def self.all(conditions)
           <<-SQL

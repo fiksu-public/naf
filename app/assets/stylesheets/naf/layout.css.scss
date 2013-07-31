@@ -343,6 +343,14 @@ html {
                     }
                 }
 
+                .new_application label {
+                  width: 12em;
+                  float: left;
+                  text-align: left;
+                  margin-right: 1em;
+                  display: block;
+                }
+
                 #errorExplanation {
                      background-color: #FEF1EC;
                      border: 1px solid #FFE4D8;
@@ -383,4 +391,19 @@ html {
 
     }
 
+}
+
+/*
+############################################
+Flash Error Message
+############################################
+*/
+
+.error {
+  margin: 0 0 0.8em 0;
+  background-color: #fef1ec;
+  padding: 12px;
+  border: 1px solid #ffe4d8;
+  color: #cd0a0a;
+  line-height:40px;
 }

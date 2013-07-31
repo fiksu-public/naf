@@ -11,6 +11,7 @@ module Logical
                  :script_type_name,
                  :application_run_group_name,
                  :application_run_group_restriction_name,
+                 :enabled,
                  :run_time,
                  :prerequisites,
                  :deleted,
@@ -33,6 +34,7 @@ module Logical
         application_scope = ::Naf::Application.
           joins("LEFT JOIN #{::Naf.schema_name}.application_schedules ON #{::Naf.schema_name}.application_schedules.application_id = #{::Naf.schema_name}.applications.id").
             order("id desc")
+
         FILTER_FIELDS.each do |field|
           if search.present? and search[field].present?
             application_scope =
@@ -43,6 +45,7 @@ module Logical
             end
           end
         end
+
         SEARCH_FIELDS.each do |field|
           if search.present? and search[field].present?
             application_scope =

@@ -38,6 +38,10 @@
 
   <div id="record">
     <h2>Historical Job</h2>
+    <% if flash[:error] -%>
+      <div class="error"><%= flash[:error] %></div></br>
+    <% end -%>
+
     <%= link_to 'Back to Jobs', historical_jobs_path %>
     &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <%= link_to 'Edit', edit_historical_job_path(@historical_job) %>

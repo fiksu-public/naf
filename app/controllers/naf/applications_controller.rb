@@ -10,6 +10,7 @@ module Naf
         end
         format.json do
           set_page
+
           applications = []
           application = []
           params[:search][:visible] = params[:search][:visible] ? false : true
@@ -25,14 +26,15 @@ module Naf
           end
           @total_display_records = applications.count
           @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
-          render :layout => 'naf/layouts/jquery_datatables'
+
+          render layout: 'naf/layouts/jquery_datatables'
         end
       end
     end
 
     def show
       @application = Naf::Application.find(params[:id])
-      @logical_application = Logical::Naf::Application.new(Naf::Application.find(params[:id]))
+      @logical_application = Logical::Naf::Application.new(@application)
     end
 
     def new
