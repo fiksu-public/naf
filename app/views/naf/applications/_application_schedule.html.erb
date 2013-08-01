@@ -1,0 +1,62 @@
+<div class="field">
+  <%= f.hidden_field :_destroy %>
+</div>
+
+<h3 class="display-inline-block">Schedule | </h3>
+<%= link_to "Remove", "#" , :id => "remove_application_schedule", :class => "display-inline-block"%>
+
+<%= f.hidden_field :application_id %>
+
+<div class="field">
+  <%= f.label :application_run_group_restriction_id, "Application run group restriction*" %>
+  <br/>
+  <%= f.select(:application_run_group_restriction_id, ::Naf::ApplicationRunGroupRestriction.all.map { |a| [a.application_run_group_restriction_name, a.id] }, :include_blank => true) %>
+</div>
+
+<div class="field">
+  <%= f.label :application_run_group_name %></br/>
+  <%= select_tag(:run_group_name_type, options_for_select([["not set", "not set"], ["command", "command"], ["custom", "custom"]], @run_group_name_type)) %><br/>
+  <%= f.text_area :application_run_group_name, :rows => 4, :cols => 32, :placeholder => "Please input Application Run Group Name" %>
+</div>
+
+<div class="field">
+  <%= f.label :run_start_minute, "Run Start Time (count of minutes after 12:00 am)" %></br/>
+  <%= f.text_field :run_start_minute %>
+</div>
+
+<div class="field">
+  <%= f.label :run_interval, "Run Interval (minutes)" %></br/>
+  <%= f.text_field :run_interval %>
+</div>
+
+<div class="field">
+  <%= f.label :priority %>  <br/>
+  <%= f.text_field :priority %>
+</div>
+
+<div class="field">
+  <%= f.label :application_run_group_limit %>  <br/>
+  <%= f.text_field :application_run_group_limit %>
+</div>
+
+<div class="field">
+  <%= f.label :enabled %>  <br/>
+  <%= f.check_box :enabled %>
+</div>
+
+<div class="field">
+  <%= f.label :visible %>  <br/>
+  <%= f.check_box :visible %>
+</div>
+<br/>
+<% if @show_prerequisite %>
+  <%= f.fields_for :application_schedule_prerequisites do |builder| %>
+    <%= render "application_schedule_prerequisites", :f => builder %>
+  <% end %>
+<% else %>
+  <% f.fields_for :application_schedule_prerequisites do |builder| %>
+    <%= render "application_schedule_prerequisites", :f => builder %>
+  <% end %>
+<% end %>
+
+<%= naf_link_to_add_fields "Add the schedule prerequisite", f, :application_schedule_prerequisites %>

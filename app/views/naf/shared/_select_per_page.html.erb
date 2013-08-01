@@ -13,7 +13,7 @@
       return parseInt(jQuery('#iDisplayLength').val());
     }
 
-    // Global to store the current timout id value.
+    // Global to store the current timeout id value.
     var timeout_id = null;
 
     // Redraw datatable.
@@ -47,7 +47,7 @@
           timeout_id = setTimeout(redrawDatatable, 10000);
         } else {
           clearTimeout(timeout_id);
-          timout_id = null;
+          timeout_id = null;
         }
       });
     });

@@ -52,7 +52,7 @@ module Logical
 
         it "should display finished_at nicely" do
           job.finished_at.should be_a(String)
-          job.finished_at.should =~ /ago$/
+          job.finished_at.split(',').first.should =~ /ago$/
         end
 
         it "should display queued time explicitly as string" do

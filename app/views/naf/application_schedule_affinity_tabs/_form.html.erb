@@ -3,12 +3,6 @@
   <% if @tab.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@tab.errors.count, "error") %> prohibited this application schedule affinity tab from being saved:</h2>
-    
-    <ul>
-      <% @tab.errors.full_messages.each do |msg| %> 
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
@@ -16,13 +10,13 @@
   <%= f.hidden_field :application_schedule_id, :value => @application_schedule.id %>
 
   <div class="field">
-    <%= f.label :affinity %><br />
+    <%= f.label :affinity_id, "Affinity*" %><br />
     <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>
   </div>    
 
 
   <br />
   <div class="actions">
-    <%= f.submit :id => 'affinity_tabs_submit_button' %>
+    <%= f.submit %>
   </div>
 <% end %>

@@ -1,5 +1,4 @@
 require 'rubygems'
-require 'nested_form'
 require 'will_paginate'
 require 'mem_info'
 require 'jquery-rails'

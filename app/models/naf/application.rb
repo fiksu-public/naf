@@ -5,9 +5,10 @@ module Naf
                     :command,
                     :application_type_id,
                     :log_level,
-                    :application_schedule_attributes,
                     :short_name,
-                    :deleted
+                    :deleted,
+                    :application_schedule,
+                    :application_schedule_attributes
 
     #---------------------
     # *** Associations ***
@@ -37,7 +38,7 @@ module Naf
                            }
 
     validate :check_references_with_application_schedule_prerequisites
-    before_save :check_short_name
+    before_save :check_blank_values
     accepts_nested_attributes_for :application_schedule, allow_destroy: true
 
     #--------------------
@@ -75,8 +76,9 @@ module Naf
 
     private
 
-    def check_short_name
+    def check_blank_values
       self.short_name = nil if self.short_name.blank?
+      self.log_level = nil if self.log_level.blank?
     end
 
     def check_references_with_application_schedule_prerequisites

@@ -1,5 +1,11 @@
 <% content_for :body do %>
-    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => table_title } %>
+    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => naf_table_title } %>
+    <br/>
+    <div class="display-inline-block search_select_input">
+      <%= label(:time_format, "Time format:") %>
+      <%= select_tag(:time_format, options_for_select([["Lexically", :lexically], ["Timestamp", :timestamp]])) %>
+    </div>
+    &nbsp;&nbsp;
     <%= render :partial => 'naf/shared/select_per_page' %>
     <div id="flash_message">
         <% unless notice.blank? %>
@@ -37,6 +43,12 @@
       <script type='text/javascript'>
 
         var sAjaxSource = "<%= naf.machines_path(:json) %>";
+        jQuery(document).ready(function() {
+            jQuery("#time_format").change(function () {
+                SetFirstPage();
+                return false;
+            });
+        });
 
       </script>
     <% end %>

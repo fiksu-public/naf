@@ -1,21 +1,24 @@
 module Logical
   module Naf
     module JobStatuses
-      class Finished
+      class Canceled
 
         def self.all(conditions)
           <<-SQL
             (
-              SELECT
-                j.*, null AS "historical_job_id"
+             SELECT
+               j.*,
+               NULL AS job_id
               FROM
-                "#{::Naf.schema_name}"."historical_jobs" AS j
+               #{::Naf::Job.table_name} AS j
               WHERE
-                j.finished_at IS NOT NULL OR
+               (
+                j.finished_at IS NULL AND
                 j.request_to_terminate = true
-                #{conditions}
+               )
+               #{conditions}
               ORDER BY
-                finished_at DESC NULLS LAST
+               finished_at DESC
             )
           SQL
         end

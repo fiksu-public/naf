@@ -1,5 +1,5 @@
 <br/>
-<div class="display-inline-block">
+<div class="display-inline-block search_select_input">
   <%= label(:status, "Status:") %>
   <%= select_tag("search[status]",
                   options_for_select([["All", nil],
@@ -12,7 +12,7 @@
 </div>
 &nbsp;&nbsp;
 
-<div class="display-inline-block">
+<div class="display-inline-block search_select_input">
   <%= label(:started_on_machine_id, "Machine:") %>
   <%= select(:search, :started_on_machine_id,
               Naf::Machine.all.collect {
@@ -21,11 +21,17 @@
 </div>
 &nbsp;&nbsp;
 
+<div class="display-inline-block search_select_input">
+  <%= label(:time_format, "Time format:") %>
+  <%= select_tag(:time_format, options_for_select([["Lexically", :lexically], ["Timestamp", :timestamp]])) %>
+</div>
+&nbsp;&nbsp;
+
 <div id='show_search_container_link' class="display-inline-block">
   <%= link_to 'Show additional search parameters', '#', id: 'search_container_link' %>
 </div>
 <div id="search_container">
-  <%= form_tag(naf.historical_jobs_path, method: "get", id: 'job_search') do %>
+  <%= form_tag(naf.historical_jobs_path, method: "get", id: 'job_search', class: 'search_select_input') do %>
       <div style="width:30%;" class="display-inline-block">
           <div class="field">
             <%= label(:command, "Command:") %>
@@ -116,6 +122,11 @@
                 return false;
             });
             jQuery("#search_started_on_machine_id").change(function () {
+                setPageOrder();
+                SetFirstPage();
+                return false;
+            });
+            jQuery("#time_format").change(function () {
                 setPageOrder();
                 SetFirstPage();
                 return false;

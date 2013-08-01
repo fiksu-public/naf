@@ -45,11 +45,25 @@ html {
         }
 
         select {
-            width: 12em;
+            width: 40em;
         }
 
         input {
-            width: 15em;
+            width: 40em;
+        }
+
+        .search_select_input {
+            select {
+                width: 12em;
+            }
+
+            input {
+                width: 15em;
+            }
+        }
+
+        :focus {
+            outline:none;
         }
 
         input[type=checkbox] {
@@ -180,6 +194,14 @@ html {
                 }
             }
 
+            #page-select-container, #refresh-page-container {
+                display: none;
+                float: right;
+                margin-top: -1px;
+                padding: 2px 2px;
+                width: 205px;
+            }
+
             #datatable_wrapper {
                 #datatable_processing {
                     color: #45a113;
@@ -192,13 +214,6 @@ html {
                 }
 
                 #datatable_paginate {
-                    #page-select-container, #refresh-page-container {
-                        display: none;
-                        float: right;
-                        margin-top: -1px;
-                        padding: 2px 2px;
-                        width: 205px;
-                    }
                     #page-select-container {
                         label {
                             position: relative;
@@ -343,7 +358,15 @@ html {
                     }
                 }
 
-                .new_application, .edit_application label {
+                .edit_application label {
+                  width: 12em;
+                  float: left;
+                  text-align: left;
+                  margin-right: 1em;
+                  display: block;
+                }
+
+                .new_application label {
                   width: 12em;
                   float: left;
                   text-align: left;
@@ -360,8 +383,8 @@ html {
                      padding: 12px;
                 }
 
-                input#affinity_tabs_submit_button, input#janitors_submit_button {
-                    width: 280px;
+                .validation-error {
+                    color: #CD0A0A;
                 }
 
                 input.check_box_input {
@@ -371,16 +394,71 @@ html {
                 .scrollable-output {
                     border: 1px solid #E1E1E1;
                     height: 500px;
-                    min-width: 1200px;
-                    scrollbars: "auto";
-                    white-space: nowrap;
-                    width: 100%;
+                    overflow-x:auto;
+                    width: 98%;
+                    background-color: #2d2d2d;
+                    color: #ffffff;
+                    padding: 5px 10px 5px 0px;
+
+                    #event_list {
+                        word-wrap: break-word;
+                        padding-left: 10px;
+                        margin: 0;
+                        list-style: none outside none;
+                        li {
+                            padding-left: 20px;
+                            text-indent: -15px;
+                        }
+                    }
+
+                    .msg {
+                        background: none repeat scroll 0 0 #202020;
+                        border: 1px solid #303030;
+                        box-shadow: 0 0 5px #000000;
+                        border-radius: 5px 5px 5px 5px;
+                        margin: 20px auto;
+                        min-width: 600px;
+                        padding: 40px 25px;
+                        position: relative;
+                        text-align: center;
+                        width: 65%;
+                        font-size: 20px;
+                    }
+                }
+
+                #stdout_header {
+                    width: 98%;
+                    input {
+                        width: 24em;
+                    }
+
+                    #papertrail_search_submit {
+                        width: 12em;
+                    }
+
+                    #papertrail_time {
+                        display: none;
+                    }
+
+                    #automatic_data_update {
+                        float:right;
+                        padding-top: 4px;
+                        max-width: 215px;
+                        input[type=checkbox] {
+                            width: 13px;
+                            top: -5px;
+                        }
+                        input {
+                            width: 100px;
+                        }
+                    }
                 }
 
                 h4 {
                     margin: 10px 0 5px 0;
                     font-weight: bold;
                 }
+
             }
 
             #parent_links {

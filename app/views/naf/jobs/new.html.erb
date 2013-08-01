@@ -1,0 +1,11 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', { :controller => 'jobs', :action => 'index' } %>
+
+    <h3 id="record_name">Create a new Job</h3>
+
+    <%= render 'form' %>
+  </div>
+<% end %>
+
+<%= render :partial => 'naf/shared/application' %>

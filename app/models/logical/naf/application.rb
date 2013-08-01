@@ -8,9 +8,12 @@ module Logical
 
       COLUMNS = [:id,
                  :title,
+                 :short_name,
                  :script_type_name,
                  :application_run_group_name,
                  :application_run_group_restriction_name,
+                 :application_run_group_limit,
+                 :priority,
                  :enabled,
                  :run_time,
                  :prerequisites,
@@ -50,7 +53,7 @@ module Logical
           if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
-              application_scope.where(["lower(naf.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+              application_scope.where(["lower(#{Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
             else
               application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
             end
@@ -112,6 +115,18 @@ module Logical
           schedule.prerequisites.map do |schedule_prerequisite|
             schedule_prerequisite.application.short_name_if_it_exist
           end.join(", \n")
+        end
+      end
+
+      def application_run_group_name
+        if schedule = @app.application_schedule
+          if schedule.application_run_group_name.blank?
+            "not set"
+          elsif schedule.application_run_group_name == command
+            "command"
+          else
+            schedule.application_run_group_name
+          end
         end
       end
 

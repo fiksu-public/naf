@@ -5,6 +5,7 @@ module Naf
                   :controller_class,
                   :title,
                   :papertrail_group_id,
+                  :papertrail_token,
                   :layout,
                   :default_page_options
 
@@ -13,6 +14,7 @@ module Naf
       @controller_class = "::ApplicationController"
       @title = "Naf - a Rails Job Scheduling Engine"
       @papertrail_group_id = nil
+      @papertrail_token = nil
       @layout = "naf_layout"
       @default_page_options = [10, 20, 50, 100, 250, 500, 750, 1000, 1500, 2000]
     end

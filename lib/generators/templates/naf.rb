@@ -4,4 +4,8 @@ Naf.configure do |config|
 
   # Setting up papertrail links
   # config.papertrail_group_id =
+
+  # Please get it from your profile on Papertrail
+  # config.papertrail_token =
+
 end

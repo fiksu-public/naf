@@ -1,0 +1,31 @@
+<tr>
+  <td scope="row">Last Queued At</td>
+  <td> <%= naf_last_queued_at_link(@record) %> </td>
+</tr>
+<tr>
+  <td>Add Script to Jobs Queue</td>
+  <td>
+    <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => "Enqueue application(id: #{@record.id}, title: #{@record.title})"), "#", {:class => "enqueue", :id => @record.id} %>
+  </td>
+</tr>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+      jQuery(document).ready(function () {
+          jQuery('.enqueue').click(function () {
+              var postSource = "<%= naf.jobs_path %>";
+              var answer = confirm("Adding application as a job on the queue?");
+              if (!answer) {
+                  return false;
+              }
+              jQuery.post(postSource, { "job[application_id]":jQuery(this).attr('id') }, function (data) {
+                  if (data.success) {
+                      jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
+                      appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                      setTimeout('window.location.reload()', 5600);
+                  }
+              });
+          });
+      });
+  </script>
+<% end %>

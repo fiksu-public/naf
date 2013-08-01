@@ -118,7 +118,7 @@ module Process::Naf
       if machine.log_level != @last_machine_log_level
         @last_machine_log_level = machine.log_level
         unless @last_machine_log_level.blank?
-          parse_and_set_logger_levels(@last_machine_log_level)
+          logging_configurator.parse_and_set_logger_levels(@last_machine_log_level)
         end
       end
 

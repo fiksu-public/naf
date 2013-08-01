@@ -5,6 +5,7 @@ module Naf
 
     has_many :logger_style_names, :class_name => '::Naf::LoggerStyleName'
     has_many :logger_names, :through => :logger_style_names
+    before_save :check_blank_values
 
     attr_accessible :name, :note, :logger_style_names_attributes
 
@@ -28,5 +29,10 @@ module Naf
       end
     end
 
+    private
+
+    def check_blank_values
+      self.note = nil if self.note.blank?
+    end
   end
 end

@@ -100,6 +100,16 @@ module Logical
         end
       end
 
+      def application_run_group_name
+        if @job.application_run_group_name.blank?
+          "not set"
+        elsif @job.application_run_group_name == @job.command
+          "command"
+        else
+          @job.application_run_group_name
+        end
+      end
+
       def server
         if started_on_machine
           name = started_on_machine.short_name_if_it_exist
@@ -165,7 +175,8 @@ module Logical
               JobStatuses::Running.all(:queued, conditions) + "union all\n" +
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
-              JobStatuses::Finished.all(conditions)
+              JobStatuses::Finished.all(conditions) + "union all\n" +
+              JobStatuses::Terminated.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
 
@@ -307,7 +318,7 @@ module Logical
 
       def finished_at
         if value = @job.finished_at
-          "#{time_ago_in_words(value, true)} ago"
+          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end

@@ -8,12 +8,12 @@
   <% end -%>
 
   <div id='create_links'>
-    <span id="create">  <%= generate_create_link %> </span>
+    <span id="create">  <%= naf_generate_create_link %> </span>
   </div>
 <% end %>
 
-<% if nested_resource_index? %>
+<% if naf_nested_resource_index? %>
   <div id='parent_links'>
-    <span id="parent"> <%= parent_resource_link %> </span>
+    <span id="parent"> <%= naf_parent_resource_link %> </span>
   </div>
 <% end %>

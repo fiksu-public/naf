@@ -16,20 +16,17 @@
       <thead>
         <tr>
           <th>Id</th>
+          <th>Server</th>
+          <th>Pid</th>
+          <th>Queued Time</th>
           <th>Title</th>
-          <th>Short Name</th>
-          <th>Script Type Name</th>
-          <th>Run Group Name</th>
-          <th>Run Group Restriction Name</th>
-          <th>Run Group Limit</th>
-          <th>Priority</th>
-          <th>Enabled</th>
+          <th>Started At</th>
+          <th>Finished At</th>
           <th>Run Time</th>
-          <th>Last Queued At</th>
-          <th>Prerequisites</th>
+          <th>Affinities</th>
+          <th>Status</th>
+          <th></th>
           <th>Actions</th>
-          <th></th>
-          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -38,12 +35,14 @@
     </table>
 
     <% content_for :javascripts do %>
-      <%= javascript_include_tag("dataTablesTemplates/applications.js") %>
+      <%= javascript_include_tag("dataTablesTemplates/jobs.js") %>
       <script type='text/javascript'>
-        var sAjaxSource = "<%= naf.applications_path(:json) %>";
-        var postSource = "<%= naf.historical_jobs_path(:json) %>";
+
+        var sAjaxSource = "<%= naf.jobs_path(:json) %>";
+
       </script>
     <% end %>
+
 <% end %>
 
 <%= render :partial => 'naf/shared/application' %>

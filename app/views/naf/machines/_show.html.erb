@@ -1,0 +1,166 @@
+<% unless @record.marked_down %>
+  <tr>
+    <td>Mark machine down</td>
+    <td>
+      <%= link_to image_tag('terminate.png', :class => 'action', :title => "Mark machine(id: #{@record.id}, server:#{@record.server_name.blank? ? @record.server_address : @record.server_name}) down"), "#", {:class => "terminate"} %>
+    </td>
+  </tr>
+<% end %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+      var id = <%= @record.id %>;
+      var system_id = '<%= @record.server_name %>';
+      var token = "<%= Naf.papertrail_token %>";
+      var group_id = '<%= Naf.papertrail_group_id %>';
+      var url = 'https://papertrailapp.com/api/v1/events/search.json';
+      var max_id = null;
+      var timeout_id = null;
+
+      jQuery(document).ready(function () {
+          getLog();
+          jQuery('#stdout').css('width', jQuery('#stdout').width());
+
+          if(system_id.length != 0 && jQuery('#papertrail_search').val().length == 0) {
+              jQuery('#papertrail_search').val(system_id + ' runner');
+          }
+
+          jQuery(document).on("click", '.terminate', function() {
+              var answer = confirm("You are going to mark machine down. Are you sure that you want to do this?");
+              if (!answer) {
+                  return false;
+              }
+              var url = '/job_system/machines/' + id;
+              jQuery.ajax({
+                  url: url,
+                  type: 'POST',
+                  dataType: 'json',
+                  data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
+                  success:function (data) {
+                      if (data.success) {
+                          jQuery("<p id='notice'>Machine was marked down!</p>").
+                                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                          setTimeout('window.location.reload()', 5600);
+                      }
+                  }
+              });
+          });
+
+          jQuery('#papertrail_search_submit').click(function () {
+              clearTimeout(timeout_id);
+              timeout_id = null;
+              getLog();
+          });
+
+          jQuery('#clock_button').click(function() {
+              jQuery("#papertrail_time").animate({width:'toggle'},350);
+              return false;
+          });
+
+          jQuery('#clear_stdout_submit').click(function() {
+              jQuery('#event_list').empty();
+          });
+
+          jQuery('#auto_update').change(function() {
+            if(jQuery(this).is(':checked')) {
+                getTail();
+            } else {
+                clearTimeout(timeout_id);
+                timeout_id = null;
+            }
+          });
+      });
+
+      function callAjax(data){
+          if(group_id.length != 0) {
+              jQuery.ajax({
+                  url: url ,
+                  headers:{ 'X-Papertrail-Token': token },
+                  dataType: 'json',
+                  data: data,
+                  success: function(response) {
+                      max_id = response['max_id'];
+                      var events = response["events"];
+                      var text = "";
+                      if(parseInt(Date.parse((-3).days().fromNow().toISOString()) / 1000) > data['min_time']) {
+                          text = setNoticeText("Oldest event reached.<br><br>Need to search older events? Download \
+                                    <a target='_blank' href='https://papertrailapp.com/account/archives'>archives</a> \
+                                    or increase \
+                                    <a target='_blank' href='https://papertrailapp.com/account/payment'>duration</a>.");
+                      }
+                      for (var i in events) {
+                          var ev = events[i];
+                          text = text + "<li>" +
+                                 ev["display_received_at"] + "&nbsp;" +
+                                 ev["hostname"] + "&nbsp;" +
+                                 ev["program"] + ":&nbsp;&nbsp;&nbsp;" +
+                                 ev["message"] + "</li>";
+                      }
+                      if(response['backend_timeout']){
+                          text = setNoticeText("Problems on server(backend_timeout = true), retry your query.");
+                      }
+                      if(text == "" && jQuery('#event_list')[0].children.length == 0) {
+                          text = "No results were found!<br>";
+                      }
+                      jQuery('#event_list').append(text);
+                      jQuery("#stdout").scrollTop(jQuery("#stdout")[0].scrollHeight);
+                  },
+                  error: function(request) {
+                     if(request.status == 401) {
+                        jQuery('#event_list').append(setNoticeText("Authorization Required.<br><br> \
+                                Please add the correct Papertrail token to the file 'config/initializers/naf.rb'"));
+                     } else {
+                        jQuery('#event_list').append(setNoticeText("Something went wrong, retry your query."));
+                     }
+                  }
+              });
+          } else {
+              jQuery('#event_list').append(setNoticeText("Papertrail group id is blank.<br><br> \
+                  Please add the correct Papertrail group id to the file 'config/initializers/naf.rb'"));
+          }
+      }
+
+      function getSearchData(){
+          var data = {};
+          var search_params = jQuery('#papertrail_search').val();
+          var time = jQuery('#papertrail_time').val();
+          var parseTime = parseInt(Date.parse(time) / 1000);
+
+          data['group_id'] = group_id;
+          data['tail'] = false;
+
+          if(parseTime != 0) {
+              data['min_time'] = parseTime;
+          }
+          if(search_params.length != 0) {
+              data['q'] = search_params;
+          }
+
+          return data;
+      }
+
+      function setNoticeText(text) {
+          return text = "<div class='msg'>"
+                            + text +
+                         "</div>";
+      }
+
+      function getTail() {
+          var data = getSearchData();
+          data['min_id'] = max_id;
+          delete data['min_time'];
+          callAjax(data);
+          if(jQuery('#auto_update').is(':checked')) {
+              timeout_id = setTimeout(getTail, 5000);
+          }
+      }
+
+      function getLog() {
+          max_id = null;
+          callAjax(getSearchData());
+          if(jQuery('#auto_update').is(':checked')) {
+             timeout_id = setTimeout(getTail, 5000);
+          }
+      }
+  </script>
+<% end %>

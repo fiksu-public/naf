@@ -40,7 +40,7 @@ module Naf
                                    greater_than: -2147483648,
                                    less_than: 2147483647
                                  }
-    before_save :check_short_name
+    before_save :check_blank_values
 
     #---------------------
     # *** Associations ***
@@ -200,7 +200,7 @@ module Naf
 
     private
 
-    def check_short_name
+    def check_blank_values
       self.short_name = nil if self.short_name.blank?
       self.server_name = nil if self.server_name.blank?
       self.server_note = nil if self.server_note.blank?

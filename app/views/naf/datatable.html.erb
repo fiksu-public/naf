@@ -1,5 +1,5 @@
 <% content_for :body do %>
-  <%= render partial: 'naf/shared/information_container', locals: { record_name: table_title } %>
+  <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
 
   <div id="flash_message">
       <% unless notice.blank? %>
@@ -16,7 +16,7 @@
     <thead>
       <tr>
         <% @cols.each do |col| %>
-          <th id="<%= col %>"><%= make_header(col) %></th>
+          <th id="<%= col %>"><%= naf_make_header(col) %></th>
         <% end %>
       </tr>
     </thead>

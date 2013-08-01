@@ -52,7 +52,7 @@ function initPaging() {
 
 function addTitles() {
   jQuery('#datatable tbody tr td').each( function() {
-    this.setAttribute( 'title', $(this).text().trim());
+    this.setAttribute( 'title', jQuery(this).text().trim());
   });
 }
 

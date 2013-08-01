@@ -1,11 +1,21 @@
 module Naf
+
+  ActionView::Base.field_error_proc = Proc.new do |html_tag, instance|
+    errors = Array(instance.error_message).join('; ')
+    if html_tag =~ /^<label for=/
+      %(<span class="validation-error">#{html_tag}</span>).html_safe
+    else
+      %(#{html_tag}<span class="validation-error">&nbsp;#{errors}</span>).html_safe
+    end
+  end
+
   module ApplicationHelper
     include ActionView::Helpers::TextHelper
 
-    DESTROY_BLOCKED_RESOURCES = ["historical_jobs", "applications", "machines", "historical_job_affinity_tabs", "janitorial_assignments"]
-    READ_ONLY_RESOURCES = []
-    CREATE_BLOCKED_RESOURCES = []
-    ALL_VISIBLE_RESOURCES = {
+    NAF_DESTROY_BLOCKED_RESOURCES = ["historical_jobs", "applications", "machines", "historical_job_affinity_tabs", "janitorial_assignments"]
+    NAF_READ_ONLY_RESOURCES = []
+    NAF_CREATE_BLOCKED_RESOURCES = []
+    NAF_ALL_VISIBLE_RESOURCES = {
                               "historical_jobs" => "",
                               "applications" => "",
                               "machines" => "",
@@ -14,19 +24,20 @@ module Naf
                               "janitorial_assignments" => ["janitorial_archive_assignments", "janitorial_create_assignments", "janitorial_drop_assignments"]
                             }
 
-    def tabs
-      ALL_VISIBLE_RESOURCES
+    def naf_tabs
+      NAF_ALL_VISIBLE_RESOURCES
     end
 
-    def last_queued_at_link(app)
+    def naf_last_queued_at_link(app)
       if historical_job = app.last_queued_job
-        link_to "#{time_ago_in_words(historical_job.created_at, true)} ago", naf.historical_job_path(historical_job)
+        link_to "#{time_ago_in_words(historical_job.created_at, true)} ago, #{historical_job.created_at.localtime.strftime("%Y-%m-%d %r")}",
+          naf.historical_job_path(historical_job)
       else
         ""
       end
     end
 
-    def highlight_tab?(tab)
+    def naf_highlight_tab?(tab)
       case tab
         when "machines"
           [tab, "machine_affinity_slots"].include?(controller_name)
@@ -51,7 +62,7 @@ module Naf
       end
     end
 
-    def parent_resource_link
+    def naf_parent_resource_link
       case controller_name
         when "historical_job_affinity_tabs"
           link_to "Back to Historical Job",
@@ -73,13 +84,13 @@ module Naf
       end
     end
 
-    def nested_resource_index?
+    def naf_nested_resource_index?
       ["historical_job_affinity_tabs",
        "application_schedule_affinity_tabs",
        "machine_affinity_slots"].include?(controller_name) and !params[:id]
     end
 
-    def table_title
+    def naf_table_title
       if current_page?(naf.janitorial_archive_assignments_path)
         "Janitorial Archive Assignment"
       elsif current_page?(naf.janitorial_create_assignments_path)
@@ -97,12 +108,12 @@ module Naf
             name = machine.server_name
             ((name and name.length > 0) ? name : machine.server_address) + ", Affinity Slots"
           else
-            make_header(controller_name)
+            naf_make_header(controller_name)
         end
       end
     end
 
-    def generate_child_resources_link
+    def naf_generate_child_resources_link
       case controller_name
         when "historical_jobs"
           link_to "Historical Job Affinity Tabs",
@@ -129,7 +140,7 @@ module Naf
       end
     end
 
-    def generate_index_link(name)
+    def naf_generate_index_link(name)
       case name
         when "historical_jobs"
           link_to "Jobs", main_app.naf_path
@@ -148,37 +159,37 @@ module Naf
       end
     end
 
-    def generate_create_link
-      return "" if READ_ONLY_RESOURCES.include?(controller_name) or CREATE_BLOCKED_RESOURCES.include?(controller_name)
-      return link_to "Add a Job", naf.new_historical_job_path, { class: 'add_job' } if display_job_search_link?
-      link_to "Create new #{model_name}", { controller: controller_name, action: 'new' }
+    def naf_generate_create_link
+      return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name) or NAF_CREATE_BLOCKED_RESOURCES.include?(controller_name)
+      return link_to "Add a Job", naf.new_historical_job_path, { class: 'add_job' } if naf_display_job_search_link?
+      link_to "Create new #{naf_model_name}", { controller: controller_name, action: 'new' }
     end
 
-    def display_job_search_link?
+    def naf_display_job_search_link?
       current_page?(naf.root_url) or current_page?(controller: 'historical_jobs', action: 'index')
     end
 
-    def model_name
+    def naf_model_name
       name_pieces = controller_name.split('_')
       name_pieces[name_pieces.size - 1] = name_pieces.last.singularize
       name_pieces.map(&:capitalize).join(' ')
     end
 
-    def make_header(attribute)
+    def naf_make_header(attribute)
       attribute.to_s.split('_').map(&:capitalize).join(' ')
     end
 
-    def generate_edit_link
-      return "" if READ_ONLY_RESOURCES.include?(controller_name)
+    def naf_generate_edit_link
+      return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name)
       link_to "Edit", { controller: controller_name, action: 'edit', id: params[:id] }, :class => 'edit'
     end
 
-    def generate_back_link
-      link_to "Back to #{make_header(controller_name)}", { controller: controller_name, action: 'index' }, class: 'back'
+    def naf_generate_back_link
+      link_to "Back to #{naf_make_header(controller_name)}", { controller: controller_name, action: 'index' }, class: 'back'
     end
 
-    def generate_destroy_link
-      return "" if READ_ONLY_RESOURCES.include?(controller_name) or DESTROY_BLOCKED_RESOURCES.include?(controller_name)
+    def naf_generate_destroy_link
+      return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name) or NAF_DESTROY_BLOCKED_RESOURCES.include?(controller_name)
       case controller_name
         when "application_schedule_affinity_tabs"
           link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record),
@@ -204,7 +215,7 @@ module Naf
         current_page?(controller: 'historical_jobs', action: 'index')
     end
 
-    def papertrail_link(record, runner = false)
+    def naf_papertrail_link(record, runner = false)
       if group_id = Naf.papertrail_group_id
         url = "http://www.papertrailapp.com/groups/#{group_id}/events"
         if record.kind_of?(::Naf::HistoricalJob) || record.kind_of?(::Logical::Naf::Job)
@@ -224,6 +235,18 @@ module Naf
       end
 
       return url
+    end
+
+    def naf_link_to_remove_fields(name, f)
+      f.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)")
+    end
+
+    def naf_link_to_add_fields(name, f, association)
+      new_object = f.object.class.reflect_on_association(association).klass.new
+      fields = f.fields_for(association, new_object, :child_index => "new_#{association}") do |builder|
+        render(association.to_s, :f => builder)
+      end
+      link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", :id => 'add_prerequisite')
     end
 
   end

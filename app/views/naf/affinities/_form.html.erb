@@ -13,7 +13,7 @@
   <% end %>
 
   <div class="field">
-    <%= f.label :name %><br />
+    <%= f.label :affinity_name, "Name*" %><br />
     <%= f.text_field :affinity_name %>
   </div>
   </br>
@@ -25,10 +25,16 @@
   </br>
 
   <div class="field">
-    <%= f.label :classification %><br />
+    <%= f.label :affinity_classification_id, "Classification*" %><br />
     <%= f.select(:affinity_classification_id, Naf::AffinityClassification.all.map{ |a|
           [a.affinity_classification_name, a.id]
         }, { include_blank: true }) %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_note %><br />
+    <%= f.text_field :affinity_note %>
   </div>
   </br>
 

@@ -3,12 +3,6 @@
   <% if @janitorial_assignment.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@janitorial_assignment.errors.count, "error") %> prohibited Janitorial Assignment from being saved:</h2>
-    
-    <ul>
-      <% @janitorial_assignment.errors.full_messages.each do |msg| %>
-        <li><%= msg %></li>
-      <% end %>
-    </ul>
   </div>
   <% end %>
  
@@ -18,7 +12,7 @@
   </div>
 
   <div class="field">
-    <%= f.label :model_name %><br />
+    <%= f.label :model_name, "Model name*" %><br />
     <%= f.text_field :model_name %>
   </div>
 
@@ -39,6 +33,6 @@
 
   <br />
   <div class="actions">
-    <%= f.submit :id => 'janitors_submit_button' %>
+    <%= f.submit %>
   </div>
 <% end %>

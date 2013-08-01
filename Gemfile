@@ -14,7 +14,8 @@ gem 'mem_info'
 gem "nested_form"
 
 # For private repo testing on Travis
-gem 'af', '=0.9.6', path: 'vendor/private'
+# gem 'af', '=0.9.9', path: 'vendor/private'
+gem 'af', git: 'git@github.com:fiksu/af.git'
 
 # These gems should be encapsulated in test group, but test fails.
 # For now it will remain global.

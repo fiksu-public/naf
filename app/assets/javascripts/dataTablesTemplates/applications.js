@@ -9,19 +9,22 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 10, 11 ] },  // turn off visibility
-      { "sClass": "center", "aTargets": [ 9 ] }
+      { "bVisible": false, "aTargets": [ 13, 14 ] },    // turn off visibility
+      { "sClass": "center", "aTargets": [ 6, 7, 8, 11, 12 ] }
     ],
     "aoColumns": [
         { "sWidth": "2%"},      // Id
-        { "sWidth": "15%"},     // Title
+        { "sWidth": "12%"},     // Title
+        { "sWidth": "7%"},      // Short Name
         { "sWidth": "9%"},      // Script Type Name
-        { "sWidth": "15%"},     // Application Run Group Name
-        { "sWidth": "20%"},     // Application Run Group Restriction Name
+        null,                   // Application Run Group Name
+        { "sWidth": "14%"},     // Application Run Group Restriction Name
+        { "sWidth": "8%"},      // Application Run Group Limit
+        { "sWidth": "4%"},      // Priority
         null,                   // Enabled
-        null,                   // Run Time
-        null,                   // Last Queued At
-        { "sWidth": "8%"},      // Prerequisites
+        { "sWidth": "8%"},      // Run Time
+        { "sWidth": "8%"},      // Last Queued At
+        { "sWidth": "7%"},      // Prerequisites
         { "sWidth": "50px"},    // Actions
         null,
         null
@@ -37,6 +40,7 @@ jQuery(document).ready(function() {
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToApplication(nRow, aData);
       colorizationDeletedOrHidden(nRow, aData);
+      checkTimeFormat(nRow, aData);
       return nRow;
     }
   };
@@ -66,8 +70,19 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  console.log(aData);
-  if (aData[10] == 'true' || aData[11] == 'false' || aData[11] == '') {
+  if (aData[11] == 'true' || aData[12] == 'false' || aData[13] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
+}
+
+function checkTimeFormat(nRow, aData) {
+  var l_q_a_array = jQuery(aData[9]).text().split(',');
+  var last_queued_at;
+  if(jQuery('#time_format').val() == 'lexically') {
+    last_queued_at = l_q_a_array[0];
+  } else {
+    last_queued_at = l_q_a_array[1];
+  }
+
+  jQuery('td:nth-child(10)', nRow).empty().append(jQuery(aData[9]).text(last_queued_at));
 }

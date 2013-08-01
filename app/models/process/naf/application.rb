@@ -65,7 +65,7 @@ module Process::Naf
         if job.log_level != @last_log_level
           @last_log_level = job.log_level
           unless @last_log_level.blank?
-            parse_and_set_logger_levels(@last_log_level)
+            logging_configurator.parse_and_set_logger_levels(@last_log_level)
           end
         end
       end

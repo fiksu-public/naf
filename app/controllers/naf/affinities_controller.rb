@@ -48,7 +48,7 @@ module Naf
     private
 
     def set_cols_and_attributes
-      @cols = [:id, :affinity_classification_name, :affinity_name]
+      @cols = [:id, :affinity_classification_name, :affinity_name, :affinity_note]
     end
 
   end
