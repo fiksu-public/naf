@@ -1,49 +1,50 @@
 <% content_for :body do %>
-    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => naf_table_title } %>
-    <%= render :partial => 'search_container' %>
-    <%= render :partial => 'naf/shared/select_per_page' %>
-    <div id="flash_message">
-        <% unless notice.blank? %>
-          <script type='text/javascript'>
-            jQuery("<p id='notice'><%= notice %></p>")
-                .appendTo('#flash_message')
-                .slideDown().delay(5000).slideUp();
-          </script>
-        <% end %>
-    </div>
+  <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
+  <%= render partial: 'search_container' %>
+  <%= render partial: 'naf/shared/select_per_page' %>
 
-    <table id='datatable'>
-      <thead>
-        <tr>
-          <th>Id</th>
-          <th>Title</th>
-          <th>Short Name</th>
-          <th>Script Type Name</th>
-          <th>Run Group Name</th>
-          <th>Run Group Restriction Name</th>
-          <th>Run Group Limit</th>
-          <th>Priority</th>
-          <th>Enabled</th>
-          <th>Run Time</th>
-          <th>Last Queued At</th>
-          <th>Prerequisites</th>
-          <th>Actions</th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr></tr>
-      </tbody>
-    </table>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
 
-    <% content_for :javascripts do %>
-      <%= javascript_include_tag("dataTablesTemplates/applications.js") %>
-      <script type='text/javascript'>
-        var sAjaxSource = "<%= naf.applications_path(:json) %>";
-        var postSource = "<%= naf.historical_jobs_path(:json) %>";
-      </script>
-    <% end %>
+  <table id='datatable'>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Title</th>
+        <th>Short Name</th>
+        <th>Script Type Name</th>
+        <th>Run Group Name</th>
+        <th>Run Group Restriction Name</th>
+        <th>Run Group Limit</th>
+        <th>Priority</th>
+        <th>Enabled</th>
+        <th>Run Time</th>
+        <th>Last Queued At</th>
+        <th>Prerequisites</th>
+        <th>Actions</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr></tr>
+    </tbody>
+  </table>
+
+  <% content_for :javascripts do %>
+    <%= javascript_include_tag("dataTablesTemplates/applications.js") %>
+    <script type='text/javascript'>
+      var sAjaxSource = "<%= naf.applications_path(:json) %>";
+      var postSource = "<%= naf.historical_jobs_path(:json) %>";
+    </script>
+  <% end %>
 <% end %>
 
-<%= render :partial => 'naf/shared/application' %>
+<%= render partial: 'naf/shared/application' %>

@@ -40,7 +40,7 @@ module Naf
       let(:invalid_tab) { mock_model(model_class, save: false) }
       let(:job) { mock_model(HistoricalJob, id: 1)  }
 
-      subject do 
+      subject do
         post :create, job_affinity_tab: { historical_job_id: 1 }, historical_job_id: 1
       end
 
@@ -50,7 +50,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:new).and_return(valid_tab)
-        valid_tab.stub!(:affinity_name).and_return("Test Name")
+        valid_tab.stub(:affinity_name).and_return("Test Name")
         path = historical_job_historical_job_affinity_tab_path(job, valid_tab)
         subject.should redirect_to(path)
       end
@@ -65,7 +65,7 @@ module Naf
       let(:invalid_job) { mock_model(model_class, update_attributes: false, id: 5, historical_job_id: 1) }
       let(:job) { mock_model(HistoricalJob, id: 1)  }
 
-      subject do 
+      subject do
         put :update, job_affinity_tab: { historical_job_id: 1 }, id: 5, historical_job_id: 1
       end
 
@@ -75,7 +75,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:find).and_return(valid_job)
-        valid_job.stub!(:affinity_name).and_return("Test Name")
+        valid_job.stub(:affinity_name).and_return("Test Name")
         path = historical_job_historical_job_affinity_tab_path(job, valid_job)
         subject.should redirect_to(path)
       end

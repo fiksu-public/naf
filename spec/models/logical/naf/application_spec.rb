@@ -5,9 +5,12 @@ module Logical
     describe Application do
       let(:columns) { [:id,
                        :title,
+                       :short_name,
                        :script_type_name,
                        :application_run_group_name,
                        :application_run_group_restriction_name,
+                       :application_run_group_limit,
+                       :priority,
                        :enabled,
                        :run_time,
                        :prerequisites,

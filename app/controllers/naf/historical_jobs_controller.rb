@@ -41,8 +41,8 @@ module Naf
     end
 
     def create
-      @historical_job = Naf::HistoricalJob.new(params[:job])
-      if params[:job][:application_id] && app = Naf::Application.find(params[:job][:application_id])
+      @historical_job = Naf::HistoricalJob.new(params[:historical_job])
+      if params[:historical_job][:application_id] && app = Naf::Application.find(params[:historical_job][:application_id])
         if schedule = app.application_schedule
           @historical_job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
         else

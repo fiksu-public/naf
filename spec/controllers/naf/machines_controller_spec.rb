@@ -3,9 +3,7 @@ require 'spec_helper'
 module Naf
   describe MachinesController do
 
-    
     it "should respond with the index action" do
-      Machine.should_not_receive(:all).and_return([])
       get :index
       response.should render_template("naf/machines/index")
       response.should be_success
@@ -32,7 +30,7 @@ module Naf
       response.should render_template("naf/machines/new")
       response.should be_success
     end
-    
+
     context "on the create action" do
       let(:valid_machine)    { mock_model(Machine, :save => true, :id => 5)  }
       let(:invalid_machine) { mock_model(Machine, :save => false) }
@@ -52,7 +50,7 @@ module Naf
     context "on the updated action" do
       let(:valid_machine)   { mock_model(Machine, :update_attributes => true, :id => 5) }
       let(:invalid_machine) { mock_model(Machine, :update_attributes => false,:id => 5) }
-     
+
       it "should redirect to show when valid" do
         Machine.should_receive(:find).with("5").and_return(valid_machine)
         post :update, :id => 5, :machine =>{}
@@ -71,6 +69,6 @@ module Naf
       cols = assigns(:cols)
       attributes = assigns(:attributes)
     end
-  
+
   end
 end

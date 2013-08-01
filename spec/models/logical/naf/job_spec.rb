@@ -252,7 +252,7 @@ module Logical
 
         it "show correct run time when job has finished" do
           historical_job.finished_at = Time.zone.now - 3.seconds
-          job.finished_at.should == 'less than 5 seconds ago'
+          job.finished_at.should =~ /less than 5 seconds ago/
         end
 
         it "show correct run time when job has not finished" do

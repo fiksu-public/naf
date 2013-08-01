@@ -2,14 +2,70 @@ module Naf
   class ApplicationSchedule < NafBase
     include PgAdvisoryLocker
 
-    validates :priority,
-              :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
-    validates :application_run_group_limit,
-              :numericality => { :only_integer => true, :greater_than_or_equal_to => 1, :less_than => 2147483647, :allow_blank => true }
-    validates :run_start_minute,
-              :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 24*60, :allow_blank => true }
-    validates :run_interval,
-              :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 2147483647, :allow_blank => true }
+    # Protect from mass-assignment issue
+    attr_accessible :application_id,
+                    :application_run_group_restriction_id,
+                    :application_run_group_name,
+                    :run_interval,
+                    :priority,
+                    :visible,
+                    :enabled,
+                    :run_start_minute,
+                    :application_run_group_limit,
+                    :application_schedule_prerequisites_attributes
+
+    SCHEDULES_LOCK_ID = 0
+
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
+
+    belongs_to :application,
+      class_name: '::Naf::Application'
+    belongs_to :application_run_group_restriction,
+      class_name: '::Naf::ApplicationRunGroupRestriction'
+    has_many :application_schedule_affinity_tabs,
+      class_name: '::Naf::ApplicationScheduleAffinityTab',
+      dependent: :destroy
+    has_many :affinities,
+      through: :application_schedule_affinity_tabs
+    has_many :application_schedule_prerequisites,
+      class_name: "::Naf::ApplicationSchedulePrerequisite",
+      dependent: :destroy
+    has_many :prerequisites,
+      class_name: "::Naf::ApplicationSchedule",
+      through: :application_schedule_prerequisites,
+      source: :prerequisite_application_schedule
+
+    accepts_nested_attributes_for :application_schedule_prerequisites, allow_destroy: true
+
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
+
+    validates :priority, numericality: {
+                           only_integer: true,
+                           greater_than: -2147483648,
+                           less_than: 2147483647
+                         }
+    validates :application_run_group_limit, numericality: {
+                                              only_integer: true,
+                                              greater_than_or_equal_to: 1,
+                                              less_than: 2147483647,
+                                              allow_blank: true
+                                            }
+    validates :run_start_minute, numericality: {
+                                   only_integer: true,
+                                   greater_than_or_equal_to: 0,
+                                   less_than: 24*60,
+                                   allow_blank: true }
+    validates :run_interval, numericality: {
+                               only_integer: true,
+                               greater_than_or_equal_to: 0,
+                               less_than: 2147483647,
+                               allow_blank: true
+                             }
+
     before_save :check_blank_values
     validate :visible_enabled_check
     validate :run_interval_at_time_check
@@ -17,25 +73,36 @@ module Naf
     validate :prerequisite_application_schedule_id_uniqueness
     validates :application_run_group_restriction_id, :presence => true
 
-    belongs_to :application, :class_name => '::Naf::Application'
-    belongs_to :application_run_group_restriction, :class_name => '::Naf::ApplicationRunGroupRestriction'
+    #--------------------
+    # *** Delegations ***
+    #++++++++++++++++++++
 
-    has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
-    has_many :affinities, :through => :application_schedule_affinity_tabs
+    delegate :title, to: :application
+    delegate :application_run_group_restriction_name, to: :application_run_group_restriction
 
-    has_many :application_schedule_prerequisites, :class_name => "::Naf::ApplicationSchedulePrerequisite", :dependent => :destroy
-    has_many :prerequisites, :class_name => "::Naf::ApplicationSchedule", :through => :application_schedule_prerequisites, :source => :prerequisite_application_schedule
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
 
-    delegate :title, :to => :application
+    def self.try_lock_schedules
+      return try_lock_record(SCHEDULES_LOCK_ID)
+    end
 
-    delegate :application_run_group_restriction_name, :to => :application_run_group_restriction
+    def self.unlock_schedules
+      return unlock_record(SCHEDULES_LOCK_ID)
+    end
 
-    attr_accessible :application_id, :application_run_group_restriction_id, :application_run_group_name, :run_interval, :priority, :visible, :enabled, :run_start_minute
-    attr_accessible :application_run_group_limit, :application_schedule_prerequisites_attributes
+    def self.exact_schedules
+      return where('run_start_minute is not null')
+    end
 
-    accepts_nested_attributes_for :application_schedule_prerequisites, :allow_destroy => true
+    def self.relative_schedules
+      return where('run_interval >= 0')
+    end
 
-    SCHEDULES_LOCK_ID = 0
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
 
     def to_s
       components = []
@@ -59,26 +126,6 @@ module Naf
       return "::Naf::ApplicationSchedule<#{components.join(', ')}>"
     end
 
-    # scope like things
-
-    def self.try_lock_schedules
-      return try_lock_record(SCHEDULES_LOCK_ID)
-    end
-
-    def self.unlock_schedules
-      return unlock_record(SCHEDULES_LOCK_ID)
-    end
-
-    def self.exact_schedules
-      return where('run_start_minute is not null')
-    end
-
-    def self.relative_schedules
-      return where('run_interval >= 0')
-    end
-
-    # accessors
-
     def visible_enabled_check
       unless visible or !enabled
         errors.add(:visible, "must be true, or set enabled to false")
@@ -86,13 +133,15 @@ module Naf
       end
     end
 
-    def enabled_application_id_unique 
+    def enabled_application_id_unique
       return unless enabled
+
       if id
         conditions = ["id <> ? AND application_id = ? AND enabled = ?", id, application_id, true]
       else
         conditions = ["application_id = ? AND enabled = ?", application_id, true]
       end
+
       num_collisions = self.class.count(:conditions => conditions)
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
     end

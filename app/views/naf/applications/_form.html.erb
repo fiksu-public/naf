@@ -103,28 +103,10 @@
           <%= schedule_fields.check_box :visible %>
         </div>
         <br/>
+        <br/>
 
-        <%= schedule_fields.fields_for :application_schedule_prerequisites do |app_sch_pre| %>
-            <h3>Application Schedule Prerequisite</h3>
-
-            <div class="field">
-              <%= app_sch_pre.label :_destroy, "Remove Prerequisite" %>
-              <%= app_sch_pre.check_box :_destroy %>
-            </div>
-            </br>
-            </br>
-
-            <%= app_sch_pre.hidden_field :application_schedule_id %>
-
-            <div class="field">
-              <%= app_sch_pre.label 'Application Schedule*' %>
-              <% schedules = ::Naf::ApplicationSchedule.all.map { |a| [a.title, a.id] unless a.id == @application.application_schedule.id }.compact %>
-              <%= app_sch_pre.select(:prerequisite_application_schedule_id, schedules, include_blank: true) %>
-            </div>
-            <br/>
-        <% end %>
-
-        <%= schedule_fields.link_to_add 'Add Prerequisite', :application_schedule_prerequisites %>
+        <h3>Application Schedule Prerequesites</h3>
+        <%= naf_link_to_add_fields "Add Prerequisite", schedule_fields, :application_schedule_prerequisites %>
     <% end %>
     <br/>
     <br/>

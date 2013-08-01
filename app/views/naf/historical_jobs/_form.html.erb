@@ -1,5 +1,4 @@
 <%= form_for(@historical_job) do |f| %>
-
   <% if @historical_job.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@historical_job.errors.count, "error") %> prohibited this application from being saved:</h2>
@@ -12,46 +11,57 @@
   </div>
   <% end %>
   <div class="field">
-    <%= f.label :script_type %> <br />
+    <%= f.label :script_type %>
     <%= f.select(:application_type_id,
                  Naf::ApplicationType.all.collect{ |type| [type.script_type_name, type.id] },
                  { include_blank: true }) %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :command, "Command*" %> <br />
-    <%= f.text_area :command, :rows => 4, :cols => 60 %>
+    <%= f.label :command, "Command*" %>
+    <%= f.text_area :command, rows: 4, cols: 60 %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :application_run_group_restriction %></br />
+    <%= f.label 'Run Group Restriction' %>
     <%= f.select(:application_run_group_restriction_id,
                  Naf::ApplicationRunGroupRestriction.all.map{ |a| [a.application_run_group_restriction_name, a.id] },
                  { include_blank: true } )%>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :application_run_group_name %><br />
+    <%= f.label 'Run Group Name' %>
     <%= select_tag(:run_group_name_type, options_for_select([["command", "command"], ["not set", "not set"], ["custom", "custom"]], @run_group_name_type)) %><br/>
-    <%= f.text_area :application_run_group_name, :rows => 4, :cols => 32, :placeholder => "Please input Application Run Group Name" %>
+    <%= f.text_area :application_run_group_name,
+          rows: 4,
+          cols: 32,
+          placeholder: "Please input Application Run Group Name",
+          class: 'text_area' %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :log_level %> <br />
+    <%= f.label :log_level %>
     <%= f.text_field :log_level %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :application_run_group_limit %>  <br />
+    <%= f.label :application_run_group_limit %>
     <%= f.text_field :application_run_group_limit %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :request_to_terminate %> <br />
+    <%= f.label :request_to_terminate %>
     <%= f.check_box :request_to_terminate %>
   </div>
+  </br>
+  </br>
 
-  <br />
   <div class="actions">
     <%= f.submit %>
   </div>

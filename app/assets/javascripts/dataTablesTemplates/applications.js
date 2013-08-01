@@ -18,14 +18,14 @@ jQuery(document).ready(function() {
         { "sWidth": "7%"},      // Short Name
         { "sWidth": "9%"},      // Script Type Name
         null,                   // Application Run Group Name
-        { "sWidth": "14%"},     // Application Run Group Restriction Name
-        { "sWidth": "8%"},      // Application Run Group Limit
+        { "sWidth": "12%"},     // Application Run Group Restriction Name
+        { "sWidth": "7%"},      // Application Run Group Limit
         { "sWidth": "4%"},      // Priority
-        null,                   // Enabled
+        { "sWidth": "4%"},      // Enabled
         { "sWidth": "8%"},      // Run Time
         { "sWidth": "8%"},      // Last Queued At
-        { "sWidth": "7%"},      // Prerequisites
-        { "sWidth": "50px"},    // Actions
+        { "sWidth": "8%"},      // Prerequisites
+        { "sWidth": "4%"},      // Actions
         null,
         null
     ],
@@ -53,7 +53,7 @@ jQuery(document).ready(function() {
     if (!answer) {
       return false;
     }
-    jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
+    jQuery.post(postSource, { "historical_job[application_id]": jQuery(this).attr('id') }, function(data) {
       if (data.success) {
         jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
                 appendTo('#flash_message').slideDown().delay(5000).slideUp();

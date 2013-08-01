@@ -2,7 +2,7 @@ module Naf
   class MachineAffinitySlotsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
-    
+
     def index
       @rows = []
       if params[:machine_id]
@@ -56,7 +56,7 @@ module Naf
     end
 
 
-    private 
+    private
 
     def set_cols_and_attributes
       @cols = [:id, :machine_server_name, :machine_server_address, :affinity_classification_name, :affinity_name, :required]

@@ -1,7 +1,11 @@
-<div id="record">
-  <%= link_to 'Back', @historical_job %>
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', @historical_job %>
 
-  <h3 id="record_name">Editing a Job</h3>
+    <h3 id="record_name">Editing a Job</h3>
 
-  <%= render 'form' %>
-</div>
+    <%= render 'form' %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

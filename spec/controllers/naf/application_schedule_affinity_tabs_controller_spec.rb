@@ -2,9 +2,9 @@ require 'spec_helper'
 
 module Naf
   describe ApplicationScheduleAffinityTabsController do
-    
+
     let(:model_class) { ApplicationScheduleAffinityTab }
-    
+
     it "should respond with index action nested under application schedule" do
       model_class.should_receive(:where).with({:application_schedule_id => "1"}).and_return([])
       get :index, :application_schedule_id => 1
@@ -14,17 +14,17 @@ module Naf
 
     it "should respond with the show action" do
       model_class.should_receive(:find).with("5").and_return(nil)
-      schedule = mock('schedule')
+      schedule = double('schedule')
       schedule.should_receive(:application).and_return(nil)
       ApplicationSchedule.should_receive(:find).with("1").and_return(schedule)
       get :show, :id => 5, :application_schedule_id => 1
       response.should render_template("naf/record")
       response.should be_success
     end
-    
+
     it "should respond with the edit action" do
       model_class.should_receive(:find).with("5").and_return(nil)
-      schedule = mock('schedule')
+      schedule = double('schedule')
       schedule.should_receive(:application).and_return(nil)
       ApplicationSchedule.should_receive(:find).with("1").and_return(schedule)
       get :edit, :id => 5, :application_schedule_id => 1
@@ -34,7 +34,7 @@ module Naf
 
     it "should respond with the new action" do
       model_class.should_receive(:new).and_return(nil)
-      schedule = mock('schedule')
+      schedule = double('schedule')
       schedule.should_receive(:application).and_return(nil)
       ApplicationSchedule.should_receive(:find).with("1").and_return(schedule)
       get :new, :id => 5, :application_schedule_id => 1
@@ -48,7 +48,7 @@ module Naf
       let(:schedule)    { mock_model(ApplicationSchedule, :id => 1) }
       let(:application) { mock_model(Application, :id => 1)  }
 
-      subject do 
+      subject do
           post :create, :application_schedule_id =>1, :application_id=>1
       end
 
@@ -59,7 +59,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:new).and_return(valid_tab)
-        valid_tab.stub!(:affinity_name).and_return("Test Name")
+        valid_tab.stub(:affinity_name).and_return("Test Name")
         path = application_application_schedule_application_schedule_affinity_tab_path(application, schedule, valid_tab)
         subject.should redirect_to(path)
       end
@@ -75,7 +75,7 @@ module Naf
       let(:schedule)    { mock_model(ApplicationSchedule, :id => 1) }
       let(:application) { mock_model(Application, :id => 1)  }
 
-      subject do 
+      subject do
           put :update, :application_schedule_id =>1, :application_id=>1, :id => 5
       end
 
@@ -86,7 +86,7 @@ module Naf
 
       it "should redirect to show when valid" do
         model_class.should_receive(:find).and_return(valid_tab)
-        valid_tab.stub!(:affinity_name).and_return("Test Name")
+        valid_tab.stub(:affinity_name).and_return("Test Name")
         path = application_application_schedule_application_schedule_affinity_tab_path(application, schedule, valid_tab)
         subject.should redirect_to(path)
       end

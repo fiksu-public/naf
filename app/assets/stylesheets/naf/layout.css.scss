@@ -358,7 +358,7 @@ html {
                     }
                 }
 
-                .edit_application label {
+                .field label {
                   width: 12em;
                   float: left;
                   text-align: left;
@@ -366,12 +366,8 @@ html {
                   display: block;
                 }
 
-                .new_application label {
-                  width: 12em;
-                  float: left;
-                  text-align: left;
-                  margin-right: 1em;
-                  display: block;
+                .text_area {
+                  margin-left: 15.5em;
                 }
 
                 #errorExplanation {

@@ -92,7 +92,7 @@ module Naf
                                         historical_job: prerequesite_needed_historical_job)
       }
       let!(:queued_job) {
-        FactoryGirl.create(:queued_job, id: historical_job,
+        FactoryGirl.create(:queued_job, id: historical_job.id,
                                         historical_job: historical_job)
       }
       let!(:prerequesite) {
