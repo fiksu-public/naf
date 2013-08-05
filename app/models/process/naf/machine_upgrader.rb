@@ -1,4 +1,3 @@
-
 require 'csv'
 
 module Process::Naf
