@@ -12,10 +12,10 @@ module Process::Naf
         elsif @upgrade_option == 'restore'
           restore_information
         else
-          logger.error 'Invalid option. Please specify one of the following options: --save-naf-information, --restore-naf-information'
+          logger.error 'Invalid option. Please specify one of the following options: --upgrade-option save, --upgrade-option restore'
         end
       else
-        logger.error 'Option missing. Please specify one of the following options: --save-naf-information, --restore-naf-information'
+        logger.error 'Option missing. Please specify one of the following options: --upgrade-option save, --upgrade-option restore'
       end
     end
 
