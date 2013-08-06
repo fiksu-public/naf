@@ -31,11 +31,9 @@ module Process::Naf
           saved_results = csv.read
         end
 
-        saved_results[0..12].should == [
+        saved_results[0..10].should == [
           ['naf.applications'],
           ['id', application.id.to_s],
-          ['created_at', application.created_at.to_s],
-          ['updated_at', application.updated_at.to_s],
           ['deleted', application.deleted.to_s],
           ['application_type_id', application.application_type_id.to_s],
           ['command', "puts 'hi'"],

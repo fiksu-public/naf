@@ -35,7 +35,12 @@ module Process::Naf
               # pairs of attribute name/value
               csv << [table.table_name]
               record.attributes.each do |key, value|
-                csv << [key, value]
+                # Certain attribute values do not need to be saved
+                if !((table == ::Naf::Machine && machines_excluded_attributes.include?(key)) ||
+                  (['created_at', 'updated_at'].include?(key)))
+
+                  csv << [key, value]
+                end
               end
               csv << ['---']
             end
@@ -99,6 +104,18 @@ module Process::Naf
         ::Naf::LoggerStyleName,
         ::Naf::Machine,
         ::Naf::MachineAffinitySlot
+      ]
+    end
+
+    def machines_excluded_attributes
+      @exclusions ||= [
+        'created_at',
+        'updated_at',
+        'last_checked_schedules_at',
+        'last_seen_alive_at',
+        'marked_down',
+        'marked_down_by_machine_id',
+        'marked_down_at'
       ]
     end
 
