@@ -42,7 +42,7 @@ module Logical
           if search.present? and search[field].present?
             application_scope =
             if field == :enabled || field == :visible
-              application_scope.where(:application_schedules => { field => search[field] })
+              application_scope.where(application_schedules: { field => search[field] })
             else
               application_scope.where(field => search[field])
             end

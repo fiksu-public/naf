@@ -29,7 +29,7 @@ class NafSchema < ActiveRecord::Migration
           affinity_classification_name   text not null unique
       );
       insert into #{schema_name}.affinity_classifications (affinity_classification_name) values
-        ('location'), ('purpose'), ('application');
+        ('location'), ('purpose'), ('application'), ('weight');
       create table #{schema_name}.affinities
       (
           id                            serial not null primary key,
@@ -45,7 +45,9 @@ class NafSchema < ActiveRecord::Migration
       insert into #{schema_name}.affinities (affinity_classification_id, affinity_name) values
          ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'normal'),
          ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'canary'),
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial');
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'memory'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'cpus');
       create table #{schema_name}.machines
       (
           id                             serial not null primary key,
@@ -66,11 +68,12 @@ class NafSchema < ActiveRecord::Migration
       );
       create table #{schema_name}.machine_affinity_slots
       (
-          id                                        serial not null primary key,
-          created_at                                timestamp not null default now(),
-          machine_id			            integer not null references #{schema_name}.machines,
+          id                                      serial not null primary key,
+          created_at                              timestamp not null default now(),
+          machine_id			                        integer not null references #{schema_name}.machines,
           affinity_id                        	    integer not null references #{schema_name}.affinities,
-          required                                  boolean not null default false,
+          affinity_parameter                      numeric null,
+          required                                boolean not null default false,
           unique (machine_id, affinity_id)
       );
       create table #{schema_name}.application_types
@@ -94,7 +97,7 @@ class NafSchema < ActiveRecord::Migration
           created_at                      timestamp not null default now(),
           updated_at                      timestamp,
           deleted                         boolean not null default false,
-          application_type_id	          integer not null references #{schema_name}.application_types,
+          application_type_id	            integer not null references #{schema_name}.application_types,
           command                         text not null,
           title                           text not null,
           short_name                      text null unique check ( short_name ~ '^[a-zA-Z_][a-zA-Z0-9_]*$' ),
@@ -146,8 +149,9 @@ class NafSchema < ActiveRecord::Migration
       (
           id                                 serial not null primary key,
           created_at                         timestamp not null default now(),
-          application_schedule_id 	     integer not null references #{schema_name}.application_schedules,
-          affinity_id           	     integer not null references #{schema_name}.affinities,
+          application_schedule_id 	         integer not null references #{schema_name}.application_schedules,
+          affinity_id           	           integer not null references #{schema_name}.affinities,
+          affinity_parameter                 numeric null,
           UNIQUE (application_schedule_id, affinity_id)
       );
       create table #{schema_name}.application_schedule_prerequisites
@@ -209,6 +213,7 @@ class NafSchema < ActiveRecord::Migration
           created_at                             timestamp not null default now(),
           historical_job_id                      bigint not null, -- references #{schema_name}.historical_jobs,
           affinity_id                            bigint not null references #{schema_name}.affinities,
+          affinity_parameter                     numeric null,
           UNIQUE (historical_job_id, affinity_id)
       );
       create table #{schema_name}.queued_jobs

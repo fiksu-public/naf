@@ -1,5 +1,5 @@
 class MyScript < ::Process::Naf::Application
-  opt :thing, :default => "world"
+  opt :thing, default: "world"
 
 
   def work

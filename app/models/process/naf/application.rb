@@ -11,12 +11,20 @@ module Process::Naf
       end
     end
 
-    opt :naf_job_id, "naf.historical_jobs.id for communication with scheduling system", :env => "NAF_JOB_ID", :type => :int
-    opt :do_not_terminate, "refuse to terminate by job and machine IPC mechanics"
+    #----------------
+    # *** Options ***
+    #+++++++++++++++++
 
-    def initialize 
+    opt :naf_job_id,
+        "naf.historical_jobs.id for communication with scheduling system",
+        env: "NAF_JOB_ID",
+        type: :int
+    opt :do_not_terminate,
+        "refuse to terminate by job and machine IPC mechanics"
+
+    def initialize
       super
-      opt :log_configuration_files, :default => ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, default: ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
     end
 
     def database_application_name

@@ -39,5 +39,5 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 desc 'Default: Run all specs.'
-task :default => :spec
+task default: :spec
 

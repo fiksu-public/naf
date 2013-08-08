@@ -7,7 +7,7 @@ module Naf
       @params_name = params_name
       @rows =
       if params[:deleted].nil? || params[:deleted] == "false"
-        janitorial_assignment_type.where(:deleted => false).order("id desc")
+        janitorial_assignment_type.where(deleted: false).order("id desc")
       else
         janitorial_assignment_type.order("id desc")
       end
@@ -19,7 +19,7 @@ module Naf
 
     def show
       @record = janitorial_assignment_type.find(params[:id])
-      render :template => 'naf/record'
+      render template: 'naf/record'
     end
 
     def new
@@ -29,9 +29,10 @@ module Naf
     def create
       @janitorial_assignment = janitorial_assignment_type.new(params[params_name])
       if  @janitorial_assignment.save
-        redirect_to(@janitorial_assignment, :notice => "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully created.")
+        redirect_to(@janitorial_assignment,
+                    notice: "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully created.")
       else
-        render :action => "new"
+        render action: "new"
       end
     end
 
@@ -42,9 +43,10 @@ module Naf
     def update
       @janitorial_assignment = janitorial_assignment_type.find(params[:id])
       if @janitorial_assignment.update_attributes(params[params_name])
-        redirect_to(@janitorial_assignment, :notice => "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully updated.")
+        redirect_to(@janitorial_assignment,
+                    notice: "#{@janitorial_assignment.type} '#{@janitorial_assignment.model_name}' was successfully updated.")
       else
-        render :action => "edit"
+        render action: "edit"
       end
     end
 

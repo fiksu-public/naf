@@ -8,7 +8,7 @@
       <%= f.label :prerequisite_application_schedule_id, "Prerequisite application schedule*" %>
       <br/>
       <% schedules = ::Naf::ApplicationSchedule.all.map { |a| [a.title, a.id] unless a.id == @application.application_schedule.id }.compact %>
-      <%= f.select(:prerequisite_application_schedule_id, schedules, :include_blank => true) %>
+      <%= f.select(:prerequisite_application_schedule_id, schedules, include_blank: true) %>
     </div>
     <br/>
 </div>

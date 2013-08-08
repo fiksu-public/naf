@@ -12,17 +12,23 @@ module Naf
   module ApplicationHelper
     include ActionView::Helpers::TextHelper
 
-    NAF_DESTROY_BLOCKED_RESOURCES = ["historical_jobs", "applications", "machines", "historical_job_affinity_tabs", "janitorial_assignments"]
+    NAF_DESTROY_BLOCKED_RESOURCES = ["historical_jobs",
+                                     "applications",
+                                     "machines",
+                                     "historical_job_affinity_tabs",
+                                     "janitorial_assignments"]
     NAF_READ_ONLY_RESOURCES = []
     NAF_CREATE_BLOCKED_RESOURCES = []
     NAF_ALL_VISIBLE_RESOURCES = {
-                              "historical_jobs" => "",
-                              "applications" => "",
-                              "machines" => "",
-                              "affinities" => "",
-                              "loggers" => ["logger_styles", "logger_names"],
-                              "janitorial_assignments" => ["janitorial_archive_assignments", "janitorial_create_assignments", "janitorial_drop_assignments"]
-                            }
+                                  "historical_jobs" => "",
+                                  "applications" => "",
+                                  "machines" => "",
+                                  "affinities" => "",
+                                  "loggers" => ["logger_styles", "logger_names"],
+                                  "janitorial_assignments" => ["janitorial_archive_assignments",
+                                                               "janitorial_create_assignments",
+                                                               "janitorial_drop_assignments"]
+                                }
 
     def naf_tabs
       NAF_ALL_VISIBLE_RESOURCES
@@ -181,7 +187,7 @@ module Naf
 
     def naf_generate_edit_link
       return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name)
-      link_to "Edit", { controller: controller_name, action: 'edit', id: params[:id] }, :class => 'edit'
+      link_to "Edit", { controller: controller_name, action: 'edit', id: params[:id] }, class: 'edit'
     end
 
     def naf_generate_back_link
@@ -193,17 +199,17 @@ module Naf
       case controller_name
         when "application_schedule_affinity_tabs"
           link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record),
-            { confirm: "Are you sure you want to destroy this #{model_name}?",
+            { confirm: "Are you sure you want to destroy this #{naf_model_name}?",
               method: :delete,
-              class: 'destroy'}
+              class: 'destroy' }
         when "machine_affinity_slots"
           link_to "Destroy", machine_machine_affinity_slot_url(@machine, @record),
-            { confirm: "Are you sure you want to destroy this #{model_name}?",
+            { confirm: "Are you sure you want to destroy this #{naf_model_name}?",
               method: :delete,
               class: 'destroy' }
         else
           link_to "Destroy", @record,
-            { confirm: "Are you sure you want to destroy this #{model_name}?",
+            { confirm: "Are you sure you want to destroy this #{naf_model_name}?",
               method: :delete,
               class: 'destroy' }
       end
@@ -243,10 +249,10 @@ module Naf
 
     def naf_link_to_add_fields(name, f, association)
       new_object = f.object.class.reflect_on_association(association).klass.new
-      fields = f.fields_for(association, new_object, :child_index => "new_#{association}") do |builder|
-        render(association.to_s, :f => builder)
+      fields = f.fields_for(association, new_object, child_index: "new_#{association}") do |builder|
+        render(association.to_s, f: builder)
       end
-      link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", :id => 'add_prerequisite')
+      link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", id: 'add_prerequisite')
     end
 
   end

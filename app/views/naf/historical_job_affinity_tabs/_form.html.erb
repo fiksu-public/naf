@@ -16,10 +16,20 @@
 
   <div class="field">
     <%= f.label :affinity %><br />
-    <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, include_blank: true) %>
+    <%= f.select(:affinity_id,
+                 ::Naf::Affinity.selectable.map{
+                    |a| [a.affinity_classification.affinity_classification_name + ', ' + a.affinity_name, a.id]
+                 },
+                 include_blank: true) %>
   </div>
+  </br>
 
-  <br />
+  <div class="field">
+    <%= f.label :affinity_parameter %></br>
+    <%= f.text_field :affinity_parameter %>
+  </div>
+  </br>
+
   <div class="actions">
     <%= f.submit %>
   </div>

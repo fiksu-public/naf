@@ -1,7 +1,21 @@
 module Naf
   class LoggerLevel < NafBase
-    validates :level, :uniqueness => true, :presence => true
+    # Protect from mass-assignment issue
+    attr_accessible :level
 
-    has_many :logger_style_names
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
+
+    has_many :logger_style_names,
+      class_name: '::Naf::LoggerStyleName'
+
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
+
+    validates :level, uniqueness: true,
+                      presence: true
+
   end
 end

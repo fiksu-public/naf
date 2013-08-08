@@ -7,7 +7,7 @@
     <% @cols.each do |col| %>
       <td>
         <% if col == :id %>
-          <%= link_to row.id, { :action => 'show', :id => row.id, :controller => controller_name } %>
+          <%= link_to row.id, { action: 'show', id: row.id, controller: controller_name } %>
         <% else %>
           <%= row.send(col) %>
         <% end %>

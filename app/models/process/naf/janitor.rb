@@ -7,8 +7,15 @@ module Process::Naf
     }
     ASSIGNMENT_TYPES = ASSIGNMENTS.keys
 
-    opt :no_writes, "don't modify database"
-    opt :list_assignments, "list models that would be processed (and exit without processing)", short: :L
+    #----------------
+    # *** Options ***
+    #+++++++++++++++++
+
+    opt :no_writes,
+        "don't modify database"
+    opt :list_assignments,
+        "list models that would be processed (and exit without processing)",
+        short: :L
 
     # the following three opt are in specific order because the last sets the default
     opt :all,

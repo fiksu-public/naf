@@ -7,13 +7,13 @@
     <div class="field">
       <%= f.label :logger_name_id, "Logger name*" %>
       <br/>
-      <%= f.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, :include_blank => true) %>
+      <%= f.select(:logger_name_id, ::Naf::LoggerName.all.map { |a| [a.name, a.id] }, include_blank: true) %>
     </div>
 
     <div class="field">
       <%= f.label :logger_level_id, "Logger level*" %>
       <br/>
-      <%= f.select(:logger_level_id, ::Naf::LoggerLevel.all.map { |a| [a.level, a.id] }, :include_blank => true) %>
+      <%= f.select(:logger_level_id, ::Naf::LoggerLevel.all.map { |a| [a.level, a.id] }, include_blank: true) %>
     </div>
     <br>
 </div>

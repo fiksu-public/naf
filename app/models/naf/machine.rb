@@ -21,7 +21,7 @@ module Naf
     # *** Validations ***
     #++++++++++++++++++++
 
-    validates :server_address, :presence => true
+    validates :server_address, presence: true
     validates :short_name, uniqueness: true,
                            allow_blank: true,
                            format: {
@@ -81,7 +81,7 @@ module Naf
     end
 
     def self.local_machine
-      return where(:server_address => machine_ip_address).first
+      return where(server_address: machine_ip_address).first
     end
 
     def self.current
@@ -196,6 +196,12 @@ module Naf
 
     def short_name_if_it_exist
       short_name || server_name
+    end
+
+    def parameter_weight(parameter)
+      machine_affinity_slots.
+        where(affinity_id: ::Naf::Affinity.find_by_affinity_name(parameter).id).
+        first.try(:affinity_parameter).to_f
     end
 
     private

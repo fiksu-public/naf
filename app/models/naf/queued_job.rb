@@ -79,5 +79,66 @@ module Naf
       )
     end
 
+    def self.weight_available_on_machine(machine)
+      machine_cpus = machine.parameter_weight('cpus')
+      machine_memory = machine.parameter_weight('memory')
+      running_job_weights = ::Naf::RunningJob.affinity_weights(machine)
+
+      if machine_cpus > 0 && machine_memory > 0
+        ::Naf::QueuedJob.
+          check_weight_sum('cpus', running_job_weights[:cpus], machine_cpus).
+          check_weight_sum('memory', running_job_weights[:memory], machine_memory)
+      elsif machine_cpus > 0 || machine_memory > 0
+        parameters = machine_cpus == 0 ? [machine_memory, 'memory'] : [machine_cpus, 'cpus']
+        ::Naf::QueuedJob.
+          check_weight_sum(parameters[1], running_job_weights[parameters[1].to_sym], parameters[0])
+      else
+        where({})
+      end
+    end
+
+    def self.check_weight_sum(parameter, running_job_weight_count, machine_weight_count)
+      where("
+        id IN (
+          SELECT
+            historical_job_id
+          FROM
+            naf.historical_job_affinity_tabs AS t
+          WHERE EXISTS (
+            SELECT
+              1
+            FROM
+              naf.queued_jobs AS j
+            WHERE
+              t.historical_job_id = j.id
+          ) AND EXISTS (
+            SELECT
+              1
+            FROM
+              naf.affinities AS a
+            WHERE
+              a.affinity_name = '#{parameter}' AND
+                t.affinity_id = a.id
+          ) AND COALESCE(affinity_parameter, 0) + #{running_job_weight_count} <= #{machine_weight_count}
+        ) OR NOT EXISTS (
+          SELECT
+            1
+          FROM
+            naf.historical_job_affinity_tabs AS t
+          WHERE
+            t.historical_job_id = queued_jobs.id AND
+            EXISTS (
+              SELECT
+                1
+              FROM
+                naf.affinities AS a
+              WHERE
+                a.affinity_name = '#{parameter}' AND
+                  t.affinity_id = a.id
+            )
+        )
+      ")
+    end
+
   end
 end

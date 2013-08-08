@@ -1,0 +1,15 @@
+= Release Notes
+
+=== Version 1.0.0
+
+Features/Changes:
+* Three table queue (Historical, Running, Queued)
+* Job tags (system, custom visible/invisible)
+* Papertrail logging for Jobs and Machines
+* CPU/Memory control of Jobs
+* Killed jobs marked as terminating/terminated
+* Updated display of timestamps (Started At, Finished At, Run Time) for Jobs
+* Fixed buttons to add Jobs to the Queue
+* Jobs index page is automatically refreshed
+
+=== Please find up-to-date information on Naf here: {Naf Wiki}[http://www.github.com/fiksu/naf/wiki]

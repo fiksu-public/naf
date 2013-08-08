@@ -5,7 +5,7 @@ module Naf
 
     def index
       @rows = Naf::LoggerName.all
-      render :template => 'naf/datatable'
+      render template: 'naf/datatable'
     end
 
     def show
@@ -16,7 +16,7 @@ module Naf
       @logger_name = Naf::LoggerName.find(params[:id])
       @logger_name.destroy
       flash[:notice] = "Logger Name '#{@logger_name.name}' was successfully deleted."
-      redirect_to(:action => "index")
+      redirect_to(action: "index")
     end
 
     def new
@@ -26,9 +26,10 @@ module Naf
     def create
       @logger_name = Naf::LoggerName.new(params[:logger_name])
       if @logger_name.save
-        redirect_to(@logger_name, :notice => "Logger Name '#{@logger_name.name}' was successfully created.")
+        redirect_to(@logger_name,
+                    notice: "Logger Name '#{@logger_name.name}' was successfully created.")
       else
-        render :action => "new"
+        render action: "new"
       end
     end
 
@@ -39,9 +40,10 @@ module Naf
     def update
       @logger_name = Naf::LoggerName.find(params[:id])
       if @logger_name.update_attributes(params[:logger_name])
-        redirect_to(@logger_name, :notice => "Logger Name '#{@logger_name.name}' was successfully updated.")
+        redirect_to(@logger_name,
+                    notice: "Logger Name '#{@logger_name.name}' was successfully updated.")
       else
-        render :action => "edit"
+        render action: "edit"
       end
     end
 

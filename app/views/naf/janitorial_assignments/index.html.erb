@@ -1,9 +1,9 @@
 <% content_for :body do %>
-    <%= render :partial => 'naf/shared/information_container', :locals => { :record_name => naf_table_title } %>
+    <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
     <br/>
     <div class="display-inline-block">
       <%= label_tag :deleted, 'Show deleted:' %>
-      <%= check_box_tag(:deleted, true, false, { :class => 'datatable_variable' }) %>
+      <%= check_box_tag(:deleted, true, false, { class: 'datatable_variable' }) %>
     </div>
     <div id="flash_message">
         <% unless notice.blank? %>
@@ -26,7 +26,7 @@
         </tr>
       </thead>
       <tbody>
-        <%= render :partial => 'rows' %>
+        <%= render partial: 'rows' %>
       </tbody>
     </table>
 
@@ -51,7 +51,6 @@
           });
       </script>
     <% end %>
-
 <% end %>
 
-<%= render :partial => 'naf/shared/application' %>
+<%= render partial: 'naf/shared/application' %>

@@ -65,13 +65,13 @@ module Naf
                                less_than: 2147483647,
                                allow_blank: true
                              }
+    validates :application_run_group_restriction_id, presence: true
 
     before_save :check_blank_values
     validate :visible_enabled_check
     validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validate :prerequisite_application_schedule_id_uniqueness
-    validates :application_run_group_restriction_id, :presence => true
 
     #--------------------
     # *** Delegations ***
@@ -142,7 +142,7 @@ module Naf
         conditions = ["application_id = ? AND enabled = ?", application_id, true]
       end
 
-      num_collisions = self.class.count(:conditions => conditions)
+      num_collisions = self.class.count(conditions: conditions)
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
     end
 

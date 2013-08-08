@@ -4,8 +4,7 @@ module Naf
     before_filter :set_cols_and_attributes
 
     def index
-      @rows = Naf::Affinity.all
-      render template: 'naf/datatable'
+      @affinities = Naf::Affinity.all
     end
 
     def show
@@ -25,7 +24,14 @@ module Naf
 
     def create
       @affinity = Naf::Affinity.new(params[:affinity])
-      if  @affinity.save
+
+      if message = @affinity.validate_affinity_name
+        flash[:error] = message
+        redirect_to :back
+        return
+      end
+
+      if @affinity.save
         redirect_to(@affinity, notice: "Affinity '#{@affinity.affinity_name}' was successfully created.")
       else
         render action: "new"

@@ -24,7 +24,7 @@ module Naf
             application =[]
           end
           @total_display_records = applications.count
-          @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
+          @applications = applications.paginate(page: @page, per_page: @rows_per_page)
 
           render layout: 'naf/layouts/jquery_datatables'
         end
@@ -44,7 +44,6 @@ module Naf
 
     def create
       set_application_run_group_name
-      ap params[:application]
       @application = Naf::Application.new(params[:application])
       if @application.save
         app_schedule = @application.application_schedule
@@ -54,11 +53,12 @@ module Naf
             prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
+        redirect_to(@application,
+                    notice: "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         set_shown_schedule_and_prerequisite
         @application.build_application_schedule unless params[:application].try(:[], :application_schedule_attributes).try(:[], :_destroy) == "0"
-        render :action => "new"
+        render action: "new"
       end
     end
 
@@ -90,10 +90,11 @@ module Naf
             prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
+        redirect_to(@application,
+                    notice: "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         set_shown_schedule_and_prerequisite
-        render :action => "edit"
+        render action: "edit"
       end
     end
 

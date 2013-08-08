@@ -31,7 +31,7 @@ module Naf
 
     end
     context "with regard to creation" do
-      let(:invalid_affinity) { FactoryGirl.build(:affinity, :affinity_name => "") }
+      let(:invalid_affinity) { FactoryGirl.build(:affinity, affinity_name: "") }
       it "it should not be valid with an empty name" do
         invalid_affinity.save.should_not be_true
         invalid_affinity.should have(2).errors_on(:affinity_name)

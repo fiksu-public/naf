@@ -5,7 +5,10 @@
 <tr>
   <td>Add Script to Jobs Queue</td>
   <td>
-    <%= link_to image_tag('control_play_blue.png', :class => 'action', :title => "Enqueue application(id: #{@record.id}, title: #{@record.title})"), "#", {:class => "enqueue", :id => @record.id} %>
+    <%= link_to image_tag('control_play_blue.png',
+                          class: 'action',
+                          title: "Enqueue application(id: #{@record.id}, title: #{@record.title})"),
+                          "#", { class: "enqueue", id: @record.id } %>
   </td>
 </tr>
 

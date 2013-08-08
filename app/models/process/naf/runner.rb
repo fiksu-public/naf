@@ -437,7 +437,7 @@ module Process::Naf
       # find the run_interval based schedules that should be queued
       # select anything that isn't currently running and completed
       # running more than run_interval minutes ago
-      relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).relative_schedules.select do |schedule|
+      relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).relative_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
             (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval.minutes)))
@@ -449,7 +449,7 @@ module Process::Naf
       #  hasn't run since run_start_time AND
       #  should have been run by now AND
       #  that should have run within fudge period AND
-      exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(:enabled => true).exact_schedules.select do |schedule|
+      exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).exact_schedules.select do |schedule|
         ( not_finished_applications[schedule.application_id].nil? &&
           ( application_last_runs[schedule.application_id].nil? ||
             ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id].finished_at)) &&

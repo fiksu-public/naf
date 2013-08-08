@@ -72,6 +72,7 @@ module Logical
             runnable_by_machine(machine).
             exclude_run_group_names(run_group_names_above_limit).
             prerequisites_finished.
+            weight_available_on_machine(machine).
             group("id, priority, created_at").
             having("array(
               select affinity_id::integer
@@ -89,12 +90,14 @@ module Logical
             runnable_by_machine(machine).
             exclude_run_group_names(run_group_names_above_limit).
             prerequisites_finished.
+            weight_available_on_machine(machine).
             order_by_priority.limit(100)
         else
           # Machine can run any queued job
           possible_jobs = ::Naf::QueuedJob.
             exclude_run_group_names(run_group_names_above_limit).
             prerequisites_finished.
+            weight_available_on_machine(machine).
             order_by_priority.limit(100)
         end
       end

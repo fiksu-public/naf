@@ -21,6 +21,8 @@ module Logical
 
       before do
         ::Naf::MachineAffinitySlot.delete_all
+        FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus')
+        FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory')
       end
 
       #----------------------------
@@ -84,14 +86,14 @@ module Logical
 
       describe "multiple affinities" do
         let(:canary_machine) {
-          slot = FactoryGirl.create(:canary_slot, :machine => FactoryGirl.create(:machine))
+          slot = FactoryGirl.create(:canary_slot, machine: FactoryGirl.create(:machine))
           slot.machine
         }
         let(:canary_job) {
           tab = FactoryGirl.create(:canary_job_affinity_tab)
           tab.job
         }
-        let(:canary_perennial_machine) { 
+        let(:canary_perennial_machine) {
           slot_one = FactoryGirl.create(:required_canary_slot, machine: FactoryGirl.create(:machine_two))
           slot_two = FactoryGirl.create(:required_perennial_slot, machine: FactoryGirl.create(:machine_two))
           slot_two.machine

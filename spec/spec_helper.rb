@@ -1,7 +1,7 @@
 # Configure Rails Environment
 ENV["RAILS_ENV"] ||= "test"
 
-# What will our dummy Rails app be? 
+# What will our dummy Rails app be?
 require File.expand_path("../dummy/config/environment.rb",  __FILE__)
 
 require 'rspec/rails'
@@ -17,7 +17,7 @@ RSpec.configure do |config|
   config.use_transactional_fixtures = true
   config.include Naf::Engine.routes.url_helpers
   config.infer_base_class_for_anonymous_controllers = true
-  config.include EngineRouting, :type => :controller
+  config.include EngineRouting, type: :controller
 end
 
 FactoryGirl.find_definitions

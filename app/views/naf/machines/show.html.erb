@@ -65,7 +65,7 @@
           <td><%= link_to "Machine Affinity Slots",
                   machine_machine_affinity_slots_path(@machine) %>
           </td>
-          <td><%= @machine.affinities.map(&:affinity_name).join(', ') %></td>
+          <td><%= ::Logical::Naf::Machine.new(@machine).affinities %></td>
         </tr
         <% unless @machine.marked_down %>
           <tr>

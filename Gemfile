@@ -11,7 +11,6 @@ gem 'jquery-ui-rails'
 gem 'awesome_print'
 gem 'will_paginate'
 gem 'mem_info'
-gem "nested_form"
 
 # For private repo testing on Travis
 # gem 'af', '=0.9.9', path: 'vendor/private'

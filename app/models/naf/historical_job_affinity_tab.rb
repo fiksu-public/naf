@@ -3,7 +3,8 @@ module Naf
     # Protect from mass-assignment issue
     attr_accessible :affinity_id,
                     :historical_job_id,
-                    :historical_job
+                    :historical_job,
+                    :affinity_parameter
 
     #---------------------
     # *** Associations ***

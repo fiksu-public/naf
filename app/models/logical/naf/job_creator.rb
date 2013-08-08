@@ -1,26 +1,27 @@
 module Logical
   module Naf
     class JobCreator
-      def queue_application(application,
-                            application_run_group_restriction,
-                            application_run_group_name,
-                            application_run_group_limit = 1,
-                            priority = 0,
-                            affinities = [],
-                            prerequisites = [])
+      def queue_application(application_schedule, prerequisites = [])
         ::Naf::HistoricalJob.transaction do
+          application = application_schedule.application
           historical_job = ::Naf::HistoricalJob.create!(application_id: application.id,
                                                         application_type_id: application.application_type_id,
                                                         command: application.command,
-                                                        application_run_group_restriction_id: application_run_group_restriction.id,
-                                                        application_run_group_name: application_run_group_name,
-                                                        application_run_group_limit: application_run_group_limit,
-                                                        priority: priority)
+                                                        application_run_group_restriction_id: application_schedule.application_run_group_restriction.id,
+                                                        application_run_group_name: application_schedule.application_run_group_name,
+                                                        application_run_group_limit: application_schedule.application_run_group_limit,
+                                                        priority: application_schedule.priority)
           historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
 
           # Create historical job affinity tabs for each affinity associated with the historical job
-          affinities.each do |affinity|
-            ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id, affinity_id: affinity.id)
+          application_schedule.affinities.each do |affinity|
+            affinity_parameter = ::Naf::ApplicationScheduleAffinityTab.
+              where(affinity_id: affinity.id,
+                    application_schedule_id: application_schedule.id).
+              first.affinity_parameter
+            ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id,
+                                                   affinity_id: affinity.id,
+                                                   affinity_parameter: affinity_parameter)
           end
 
           historical_job.verify_prerequisites(prerequisites)
@@ -61,13 +62,7 @@ module Logical
         end
 
         # Queue the application
-        return queue_application(application_schedule.application,
-                                 application_schedule.application_run_group_restriction,
-                                 application_schedule.application_run_group_name,
-                                 application_schedule.application_run_group_limit,
-                                 application_schedule.priority,
-                                 application_schedule.affinities,
-                                 prerequisite_jobs)
+        return queue_application(application_schedule, prerequisite_jobs)
       end
 
       # This method act similar to queue_application but is used for testing purpose

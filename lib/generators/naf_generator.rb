@@ -4,7 +4,7 @@ class NafGenerator < Rails::Generators::Base
 
   source_root File.expand_path("../templates", __FILE__)
 
-  argument :schema_name, :type => :string, :default => "naf"
+  argument :schema_name, type: :string, default: "naf"
 
   def add_configuration_files
     filename = "naf.rb"
@@ -36,8 +36,8 @@ class NafGenerator < Rails::Generators::Base
 
   def mount_engine
     puts "Mounting Naf::Engine at \"/job_system\" in config/routes.rb..."
-    insert_into_file("#{Rails.root}/config/routes.rb", :after => /routes.draw.do\n/) do
-      %Q{\n  mount Naf::Engine, :at => "/job_system"\n}
+    insert_into_file("#{Rails.root}/config/routes.rb", after: /routes.draw.do\n/) do
+      %Q{\n  mount Naf::Engine, at: "/job_system"\n}
     end
   end
 

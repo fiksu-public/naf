@@ -17,12 +17,12 @@ module Naf
         Machine.is_it_time_to_check_schedules?(1.minute).should be_false
       end
     end
-      
+
 
     context "when created" do
 
       it "should not save with a bad address" do
-        bad_machine = FactoryGirl.build(:machine, :server_address => "21312")
+        bad_machine = FactoryGirl.build(:machine, server_address: "21312")
         bad_machine.save.should_not be_true
         bad_machine.should have(1).error_on(:server_address)
       end
@@ -71,7 +71,7 @@ module Naf
         dying_machine.marked_down.should be_true
       end
     end
-      
+
 
 
   end

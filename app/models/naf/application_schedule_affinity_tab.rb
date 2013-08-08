@@ -1,16 +1,39 @@
 module Naf
   class ApplicationScheduleAffinityTab < NafBase
-    validates :application_schedule_id, :affinity_id, :presence => true
+    # Protect from mass-assignment issue
+    attr_accessible :application_schedule_id,
+                    :affinity_id,
+                    :affinity_parameter
 
-    validates_uniqueness_of :affinity_id, :scope => :application_schedule_id, :message => "has already been taken for this script"
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
 
-    belongs_to :application_schedule, :class_name => '::Naf::ApplicationSchedule'
-    
-    belongs_to :affinity, :class_name => '::Naf::Affinity'
+    belongs_to :application_schedule,
+      class_name: '::Naf::ApplicationSchedule'
+    belongs_to :affinity,
+      class_name: '::Naf::Affinity'
 
-    delegate :affinity_name, :affinity_classification_name, :to => :affinity
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
 
-    attr_accessible :application_schedule_id, :affinity_id
+    validates :application_schedule_id,
+              :affinity_id, presence: true
+    validates_uniqueness_of :affinity_id, scope: :application_schedule_id,
+                                          message: 'has already been taken for this script'
+
+    #--------------------
+    # *** Delegations ***
+    #++++++++++++++++++++
+
+    delegate :affinity_name,
+             :affinity_classification_name, to: :affinity
+
+
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
 
     def script_title
       application_schedule.title
