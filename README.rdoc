@@ -18,3 +18,5 @@ With a management console, providing:
 * Schedule Management
 
 === Please find up-to-date information on Naf here: {Naf Wiki}[http://www.github.com/fiksu/naf/wiki]
+
+=== Instructions on updagrading Naf to Version 1.0.0: {Instructions}[http://www.github.com/fiksu/naf/wiki/Upgrading-Naf-from-0.9.9-to-1.0.0]
