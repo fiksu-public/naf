@@ -2,7 +2,12 @@ require 'spec_helper'
 
 module Naf
   describe HistoricalJob do
-    let(:historical_job) { FactoryGirl.create(:job) }
+
+    before(:all) do
+      ::Naf::HistoricalJob.delete_all
+    end
+
+    let!(:historical_job) { FactoryGirl.create(:job) }
 
     # Mass-assignment
     [:application_id,
@@ -61,58 +66,222 @@ module Naf
       it { should_not allow_value(v).for(:application_run_group_limit) }
     end
 
-    context "when it is newly created" do
-      it "should find the job by run group" do
-        HistoricalJob.where(application_run_group_name: historical_job.application_run_group_name).
-          should include(historical_job)
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
+
+    describe "#full_table_name_prefix" do
+      it "return the correct string" do
+        ::Naf::HistoricalJob.full_table_name_prefix.should == 'naf.'
       end
     end
 
-    context "With regard to method calls" do
-      it "should delegate a method to application type" do
-        historical_job.script_type_name.should == 'rails'
+    describe "#queued_between" do
+      before do
+        FactoryGirl.create(:job, created_at: Time.zone.now - 5.minutes)
+      end
+
+      it "return the correct queued job" do
+        ::Naf::HistoricalJob.queued_between(Time.zone.now - 1.minutes, Time.zone.now).
+          should == [historical_job]
       end
     end
 
-    context "when the job is picked" do
-      let(:picked_job) { FactoryGirl.create(:job_picked_by_machine) }
-      it "should not be found by the started scope" do
-        picked_job_id = picked_job.id
-        HistoricalJob.where("started_at is not null").map(&:id).should_not include(picked_job_id)
+    describe "#canceled" do
+      it "return jobs requested to terminate" do
+        historical_job.update_attributes!(request_to_terminate: true)
+        ::Naf::HistoricalJob.canceled.should == [historical_job]
+      end
+
+      it "return nil when no jobs have been requested to terminate" do
+        ::Naf::HistoricalJob.canceled.should == []
       end
     end
 
-    context "when the job is stale" do
-      let(:stale_job) { FactoryGirl.create(:stale_job) }
-      it "should not be found by queued_between scope" do
-        stale_job_id = stale_job.id
-        HistoricalJob.queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-          map(&:id).should_not include(stale_job_id)
+    describe "#application_last_runs" do
+      before do
+        historical_job.update_attributes!(application_id: FactoryGirl.create(:application).id)
+      end
+
+      it "return job when it finished running" do
+        historical_job.finished_at = Time.zone.now
+        historical_job.save!
+        ::Naf::HistoricalJob.application_last_runs.first.application.should == historical_job.application
+      end
+
+      it "return nil when job has not finished running" do
+        ::Naf::HistoricalJob.application_last_runs.should == []
       end
     end
 
-    context "when it is running" do
-      let(:running_job) { FactoryGirl.create(:running_job) }
-
-      it "should be found by the started scope" do
-        running_job_id = running_job.id
-        HistoricalJob.where("started_at is not null").map(&:id).should include(running_job_id)
+    describe "#application_last_queued" do
+      let(:historical_job2) { FactoryGirl.create(:job) }
+      before do
+        application = FactoryGirl.create(:application)
+        historical_job.update_attributes!(application_id: application.id)
+        historical_job2.update_attributes!(application_id: application.id)
       end
 
-      it "should not be found by not_started scope" do
-        HistoricalJob.where(started_at: nil).should_not include(running_job)
+      it "return correct application id" do
+        ::Naf::HistoricalJob.application_last_queued.first.should == historical_job2
       end
     end
 
-    context "when it is finished" do
-      let(:finished_job) { FactoryGirl.create(:finished_job) }
-
-      it "should be found by the finished scope" do
-        HistoricalJob.finished.should include(finished_job)
+    describe "#finished" do
+      it "return jobs that have finished running" do
+        historical_job.finished_at = Time.zone.now
+        historical_job.save!
+        ::Naf::HistoricalJob.finished.should == [historical_job]
       end
 
-      it "should be found by the started scope" do
-        HistoricalJob.where("started_at is not null").should include(finished_job)
+      it "return jobs requested to terminate" do
+        historical_job.update_attributes!(request_to_terminate: true)
+        ::Naf::HistoricalJob.finished.should == [historical_job]
+      end
+
+      it "return nil when no jobs have been requested to terminate or have finished running" do
+        ::Naf::HistoricalJob.finished.should == []
+      end
+    end
+
+    describe "#queued_status" do
+      let(:historical_job2) { FactoryGirl.create(:job, finished_at: Time.zone.now) }
+      let(:historical_job3) { FactoryGirl.create(:job, started_at: Time.zone.now) }
+
+      it "return correct jobs" do
+        FactoryGirl.create(:job, request_to_terminate: true)
+        ::Naf::HistoricalJob.queued_status.
+          order(:id).should == [historical_job, historical_job2, historical_job3]
+      end
+    end
+
+    describe "#running_status" do
+      let(:historical_job2) { FactoryGirl.create(:job, finished_at: Time.zone.now) }
+
+      it "return correct jobs" do
+        historical_job.started_at = Time.zone.now
+        historical_job.save!
+        FactoryGirl.create(:job, request_to_terminate: true)
+
+        ::Naf::HistoricalJob.running_status.
+          order(:id).should == [historical_job, historical_job2]
+      end
+    end
+
+    describe "#queued_with_waiting" do
+      it "return correct jobs" do
+        FactoryGirl.create(:job, request_to_terminate: true)
+        ::Naf::HistoricalJob.queued_with_waiting.
+          order(:id).should == [historical_job]
+      end
+    end
+
+    describe "#errored" do
+      let(:historical_job2) { FactoryGirl.create(:job, request_to_terminate: true) }
+      let(:historical_job3) { FactoryGirl.create(:job, finished_at: Time.zone.now,
+                                                       exit_status: 1) }
+
+      it "return correct jobs" do
+        ::Naf::HistoricalJob.errored.
+          order(:id).should == [historical_job2, historical_job3]
+      end
+    end
+
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    describe "#to_s" do
+      before do
+        historical_job.update_attributes!(command: "puts 'hi'")
+      end
+
+      it "return correct parsing of app" do
+        historical_job.to_s.should == "::Naf::HistoricalJob<QUEUED, id: #{historical_job.id}, \"puts \'hi\'\">"
+      end
+    end
+
+    describe "#title" do
+      it "return correct application title when present" do
+        historical_job.application = FactoryGirl.create(:application, title: 'App1')
+        historical_job.title.should == 'App1'
+      end
+
+      it "return nil when application not present" do
+        historical_job.title.should == nil
+      end
+    end
+
+    describe "#machine_started_on_server_name" do
+      it "return correct machine server name when present" do
+        historical_job.started_on_machine = FactoryGirl.create(:machine, server_name: 'Machine1')
+        historical_job.machine_started_on_server_name.should == 'Machine1'
+      end
+
+      it "return nil when machine not present" do
+        historical_job.machine_started_on_server_name.should == nil
+      end
+    end
+
+    describe "#machine_started_on_server_address" do
+      it "return correct machine server name when present" do
+        historical_job.started_on_machine = FactoryGirl.create(:machine)
+        historical_job.machine_started_on_server_address.should == '0.0.0.1'
+      end
+
+      it "return nil when machine not present" do
+        historical_job.machine_started_on_server_address.should == nil
+      end
+    end
+
+    describe "#historical_job_affinity_tabs" do
+      it "return affinity tabs associated with historical_job" do
+        affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
+        historical_job.historical_job_affinity_tabs.should == [affinity_tab]
+      end
+    end
+
+    describe "#job_affinities" do
+      it "return affinities associated with historical_job" do
+        affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
+        historical_job.job_affinities.should == [affinity_tab.affinity]
+      end
+    end
+
+    describe "#affinity_ids" do
+      it "return affinities associated with historical_job" do
+        affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
+        historical_job.affinity_ids.should == [affinity_tab.affinity.id]
+      end
+    end
+
+    describe "#historical_job_prerequisites" do
+      it "return historical job prerequisites associated with historical_job" do
+        historical_job_prerequesite = FactoryGirl.
+          create(:historical_job_prerequesite, historical_job: historical_job,
+                                               prerequisite_historical_job: FactoryGirl.create(:job))
+        historical_job.historical_job_prerequisites.should == [historical_job_prerequesite]
+      end
+    end
+
+    describe "#prerequisites" do
+      it "return prerequisites associated with historical_job" do
+        prerequisite = FactoryGirl.create(:job)
+        historical_job_prerequesite = FactoryGirl.
+          create(:historical_job_prerequesite, historical_job: historical_job,
+                                               prerequisite_historical_job: prerequisite)
+        historical_job.prerequisites.should == [prerequisite]
+      end
+    end
+
+    describe "#verify_prerequisites" do
+      it "not raise error when job is not in a prerequisite loop" do
+        historical_job2 = FactoryGirl.create(:job)
+        expect { historical_job.verify_prerequisites([historical_job2]) }.not_to raise_error
+      end
+
+      it "raise an error when job is in a prerequesite loop" do
+        expect { historical_job.verify_prerequisites([historical_job]) }.to raise_error
       end
     end
 

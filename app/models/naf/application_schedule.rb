@@ -43,6 +43,7 @@ module Naf
     # *** Validations ***
     #++++++++++++++++++++
 
+    validates :application_run_group_restriction_id, presence: true
     validates :priority, numericality: {
                            only_integer: true,
                            greater_than: -2147483648,
@@ -58,14 +59,14 @@ module Naf
                                    only_integer: true,
                                    greater_than_or_equal_to: 0,
                                    less_than: 24*60,
-                                   allow_blank: true }
+                                   allow_blank: true
+                                 }
     validates :run_interval, numericality: {
                                only_integer: true,
                                greater_than_or_equal_to: 0,
                                less_than: 2147483647,
                                allow_blank: true
                              }
-    validates :application_run_group_restriction_id, presence: true
 
     before_save :check_blank_values
     validate :visible_enabled_check

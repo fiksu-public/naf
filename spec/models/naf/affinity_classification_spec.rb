@@ -28,5 +28,29 @@ module Naf
     # *** Class Methods ***
     #++++++++++++++++++++++
 
+    describe "#purpose" do
+      let!(:purpose_affinity_classification) { FactoryGirl.create(:purpose_affinity_classification) }
+
+      it "return the purpose affinity classification" do
+        ::Naf::AffinityClassification.purpose.should == purpose_affinity_classification
+      end
+    end
+
+    describe "#location" do
+      let!(:location_affinity_classification) { FactoryGirl.create(:location_affinity_classification) }
+
+      it "return the location affinity classification" do
+        ::Naf::AffinityClassification.location.should == location_affinity_classification
+      end
+    end
+
+    describe "#application" do
+      let!(:application_affinity_classification) { FactoryGirl.create(:application_affinity_classification) }
+
+      it "return the application affinity classification" do
+        ::Naf::AffinityClassification.application.should == application_affinity_classification
+      end
+    end
+
   end
 end

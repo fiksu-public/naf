@@ -44,7 +44,7 @@ module Naf
     #+++++++++++++++++++++++++
 
     def job
-      return ::Naf::HistoricalJob.
+      ::Naf::HistoricalJob.
         from_partition(id).
         where(id: historical_job_id).first
     end

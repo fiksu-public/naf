@@ -24,11 +24,12 @@ module Naf
     # *** Validations ***
     #++++++++++++++++++++
 
-    validates :affinity_classification_id, presence: true
-    validates :affinity_name, presence: true,
-                              length: { minimum: 1 }
+    validates :affinity_classification_id,
+              :affinity_name, presence: true
+    validates :affinity_name, length: { minimum: 1 }
     validates :affinity_short_name, uniqueness: true,
                                     allow_blank: true,
+                                    allow_nil: true,
                                     format: {
                                       with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                                       message: 'letters should be first'

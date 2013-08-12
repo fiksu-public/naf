@@ -1,7 +1,7 @@
 require 'factory_girl'
 
 FactoryGirl.define do
-  
+
   #############################################################
   #######   Jobs  #############################################
   #############################################################
@@ -23,6 +23,13 @@ FactoryGirl.define do
     association :application_type, :factory => :rails_app_type
     association :application_run_group_restriction, :factory => :no_limit
     command "::Naf::QueuedJob.test hello world"
+  end
+
+  factory :running_job_base, :class => ::Naf::RunningJob do
+    association :historical_job, :factory => :job
+    association :application_type, :factory => :rails_app_type
+    association :application_run_group_restriction, :factory => :no_limit
+    command "::Naf::RunningJob.test hello world"
   end
 
   factory :scheduled_job, :parent => :job do
@@ -155,6 +162,15 @@ FactoryGirl.define do
   end
 
   #############################################################
+  #######   Application Schedules ############ ################
+  #############################################################
+
+  factory :schedule_prerequisite, :class => ::Naf::ApplicationSchedulePrerequisite do
+    association :application_schedule, :factory => :schedule
+    association :prerequisite_application_schedule, :factory => :schedule
+  end
+
+  #############################################################
   #######   Application Run Group Restrictions ################
   #############################################################
 
@@ -206,7 +222,7 @@ FactoryGirl.define do
     description "bash command"
     invocation_method "bash_command_invocator"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::ApplicationType.find_or_initialize_by_id(id)
     end
   end
@@ -217,7 +233,7 @@ FactoryGirl.define do
     description "bash script"
     invocation_method "bash_script_invocator"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::ApplicationType.find_or_initialize_by_id(id)
     end
   end
@@ -228,7 +244,7 @@ FactoryGirl.define do
     description "ruby script"
     invocation_method "ruby_script_invocator"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::ApplicationType.find_or_initialize_by_id(id)
     end
   end
@@ -237,32 +253,33 @@ FactoryGirl.define do
   #######   Affinities      ###################################
   #############################################################
 
-  factory :normal_affinity, :class => ::Naf::Affinity do 
+  factory :normal_affinity, :class => ::Naf::Affinity do
     id 1
     association :affinity_classification, :factory => :purpose_affinity_classification
     affinity_name "normal"
+    affinity_short_name "short_name"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::Affinity.find_or_initialize_by_id(id)
     end
   end
 
-  factory :canary_affinity, :class => ::Naf::Affinity do 
+  factory :canary_affinity, :class => ::Naf::Affinity do
     id 2
     association :affinity_classification, :factory => :purpose_affinity_classification
     affinity_name "canary"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::Affinity.find_or_initialize_by_id(id)
     end
   end
 
-  factory :perennial_affinity, :class => ::Naf::Affinity do 
+  factory :perennial_affinity, :class => ::Naf::Affinity do
     id 3
     association :affinity_classification, :factory => :purpose_affinity_classification
     affinity_name "perennial"
     # Ensure single creation
-    initialize_with do 
+    initialize_with do
       ::Naf::Affinity.find_or_initialize_by_id(id)
     end
   end
@@ -273,7 +290,7 @@ FactoryGirl.define do
       "Affinity #{n}"
     end
   end
-  
+
   #############################################################
   #######   Affinity Classifications  #########################
   #############################################################
@@ -293,7 +310,7 @@ FactoryGirl.define do
       ::Naf::AffinityClassification.find_or_initialize_by_id(id)
     end
   end
-  
+
   factory :application_affinity_classification, :class => ::Naf::AffinityClassification do
     id 3
     affinity_classification_name "application"
@@ -360,6 +377,40 @@ FactoryGirl.define do
   factory :required_canary_slot, :parent => :machine_affinity_slot_base do
     association :affinity, :factory => :canary_affinity
     required true
+  end
+
+  ##################################################
+  #######   Logger Level   #########################
+  ##################################################
+
+  factory :logger_level, :class => ::Naf::LoggerLevel do
+    sequence(:level) { |n| "level#{n}" }
+  end
+
+  #################################################
+  #######   Logger Name   #########################
+  #################################################
+
+  factory :logger_name, :class => ::Naf::LoggerName do
+    sequence(:name) { |n| "name#{n}" }
+  end
+
+  ##################################################
+  #######   Logger Style   #########################
+  ##################################################
+
+  factory :logger_style, :class => ::Naf::LoggerStyle do
+    sequence(:name) { |n| "name#{n}" }
+  end
+
+  ######################################################
+  #######   Logger Style Name  #########################
+  ######################################################
+
+  factory :logger_style_name, :class => ::Naf::LoggerStyleName do
+    association :logger_level, :factory => :logger_level
+    association :logger_name, :factory => :logger_name
+    association :logger_style, :factory => :logger_style
   end
 
 end

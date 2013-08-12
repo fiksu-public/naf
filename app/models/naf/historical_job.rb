@@ -62,7 +62,7 @@ module Naf
     has_many :prerequisites,
       class_name: "::Naf::HistoricalJob",
       through: :historical_job_prerequisites,
-      source: :prerequisite_job
+      source: :prerequisite_historical_job
     # Access supported through instance methods
     has_many :historical_job_affinity_tabs,
       class_name: "::Naf::HistoricalJobAffinityTab",
@@ -139,67 +139,67 @@ module Naf
     #++++++++++++++++++++++
 
     def self.connection
-      return ::Naf::NafBase.connection
+      ::Naf::NafBase.connection
     end
 
     def self.full_table_name_prefix
-      return ::Naf::NafBase.full_table_name_prefix
+      ::Naf::NafBase.full_table_name_prefix
     end
 
     def self.partition_table_size
-      return 100000
+      100000
     end
 
     def self.partition_num_lead_buffers
-      return 10
+      10
     end
 
     def self.queued_between(start_time, end_time)
-      return where(["created_at >= ? AND created_at <= ?", start_time, end_time])
+      where(["created_at >= ? AND created_at <= ?", start_time, end_time])
     end
 
     def self.canceled
-      return where(request_to_terminate: true)
+      where(request_to_terminate: true)
     end
 
     def self.application_last_runs
-      return where("application_id IS NOT NULL").
+      where("application_id IS NOT NULL").
         group("application_id").
         select("application_id, MAX(finished_at) AS finished_at").
-        reject{|job| job.finished_at.nil? }
+        reject{ |job| job.finished_at.nil? }
     end
 
     def self.application_last_queued
-      return where("application_id IS NOT NULL").
+      where("application_id IS NOT NULL").
         group("application_id").
         select("application_id, MAX(id) AS id, MAX(created_at) AS created_at")
     end
 
     def self.finished
-      return where("finished_at IS NOT NULL OR request_to_terminate = true")
+      where("finished_at IS NOT NULL OR request_to_terminate = true")
     end
 
     def self.queued_status
-      return where("(started_at IS NULL AND request_to_terminate = false)
-                    OR (finished_at > '#{Time.zone.now - 1.minute}')
-                    OR (started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false)")
+      where("(started_at IS NULL AND request_to_terminate = false) OR
+             (finished_at > '#{Time.zone.now - 1.minute}') OR
+             (started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false)")
     end
 
     def self.running_status
-      return where("(started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false)
-                    OR (finished_at > '#{Time.zone.now - 1.minute}')")
+      where("(started_at IS NOT NULL AND finished_at IS NULL AND request_to_terminate = false) OR
+             (finished_at > '#{Time.zone.now - 1.minute}')")
     end
 
     def self.queued_with_waiting
-      return where("(started_at IS NULL AND request_to_terminate = false)")
+      where("(started_at IS NULL AND request_to_terminate = false)")
     end
 
     def self.errored
-      return where("finished_at IS NOT NULL AND exit_status > 0 OR request_to_terminate = true")
+      where("finished_at IS NOT NULL AND exit_status > 0 OR request_to_terminate = true")
     end
 
     def self.lock_for_job_queue(&block)
-      return lock_record(0, &block)
+      lock_record(0, &block)
     end
 
     #-------------------------
@@ -244,39 +244,39 @@ module Naf
     end
 
     def title
-      return application.try(:title)
+      application.try(:title)
     end
 
     def machine_started_on_server_name
-      return started_on_machine.try(:server_name)
+      started_on_machine.try(:server_name)
     end
 
     def machine_started_on_server_address
-      return started_on_machine.try(:server_address)
+      started_on_machine.try(:server_address)
     end
 
     def historical_job_affinity_tabs
-      return ::Naf::HistoricalJobAffinityTab.
+      ::Naf::HistoricalJobAffinityTab.
         from_partition(id).
         where(historical_job_id: id)
     end
 
     def job_affinities
-      return historical_job_affinity_tabs.map{ |jat| jat.affinity }
+      historical_job_affinity_tabs.map{ |jat| jat.affinity }
     end
 
     def affinity_ids
-      return historical_job_affinity_tabs.map{ |jat| jat.affinity_id }
+      historical_job_affinity_tabs.map{ |jat| jat.affinity_id }
     end
 
     def historical_job_prerequisites
-      return ::Naf::HistoricalJobPrerequisite.
+      ::Naf::HistoricalJobPrerequisite.
         from_partition(id).
         where(historical_job_id: id)
     end
 
     def prerequisites
-      return historical_job_prerequisites.
+      historical_job_prerequisites.
         map{ |hjp| ::Naf::HistoricalJob.from_partition(hjp.prerequisite_historical_job_id).
         find_by_id(hjp.prerequisite_historical_job_id) }.
         reject{ |j| j.nil? }

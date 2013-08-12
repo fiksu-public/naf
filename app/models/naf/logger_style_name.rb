@@ -21,7 +21,8 @@ module Naf
     #++++++++++++++++++++
 
     validates :logger_name_id,
-              :logger_level_id, presence: true
+              :logger_level_id,
+              :logger_style_id, presence: true
     validates :logger_style_id, uniqueness: { scope: :logger_name_id }
 
   end

@@ -21,9 +21,11 @@ module Naf
     # *** Validations ***
     #++++++++++++++++++++
 
-    validates :server_address, presence: true
+    validates :server_address,
+              :thread_pool_size, presence: true
     validates :short_name, uniqueness: true,
                            allow_blank: true,
+                           allow_nil: true,
                            format: {
                              with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                              message: "letters should be first (use only letters and numbers)"
@@ -57,44 +59,49 @@ module Naf
     #++++++++++++++++++++++
 
     def self.enabled
-      return where(enabled: true)
+      where(enabled: true)
     end
 
     def self.up
-      return where(marked_down: false)
+      where(marked_down: false)
     end
 
     def self.down
-      return where(marked_down: true)
+      where(marked_down: true)
     end
 
     def self.machine_ip_address
-      return Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
-    rescue StandardError
-      return "127.0.0.1"
+      begin
+        Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
+      rescue StandardError
+        "127.0.0.1"
+      end
     end
 
     def self.hostname
-      Socket.gethostname
-    rescue StandardError
-      return "local"
+      begin
+        Socket.gethostname
+      rescue StandardError
+        "local"
+      end
     end
 
     def self.local_machine
-      return where(server_address: machine_ip_address).first
+      where(server_address: machine_ip_address).first
     end
 
     def self.current
-      return local_machine
+      local_machine
     end
 
     def self.last_time_schedules_were_checked
-      return self.maximum(:last_checked_schedules_at)
+      self.maximum(:last_checked_schedules_at)
     end
 
     def self.is_it_time_to_check_schedules?(check_period)
       time = Naf::Machine.last_time_schedules_were_checked
-      return time.nil? || time < (Time.zone.now - check_period)
+
+      time.nil? || time < (Time.zone.now - check_period)
     end
 
     #-------------------------
@@ -102,15 +109,15 @@ module Naf
     #+++++++++++++++++++++++++
 
     def try_lock_for_runner_use(&block)
-      return advisory_try_lock(&block)
+      advisory_try_lock(&block)
     end
 
     def unlock_for_runner_use
-      return advisory_unlock
+      advisory_unlock
     end
 
     def machine_logger
-      return af_logger(self.class.name)
+      af_logger(self.class.name)
     end
 
     def to_s
@@ -120,9 +127,7 @@ module Naf
       else
         components << "DISABLED"
       end
-      if marked_down
-        components << "DOWN!"
-      end
+      components << "DOWN!" if marked_down
       components << "id: #{id}"
       components << "address: #{server_address}"
       components << "name: \"#{server_name}\"" unless server_name.blank?
@@ -162,7 +167,7 @@ module Naf
     def is_stale?(period)
       # if last_seen_alive_at is nil then the runner has not been started yet -- hold off
       # claiming it is stale until the runner is run at least once.
-      return self.last_seen_alive_at.present? && self.last_seen_alive_at < (Time.zone.now - period)
+      self.last_seen_alive_at.present? && self.last_seen_alive_at < (Time.zone.now - period)
     end
 
     def mark_processes_as_dead(by_machine)
@@ -177,6 +182,7 @@ module Naf
         job.marked_dead_at = job.historical_job.marked_dead_at = marking_at
         job.historical_job.finished_at = marking_at
         job.save!
+        job.historical_job.save!
       end
     end
 
@@ -191,7 +197,9 @@ module Naf
     end
 
     def affinity
-      return ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(::Naf::AffinityClassification.location.id, server_address)
+      ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(
+        ::Naf::AffinityClassification.location.id, server_address
+      )
     end
 
     def short_name_if_it_exist

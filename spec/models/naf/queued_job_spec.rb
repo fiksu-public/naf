@@ -2,7 +2,6 @@ require 'spec_helper'
 
 module Naf
   describe QueuedJob do
-
     # Mass-assignment
     [:application_id,
      :application_type_id,
@@ -160,6 +159,12 @@ module Naf
                                                affinity_id: affinity.id,
                                                affinity_parameter: 1)}
       it "return queued job when machine has cpus left" do
+        ::Naf::QueuedJob.check_weight_sum('cpus', 1, 3).
+          should == [queued_job]
+      end
+
+      it "return queued job when job does not have cpu affinity" do
+        affinity_tab.delete
         ::Naf::QueuedJob.check_weight_sum('cpus', 1, 3).
           should == [queued_job]
       end

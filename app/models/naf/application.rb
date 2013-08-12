@@ -14,13 +14,13 @@ module Naf
     # *** Associations ***
     #+++++++++++++++++++++
 
+    belongs_to :application_type,
+      class_name: '::Naf::ApplicationType'
     has_one :application_schedule,
       class_name: '::Naf::ApplicationSchedule',
       dependent: :destroy
     has_many :historical_jobs,
       class_name: '::Naf::HistoricalJob'
-    belongs_to :application_type,
-      class_name: '::Naf::ApplicationType'
 
     #--------------------
     # *** Validations ***
@@ -29,9 +29,10 @@ module Naf
     validates :application_type_id,
               :command,
               :title, presence: true
-    validates :title,
-              :short_name, uniqueness: true
-    validates :short_name, allow_blank: true,
+    validates :title, uniqueness: true
+    validates :short_name, uniqueness: true,
+                           allow_blank: true,
+                           allow_nil: true,
                            format: {
                              with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
                              message: "letters should be first"
@@ -53,11 +54,10 @@ module Naf
 
     def to_s
       components = []
-      if deleted
-        components << "DELETED"
-      end
+      components << "DELETED" if deleted
       components << "id: #{id}"
       components << title
+
       return "::Naf::Application<#{components.join(', ')}>"
     end
 
@@ -86,7 +86,8 @@ module Naf
         prerequisites = Naf::ApplicationSchedulePrerequisite.
           where(prerequisite_application_schedule_id: application_schedule.id).all
         unless prerequisites.blank?
-          errors.add(:base, "Cannot delete scheduler, because the following applications are referenced to it: #{prerequisites.map{ |pre| pre.application_schedule.title }.join(', ') }")
+          errors.add(:base, "Cannot delete scheduler, because the following applications are referenced to it: " +
+            "#{prerequisites.map{ |pre| pre.application_schedule.title }.join(', ') }")
         end
       end
     end

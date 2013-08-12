@@ -8,7 +8,6 @@ module Naf
     let(:ruby) { FactoryGirl.create(:ruby_script_app_type) }
     let!(:job) { FactoryGirl.create(:job) }
 
-
     # Mass-assignment
     [:enabled,
      :script_type_name,
@@ -36,10 +35,6 @@ module Naf
 
     it { should validate_presence_of(:script_type_name) }
     it { should validate_presence_of(:invocation_method) }
-
-    #-------------------------
-    # *** Instance Methods ***
-    #+++++++++++++++++++++++++
 
     context "For a Rails Application" do
       before do

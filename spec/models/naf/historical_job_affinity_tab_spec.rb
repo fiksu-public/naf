@@ -7,7 +7,8 @@ module Naf
     # Mass-assignment
     [:affinity_id,
      :historical_job_id,
-     :historical_job].each do |a|
+     :historical_job,
+     :affinity_parameter].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -35,6 +36,15 @@ module Naf
     #----------------------
     # *** Class Methods ***
     #++++++++++++++++++++++
+
+    describe "#job" do
+      let(:job) { FactoryGirl.create(:job) }
+
+      it "return the correct job" do
+        historical_job_affinity_tab.historical_job_id = job.id
+        historical_job_affinity_tab.job.should == job
+      end
+    end
 
     describe "#script_type_name" do
       it "return the correct name" do
