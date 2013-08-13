@@ -9,7 +9,9 @@ module Process::Naf
     def work
       if @upgrade_option.present?
         if @upgrade_option == 'save'
+          @naf_version = '0.9.9'
           save_information('naf_tables_information_v_0_9_9.csv')
+          @naf_version = '1.0.0'
           save_information('naf_tables_information_v_1_0_0.csv')
         elsif @upgrade_option == 'restore'
           if @naf_version == '0.9.9'
