@@ -33,6 +33,8 @@ module Process::Naf
     private
 
     def save_information(file)
+      logger.info "Saving information to file: #{file}"
+
       CSV.open(file, 'w') do |csv|
         # Traverse through all the necessary tables
         tables.each do |table|
@@ -83,6 +85,8 @@ module Process::Naf
           end
         end
       end
+
+      logger.info 'Closing file'
     end
 
     def restore_information(file)
