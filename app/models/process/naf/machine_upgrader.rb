@@ -4,25 +4,36 @@ module Process::Naf
   class MachineUpgrader < ::Process::Naf::Application
 
     opt :upgrade_option, type: :string
+    opt :naf_version, type: :string
 
     def work
       if @upgrade_option.present?
         if @upgrade_option == 'save'
-          save_information
+          save_information('naf_tables_information_v_0_9_9.csv')
+          save_information('naf_tables_information_v_1_0_0.csv')
         elsif @upgrade_option == 'restore'
-          restore_information
+          if @naf_version == '0.9.9'
+            restore_information('naf_tables_information_v_0_9_9.csv')
+          elsif @naf_version == '1.0.0'
+            restore_information('naf_tables_information_v_1_0_0.csv')
+          else
+            logger.error 'Invalid version option. Please specify one of the following ' +
+              'options: --naf-version 0.9.9, --naf-version 1.0.0'
+          end
         else
-          logger.error 'Invalid option. Please specify one of the following options: --upgrade-option save, --upgrade-option restore'
+          logger.error 'Invalid upgrade option. Please specify one of the following ' +
+            'options: --upgrade-option save, --upgrade-option restore'
         end
       else
-        logger.error 'Option missing. Please specify one of the following options: --upgrade-option save, --upgrade-option restore'
+        logger.error 'Upgrade option missing. Please specify one of the following ' +
+          'options: --upgrade-option save, --upgrade-option restore'
       end
     end
 
     private
 
-    def save_information
-      CSV.open('naf_tables_information.csv', 'w') do |csv|
+    def save_information(file)
+      CSV.open(file, 'w') do |csv|
         # Traverse through all the necessary tables
         tables.each do |table|
           table.all.each do |record|
@@ -39,7 +50,16 @@ module Process::Naf
                 if !((table == ::Naf::Machine && machines_excluded_attributes.include?(key)) ||
                   (['created_at', 'updated_at'].include?(key)))
 
-                  csv << [key, value]
+                  # Since version 1.0.0 has 5 default affinities and version
+                  # 0.9.9 has 3 default affinities, the affinities ids need
+                  # to be readjusted
+                  if ((table == ::Naf::Affinity && key == 'id') ||
+                      (key == 'affinity_id')) && @naf_version == '1.0.0'
+
+                    csv << [key, value + 2]
+                  else
+                    csv << [key, value]
+                  end
                 end
               end
               csv << ['---']
@@ -50,18 +70,26 @@ module Process::Naf
           if table.count != 0
             logger.info "Saved #{table.count} #{table.to_s} record(s)"
 
-            csv << [table.sequence_name, table.find_by_sql("SELECT last_value FROM #{table.sequence_name}").first['last_value']]
+            # The affinity sequence needs to be readjusted for version 1.0.0
+            if table == ::Naf::Affinity && @naf_version == '1.0.0'
+              last_value = (table.
+                find_by_sql("SELECT last_value FROM #{table.sequence_name}").
+                first['last_value'].to_i + 2).to_s
+              csv << [table.sequence_name, last_value]
+            else
+              csv << [table.sequence_name, table.find_by_sql("SELECT last_value FROM #{table.sequence_name}").first['last_value']]
+            end
             csv << ['===']
           end
         end
       end
     end
 
-    def restore_information
+    def restore_information(file)
       record = nil
       attributes = nil
 
-      CSV.open('naf_tables_information.csv', 'r') do |csv|
+      CSV.open(file, 'r') do |csv|
         csv.read.each do |row|
           # End of attributes
           if row[0] == '---'

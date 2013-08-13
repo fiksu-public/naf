@@ -12,7 +12,7 @@ module Process::Naf
     end
 
     after(:all) do
-      system "rm naf_tables_information.csv"
+      system "rm naf_tables_information*.csv"
     end
 
 		describe "save information" do
@@ -27,7 +27,7 @@ module Process::Naf
 
 			it "write to csv file" do
         saved_results = nil
-        CSV.open('naf_tables_information.csv', 'r') do |csv|
+        CSV.open('naf_tables_information_v_1_0_0.csv', 'r') do |csv|
           saved_results = csv.read
         end
 
@@ -50,7 +50,7 @@ module Process::Naf
 
     describe "restore information" do
       before do
-        run_script('--upgrade-option', 'restore')
+        run_script('--upgrade-option', 'restore', '--naf-version', '1.0.0')
       end
 
       it "insert records correctly" do
