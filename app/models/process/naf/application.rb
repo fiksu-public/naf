@@ -24,7 +24,14 @@ module Process::Naf
 
     def initialize
       super
-      opt :log_configuration_files, default: ["af.yml", "naf.yml", "nafjob.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, default: ["af.yml",
+                                              "af-#{Rails.env}.yml",
+                                              "naf.yml",
+                                              "naf-#{Rails.env}.yml",
+                                              "nafjob.yml",
+                                              "nafjob-#{Rails.env}.yml",
+                                              "#{af_name}.yml",
+                                              "#{af_name}-#{Rails.env}.yml"]
     end
 
     def database_application_name

@@ -41,7 +41,14 @@ module Process::Naf
 
     def initialize
       super
-      opt :log_configuration_files, default: ["af.yml", "naf.yml", "nafrunner.yml", "#{af_name}.yml"]
+      opt :log_configuration_files, default: ["af.yml",
+                                              "af-#{Rails.env}.yml",
+                                              "naf.yml",
+                                              "naf-#{Rails.env}.yml",
+                                              "nafrunner.yml",
+                                              "nafrunner-#{Rails.env}.yml",
+                                              "#{af_name}.yml",
+                                              "#{af_name}-#{Rails.env}.yml"]
       @last_machine_log_level = nil
       @job_creator = ::Logical::Naf::JobCreator.new
     end
@@ -339,7 +346,8 @@ module Process::Naf
       (1..@wait_time_for_processes_to_terminate).each do |i|
         num_assigned_jobs = assigned_jobs(machine).length
         return if num_assigned_jobs == 0
-        logger.debug_medium "#{i}/#{@wait_time_for_processes_to_terminate}: sleeping 1 second while we wait for #{num_assigned_jobs} assigned job(s) to terminate as requested"
+        logger.debug_medium "#{i}/#{@wait_time_for_processes_to_terminate}: sleeping 1 second while we wait for " +
+          "#{num_assigned_jobs} assigned job(s) to terminate as requested"
         sleep(1)
       end
 

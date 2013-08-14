@@ -51,7 +51,7 @@ module Process::Naf
           machine = ::Naf::Machine.create(server_address: @server_address)
           classification = ::Naf::AffinityClassification.location.id
           affinity = ::Naf::Affinity.
-            find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id)
+            find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id.to_s)
           machine.machine_affinity_slots.create(affinity_id: affinity.id)
         end
 
