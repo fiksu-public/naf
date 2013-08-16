@@ -31,7 +31,6 @@ module Naf
 
     it { should validate_presence_of(:machine_id) }
     it { should validate_presence_of(:affinity_id) }
-    pending { should validate_uniqueness_of(:affinity_id).scoped_to(:machine_id) }
 
     #--------------------
     # *** Delegations ***

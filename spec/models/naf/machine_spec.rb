@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe Machine do
-    let(:machine) { FactoryGirl.create(:machine) }
+    let!(:machine) { FactoryGirl.create(:machine) }
 
     # Mass-assignment
     [:server_address,
@@ -34,7 +34,7 @@ module Naf
     #++++++++++++++++++++
 
     it { should validate_presence_of(:server_address) }
-    pending { should validate_uniqueness_of(:short_name) }
+    it { should validate_uniqueness_of(:short_name) }
 
     ['', 'aa', 'aA', 'Aa', 'AA', '_a', 'a1', 'A1', '_9'].each do |v|
       it { should allow_value(v).for(:short_name) }
@@ -122,9 +122,12 @@ module Naf
     #++++++++++++++++++++++
 
     describe "#enabled" do
-      it "return the correct machine" do
-        FactoryGirl.create(:machine, enabled: false)
+      before do
         machine.update_attributes!(enabled: true)
+        FactoryGirl.create(:machine_two, enabled: false)
+      end
+
+      it "return the correct machine" do
         ::Naf::Machine.enabled.all.should == [machine]
       end
     end
@@ -410,6 +413,7 @@ module Naf
       end
 
       it "return server name" do
+        machine.short_name = nil
         machine.server_name = 'machine.example.com'
         machine.short_name_if_it_exist.should == 'machine.example.com'
       end

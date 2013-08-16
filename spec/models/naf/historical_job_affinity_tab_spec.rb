@@ -29,10 +29,6 @@ module Naf
 
     it { should validate_presence_of(:affinity_id) }
 
-    pending "uniqueness"do
-      it { should validate_uniqueness_of(:affinity_id).scoped_to(:historical_job_id) }
-    end
-
     #----------------------
     # *** Class Methods ***
     #++++++++++++++++++++++
