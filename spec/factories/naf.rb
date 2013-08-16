@@ -125,15 +125,12 @@ FactoryGirl.define do
 
   factory :application_base, :class => ::Naf::Application  do
     association :application_type, :factory => :rails_app_type
+    sequence(:short_name) { |n| "short_name#{n}" }
   end
 
   factory :application, :parent => :application_base do
-    sequence(:command) do |n|
-      "::Naf::HistoricalJob.test hello_#{n}"
-    end
-    sequence(:title) do |n|
-      "Test #{n}"
-    end
+    sequence(:command) { |n| "::Naf::HistoricalJob.test hello_#{n}" }
+    sequence(:title) { |n| "Test #{n}" }
   end
 
   factory :scheduled_application, :parent => :application do

@@ -4,13 +4,13 @@
   <%= render partial: 'naf/shared/select_per_page' %>
 
   <div id="flash_message">
-      <% unless notice.blank? %>
-        <script type='text/javascript'>
-          jQuery("<p id='notice'><%= notice %></p>")
-              .appendTo('#flash_message')
-              .slideDown().delay(5000).slideUp();
-        </script>
-      <% end %>
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+            .appendTo('#flash_message')
+            .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
   </div>
 
   <table id='datatable'>
@@ -25,6 +25,7 @@
         <th>Run Group Limit</th>
         <th>Priority</th>
         <th>Enabled</th>
+        <th>Enqueue</th>
         <th>Run Time</th>
         <th>Last Queued At</th>
         <th>Prerequisites</th>

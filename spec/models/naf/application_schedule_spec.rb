@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe ApplicationSchedule do
-    let(:schedule) { FactoryGirl.create(:schedule) }
+    let!(:schedule) { FactoryGirl.create(:schedule) }
 
     # Mass-assignment
     [:application_id,
@@ -14,7 +14,8 @@ module Naf
      :enabled,
      :run_start_minute,
      :application_run_group_limit,
-     :application_schedule_prerequisites_attributes].each do |a|
+     :application_schedule_prerequisites_attributes,
+     :enqueue_backlogs].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -40,7 +41,6 @@ module Naf
     #++++++++++++++++++++
 
     it { should validate_presence_of(:application_run_group_restriction_id) }
-    pending { should validate_presence_of(:application_id) }
 
     [-2147483647, 2147483646, 0].each do |v|
       it { should allow_value(v).for(:priority) }

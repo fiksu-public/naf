@@ -2,6 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe RunningJob do
+    let!(:running_job) { FactoryGirl.create(:running_job_base) }
 
     # Mass-assignment
     [:application_id,
@@ -47,6 +48,56 @@ module Naf
     #----------------------
     # *** Class Methods ***
     #++++++++++++++++++++++
+
+    describe "#started_on" do
+      let(:machine) { mock_model(Machine) }
+      before do
+        running_job.started_on_machine = machine
+      end
+
+      it "return the correct job record" do
+        ::Naf::RunningJob.should_receive(:where).and_return([running_job])
+        ::Naf::RunningJob.started_on(machine).should == [running_job]
+      end
+    end
+
+    describe "#in_run_group" do
+      it "return the correct job record" do
+        ::Naf::RunningJob.should_receive(:where).and_return([running_job])
+        ::Naf::RunningJob.in_run_group('test').should == [running_job]
+      end
+    end
+
+    describe "#assigned_jobs" do
+      let(:machine) { mock_model(Machine) }
+
+      it "return the correct job record" do
+        ::Naf::RunningJob.stub(:started_on).and_return([running_job])
+        ::Naf::RunningJob.assigned_jobs(machine).should == [running_job]
+      end
+    end
+
+    describe "#affinity_weights" do
+      let(:machine) { FactoryGirl.create(:machine) }
+      before do
+        cpu_affinity = FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus')
+        memory_affinity = FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory')
+        FactoryGirl.create(:job_affinity_tab_base, historical_job: running_job.historical_job,
+                                                   affinity: cpu_affinity,
+                                                   affinity_parameter: 1.0)
+        FactoryGirl.create(:job_affinity_tab_base, historical_job: running_job.historical_job,
+                                                   affinity: memory_affinity,
+                                                   affinity_parameter: 1.0)
+
+        running_job.started_on_machine = machine
+        running_job.save!
+      end
+
+      it "return the correct sum of affinity parameters for each affinity" do
+        ::Naf::RunningJob.affinity_weights(machine).should == { cpus: 1.0, memory: 1.0 }
+      end
+    end
+
 
   end
 end

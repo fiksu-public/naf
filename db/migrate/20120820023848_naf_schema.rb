@@ -131,6 +131,7 @@ class NafSchema < ActiveRecord::Migration
           run_start_minute                         integer null check (run_start_minute >= 0 and run_start_minute < (24 * 60)),
           run_interval                             integer null check (run_interval >= 0),
           priority                                 integer not null default 0,
+          enqueue_backlogs                         boolean not null default false,
           check (visible = true OR enabled = false),
           check (run_start_minute is null OR run_interval is null)
       );

@@ -15,6 +15,7 @@ module Logical
                  :application_run_group_limit,
                  :priority,
                  :enabled,
+                 :enqueue_backlogs,
                  :run_time,
                  :prerequisites,
                  :deleted,
@@ -145,6 +146,10 @@ module Logical
             super
           end
         end
+      end
+
+      def enqueue_backlogs
+        application_schedule.try(:enqueue_backlogs)
       end
 
     end

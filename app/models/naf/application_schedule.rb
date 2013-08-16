@@ -12,7 +12,8 @@ module Naf
                     :enabled,
                     :run_start_minute,
                     :application_run_group_limit,
-                    :application_schedule_prerequisites_attributes
+                    :application_schedule_prerequisites_attributes,
+                    :enqueue_backlogs
 
     SCHEDULES_LOCK_ID = 0
 
@@ -86,19 +87,19 @@ module Naf
     #++++++++++++++++++++++
 
     def self.try_lock_schedules
-      return try_lock_record(SCHEDULES_LOCK_ID)
+      try_lock_record(SCHEDULES_LOCK_ID)
     end
 
     def self.unlock_schedules
-      return unlock_record(SCHEDULES_LOCK_ID)
+      unlock_record(SCHEDULES_LOCK_ID)
     end
 
     def self.exact_schedules
-      return where('run_start_minute is not null')
+      where('run_start_minute is not null')
     end
 
     def self.relative_schedules
-      return where('run_interval >= 0')
+      where('run_interval >= 0')
     end
 
     #-------------------------

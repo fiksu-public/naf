@@ -12,19 +12,16 @@ module Logical
                        :application_run_group_limit,
                        :priority,
                        :enabled,
+                       :enqueue_backlogs,
                        :run_time,
                        :prerequisites,
                        :deleted,
                        :visible] }
       let(:physical_app) { FactoryGirl.create(:application) }
-      let(:logical_app) { Application.new(physical_app) }
-      #
-      # This is causing the following error: "Validation failed: Short name has already been taken".
-      # Making specs pending until it is resolved.
-      #
-      # let(:scheduled_physical_app) {
-      #   FactoryGirl.create(:scheduled_application, application_schedule: FactoryGirl.create(:schedule_at_time))
-      # }
+      let!(:logical_app) { Application.new(physical_app) }
+      let(:scheduled_physical_app) {
+        FactoryGirl.create(:scheduled_application, application_schedule: FactoryGirl.create(:schedule_at_time))
+      }
 
       context "Class Methods" do
         it "search method should return array of wrapper around physical application" do
@@ -36,28 +33,32 @@ module Logical
       end
 
       it "should delegate command to the physical app" do
-        app = logical_app
-        app.should_receive(:command).and_return("")
-        app.command
+        logical_app.should_receive(:command).and_return("")
+        logical_app.command
       end
 
       it "to_hash should have the specified columns" do
-        logical_app.to_hash.keys.should eql(columns)
+        logical_app.to_hash.keys.should == columns
       end
 
-      pending "should render run_start_minute" do
-        scheduled_app = scheduled_physical_app
-        scheduled_app.application_schedule.run_start_minute.should be_a(Fixnum)
-        Application.new(scheduled_app).run_start_minute.should be_a(String)
+      it "should render run_start_minute" do
+        scheduled_physical_app.application_schedule.run_start_minute.should be_a(Fixnum)
+
+        Application.new(scheduled_physical_app).run_start_minute.should be_a(String)
       end
 
-      pending "should delegate methods to its schedule" do
-        methods = [:application_run_group_restriction_name, :run_interval, :application_run_group_name, :run_start_minute]
+      it "should delegate methods to its schedule" do
+        methods = [:application_run_group_restriction_name,
+                   :run_interval,
+                   :application_run_group_name,
+                   :run_start_minute]
         schedule = scheduled_physical_app.application_schedule
         logical_scheduled_app = Application.new(scheduled_physical_app)
+
         methods.each do |m|
           schedule.should_receive(m).and_return(nil)
         end
+
         methods.each do |m|
           logical_scheduled_app.send(m)
         end

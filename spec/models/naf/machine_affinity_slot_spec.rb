@@ -2,7 +2,8 @@ require 'spec_helper'
 
 module Naf
   describe MachineAffinitySlot do
-    let(:slot) { FactoryGirl.create(:normal_machine_affinity_slot) }
+    let(:machine) { mock_model(Machine, server_address: '0.0.0.1', server_name: 'Machine1') }
+    let!(:slot) { FactoryGirl.create(:normal_machine_affinity_slot) }
 
     # Mass-assignment
     [:machine_id,
@@ -57,6 +58,10 @@ module Naf
     # *** Instance Methods ***
     #+++++++++++++++++++++++++
 
+    before do
+      slot.machine = machine
+    end
+
     describe "#machine_server_address" do
       it "return the correct address" do
         slot.machine_server_address.should == '0.0.0.1'
@@ -64,10 +69,6 @@ module Naf
     end
 
     describe "#machine_server_name" do
-      before do
-        slot.machine.server_name = 'Machine1'
-      end
-
       it "return the correct name" do
         slot.machine_server_name.should == 'Machine1'
       end

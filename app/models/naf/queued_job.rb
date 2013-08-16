@@ -89,7 +89,7 @@ module Naf
           check_weight_sum('cpus', running_job_weights[:cpus], machine_cpus).
           check_weight_sum('memory', running_job_weights[:memory], machine_memory)
       elsif machine_cpus > 0 || machine_memory > 0
-        parameters = machine_cpus == 0 ? [machine_memory, 'memory'] : [machine_cpus, 'cpus']
+        parameters = (machine_cpus == 0 ? [machine_memory, 'memory'] : [machine_cpus, 'cpus'])
         ::Naf::QueuedJob.
           check_weight_sum(parameters[1], running_job_weights[parameters[1].to_sym], parameters[0])
       else

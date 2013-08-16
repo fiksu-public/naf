@@ -16,6 +16,7 @@ module Logical
             ::Naf::HistoricalJob.delete_all
             ::Naf::HistoricalJobAffinityTab.delete_all
             ::Naf::ApplicationSchedule.destroy_all
+            app_schedule_for_canary.enqueue_backlogs = true
           end
 
           it "affinities" do

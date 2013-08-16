@@ -9,8 +9,8 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 13, 14 ] },    // turn off visibility
-      { "sClass": "center", "aTargets": [ 6, 7, 8, 11, 12 ] }
+      { "bVisible": false, "aTargets": [ 14, 15 ] },    // turn off visibility
+      { "sClass": "center", "aTargets": [ 6, 7, 8, 9, 12, 13 ] }
     ],
     "aoColumns": [
         { "sWidth": "2%"},      // Id
@@ -22,6 +22,7 @@ jQuery(document).ready(function() {
         { "sWidth": "7%"},      // Application Run Group Limit
         { "sWidth": "4%"},      // Priority
         { "sWidth": "4%"},      // Enabled
+        { "sWidth": "4%"},      // Enqueue Backlogs
         { "sWidth": "8%"},      // Run Time
         { "sWidth": "8%"},      // Last Queued At
         { "sWidth": "8%"},      // Prerequisites
@@ -59,6 +60,11 @@ jQuery(document).ready(function() {
                 appendTo('#flash_message').slideDown().delay(5000).slideUp();
         jQuery('#datatable').dataTable().fnDraw();
       }
+      else {
+        jQuery("<div class='error'>Sorry, \'" +  data.title + "\' cannot add a Job to the queue right now!</div>").
+                appendTo('#flash_message').slideDown().delay(5000).slideUp();
+        jQuery('#datatable').dataTable().fnDraw();
+      }
     });
   });
 });
@@ -70,13 +76,13 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[11] == 'true' || aData[12] == 'false' || aData[13] == '') {
+  if (aData[12] == 'true' || aData[13] == 'false' || aData[14] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
 
 function checkTimeFormat(nRow, aData) {
-  var l_q_a_array = jQuery(aData[9]).text().split(',');
+  var l_q_a_array = jQuery(aData[10]).text().split(',');
   var last_queued_at;
   if(jQuery('#time_format').val() == 'lexically') {
     last_queued_at = l_q_a_array[0];
@@ -84,5 +90,5 @@ function checkTimeFormat(nRow, aData) {
     last_queued_at = l_q_a_array[1];
   }
 
-  jQuery('td:nth-child(10)', nRow).empty().append(jQuery(aData[9]).text(last_queued_at));
+  jQuery('td:nth-child(11)', nRow).empty().append(jQuery(aData[10]).text(last_queued_at));
 }

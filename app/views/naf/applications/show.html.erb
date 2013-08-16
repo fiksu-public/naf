@@ -24,6 +24,11 @@
                         appendTo('#flash_message').slideDown().delay(5000).slideUp();
                         setTimeout('window.location.reload()', 5600);
                     }
+                    else {
+                      jQuery("<div class='error'>Sorry, \'" +  data.title + "\' cannot add a Job to the queue right now!</div>").
+                              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+                      jQuery('#datatable').dataTable().fnDraw();
+                    }
                 });
             });
         });
@@ -119,6 +124,10 @@
         <tr>
           <td>Enabled</td>
           <td><%= @logical_application.enabled %></td>
+        </tr>
+        <tr>
+          <td>Enqueue Backlogs</td>
+          <td><%= @logical_application.enqueue_backlogs %></td>
         </tr>
         <tr>
           <td><%= link_to "Application Schedule Affinity Tabs",

@@ -106,46 +106,38 @@ module Naf
     end
 
     describe "#weight_available_on_machine" do
-      let!(:machine) { FactoryGirl.create(:machine) }
-      let!(:cpu_affinity) { FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus') }
-      let!(:memory_affinity) { FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory') }
-      let!(:affinity_slot) { FactoryGirl.create(:machine_affinity_slot_base,
-                                                machine: machine,
-                                                affinity_parameter: 5,
-                                                affinity_id: cpu_affinity.id) }
+      let!(:machine) { mock_model(Machine) }
       let!(:queued_job) { FactoryGirl.create(:queued_job) }
-      let!(:running_job) { FactoryGirl.create(:running_job,
-                                              started_on_machine: machine) }
-      let!(:running_affinity_tab) { FactoryGirl.create(:job_affinity_tab_base,
-                                                       historical_job_id: running_job.id,
-                                                       affinity_id: cpu_affinity.id,
-                                                       affinity_parameter: 1)}
-      let!(:queued_affinity_tab) { FactoryGirl.create(:job_affinity_tab_base,
-                                                      historical_job: queued_job.historical_job,
-                                                      affinity_id: cpu_affinity.id,
-                                                      affinity_parameter: 1)}
+
+      before do
+        ::Naf::RunningJob.any_instance.stub(:affinity_weights).
+          and_return(cpus: 1.0, memory: 1.0)
+      end
 
       it "return queued job when machine has cpus left" do
+        machine.stub(:parameter_weight).with('cpus').and_return(5.0)
+        machine.stub(:parameter_weight).with('memory').and_return(0.0)
+        ::Naf::QueuedJob.any_instance.stub(:check_weight_sum).
+          and_return(queued_job)
+
         ::Naf::QueuedJob.weight_available_on_machine(machine).
           should == [queued_job]
       end
 
       it "return queued job when machine has cpus and memory left" do
-        FactoryGirl.create(:machine_affinity_slot_base,
-                           machine: machine,
-                           affinity_parameter: 5,
-                           affinity_id: memory_affinity.id)
-        FactoryGirl.create(:job_affinity_tab_base,
-                           historical_job: queued_job.historical_job,
-                           affinity_id: memory_affinity.id,
-                           affinity_parameter: 2)
+        machine.stub(:parameter_weight).with('cpus').and_return(5.0)
+        machine.stub(:parameter_weight).with('memory').and_return(5.0)
+        ::Naf::QueuedJob.any_instance.stub(:check_weight_sum).
+          and_return(queued_job)
 
         ::Naf::QueuedJob.weight_available_on_machine(machine).
           should == [queued_job]
       end
 
       it "return queued job when machine does not have cpu/memory restriction" do
-        ::Naf::MachineAffinitySlot.delete_all
+        machine.stub(:parameter_weight).with('cpus').and_return(0.0)
+        machine.stub(:parameter_weight).with('memory').and_return(0.0)
+
         ::Naf::QueuedJob.weight_available_on_machine(machine).
           should == [queued_job]
       end

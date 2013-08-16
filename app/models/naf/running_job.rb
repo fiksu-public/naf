@@ -45,15 +45,15 @@ module Naf
     #+++++++++++++++++++++++++
 
     def self.started_on(machine)
-      return where(started_on_machine_id: machine.id)
+      where(started_on_machine_id: machine.id)
     end
 
     def self.in_run_group(run_group_name)
-      return where(application_run_group_name: run_group_name)
+      where(application_run_group_name: run_group_name)
     end
 
     def self.assigned_jobs(machine)
-      return started_on(machine)
+      started_on(machine)
     end
 
     def self.affinity_weights(machine)

@@ -1,24 +1,44 @@
 module Logical
   module Naf
     class JobCreator
-      def queue_application(application_schedule, prerequisites = [])
+      def queue_application(application,
+                            application_run_group_restriction,
+                            application_run_group_name,
+                            application_run_group_limit = 1,
+                            priority = 0,
+                            affinities = [],
+                            prerequisites = [],
+                            enqueue=false)
+
+        # Before adding a job to the queue, check whether the number of
+        # jobs (running/queued) is equal to or greater than the application
+        # run group limit, or if enqueue_backlogs is set to false. If so,
+        # do not add the job to the queue
+        started_jobs = ::Naf::HistoricalJob.
+          select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
+          where('finished_at IS NULL AND command = ? AND application_run_group_name = ?',
+            application.command, application_run_group_name).
+          group('application_run_group_name, application_run_group_limit').first
+        if enqueue == false || (started_jobs.present? && started_jobs.application_run_group_limit <= started_jobs.count.to_i)
+          return
+        end
+
         ::Naf::HistoricalJob.transaction do
-          application = application_schedule.application
           historical_job = ::Naf::HistoricalJob.create!(application_id: application.id,
                                                         application_type_id: application.application_type_id,
                                                         command: application.command,
-                                                        application_run_group_restriction_id: application_schedule.application_run_group_restriction.id,
-                                                        application_run_group_name: application_schedule.application_run_group_name,
-                                                        application_run_group_limit: application_schedule.application_run_group_limit,
-                                                        priority: application_schedule.priority)
+                                                        application_run_group_restriction_id: application_run_group_restriction.id,
+                                                        application_run_group_name: application_run_group_name,
+                                                        application_run_group_limit: application_run_group_limit,
+                                                        priority: priority)
           historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
 
           # Create historical job affinity tabs for each affinity associated with the historical job
-          application_schedule.affinities.each do |affinity|
+          affinities.each do |affinity|
             affinity_parameter = ::Naf::ApplicationScheduleAffinityTab.
               where(affinity_id: affinity.id,
-                    application_schedule_id: application_schedule.id).
-              first.affinity_parameter
+                    application_schedule_id: application.application_schedule.try(:id)).
+              first.try(:affinity_parameter)
             ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id,
                                                    affinity_id: affinity.id,
                                                    affinity_parameter: affinity_parameter)
@@ -31,16 +51,7 @@ module Logical
                                                     prerequisite_historical_job_id: prerequisite.id)
           end
 
-          # Create a queued job
-          queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
-                                            application_type_id: historical_job.application_type_id,
-                                            command: historical_job.command,
-                                            application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
-                                            application_run_group_name: historical_job.application_run_group_name,
-                                            application_run_group_limit: historical_job.application_run_group_limit,
-                                            priority: historical_job.priority)
-          queued_job.id = historical_job.id
-          queued_job.save!
+          create_queue_job(historical_job)
 
           return historical_job
         end
@@ -62,7 +73,14 @@ module Logical
         end
 
         # Queue the application
-        return queue_application(application_schedule, prerequisite_jobs)
+        return queue_application(application_schedule.application,
+                                 application_schedule.application_run_group_restriction,
+                                 application_schedule.application_run_group_name,
+                                 application_schedule.application_run_group_limit,
+                                 application_schedule.priority,
+                                 application_schedule.affinities,
+                                 prerequisite_jobs,
+                                 application_schedule.enqueue_backlogs)
       end
 
       # This method act similar to queue_application but is used for testing purpose
@@ -91,19 +109,22 @@ module Logical
                                                     prerequisite_historical_job_id: prerequisite.id)
           end
 
-          # Create a queued job
-          queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
-                                            application_type_id: historical_job.application_type_id,
-                                            command: historical_job.command,
-                                            application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
-                                            application_run_group_name: historical_job.application_run_group_name,
-                                            application_run_group_limit: historical_job.application_run_group_limit,
-                                            priority: historical_job.priority)
-          queued_job.id = historical_job.id
-          queued_job.save!
+          create_queue_job(historical_job)
 
           return historical_job
         end
+      end
+
+      def create_queue_job(historical_job)
+        queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
+                                          application_type_id: historical_job.application_type_id,
+                                          command: historical_job.command,
+                                          application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
+                                          application_run_group_name: historical_job.application_run_group_name,
+                                          application_run_group_limit: historical_job.application_run_group_limit,
+                                          priority: historical_job.priority)
+        queued_job.id = historical_job.id
+        queued_job.save!
       end
 
       def queue_test

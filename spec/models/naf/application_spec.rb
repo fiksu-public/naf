@@ -37,7 +37,7 @@ module Naf
     it { should validate_presence_of(:command) }
     it { should validate_presence_of(:title) }
     it { should validate_uniqueness_of(:title) }
-    pending { should validate_uniqueness_of(:short_name) }
+    it { should validate_uniqueness_of(:short_name) }
 
     ['', 'aa', 'aA', 'Aa', 'AA', '_a', 'a1', 'A1', '_9'].each do |v|
       it { should allow_value(v).for(:short_name) }
@@ -118,6 +118,7 @@ module Naf
       end
 
       it "return app's title" do
+        app.short_name = nil
         app.update_attributes!(title: 'Application 1')
         app.short_name_if_it_exist.should == 'Application 1'
       end

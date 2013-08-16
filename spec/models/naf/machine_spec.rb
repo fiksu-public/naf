@@ -337,7 +337,9 @@ module Naf
         Timecop.return
       end
 
-      let!(:running_job) { FactoryGirl.create(:running_job_base, created_at: Time.zone.now - 1.minute, started_on_machine_id: machine.id) }
+      let!(:running_job) {
+        FactoryGirl.create(:running_job_base, created_at: Time.zone.now - 1.minute, started_on_machine_id: machine.id)
+      }
 
       before do
         machine.mark_processes_as_dead(machine)

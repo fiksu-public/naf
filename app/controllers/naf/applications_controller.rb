@@ -106,7 +106,8 @@ module Naf
                          :priority,
                          :application_run_group_limit,
                          :visible,
-                         :enabled ]
+                         :enabled,
+                         :enqueue_backlogs ]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = Logical::Naf::Application::COLUMNS
     end

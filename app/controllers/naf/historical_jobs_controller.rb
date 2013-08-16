@@ -45,6 +45,12 @@ module Naf
       if params[:historical_job][:application_id] && app = Naf::Application.find(params[:historical_job][:application_id])
         if schedule = app.application_schedule
           @historical_job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
+          if @historical_job.blank?
+            render json: { success: false,
+                           title: ::Naf::Application.find_by_id(params[:historical_job][:application_id]).title }.to_json
+
+            return
+          end
         else
           @historical_job.command = app.command
           @historical_job.application_type_id = app.application_type_id

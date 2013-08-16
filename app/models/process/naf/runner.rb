@@ -129,38 +129,7 @@ module Process::Naf
         end
       end
 
-      if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
-        logger.debug "it's time to check schedules"
-        if ::Naf::ApplicationSchedule.try_lock_schedules
-          logger.debug_gross "checking schedules"
-          machine.mark_checked_schedule
-          ::Naf::ApplicationSchedule.unlock_schedules
-
-          # check scheduled tasks
-          should_be_queued.each do |application_schedule|
-            logger.info "scheduled application: #{application_schedule}"
-            begin
-              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-                @job_creator.queue_application_schedule(application_schedule)
-              end
-            rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
-              logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
-              logger.error jpl
-              application_schedule.enabled = false
-              application_schedule.save!
-              logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"
-            end
-          end
-
-          # check the runner machines
-          ::Naf::Machine.enabled.up.each do |runner_to_check|
-            if runner_to_check.is_stale?(@runner_stale_period.minutes)
-              logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
-              runner_to_check.mark_machine_down(machine)
-            end
-          end
-        end
-      end
+      check_schedules(machine)
 
       # clean up children that have exited
       logger.detail "cleaning up dead children: #{@children.length}"
@@ -184,10 +153,12 @@ module Process::Naf
                 dead_children << child
               end
             end
+
             unless dead_children.blank?
               logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
               logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
             end
+
             break
           rescue Errno::ECHILD => e
             logger.error "No child when we thought we had children #{@children.inspect}"
@@ -276,6 +247,41 @@ module Process::Naf
       logger.debug_gross "done starting jobs"
 
       return true
+    end
+
+    def check_schedules(machine)
+      if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
+        logger.debug "it's time to check schedules"
+        if ::Naf::ApplicationSchedule.try_lock_schedules
+          logger.debug_gross "checking schedules"
+          machine.mark_checked_schedule
+          ::Naf::ApplicationSchedule.unlock_schedules
+
+          # check scheduled tasks
+          should_be_queued.each do |application_schedule|
+            logger.info "scheduled application: #{application_schedule}"
+            begin
+              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+                @job_creator.queue_application_schedule(application_schedule)
+              end
+            rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
+              logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
+              logger.error jpl
+              application_schedule.enabled = false
+              application_schedule.save!
+              logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"
+            end
+          end
+
+          # check the runner machines
+          ::Naf::Machine.enabled.up.each do |runner_to_check|
+            if runner_to_check.is_stale?(@runner_stale_period.minutes)
+              logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
+              runner_to_check.mark_machine_down(machine)
+            end
+          end
+        end
+      end
     end
 
     # XXX update_all doesn't support "from_partition" so we have this helper
@@ -446,8 +452,8 @@ module Process::Naf
       # select anything that isn't currently running and completed
       # running more than run_interval minutes ago
       relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).relative_schedules.select do |schedule|
-        ( not_finished_applications[schedule.application_id].nil? &&
-          ( application_last_runs[schedule.application_id].nil? ||
+        (not_finished_applications[schedule.application_id].nil? &&
+          (application_last_runs[schedule.application_id].nil? ||
             (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval.minutes)))
       end
 
@@ -458,12 +464,12 @@ module Process::Naf
       #  should have been run by now AND
       #  that should have run within fudge period AND
       exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).exact_schedules.select do |schedule|
-        ( not_finished_applications[schedule.application_id].nil? &&
-          ( application_last_runs[schedule.application_id].nil? ||
+        (not_finished_applications[schedule.application_id].nil? &&
+          (application_last_runs[schedule.application_id].nil? ||
             ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id].finished_at)) &&
           (Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) >= 0.seconds &&
           ((Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) <= (@check_schedules_period * @schedule_fudge_scale).minutes)
-          )
+        )
       end
 
       return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin

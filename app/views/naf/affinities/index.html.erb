@@ -31,7 +31,8 @@
           <td><%= affinity.affinity_classification.affinity_classification_name %></td>
           <td>
             <% if affinity.affinity_classification.affinity_classification_name == 'location' -%>
-              <%= link_to affinity.affinity_name, machine_path(::Naf::Machine.find_by_id(affinity.affinity_name)) %>
+              <% affinity_name = ::Naf::Machine.find_by_id(affinity.affinity_name) %>
+              <%= link_to affinity.affinity_name, machine_path(affinity_name) if affinity_name %>
             <% else -%>
               <%= affinity.affinity_name %>
             <% end -%>

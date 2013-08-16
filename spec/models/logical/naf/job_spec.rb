@@ -27,7 +27,7 @@ module Logical
         end
       end
 
-      pending "#title" do
+      context "#title" do
         let(:scheduled_job) { Job.new(FactoryGirl.create(:scheduled_job)) }
 
         context "for a job scheduled from an application" do
@@ -73,7 +73,7 @@ module Logical
       end
 
       context "#to_hash" do
-        let(:columns) { 
+        let(:columns) {
           [:id,
            :server,
            :pid,
