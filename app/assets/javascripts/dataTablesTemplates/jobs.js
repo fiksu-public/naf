@@ -48,6 +48,7 @@ jQuery(document).ready(function() {
     }
   };
 
+
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 

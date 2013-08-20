@@ -119,6 +119,26 @@ FactoryGirl.define do
   end
 
   #############################################################
+  #######   Machine Runners  ##################################
+  #############################################################
+
+  factory :machine_runner, class: ::Naf::MachineRunner do
+    association :machine, factory: :machine
+    sequence(:runner_cwd) { |n| "/proc/1/#{n}" }
+  end
+
+  #############################################################
+  #######   Machine Runner Invocations  #######################
+  #############################################################
+
+  factory :machine_runner_invocation, class: ::Naf::MachineRunnerInvocation do
+    association :machine_runner, factory: :machine_runner
+    sequence(:pid) { |n| n }
+    is_running false
+    wind_down false
+  end
+
+  #############################################################
   #######   Applications ######################################
   #############################################################
 

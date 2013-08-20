@@ -71,19 +71,46 @@ module Process::Naf
         exit 1
       end
 
-      if machine.try_lock_for_runner_use
-        begin
-          work_machine(machine)
-        ensure
-          machine.unlock_for_runner_use
+      machine.lock_for_runner_use
+      begin
+        # Wind down other runners
+        machine.machine_runners.each do |machine_runner|
+          machine_runner.machine_runner_invocations.each do |invocation|
+            if invocation.is_running
+              begin
+                retval = Process.kill(0, invocation.pid)
+                logger.detail "#{retval} = kill(0, #{invocation.pid}) -- process alive, marking runner invocation as winding down"
+                invocation.wind_down = true
+                invocation.save!
+              rescue Errno::ESRCH
+                logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
+                invocation.is_running = false
+                invocation.save!
+              end
+            end
+          end
         end
-      else
-        logger.fatal "There is already a runner running on this machine, exiting..."
-        exit 1
+        # Create a machine runner, if it doesn't exist
+        machine_runner = ::Naf::MachineRunner.
+          find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
+                                                      runner_cwd: Dir.pwd)
+        # Create an invocation for this runner
+        invocation = ::Naf::MachineRunnerInvocation.create(machine_runner_id: machine_runner.id,
+                                                           pid: Process.pid,
+                                                           is_running: true)
+      ensure
+        machine.unlock_for_runner_use
+      end
+
+      begin
+        work_machine(machine, invocation)
+      ensure
+        invocation.is_running = false
+        invocation.save!
       end
     end
 
-    def work_machine(machine)
+    def work_machine(machine, invocation)
       machine.mark_alive
       machine.mark_up
 
@@ -101,14 +128,14 @@ module Process::Naf
       @job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
       while true
-        break unless work_machine_loop(machine)
+        break unless work_machine_loop(machine, invocation)
         GC.start
       end
 
       logger.info "runner quitting"
     end
 
-    def work_machine_loop(machine)
+    def work_machine_loop(machine, invocation)
       machine.reload
 
       # Check machine status
@@ -129,7 +156,15 @@ module Process::Naf
         end
       end
 
-      check_schedules(machine)
+      invocation.reload
+      if invocation.wind_down
+        logger.warn "invocation asked to wind down"
+        if @children.length == 0
+          return false;
+        end
+      end
+
+      check_schedules(machine) if !invocation.wind_down
 
       # clean up children that have exited
       logger.detail "cleaning up dead children: #{@children.length}"
@@ -205,7 +240,7 @@ module Process::Naf
 
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-      while @children.length < machine.thread_pool_size && memory_available_to_spawn?
+      while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
           running_job = @job_fetcher.fetch_next_job
@@ -247,6 +282,7 @@ module Process::Naf
       logger.debug_gross "done starting jobs"
 
       return true
+
     end
 
     def check_schedules(machine)

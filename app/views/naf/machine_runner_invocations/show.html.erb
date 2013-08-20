@@ -1,0 +1,46 @@
+<% content_for :body do %>
+  <div id="record">
+    <h2>Machine Runner Invocation</h2>
+    <%= link_to 'Back to Machine Runner Invocations', machine_runner_machine_runner_invocations_path %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td><%= @machine_runner_invocation.id %></td>
+        </tr>
+        <tr>
+          <td>Created At</td>
+          <td><%= @machine_runner_invocation.created_at %></td>
+        </tr>
+        <tr>
+          <td>Machine Runner Id</td>
+          <td><%= link_to @machine_runner_invocation.machine_runner.id, machine_runner_path(@machine_runner_invocation.machine_runner) %></td>
+        </tr>
+        <tr>
+          <td>PID</td>
+          <td><%= @machine_runner_invocation.pid %></td>
+        </tr>
+        <tr>
+          <td>Is Running</td>
+          <td><%= @machine_runner_invocation.is_running %></td>
+        </tr>
+        <tr>
+          <td>Wind Down</td>
+          <td><%= @machine_runner_invocation.wind_down %></td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+  </div>
+<% end %>
+<%= render partial: 'naf/shared/application' %>

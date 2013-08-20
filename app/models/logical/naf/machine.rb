@@ -32,7 +32,7 @@ module Logical
       end
 
       def self.all
-        ::Naf::Machine.all.map{|machine| new(machine)}
+        ::Naf::Machine.all.map{ |machine| new(machine) }
       end
 
       def process_pool_size
@@ -56,7 +56,7 @@ module Logical
       end
 
       def to_hash
-        Hash[ COLUMNS.map{|m| [m, send(m)]} ]
+        Hash[COLUMNS.map{ |m| [m, send(m)] }]
       end
 
       def affinities
@@ -69,6 +69,16 @@ module Logical
             name
           end
         end.join(", \n")
+      end
+
+      def name
+        if @machine.short_name
+          @machine.short_name
+        elsif @machine.server_name
+          @machine.server_name
+        else
+          @machine.server_address
+        end
       end
 
     end

@@ -76,6 +76,23 @@ class NafSchema < ActiveRecord::Migration
           required                                boolean not null default false,
           unique (machine_id, affinity_id)
       );
+      create table #{schema_name}.machine_runners
+      (
+          id              serial not null primary key,
+          created_at      timestamp not null default now(),
+          machine_id      integer not null references naf.machines,
+          runner_cwd      text not null,
+          unique (machine_id, runner_cwd)
+      );
+      create table #{schema_name}.machine_runner_invocations
+      (
+          id                  serial not null primary key,
+          created_at          timestamp not null default now(),
+          machine_runner_id   integer not null references naf.machine_runners,
+          pid                 integer not null,
+          is_running          boolean not null default true,
+          wind_down           boolean not null default false
+      );
       create table #{schema_name}.application_types
       (
           id                  serial not null primary key,

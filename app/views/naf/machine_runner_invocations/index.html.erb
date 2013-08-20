@@ -1,0 +1,44 @@
+<% content_for :body do %>
+  <h2>Machine Runner Invocations</h2>
+  <%= link_to 'Back to Machine Runner', machine_runner_path(params[:machine_runner_id]) %>
+  </br>
+  </br>
+
+  <div id="record">
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Created At</th>
+          <th>Machine Runner Id</th>
+          <th>Pid</th>
+          <th>Is Running</th>
+          <th>Wind Down</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @machine_runner_invocations.each do |machine_runner_invocation| -%>
+          <tr>
+            <td><%= link_to machine_runner_invocation.id,
+                      machine_runner_machine_runner_invocation_path(machine_runner_invocation.machine_runner, machine_runner_invocation) %></td>
+            <td><%= machine_runner_invocation.created_at %></td>
+            <td><%= link_to machine_runner_invocation.machine_runner.id, machine_runner_path(machine_runner_invocation.machine_runner) %></td>
+            <td><%= machine_runner_invocation.pid %></td>
+            <td><%= machine_runner_invocation.is_running %></td>
+            <td><%= machine_runner_invocation.wind_down %></td>
+          </tr>
+        <% end -%>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <script type='text/javascript'>
+        jQuery(document).ready(function() {
+          jQuery('#datatable').addDataTable({});
+        });
+      </script>
+    <% end %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

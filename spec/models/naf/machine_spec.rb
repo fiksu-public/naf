@@ -28,6 +28,7 @@ module Naf
 
     it { should have_many(:machine_affinity_slots) }
     it { should have_many(:affinities) }
+    it { should have_many(:machine_runners) }
 
     #--------------------
     # *** Validations ***

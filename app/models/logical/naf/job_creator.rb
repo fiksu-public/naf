@@ -14,13 +14,23 @@ module Logical
         # jobs (running/queued) is equal to or greater than the application
         # run group limit, or if enqueue_backlogs is set to false. If so,
         # do not add the job to the queue
-        started_jobs = ::Naf::HistoricalJob.
+        running_jobs = ::Naf::RunningJob.
           select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
-          where('finished_at IS NULL AND command = ? AND application_run_group_name = ?',
+          where('command = ? AND application_run_group_name = ?',
             application.command, application_run_group_name).
           group('application_run_group_name, application_run_group_limit').first
-        if enqueue == false || (started_jobs.present? && started_jobs.application_run_group_limit <= started_jobs.count.to_i)
-          return
+
+        queued_jobs = ::Naf::QueuedJob.
+          select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
+          where('command = ? AND application_run_group_name = ?',
+            application.command, application_run_group_name).
+          group('application_run_group_name, application_run_group_limit').first
+
+        if enqueue == false && (running_jobs.present? || queued_jobs.present?)
+          group_limit = running_jobs.try(:application_run_group_limit).to_i + queued_jobs.try(:application_run_group_limit).to_i
+          total_jobs = running_jobs.try(:count).to_i + queued_jobs.try(:count).to_i
+
+          return if group_limit <= total_jobs
         end
 
         ::Naf::HistoricalJob.transaction do

@@ -41,7 +41,6 @@
     <% content_for :javascripts do %>
       <%= javascript_include_tag("dataTablesTemplates/machines.js") %>
       <script type='text/javascript'>
-
         var sAjaxSource = "<%= naf.machines_path(:json) %>";
         jQuery(document).ready(function() {
             jQuery("#time_format").change(function () {
@@ -49,7 +48,6 @@
                 return false;
             });
         });
-
       </script>
     <% end %>
 

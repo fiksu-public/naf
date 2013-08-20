@@ -2,14 +2,21 @@ Naf::Engine.routes.draw do
   resources :historical_jobs do
     resources :historical_job_affinity_tabs, except: [:destroy]
   end
+
   resources :applications, except: [:destroy] do
     resources :application_schedules, only: [] do
       resources :application_schedule_affinity_tabs
     end
   end
+
   resources :machines, except: [:destroy] do
     resources :machine_affinity_slots
   end
+
+  resources :machine_runners, only: [:index, :show] do
+    resources :machine_runner_invocations, only: [:index, :show]
+  end
+
   resources :logger_styles
   resources :logger_names
   resources :affinities

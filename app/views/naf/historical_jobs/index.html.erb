@@ -1,4 +1,5 @@
 <% content_for :body do %>
+  <%= render partial: 'runners' %>
   <%= render partial: 'naf/shared/information_container', locals: { record_name: "Jobs" } %>
   <%= render partial: 'search_container' %>
   <%= render partial: 'naf/shared/select_per_page' %>

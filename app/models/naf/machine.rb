@@ -53,6 +53,8 @@ module Naf
       dependent: :destroy
     has_many :affinities,
       through: :machine_affinity_slots
+    has_many :machine_runners,
+      class_name: '::Naf::MachineRunner'
 
     #----------------------
     # *** Class Methods ***
@@ -108,8 +110,8 @@ module Naf
     # *** Instance Methods ***
     #+++++++++++++++++++++++++
 
-    def try_lock_for_runner_use(&block)
-      advisory_try_lock(&block)
+    def lock_for_runner_use(&block)
+      advisory_lock(&block)
     end
 
     def unlock_for_runner_use
