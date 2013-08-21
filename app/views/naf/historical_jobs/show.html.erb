@@ -84,6 +84,14 @@
           <td><%= Process.pid %></td>
         </tr>
         <tr>
+          <td>Machine Runner Id</td>
+          <td>
+            <% if @historical_job.machine_runner_id.present? -%>
+              <%= link_to @historical_job.machine_runner_id, machine_runner_path(@historical_job.machine_runner) %>
+            <% end -%>
+          </td>
+        </tr>
+        <tr>
           <td>Queued Time</td>
           <td><%= @historical_job.created_at.localtime.strftime("%Y-%m-%d %r") %></td>
         </tr>

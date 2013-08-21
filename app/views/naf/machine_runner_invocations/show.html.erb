@@ -14,7 +14,7 @@
       </thead>
       <tbody>
         <tr>
-          <td>ID</td>
+          <td>Id</td>
           <td><%= @machine_runner_invocation.id %></td>
         </tr>
         <tr>
@@ -26,7 +26,7 @@
           <td><%= link_to @machine_runner_invocation.machine_runner.id, machine_runner_path(@machine_runner_invocation.machine_runner) %></td>
         </tr>
         <tr>
-          <td>PID</td>
+          <td>Pid</td>
           <td><%= @machine_runner_invocation.pid %></td>
         </tr>
         <tr>
@@ -36,6 +36,23 @@
         <tr>
           <td>Wind Down</td>
           <td><%= @machine_runner_invocation.wind_down %></td>
+        </tr>
+        <tr>
+          <td>Latest Commit</td>
+          <td><%= link_to @machine_runner_invocation.commit_information,
+                  "https://github.com/#{@machine_runner_invocation.repository_name}/commit/#{@machine_runner_invocation.commit_information}" %></td>
+        </tr>
+        <tr>
+          <td>Branch Name</td>
+          <td><%= @machine_runner_invocation.branch_name %></td>
+        </tr>
+        <tr>
+          <td>Repository Name</td>
+          <td><%= @machine_runner_invocation.repository_name %></td>
+        </tr>
+        <tr>
+          <td>Deployment Tag</td>
+          <td><%= @machine_runner_invocation.deployment_tag %></td>
         </tr>
       </tbody>
     </table>

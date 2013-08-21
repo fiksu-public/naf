@@ -136,6 +136,10 @@ FactoryGirl.define do
     sequence(:pid) { |n| n }
     is_running false
     wind_down false
+    commit_information '123456'
+    branch_name 'branch'
+    repository_name 'app/example'
+    deployment_tag "20130101_1200"
   end
 
   #############################################################

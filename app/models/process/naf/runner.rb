@@ -38,6 +38,9 @@ module Process::Naf
     opt :disable_gc_modifications,
         "don't modify ruby GC parameters",
         default: false
+    opt :kill_all_runners,
+        "don't wait for runners to wind down and finish running their jobs",
+        default: false
 
     def initialize
       super
@@ -97,7 +100,11 @@ module Process::Naf
         # Create an invocation for this runner
         invocation = ::Naf::MachineRunnerInvocation.create(machine_runner_id: machine_runner.id,
                                                            pid: Process.pid,
-                                                           is_running: true)
+                                                           is_running: true,
+                                                           repository_name: (`git remote -v`).slice(/:.*\./)[1..-2],
+                                                           branch_name: (`git rev-parse --abbrev-ref HEAD`).strip,
+                                                           commit_information: (`git log --pretty="%H" -n 1`).strip,
+                                                           deployment_tag: (`git describe --abbrev=0 --tag`).strip)
       ensure
         machine.unlock_for_runner_use
       end
@@ -115,7 +122,7 @@ module Process::Naf
       machine.mark_up
 
       # Make sure no processes are thought to be running on this machine
-      terminate_old_processes(machine)
+      terminate_old_processes(machine) if @kill_all_runners
 
       logger.info "working: #{machine}"
 
@@ -258,6 +265,7 @@ module Process::Naf
             running_job.pid = pid
             running_job.historical_job.pid = pid
             running_job.historical_job.failed_to_start = false
+            running_job.historical_job.machine_runner_id = invocation.machine_runner_id
             logger.info "job started : #{running_job}"
             running_job.save!
             running_job.historical_job.save!

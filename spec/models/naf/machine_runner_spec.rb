@@ -20,6 +20,7 @@ module Naf
 
     it { should belong_to(:machine) }
     it { should have_many(:machine_runner_invocations) }
+    it { should have_many(:historical_jobs) }
 
     #--------------------
     # *** Validations ***

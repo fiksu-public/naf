@@ -78,20 +78,24 @@ class NafSchema < ActiveRecord::Migration
       );
       create table #{schema_name}.machine_runners
       (
-          id              serial not null primary key,
-          created_at      timestamp not null default now(),
-          machine_id      integer not null references naf.machines,
-          runner_cwd      text not null,
+          id                    serial not null primary key,
+          created_at            timestamp not null default now(),
+          machine_id            integer not null references naf.machines,
+          runner_cwd            text not null,
           unique (machine_id, runner_cwd)
       );
       create table #{schema_name}.machine_runner_invocations
       (
-          id                  serial not null primary key,
-          created_at          timestamp not null default now(),
-          machine_runner_id   integer not null references naf.machine_runners,
-          pid                 integer not null,
-          is_running          boolean not null default true,
-          wind_down           boolean not null default false
+          id                    serial not null primary key,
+          created_at            timestamp not null default now(),
+          machine_runner_id     integer not null references naf.machine_runners,
+          pid                   integer not null,
+          is_running            boolean not null default true,
+          wind_down             boolean not null default false,
+          commit_information    text not null,
+          branch_name           text not null,
+          repository_name       text not null,
+          deployment_tag        text not null
       );
       create table #{schema_name}.application_types
       (
@@ -214,7 +218,8 @@ class NafSchema < ActiveRecord::Migration
           marked_dead_at                         timestamp null,
 
           log_level                              text null,
-          tags                                   text[]
+          tags                                   text[],
+          machine_runner_id                      integer null references #{schema_name}.machine_runners
       );
       create table #{schema_name}.historical_job_prerequisites
       (
@@ -358,6 +363,8 @@ class NafSchema < ActiveRecord::Migration
       drop table #{schema_name}.affinities cascade;
       drop table #{schema_name}.affinity_classifications cascade;
       drop table #{schema_name}.machines cascade;
+      drop table #{schema_name}.machine_runner_invocations cascade;
+      drop table #{schema_name}.machine_runners cascade;
       drop table #{schema_name}.machine_affinity_slots cascade;
       drop table #{schema_name}.applications cascade;
       drop table #{schema_name}.application_types cascade;

@@ -7,6 +7,9 @@ Features/Changes:
 * Job tags (system, custom visible/invisible)
 * Papertrail logging for Jobs and Machines
 * CPU/Memory control of Jobs
+* Environment specific log configuration
+* Enqueue switch for application_schedules
+* Machine runner management
 * Killed jobs marked as terminating/terminated
 * Updated display of timestamps (Started At, Finished At, Run Time) for Jobs
 * Fixed buttons to add Jobs to the Queue

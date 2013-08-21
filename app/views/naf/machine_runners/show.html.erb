@@ -44,9 +44,9 @@
         </tr>
       </thead>
       <tbody>
-        <% @machine_runner.machine_runner_invocations.each do |invocation| -%>
+        <% @machine_runner.machine_runner_invocations.order('id DESC').each do |invocation| -%>
         <tr>
-          <td><%= link_to invocation.id, machine_runner_machine_runner_invocation_path(invocation) %></td>
+          <td><%= link_to invocation.id, machine_runner_machine_runner_invocation_path(@machine_runner, invocation) %></td>
           <td><%= invocation.pid %></td>
           <td><%= invocation.is_running %></td>
           <td><%= invocation.wind_down %></td>

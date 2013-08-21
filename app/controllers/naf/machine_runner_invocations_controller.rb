@@ -3,10 +3,12 @@ module Naf
 
     def index
     	if params[:machine_runner_id].present?
-      	@machine_runner_invocations = Naf::MachineRunnerInvocation.
-      		where(machine_runner_id: params[:machine_runner_id]).all
+        @machine_runner_invocations = Naf::MachineRunnerInvocation.
+          where(machine_runner_id: params[:machine_runner_id]).
+          order('id DESC').all
       else
-      	@machine_runner_invocations = Naf::MachineRunnerInvocation.all
+        @machine_runner_invocations = Naf::MachineRunnerInvocation.
+          order('id DESC').all
       end
     end
 

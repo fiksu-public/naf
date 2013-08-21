@@ -4,7 +4,11 @@ module Naf
     attr_accessible :machine_runner_id,
                     :pid,
                     :is_running,
-                    :wind_down
+                    :wind_down,
+                    :commit_information,
+                    :branch_name,
+                    :repository_name,
+                    :deployment_tag
 
     #---------------------
     # *** Associations ***
@@ -18,7 +22,11 @@ module Naf
     #++++++++++++++++++++
 
     validates :machine_runner_id,
-              :pid, presence: true
+              :pid,
+              :commit_information,
+              :branch_name,
+              :repository_name,
+              :deployment_tag, presence: true
 
   end
 end

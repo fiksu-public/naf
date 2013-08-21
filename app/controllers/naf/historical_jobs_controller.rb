@@ -55,21 +55,33 @@ module Naf
           @historical_job.command = app.command
           @historical_job.application_type_id = app.application_type_id
           @historical_job.application_run_group_restriction_id = Naf::ApplicationRunGroupRestriction.no_limit.id
+          @queued_job = ::Naf::QueuedJob.new
         end
       else
-        @queued_job = ::Naf::QueuedJob.new(application_type_id: @historical_job.application_type_id,
-                                           command: @historical_job.command,
-                                           application_run_group_restriction_id: @historical_job.application_run_group_restriction_id,
-                                           application_run_group_name: @historical_job.application_run_group_name,
-                                           application_run_group_limit: @historical_job.application_run_group_limit,
-                                           priority: @historical_job.priority)
+        @queued_job = ::Naf::QueuedJob.new
+      end
+
+      if @queued_job.present?
+        @queued_job.application_type_id = @historical_job.application_type_id
+        @queued_job.command = @historical_job.command
+        @queued_job.application_run_group_restriction_id = @historical_job.application_run_group_restriction_id
+        @queued_job.application_run_group_name = @historical_job.application_run_group_name
+        @queued_job.application_run_group_limit = @historical_job.application_run_group_limit
+        @queued_job.priority = @historical_job.priority
       end
 
       respond_to do |format|
         format.json do
-          render json: { success: true,
-                         title: @historical_job.title,
-                         command: @historical_job.command }.to_json if @historical_job.save
+          if @historical_job.save
+            if @queued_job.present?
+              @queued_job.id = @historical_job.id
+              @queued_job.save
+            end
+
+            render json: { success: true,
+                           title: @historical_job.title,
+                           command: @historical_job.command }.to_json
+          end
         end
 
         format.html do

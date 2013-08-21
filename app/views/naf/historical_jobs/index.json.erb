@@ -1,17 +1,17 @@
 <%
   rows = @historical_jobs.each do |job|
     job[12] = link_to image_tag('papertrail_job.png',
-                class: 'action',
-                title: "View job(id: #{job[0]}, title: #{job[4]}) log in Papertrail"),
-                job[11],
-                { target: '_blank', class: "papertrail", id: job[0] }
+                                class: 'action',
+                                title: "View job(id: #{job[0]}, title: #{job[4]}) log in Papertrail"),
+                                job[12],
+                                { target: '_blank', class: "papertrail", id: job[0] }
     job[12] << "&nbsp;&nbsp;&nbsp;".html_safe
 
     unless job[10] == "Canceled"
       job[12] << (link_to image_tag('terminate.png',
-                    class: 'action',
-                    title: "Terminate job(id: #{job[0]}, title: #{job[4]})"),
-                    "#", { class: "terminate", id: job[0]})
+                  class: 'action',
+                  title: "Terminate job(id: #{job[0]}, title: #{job[4]})"),
+                  "#", { class: "terminate", id: job[0]})
     end
   end
 %>

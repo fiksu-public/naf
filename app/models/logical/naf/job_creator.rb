@@ -8,7 +8,7 @@ module Logical
                             priority = 0,
                             affinities = [],
                             prerequisites = [],
-                            enqueue=false)
+                            enqueue = false)
 
         # Before adding a job to the queue, check whether the number of
         # jobs (running/queued) is equal to or greater than the application

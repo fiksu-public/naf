@@ -12,13 +12,13 @@
       <tr>
       <% ::Naf::MachineRunner.all.each do |runner| -%>
         <% machine = ::Logical::Naf::Machine.new(runner.machine)%>
-        <td>
           <% if runner.machine_runner_invocations.last.present? -%>
+            <td>
             <%= link_to "#{machine.name}(#{runner.machine_runner_invocations.last.pid})",
                   machine_runner_machine_runner_invocation_path(runner, runner.machine_runner_invocations.last),
                   { style: machine_runner_status(runner.machine_runner_invocations.last) } %>
+            </td>
           <% end -%>
-        </td>
       <% end -%>
       </tr>
     </tbody>
