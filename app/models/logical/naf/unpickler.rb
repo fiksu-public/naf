@@ -25,7 +25,6 @@ module ::Logical::Naf
 
     def generic_unpickle(model, preserve, id_method_name = :id)
       if @references[{:association_model_name => model.name, :association_value => preserve[id_method_name.to_s]}]
-        logger.info "generic_unpickle model=#{model.name}, id=#{preserve[id_method_name.to_s]} is already in the reference table"
         return {} 
       end
 
@@ -62,7 +61,6 @@ module ::Logical::Naf
 
     def reconstitute
       @preservables.each do |model|
-        logger.info "pre_unpickle #{model.name}"
         if model.respond_to?(:pre_unpickle)
           model.pre_unpickle(self)
         else
@@ -75,7 +73,6 @@ module ::Logical::Naf
         if model_preserves
           model_preserves.each do |model_preserve|
             if model.respond_to?(:unpickle)
-              logger.info "unpickle #{model.name}"
               additional_references = model.unpickle(model_preserve, self)
             else
               additional_references = generic_unpickle(model, model_preserve)

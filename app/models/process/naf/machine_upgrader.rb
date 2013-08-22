@@ -19,10 +19,18 @@ module Process::Naf
                     ::Naf::ApplicationScheduleAffinityTab,
                     ::Naf::LoggerName,
                     ::Naf::LoggerStyle,
+                    ::Naf::Logger,
                     ::Naf::LoggerStyleName,
                     ::Naf::Machine,
-                    ::Naf::MachineAffinitySlot
+                    ::Naf::MachineAffinitySlot,
+                    ::Naf::JanitorialAssignment
                    ]
+
+    CLEAN_SYSTEM_MODELS = [
+                           ::Naf::Machine,
+                           ::Naf::Job,
+                          ]
+
 
     def work
       self.send("work_#{@upgrade_option}")
@@ -83,54 +91,9 @@ module Process::Naf
     end
 
     def check_for_clean_system
-      PRESERVABLES.each do |model|
+      CLEAN_SYSTEM_MODELS.each do |model|
         raise "the system is unclean" if model.count > 0
       end
-    end
-
-    def restore_information(file)
-      record = nil
-      attributes = nil
-
-      CSV.open(file, 'r') do |csv|
-        csv.read.each do |row|
-          # End of attributes
-          if row[0] == '---'
-            # Assign all the values
-            attributes.each do |key, value|
-              record.send("#{key}=", value)
-            end
-            record.save!
-            logger.info "Restored #{record.class.to_s}"
-          # Table sequence
-          elsif row[0] =~ /id_seq/
-            # Restore the correct sequence value
-            record.class.find_by_sql("SELECT setval('#{row[0]}', #{row[1].to_i})")
-            logger.info "Restored #{row[0]}"
-          # Table
-          elsif row[0] =~ /naf./
-            # Create a new record
-            record = ('Naf::' + row[0].classify).constantize.new
-            attributes = {}
-          # Table attribute
-          elsif row[0] != '==='
-            # Populate a hash with attributes and values
-            attributes[row[0].to_sym] = row[1]
-          end
-        end
-      end
-    end
-
-    def machines_excluded_attributes
-      @exclusions ||= [
-        'created_at',
-        'updated_at',
-        'last_checked_schedules_at',
-        'last_seen_alive_at',
-        'marked_down',
-        'marked_down_by_machine_id',
-        'marked_down_at'
-      ]
     end
 
   end
