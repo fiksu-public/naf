@@ -3,11 +3,16 @@ module ::Logical::Naf
     include ::Af::Application::Component
 
     create_proxy_logger
+    attr_reader :preserves,
+                :preservables,
+                :naf_version,
+                :context
 
     def initialize(naf_version, preservables)
       @preservables = preservables
       @naf_version = naf_version
       @preserves = {}
+      @context = {}
     end
 
     def generic_pickle(instance, associations = nil, ignored_attributes = [:created_at, :updated_at])
@@ -27,13 +32,13 @@ module ::Logical::Naf
         end
       end
 
-      return Hash[instance_attributes.map {|key,value|
+      return Hash[instance_attributes.map { |key,value|
                     if associations[key]
-                      [key,{:association_model_name => associations[key], :association_value => value}]
+                      [key, { association_model_name: associations[key], association_value: value }]
                     else
                       [key,value]
                     end
-                  }]
+                  } ]
     end
 
     def preserve
@@ -51,7 +56,7 @@ module ::Logical::Naf
 
       @preserves[model.name] = pickables.map do |instance|
         if instance.respond_to?(:pickle)
-          instance.pickle(pickler)
+          instance.pickle(self)
         else
           generic_pickle(instance)
         end
@@ -59,10 +64,10 @@ module ::Logical::Naf
     end
 
     def pickle_jar
-      return {
-        :version => @naf_version,
-        :preserved_at => Time.now,
-        :preserves => @preserves
+      {
+        version: @naf_version,
+        preserved_at: Time.now,
+        preserves: @preserves
       }
     end
   end

@@ -1,31 +1,37 @@
 module ::Logical::Naf
   class Unpickler
     include ::Af::Application::Component
+
     create_proxy_logger
-    attr_reader :preserves, :preservables, :input_version, :references
+    attr_reader :preserves,
+                :preservables,
+                :input_version,
+                :references,
+                :context
 
     def initialize(preserves, preservables, input_version)
       @preserves = preserves
       @preservables = preservables
       @input_version = input_version
       @references = {}
+      @context = {}
     end
 
     def cache_all_models(model)
       references.merge!(Hash[model.all.map do |m|
                                logger.detail "caching: #{m.inspect}"
-                               [{:association_model_name => model.name, :association_value => m.id}, m]
+                               [{ association_model_name: model.name, association_value: m.id }, m]
                              end
                             ])
     end
 
     def retrieve_reference(reference)
-      return @references[reference.symbolize_keys]
+      references[reference.symbolize_keys]
     end
 
     def generic_unpickle(model, preserve, id_method_name = :id)
-      if @references[{:association_model_name => model.name, :association_value => preserve[id_method_name.to_s]}]
-        return {} 
+      if references[{ association_model_name: model.name, association_value: preserve[id_method_name.to_s] }]
+        return {}
       end
 
       attributes = {}
@@ -39,7 +45,7 @@ module ::Logical::Naf
             reference_instance = retrieve_reference(value)
             if reference_instance.nil?
               logger.error value.inspect
-              logger.error { @references.map{|r| r.inspect}.join("\n") }
+              logger.error { references.map{|r| r.inspect}.join("\n") }
               raise "couldn't find reference for #{value.inspect} in #{preserve.inspect}"
             end
             attributes[method_name.to_sym] = reference_instance.id
@@ -50,17 +56,18 @@ module ::Logical::Naf
       end
 
       instance = model.new
-      attributes.each do |method,value|
+      attributes.each do |method, value|
         instance.send("#{method}=".to_sym, value)
       end
       instance.save!
       logger.info "created #{instance.inspect}"
-      
-      return {{:association_model_name => model.name, :association_value => preserve[id_method_name.to_s]} => instance}
+
+      return { { association_model_name: model.name,
+                 association_value: preserve[id_method_name.to_s] } => instance }
     end
 
     def reconstitute
-      @preservables.each do |model|
+      preservables.each do |model|
         if model.respond_to?(:pre_unpickle)
           model.pre_unpickle(self)
         else
@@ -68,8 +75,8 @@ module ::Logical::Naf
         end
       end
 
-      @preservables.each do |model|
-        model_preserves = @preserves[model.name]
+      preservables.each do |model|
+        model_preserves = preserves[model.name]
         if model_preserves
           model_preserves.each do |model_preserve|
             if model.respond_to?(:unpickle)
@@ -77,12 +84,12 @@ module ::Logical::Naf
             else
               additional_references = generic_unpickle(model, model_preserve)
             end
-            @references.merge!(additional_references)
+            references.merge!(additional_references)
           end
         end
       end
 
-      @preservables.each do |model|
+      preservables.each do |model|
         model.post_unpickle(self) if model.respond_to?(:post_unpickle)
       end
     end

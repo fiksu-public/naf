@@ -86,7 +86,7 @@ module Naf
       end
     end
 
-    def enabled_application_id_unique 
+    def enabled_application_id_unique
       return unless enabled
       if id
         conditions = ["id <> ? AND application_id = ? AND enabled = ?", id, application_id, true]
@@ -102,6 +102,11 @@ module Naf
         errors.add(:run_interval, "or Run start minute must be nil")
         errors.add(:run_start_minute, "or Run interval must be nil")
       end
+    end
+
+    def self.pickleables(pickler)
+      self.joins(:application).
+        where('naf.applications.deleted IS FALSE')
     end
 
     private

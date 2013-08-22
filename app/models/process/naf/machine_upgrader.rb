@@ -2,10 +2,19 @@ require 'naf/version'
 
 module Process::Naf
   class MachineUpgrader < ::Process::Naf::Application
-    opt :upgrade_option, "what should we do", :default => :dump, :choices => [:dump, :restore]
-    opt :pretty, "make things pretty", :default => false
-    opt :no_updates, "don't update the db (via transaction rollback)", :default => false
-    opt :force, "run even if system looks unclean", :default => false
+    opt :upgrade_option,
+        "what should we do",
+        default: :dump,
+        choices: [:dump, :restore]
+    opt :pretty,
+        "make things pretty",
+        default: false
+    opt :no_updates,
+        "don't update the db (via transaction rollback)",
+        default: false
+    opt :force,
+        "run even if system looks unclean",
+        default: false
 
     PRESERVABLES = [
                     ::Naf::ApplicationType,
@@ -16,9 +25,9 @@ module Process::Naf
                     ::Naf::AffinityClassification,
                     ::Naf::Affinity,
                     ::Naf::ApplicationScheduleAffinityTab,
+                    ::Naf::LoggerLevel,
                     ::Naf::LoggerName,
                     ::Naf::LoggerStyle,
-                    ::Naf::Logger,
                     ::Naf::LoggerStyleName,
                     ::Naf::Machine,
                     ::Naf::MachineAffinitySlot,
@@ -27,14 +36,14 @@ module Process::Naf
 
     CLEAN_SYSTEM_MODELS = [
                            ::Naf::Machine,
-                           ::Naf::Job,
+                           ::Naf::VERSION == '1.0.0' ? ::Naf::HistoricalJob : ::Naf::Job
                           ]
 
 
     def work
       self.send("work_#{@upgrade_option}")
     end
-    
+
     def work_dump
       pickler = ::Logical::Naf::Pickler.new(::Naf::VERSION, PRESERVABLES)
       pickler.preserve
@@ -52,20 +61,24 @@ module Process::Naf
         logger.fatal "this doesn't look like a naf upgrade stream to me, it is not json parserable!"
         exit 1
       end
+
       unless pickle_jar.is_a?(Hash)
         logger.fatal "this doesn't look like a naf upgrade stream to me, it is of type: #{pickle_jar.class.name}"
         exit 1
       end
+
       pickle_jar_version = pickle_jar['version']
       if pickle_jar_version.blank?
         logger.fatal "this doesn't look like a naf upgrade stream to me, it has no version!"
         exit 1
       end
+
       preserves = pickle_jar['preserves']
       if preserves.nil?
         logger.fatal "this doesn't look like a naf upgrade stream to me, there are no preserves!"
         exit 1
       end
+
       unless preserves.is_a?(Hash)
         logger.fatal "this doesn't look like a naf upgrade stream to me, the preserves are type: #{preserves.class.name}"
         exit 1
