@@ -45,8 +45,14 @@ module Process::Naf
       return nil
     end
 
+    def post_command_line_parsing
+      super
+      Af::Logging::Configurator.log_ignore_configuration = (naf_job_id.blank? && Af::Logging::Configurator.log_console != false)
+    end
+
     def pre_work
       set_connection_application_name(database_application_name)
+
       Log4r::GDC.set(naf_job_id.to_s)
 
       super

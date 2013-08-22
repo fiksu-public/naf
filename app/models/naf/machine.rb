@@ -214,6 +214,17 @@ module Naf
         first.try(:affinity_parameter).to_f
     end
 
+    def pickle(pickler)
+      pickler.generic_pickle(self, nil, [
+                                         :created_at,
+                                         :updated_at,
+                                         :last_checked_schedules_at,
+                                         :last_seen_alive_at,
+                                         :marked_down,
+                                         :marked_down_by_machine_id,
+                                         :marked_down_at
+                                        ])
+
     private
 
     def check_blank_values

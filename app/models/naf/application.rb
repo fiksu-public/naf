@@ -74,6 +74,10 @@ module Naf
       short_name || title
     end
 
+    def self.pickables
+      return self.where(:deleted => false)
+    end
+
     private
 
     def check_blank_values
