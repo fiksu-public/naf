@@ -1,94 +1,91 @@
-require 'csv'
+require 'naf/version'
 
 module Process::Naf
   class MachineUpgrader < ::Process::Naf::Application
+    UPGRADE_OPTIONS = [:dump, :restore]
+    opt :upgrade_option, "what should we do", :default => :dump, :choices => UPGRADE_OPTIONS
+    opt :pretty, "make things pretty", :default => false
+    opt :no_updates, "don't update the db (via transaction rollback)", :default => false
+    opt :force, "run even if system looks unclean", :defatul => false
 
-    opt :upgrade_option, type: :string
-    opt :naf_version, type: :string
+    PRESERVABLES = [
+                    ::Naf::ApplicationType,
+                    ::Naf::Application,
+                    ::Naf::ApplicationRunGroupRestriction,
+                    ::Naf::ApplicationSchedule,
+                    ::Naf::ApplicationSchedulePrerequisite,
+                    ::Naf::AffinityClassification,
+                    ::Naf::Affinity,
+                    ::Naf::ApplicationScheduleAffinityTab,
+                    ::Naf::LoggerName,
+                    ::Naf::LoggerStyle,
+                    ::Naf::LoggerStyleName,
+                    ::Naf::Machine,
+                    ::Naf::MachineAffinitySlot
+                   ]
 
     def work
-      if @upgrade_option.present?
-        if @upgrade_option == 'save'
-          @naf_version = '0.9.9'
-          save_information('naf_tables_information_v_0_9_9.csv')
-          @naf_version = '1.0.0'
-          save_information('naf_tables_information_v_1_0_0.csv')
-        elsif @upgrade_option == 'restore'
-          if @naf_version == '0.9.9'
-            restore_information('naf_tables_information_v_0_9_9.csv')
-          elsif @naf_version == '1.0.0'
-            restore_information('naf_tables_information_v_1_0_0.csv')
-          else
-            logger.error 'Invalid version option. Please specify one of the following ' +
-              'options: --naf-version 0.9.9, --naf-version 1.0.0'
-          end
-        else
-          logger.error 'Invalid upgrade option. Please specify one of the following ' +
-            'options: --upgrade-option save, --upgrade-option restore'
-        end
+      self.send("work_#{@upgrade_option}")
+    end
+    
+    def work_dump
+      pickler = ::Logical::Naf::Pickler.new(::Naf::VERSION, PRESERVABLES)
+      pickler.preserve
+      if @pretty
+        puts JSON.pretty_generate(pickler.pickle_jar)
       else
-        logger.error 'Upgrade option missing. Please specify one of the following ' +
-          'options: --upgrade-option save, --upgrade-option restore'
+        puts JSON.generate(pickler.pickle_jar)
       end
     end
 
-    private
-
-    def save_information(file)
-      logger.info "Saving information to file: #{file}"
-
-      CSV.open(file, 'w') do |csv|
-        # Traverse through all the necessary tables
-        tables.each do |table|
-          table.all.each do |record|
-            # Information related to data inserted by the Naf migration should not be include in the CSV file.
-            if !((table == ::Naf::Affinity && ['normal', 'canary', 'perennial'].include?(record.affinity_name)) ||
-              (table == ::Naf::ApplicationSchedule && ['::Process::Naf::Janitor.run'].include?(record.application_run_group_name)) ||
-              (table == ::Naf::Application && ['::Process::Naf::Janitor.run'].include?(record.command)))
-
-              # Information will be saved with the format of table name, followed by
-              # pairs of attribute name/value
-              csv << [table.table_name]
-              record.attributes.each do |key, value|
-                # Certain attribute values do not need to be saved
-                if !((table == ::Naf::Machine && machines_excluded_attributes.include?(key)) ||
-                  (['created_at', 'updated_at'].include?(key)))
-
-                  # Since version 1.0.0 has 5 default affinities and version
-                  # 0.9.9 has 3 default affinities, the affinities ids need
-                  # to be readjusted
-                  if ((table == ::Naf::Affinity && key == 'id') ||
-                      (key == 'affinity_id')) && @naf_version == '1.0.0'
-
-                    csv << [key, value + 2]
-                  else
-                    csv << [key, value]
-                  end
-                end
-              end
-              csv << ['---']
-            end
-          end
-
-          # No need to update the table sequence if it doesn't have any records
-          if table.count != 0
-            logger.info "Saved #{table.count} #{table.to_s} record(s)"
-
-            # The affinity sequence needs to be readjusted for version 1.0.0
-            if table == ::Naf::Affinity && @naf_version == '1.0.0'
-              last_value = (table.
-                find_by_sql("SELECT last_value FROM #{table.sequence_name}").
-                first['last_value'].to_i + 2).to_s
-              csv << [table.sequence_name, last_value]
-            else
-              csv << [table.sequence_name, table.find_by_sql("SELECT last_value FROM #{table.sequence_name}").first['last_value']]
-            end
-            csv << ['===']
-          end
-        end
+    def work_restore
+      begin
+        pickle_jar = JSON.parse(STDIN.read)
+      rescue StandardError => e
+        logger.fatal "this doesn't look like a naf upgrade stream to me, it is not json parserable!"
+        exit 1
+      end
+      unless pickle_jar.is_a?(Hash)
+        logger.fatal "this doesn't look like a naf upgrade stream to me, it is of type: #{pickle_jar.class.name}"
+        exit 1
+      end
+      pickle_jar_version = pickle_jar['version']
+      if pickle_jar_version.blank?
+        logger.fatal "this doesn't look like a naf upgrade stream to me, it has no version!"
+        exit 1
+      end
+      preserves = pickle_jar['preserves']
+      if preserves.nil?
+        logger.fatal "this doesn't look like a naf upgrade stream to me, there are no preserves!"
+        exit 1
+      end
+      unless preserves.is_a?(Hash)
+        logger.fatal "this doesn't look like a naf upgrade stream to me, the preserves are type: #{preserves.class.name}"
+        exit 1
       end
 
-      logger.info 'Closing file'
+      check_for_clean_system unless @force
+
+      preserved_at_text = pickle_jar['preserved_at']
+      preserved_at = Time.parse(preserved_at_text) rescue "unknown"
+
+      logger.info "restoring:"
+      logger.info " preserved_at: #{preserved_at}"
+      logger.info " version: #{pickle_jar_version}"
+      logger.info " models: #{preserves.length}"
+
+      unpickler = ::Logical::Naf::Unpickler.new(preserves, PRESERVABLES, pickle_jar_version)
+      ::Naf::NafBase.transaction do
+        unpickler.reconstitute
+        raise ActiveRecord::Rollback if @no_updates
+      end
+      logger.info "restoration complete! thank you!"
+    end
+
+    def check_for_clean_system
+      PRESERVABLES.each do |model|
+        raise "the system is unclean" if model.count > 0
+      end
     end
 
     def restore_information(file)
@@ -122,23 +119,6 @@ module Process::Naf
           end
         end
       end
-    end
-
-    # Naf tables that has important information that needs to be saved before
-    # reverting the migration
-    def tables
-      @tables ||= [
-        ::Naf::Application,
-        ::Naf::ApplicationSchedule,
-        ::Naf::ApplicationSchedulePrerequisite,
-        ::Naf::Affinity,
-        ::Naf::ApplicationScheduleAffinityTab,
-        ::Naf::LoggerName,
-        ::Naf::LoggerStyle,
-        ::Naf::LoggerStyleName,
-        ::Naf::Machine,
-        ::Naf::MachineAffinitySlot
-      ]
     end
 
     def machines_excluded_attributes
