@@ -47,5 +47,10 @@ module Naf
       end
     end
 
+    def self.pickleables(pickler)
+      self.joins([application_schedule: :application]).
+        where('applications.deleted = false')
+    end
+
   end
 end

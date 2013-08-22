@@ -155,6 +155,11 @@ module Naf
       end
     end
 
+    def self.pickleables(pickler)
+      self.joins(:application).
+        where('naf.applications.deleted IS FALSE')
+    end
+
     private
 
     def prerequisite_application_schedule_id_uniqueness
