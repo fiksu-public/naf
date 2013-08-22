@@ -2,11 +2,10 @@ require 'naf/version'
 
 module Process::Naf
   class MachineUpgrader < ::Process::Naf::Application
-    UPGRADE_OPTIONS = [:dump, :restore]
-    opt :upgrade_option, "what should we do", :default => :dump, :choices => UPGRADE_OPTIONS
+    opt :upgrade_option, "what should we do", :default => :dump, :choices => [:dump, :restore]
     opt :pretty, "make things pretty", :default => false
     opt :no_updates, "don't update the db (via transaction rollback)", :default => false
-    opt :force, "run even if system looks unclean", :defatul => false
+    opt :force, "run even if system looks unclean", :default => false
 
     PRESERVABLES = [
                     ::Naf::ApplicationType,
