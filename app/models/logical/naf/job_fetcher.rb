@@ -73,7 +73,7 @@ module Logical
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
             weight_available_on_machine(machine).
-            group("id, priority, created_at").
+            group("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
             having("array(
               select affinity_id::integer
               from naf.historical_job_affinity_tabs
