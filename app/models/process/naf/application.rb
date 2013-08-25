@@ -100,11 +100,11 @@ module Process::Naf
       end
     end
 
-    def add_jobs_tags(*new_tags)
+    def add_job_tags(*new_tags)
       update_job_tags([], new_tags)
     end
 
-    def remove_jobs_tags(*old_tags)
+    def remove_job_tags(*old_tags)
       update_job_tags(old_tags, [])
     end
 
