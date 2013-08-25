@@ -95,9 +95,17 @@ module Process::Naf
     def update_job_tags(old_tags, new_tags)
       job = fetch_naf_job
       if job
-        job.remove_tags(old_tags)
-        job.add_tags(new_tags)
+        job.remove_tags(old_tags.map(&:to_s))
+        job.add_tags(new_tags.map(&:to_s))
       end
+    end
+
+    def add_jobs_tags(new_tags)
+      update_job_tags({}, new_tags)
+    end
+
+    def remove_jobs_tags(old_tags)
+      update_job_tags(old_tags, {})
     end
 
     def work
