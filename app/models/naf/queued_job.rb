@@ -62,7 +62,7 @@ module Naf
            from
              naf.running_jobs as rj
            where
-             rj.application_run_group = naf.queued_jobs.application_run_group and
+             rj.application_run_group_name = naf.queued_jobs.application_run_group_name and
              rj.started_on_machine_id = #{machine.id})
         ) OR
         (
@@ -72,7 +72,7 @@ module Naf
            from
              naf.running_jobs as rj
            where
-             rj.application_run_group = naf.queued_jobs.application_run_group)
+             rj.application_run_group_name = naf.queued_jobs.application_run_group_name)
         )
       )
       SQL

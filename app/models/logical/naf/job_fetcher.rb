@@ -68,7 +68,7 @@ module Logical
 
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
-            select("id, priority, created_at").
+            select("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
             runnable_by_machine(machine).
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
