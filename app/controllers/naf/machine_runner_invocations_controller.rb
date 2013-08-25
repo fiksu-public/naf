@@ -2,7 +2,7 @@ module Naf
   class MachineRunnerInvocationsController < Naf::ApplicationController
 
     def index
-    	if params[:machine_runner_id].present?
+      if params[:machine_runner_id].present?
         @machine_runner_invocations = Naf::MachineRunnerInvocation.
           where(machine_runner_id: params[:machine_runner_id]).
           order('id DESC').all

@@ -10,16 +10,19 @@
   <table id="runner">
     <tbody>
       <tr>
-      <% ::Naf::MachineRunner.all.each do |runner| -%>
-        <% machine = ::Logical::Naf::Machine.new(runner.machine)%>
-          <% if runner.machine_runner_invocations.last.present? -%>
+      <%
+	 ::Naf::MachineRunner.all.each do |runner|
+           machine = ::Logical::Naf::Machine.new(runner.machine)
+           invocation = runner.machine_runner_invocations.last
+	   if invocation.present? && invocation.is_running
+      -%>
             <td>
-            <%= link_to "#{machine.name}(#{runner.machine_runner_invocations.last.pid})",
-                  machine_runner_machine_runner_invocation_path(runner, runner.machine_runner_invocations.last),
-                  { style: machine_runner_status(runner.machine_runner_invocations.last) } %>
+            <%= link_to "#{machine.name}(#{invocation.pid})",
+                machine_runner_machine_runner_invocation_path(runner, invocation),
+                  { style: machine_runner_status(invocation) } %>
             </td>
-          <% end -%>
-      <% end -%>
+          <% end
+           end -%>
       </tr>
     </tbody>
   </table>
