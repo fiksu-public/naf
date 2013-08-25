@@ -98,6 +98,9 @@ module Process::Naf
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
         # Create an invocation for this runner
+        repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
+        branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
+        commit_information = (`git log --pretty="%H" -n 1`).strip
         deployment_tag = (`git describe --abbrev=0 --tag 2>&1`).strip
         if deployment_tag.match(/fatal: No names found, cannot describe anything/)
           deployment_tag = 'unknown'
@@ -105,9 +108,9 @@ module Process::Naf
         invocation = ::Naf::MachineRunnerInvocation.create!(machine_runner_id: machine_runner.id,
                                                             pid: Process.pid,
                                                             is_running: true,
-                                                            repository_name: (`git remote -v`).slice(/:.*\./)[1..-2],
-                                                            branch_name: (`git rev-parse --abbrev-ref HEAD`).strip,
-                                                            commit_information: (`git log --pretty="%H" -n 1`).strip,
+                                                            repository_name: repository_name,
+                                                            branch_name: branch_name,
+                                                            commit_information: commit_information,
                                                             deployment_tag: deployment_tag)
       ensure
         machine.unlock_for_runner_use

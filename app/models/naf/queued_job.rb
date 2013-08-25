@@ -49,6 +49,37 @@ module Naf
       end
     end
 
+    def self.is_not_restricted_by_run_group(machine)
+      sql = <<-SQL
+      (
+        naf.queued_jobs.application_run_group_name is not null OR
+        naf.queued_jobs.application_run_group_limit is not null OR
+        naf.application_run_group_restrictions.application_run_group_restriction_name = 'no limit' OR
+        (
+          naf.application_run_group_restrictions.application_run_group_restriction_name = 'limited per machine' AND
+          (select
+            count(*) < naf.queued_jobs.application_run_group_limit
+           from
+             naf.running_jobs as rj
+           where
+             rj.application_run_group = naf.queued_jobs.application_run_group and
+             rj.started_on_machine_id = #{machine.id})
+        ) OR
+        (
+          application_run_group_restrictions.application_run_group_restriction_name = 'limited per all machines' AND
+          (select
+            count(*) < naf.queued_jobs.application_run_group_limit
+           from
+             naf.running_jobs as rj
+           where
+             rj.application_run_group = naf.queued_jobs.application_run_group)
+        )
+      )
+      SQL
+      return joins(:application_run_group_restriction).
+        where(sql)
+    end
+
     def self.runnable_by_machine(machine)
       where("NOT EXISTS (
         SELECT 1
