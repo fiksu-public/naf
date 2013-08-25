@@ -224,6 +224,7 @@ module Naf
                                          :marked_down_by_machine_id,
                                          :marked_down_at
                                         ])
+    end
 
     private
 
