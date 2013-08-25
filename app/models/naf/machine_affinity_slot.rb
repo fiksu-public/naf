@@ -37,11 +37,22 @@ module Naf
     #+++++++++++++++++++++++++
 
     def machine_server_address
-      machine.server_address
+      return machine.server_address
     end
 
     def machine_server_name
-      machine.server_name
+      return machine.server_name
+    end
+
+    def self.unpickle(preserve, unpickler)
+      if unpickler.input_version == "0.9.9"
+        a = unpickler.retrieve_reference(preserve[:affinity_id])
+        if (a.affinity_classification_id == ::Naf::AffinityClassification.location.id && a.affinity_name.match(::Naf::Machine::IP_REGEX))
+          m = unpickler.retrieve_reference(preserve[:machine_id])
+          a.affinity_name = m.id.to_s
+          a.save!
+        end
+      end
     end
 
   end
