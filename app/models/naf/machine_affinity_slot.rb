@@ -46,13 +46,14 @@ module Naf
 
     def self.unpickle(preserve, unpickler)
       if unpickler.input_version == "0.9.9"
-        a = unpickler.retrieve_reference(preserve[:affinity_id])
+        a = unpickler.retrieve_reference(preserve['affinity_id'])
         if (a.affinity_classification_id == ::Naf::AffinityClassification.location.id && a.affinity_name.match(::Naf::Machine::IP_REGEX))
-          m = unpickler.retrieve_reference(preserve[:machine_id])
+          m = unpickler.retrieve_reference(preserve['machine_id'])
           a.affinity_name = m.id.to_s
           a.save!
         end
       end
+      return unpickler.generic_unpickle(self, preserve)
     end
 
   end
