@@ -11,7 +11,7 @@
     <tbody>
       <tr>
       <%
-	 ::Naf::MachineRunner.all.each do |runner|
+	 ::Naf::MachineRunner.enabled.each do |runner|
            machine = ::Logical::Naf::Machine.new(runner.machine)
            invocation = runner.machine_runner_invocations.last
 	   if invocation.present? && invocation.is_running
