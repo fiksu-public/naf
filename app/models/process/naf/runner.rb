@@ -240,6 +240,8 @@ module Process::Naf
                 # XXX ERROR no child for returned pid -- this can't happen
                 logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
               end
+            rescue ActiveRecord::ActiveRecordError => are
+              raise
             rescue StandardError => e
               # XXX just incase a job control failure -- more code here
               logger.error "some failure during child clean up"
@@ -288,6 +290,8 @@ module Process::Naf
             # Update job tags
             running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
           end
+        rescue ActiveRecord::ActiveRecordError => are
+          raise
         rescue StandardError => e
           # XXX rescue for various issues
           logger.error "failure during job start"
