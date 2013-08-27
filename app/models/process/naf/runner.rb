@@ -204,17 +204,17 @@ module Process::Naf
             end
 
             unless dead_children.blank?
-              logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
-              logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+              logger.error "#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+              logger.warn "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
             end
 
             break
           rescue Errno::ECHILD => e
-            logger.error "No child when we thought we had children #{@children.inspect}"
-            logger.error e
+            logger.error "#{machine} No child when we thought we had children #{@children.inspect}"
+            logger.warn e
             pid = @children.first.try(:first)
             status = nil
-            logger.error "pulling first child off list to clean it up: pid=#{pid}"
+            logger.warn "pulling first child off list to clean it up: pid=#{pid}"
           end
 
           if pid
@@ -245,7 +245,7 @@ module Process::Naf
             rescue StandardError => e
               # XXX just incase a job control failure -- more code here
               logger.error "some failure during child clean up"
-              logger.error e
+              logger.warn e
             end
           end
         end
@@ -280,7 +280,7 @@ module Process::Naf
             running_job.historical_job.save!
           else
             # should never get here (well, hopefully)
-            logger.error "failed to execute #{running_job}"
+            logger.error "#{machine}: failed to execute #{running_job}"
             # Update job tags
             running_job.historical_job.remove_all_tags
             running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
@@ -294,8 +294,8 @@ module Process::Naf
           raise
         rescue StandardError => e
           # XXX rescue for various issues
-          logger.error "failure during job start"
-          logger.error e
+          logger.error "#{machine}: failure during job start"
+          logger.warn e
         end
       end
       logger.debug_gross "done starting jobs"
@@ -320,8 +320,8 @@ module Process::Naf
                 @job_creator.queue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
-              logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
-              logger.error jpl
+              logger.error "#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}"
+              logger.warn jpl
               application_schedule.enabled = false
               application_schedule.save!
               logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"

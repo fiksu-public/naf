@@ -52,8 +52,8 @@ module Naf
     def self.is_not_restricted_by_run_group(machine)
       sql = <<-SQL
       (
-        naf.queued_jobs.application_run_group_name is not null OR
-        naf.queued_jobs.application_run_group_limit is not null OR
+        naf.queued_jobs.application_run_group_name is null OR
+        naf.queued_jobs.application_run_group_limit is null OR
         naf.application_run_group_restrictions.application_run_group_restriction_name = 'no limit' OR
         (
           naf.application_run_group_restrictions.application_run_group_restriction_name = 'limited per machine' AND
