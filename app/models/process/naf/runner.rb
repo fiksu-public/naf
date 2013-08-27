@@ -256,7 +256,8 @@ module Process::Naf
 
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-      while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
+      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
+      while ::Naf::RunningJob.where(:started_on_machine_id => machine.id).count < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
           running_job = @job_fetcher.fetch_next_job
