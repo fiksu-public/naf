@@ -313,7 +313,7 @@ module Process::Naf
           ::Naf::ApplicationSchedule.unlock_schedules
 
           # check scheduled tasks
-          should_be_queued.each do |application_schedule|
+          should_be_queued(machine).each do |application_schedule|
             logger.info "scheduled application: #{application_schedule}"
             begin
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
@@ -493,7 +493,7 @@ module Process::Naf
       end
     end
 
-    def should_be_queued
+    def should_be_queued(machine)
       not_finished_applications = ::Naf::HistoricalJob.
         queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
         where("finished_at IS NULL AND request_to_terminate = false").
@@ -527,7 +527,27 @@ module Process::Naf
         )
       end
 
-      return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin
+      return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
+        # only queue applications that are not restricted by run group limits
+        if schedule.enqueue_backlogs
+          true
+        else
+          if (schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.no_limit ||
+              schedule.application_run_group_limit.nil? ||
+              schedule.application_run_group_name.nil?)
+            true
+          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_machine
+            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
+             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name,
+                                     :started_on_machine_id => machine.id).count) < schedule.application_run_group_limit
+          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines
+            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
+             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name).count) < schedule.application_run_group_limit
+          else
+            false
+          end
+        end
+      end
     end
 
     def memory_available_to_spawn?
