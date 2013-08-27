@@ -67,7 +67,7 @@ module Process::Naf
       if job
         unless @do_not_terminate
           if job.request_to_terminate
-            logger.alarm "terminating by request"
+            logger.warn "terminating by request"
             raise TerminationRequest.new(job, "job requested to terminate")
           end
           unless job.started_on_machine
