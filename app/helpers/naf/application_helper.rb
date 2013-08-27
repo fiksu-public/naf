@@ -23,7 +23,8 @@ module Naf
                                   "historical_jobs" => "",
                                   "applications" => "",
                                   "machines" => "",
-                                  "machine_runners" => "",
+                                  "runners" => ["machine_runners",
+                                                "machine_runner_invocations"],
                                   "affinities" => "",
                                   "loggers" => ["logger_styles", "logger_names"],
                                   "janitorial_assignments" => ["janitorial_archive_assignments",
@@ -48,8 +49,8 @@ module Naf
       case tab
         when "machines"
           [tab, "machine_affinity_slots"].include?(controller_name)
-        when "machine_runners"
-          [tab, "machine_runner_invocations"].include?(controller_name)
+        when "runners"
+          ["machine_runners", "machine_runner_invocations"].include?(controller_name)
         when "historical_jobs"
           [tab, "historical_job_affinity_tabs"].include?(controller_name)
         when "applications"
@@ -155,6 +156,8 @@ module Naf
           link_to "Jobs", main_app.naf_path
         when "loggers"
           link_to "Loggers", naf.logger_styles_path
+        when "runners"
+          link_to "Runners", naf.machine_runners_path
         when "janitorial_assignments"
           link_to "Janitorial Assignments", naf.janitorial_archive_assignments_path
         when "janitorial_archive_assignments"
@@ -256,20 +259,6 @@ module Naf
         render(association.to_s, f: builder)
       end
       link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", id: 'add_prerequisite')
-    end
-
-    def machine_runner_status(invocation)
-      if invocation.is_running
-        if invocation.wind_down
-          # Runner is Waiting for jobs to finish running,
-          # and will not start any other jobs
-          'color: #f8a800;'
-        else
-          'color: #45a113;' # Runner is UP
-        end
-      else
-        'color: #CD0A0A;' # Runner is DOWN
-      end
     end
 
   end

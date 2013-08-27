@@ -106,6 +106,14 @@ module Naf
       time.nil? || time < (Time.zone.now - check_period)
     end
 
+    def self.include_disabled(filter)
+      if !filter
+        where(enabled: true)
+      else
+        where({})
+      end
+    end
+
     #-------------------------
     # *** Instance Methods ***
     #+++++++++++++++++++++++++
@@ -224,6 +232,7 @@ module Naf
                                          :marked_down_by_machine_id,
                                          :marked_down_at
                                         ])
+    end
 
     private
 

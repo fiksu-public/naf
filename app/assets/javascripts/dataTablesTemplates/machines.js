@@ -21,6 +21,14 @@ jQuery(document).ready(function() {
         { "sWidth": "10%"},
         { "sWidth": "70px"}
     ],
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
+      _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
+      jQuery.getJSON( sSource, aoData, function (json) {
+        fnCallback(json);
+        initPaging();
+        addTitles();
+      });
+    },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToMachines(nRow, aData);
       checkTimeFormat(nRow, aData);

@@ -40,7 +40,8 @@ module Logical
                                                         application_run_group_restriction_id: application_run_group_restriction.id,
                                                         application_run_group_name: application_run_group_name,
                                                         application_run_group_limit: application_run_group_limit,
-                                                        priority: priority)
+                                                        priority: priority,
+                                                        log_level: application.log_level)
           historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
 
           # Create historical job affinity tabs for each affinity associated with the historical job

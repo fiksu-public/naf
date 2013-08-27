@@ -1,0 +1,8 @@
+ <%
+  rows = @rows.each do |row|
+  	row[0] = link_to row[0], machine_runner_invocation_path(row[0])
+  	row[2] = link_to row[2], machine_runner_path(row[2])
+  end
+%>
+
+<%= raw rows %>

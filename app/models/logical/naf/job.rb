@@ -1,5 +1,4 @@
-# A wrapper around Naf::HistoricalJob
-# used for rendering in views
+# A wrapper around Naf::HistoricalJob used for rendering in views
 
 module Logical
   module Naf

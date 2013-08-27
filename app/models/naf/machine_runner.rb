@@ -23,5 +23,29 @@ module Naf
               :runner_cwd, presence: true
     validates :machine_id, uniqueness: { scope: :runner_cwd }
 
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
+
+    def self.enabled
+      joins(:machine).
+      where('naf.machines.enabled IS TRUE')
+    end
+
+    def self.running
+      joins(:machine_runner_invocations).
+      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down IS FALSE')
+    end
+
+    def self.winding_down
+      joins(:machine_runner_invocations).
+      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down IS TRUE')
+    end
+
+    def self.dead
+      joins(:machine_runner_invocations).
+      where('naf.machine_runner_invocations.is_running IS FALSE')
+    end
+
   end
 end

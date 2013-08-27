@@ -1,5 +1,4 @@
-# A wrapper around Naf::Machine
-# used for rendering in views
+# A wrapper around Naf::Machine used for rendering in views
 
 module Logical
   module Naf
@@ -31,8 +30,8 @@ module Logical
         end
       end
 
-      def self.all
-        ::Naf::Machine.all.map{ |machine| new(machine) }
+      def self.all(filter = false)
+        ::Naf::Machine.include_disabled(filter).all.map{ |machine| new(machine) }
       end
 
       def process_pool_size

@@ -152,29 +152,6 @@
     </table>
     </br>
 
-    <h2>Last Queued Job</h2>
-    <table id="naf_table_show">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Last Queued At</th>
-          <th>Command</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if job = @application.last_queued_job -%>
-          <tr>
-            <td><%= link_to job.id, historical_job_path(job) %></td>
-            <td><%= "#{time_ago_in_words(job.created_at, true)} ago" %></td>
-            <td><%= job.command %></td>
-            <td><%= ::Logical::Naf::Job.new(job).status %></td>
-          </tr>
-        <% end -%>
-      </tbody>
-    </table>
-    </br>
-
     <% if @application.application_schedule.present? %>
       <h2>Prerequisites</h2>
       <table id="naf_table_show">
@@ -195,6 +172,29 @@
       </table>
       </br>
     <% end %>
+
+    <h2>Last Queued Job</h2>
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th width="10%">ID</th>
+          <th width="20%">Last Queued At</th>
+          <th>Command</th>
+          <th width="15%">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @application.historical_jobs.order('created_at desc').limit(10).each do |job| -%>
+          <tr>
+            <td><%= link_to job.id, historical_job_path(job) %></td>
+            <td><%= "#{time_ago_in_words(job.created_at, true)} ago" %></td>
+            <td style="white-space: pre-wrap;"><%= job.command %></td>
+            <td><%= ::Logical::Naf::Job.new(job).status %></td>
+          </tr>
+        <% end -%>
+      </tbody>
+    </table>
+    </br>
 
   </div>
 <% end %>

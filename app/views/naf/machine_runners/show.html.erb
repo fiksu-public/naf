@@ -1,4 +1,41 @@
 <% content_for :body do %>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <script type='text/javascript'>
+    // Action: Wind Down Runner
+    jQuery(document).delegate('.wind_down', "click", function() {
+      var answer = confirm("You are winding down this runner. Are you sure you want to do this?");
+      if (!answer) {
+        return false;
+      }
+      var id = <%= @machine_runner.machine_runner_invocations.last.id %>;
+      var url = '/job_system/machine_runner_invocations/' + id;
+      jQuery.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: { "machine_runner_invocation[request_to_wind_down]": 1, "machine_runner_invocation_id": id, "_method": "put" },
+        success:function (data) {
+          if (data.success) {
+            jQuery("<p id='notice'>The machine runner is winding down!</p>").
+            appendTo('#flash_message').slideDown().delay(5000).slideUp();
+            jQuery('#datatable').dataTable().fnDraw();
+            window.location.reload()
+          }
+        }
+      });
+    });
+  </script>
+
+
   <div id="record">
     <h2>Machine Runner</h2>
     <%= link_to 'Back to Machine Runners', machine_runners_path %>
@@ -29,6 +66,14 @@
           <td>Runner Cwd</td>
           <td><%= @machine_runner.runner_cwd %></td>
         </tr>
+        <tr>
+          <td>Wind Down Runner</td>
+          <td><%= link_to image_tag('terminate.png',
+            class: 'action',
+            title: "Wind Down Runner(id: #{@machine_runner.machine_runner_invocation.last.id})"),
+            "#", { class: "wind_down" }
+          %></td>
+        </tr>
       </tbody>
     </table>
     </br>
@@ -37,16 +82,20 @@
     <table id="naf_table_show">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>PID</th>
+          <th>Id</th>
+          <th>Started At</th>
+          <th>Last Seen</th>
+          <th>Pid</th>
           <th>Is Running</th>
           <th>Wind Down</th>
         </tr>
       </thead>
       <tbody>
-        <% @machine_runner.machine_runner_invocations.order('id DESC').each do |invocation| -%>
+        <% @machine_runner.machine_runner_invocations.order('created_at DESC').each do |invocation| -%>
         <tr>
-          <td><%= link_to invocation.id, machine_runner_machine_runner_invocation_path(@machine_runner, invocation) %></td>
+          <td><%= link_to invocation.id, machine_runner_invocation_path(invocation) %></td>
+          <td><%= invocation.created_at %></td>
+          <td><%= invocation.updated_at %></td>
           <td><%= invocation.pid %></td>
           <td><%= invocation.is_running %></td>
           <td><%= invocation.wind_down %></td>

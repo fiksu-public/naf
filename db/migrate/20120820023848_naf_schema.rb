@@ -88,6 +88,7 @@ class NafSchema < ActiveRecord::Migration
       (
           id                    serial not null primary key,
           created_at            timestamp not null default now(),
+          updated_at            timestamp,
           machine_runner_id     integer not null references naf.machine_runners,
           pid                   integer not null,
           is_running            boolean not null default true,

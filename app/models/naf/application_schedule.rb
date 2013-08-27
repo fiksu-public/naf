@@ -102,6 +102,11 @@ module Naf
       where('run_interval >= 0')
     end
 
+    def self.pickables
+      # check the application is deleted
+      self.where(:deleted => false)
+    end
+
     #-------------------------
     # *** Instance Methods ***
     #+++++++++++++++++++++++++

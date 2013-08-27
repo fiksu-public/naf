@@ -1,0 +1,21 @@
+<br/>
+<div class="display-inline-block search_select_input">
+  <%= label(:filter, "Filter:") %>
+  <%= select_tag("filter[invocations]",
+                  options_for_select([["All", :all],
+                                      ["Top", :top]], :all),
+                  { class: 'datatable_variable' }) %></b>
+</div>
+&nbsp;&nbsp;
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    jQuery(document).ready(function() {
+      jQuery("#filter_invocations").change(function () {
+        setPageOrder();
+        SetFirstPage();
+        return false;
+      });
+    });
+  </script>
+<% end %>

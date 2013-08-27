@@ -1,88 +1,22 @@
-<div id='page-label'>
-  <h3 id="record_name">Runners</h3>
-</div>
-
-<div class="display-inline-block">
-  <%= link_to 'Show runners', '#', id: 'record_link' %>
-</div>
-
-<div id="record">
-  <table id="runner">
-    <tbody>
-      <tr>
-      <% ::Naf::MachineRunner.all.each do |runner| -%>
-        <% machine = ::Logical::Naf::Machine.new(runner.machine)%>
-          <% if runner.machine_runner_invocations.last.present? -%>
-            <td>
-            <%= link_to "#{machine.name}(#{runner.machine_runner_invocations.last.pid})",
-                  machine_runner_machine_runner_invocation_path(runner, runner.machine_runner_invocations.last),
-                  { style: machine_runner_status(runner.machine_runner_invocations.last) } %>
-            </td>
-          <% end -%>
-      <% end -%>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-<% content_for :javascripts do %>
-  <script type='text/javascript'>
-    jQuery(document).ready(function() {
-      if(getCookie('show_runners') == 'true'){
-        jQuery("#record").show();
-        jQuery("#record_link").text("Hide runners");
-      } else {
-        jQuery("#record").hide();
-        jQuery("#record_link").text("Show runners");
-      }
-
-      jQuery("#record_link").click(function () {
-        if (jQuery("#record").css('display') == 'none') {
-          setCookie('show_runners', true, 1);
-        }else {
-          setCookie('show_runners', false, 1);
-        }
-        jQuery("#record").slideToggle("slow");
-
-        if(getCookie('show_runners') == 'true'){
-          jQuery("#record_link").text("Hide runners");
-        } else {
-          jQuery("#record_link").text("Show runners");
-        }
-      });
-    });
-
-    function getCookie(c_name)
-    {
-      var c_value = document.cookie;
-      var c_start = c_value.indexOf(" " + c_name + "=");
-      if (c_start == -1)
-      {
-        c_start = c_value.indexOf(c_name + "=");
-      }
-      if (c_start == -1)
-      {
-        c_value = null;
-      }
-      else
-      {
-        c_start = c_value.indexOf("=", c_start) + 1;
-        var c_end = c_value.indexOf(";", c_start);
-        if (c_end == -1)
-        {
-          c_end = c_value.length;
-        }
-        c_value = unescape(c_value.substring(c_start, c_end));
-      }
-      return c_value;
-    }
-
-    function setCookie(c_name, value, exdays)
-    {
-      var exdate = new Date();
-      exdate.setDate(exdate.getDate() + exdays);
-      var c_value = escape(value) + ((exdays == null) ? "" : "; expires=" + exdate.toUTCString());
-      document.cookie = c_name + "=" + c_value;
-    }
-  </script>
-<% end %>
+<table id="runner">
+  <tr>
+    <td>
+      <div id='page-label'>
+        <h3 id="record_name">Runners: </h3>
+      </div>
+    </td>
+    <td>
+      <div class="running"><%= ::Naf::MachineRunner.running.count %> running&nbsp;</div>
+    </td>
+    <% if ::Naf::MachineRunner.winding_down.count > 0 -%>
+      <td>
+        <div class="winding-down"><%= ::Naf::MachineRunner.winding_down.count %> winding down&nbsp;&nbsp;</div>
+      </td>
+    <% end %>
+    <% if ::Naf::MachineRunner.winding_down.count > 0 -%>
+      <td>
+        <div class="down"><%= ::Naf::MachineRunner.dead.count %> down</div>
+      </td>
+    <% end %>
+ </tr>
+</table>

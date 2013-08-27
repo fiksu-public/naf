@@ -1,7 +1,7 @@
 <% content_for :body do %>
   <div id="record">
     <h2>Machine Runner Invocation</h2>
-    <%= link_to 'Back to Machine Runner Invocations', machine_runner_machine_runner_invocations_path %>
+    <%= link_to 'Back to Machine Runner Invocations', machine_runner_invocations_path %>
     </br>
     </br>
 
@@ -18,8 +18,12 @@
           <td><%= @machine_runner_invocation.id %></td>
         </tr>
         <tr>
-          <td>Created At</td>
+          <td>Started At</td>
           <td><%= @machine_runner_invocation.created_at %></td>
+        </tr>
+        <tr>
+          <td>Last Seen At</td>
+          <td><%= @machine_runner_invocation.updated_at %></td>
         </tr>
         <tr>
           <td>Machine Runner Id</td>

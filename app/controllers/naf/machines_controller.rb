@@ -10,11 +10,17 @@ module Naf
         format.html
         format.json do
           set_page
+
+          if params['show'].present?
+            filter = params['show']['disabled']
+          else
+            filter = false
+          end
+
           machines = []
           machine = []
           @total_records = Naf::Machine.count(:all)
-
-          Logical::Naf::Machine.all.map(&:to_hash).map do |hash|
+          Logical::Naf::Machine.all(filter).map(&:to_hash).map do |hash|
             add_urls(hash).map do |key, value|
               value = '' if value.nil?
               machine << value

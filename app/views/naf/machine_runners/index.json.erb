@@ -1,7 +1,15 @@
  <%
   rows = @rows.each do |row|
   	row[0] = link_to row[0], machine_runner_path(row[0])
-  	row[2] = link_to row[2], machine_path(row[2])
+		machine = ::Naf::Machine.find_by_id(row[2])
+		row[2] = link_to ::Logical::Naf::Machine.new(machine).name, machine_path(row[2])
+		if row[6] == "Running"
+      row[8] = link_to image_tag('terminate.png',
+		             class: 'action',
+		             title: "Wind Down Runner(id: #{row[4]})"),
+		             "#", { class: "wind_down", id: row[4	] }
+    end
+		row[4] = link_to row[4], machine_runner_invocation_path(row[4])
   end
 %>
 

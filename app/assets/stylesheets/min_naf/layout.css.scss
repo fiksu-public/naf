@@ -130,15 +130,15 @@
                         text-align: center;
                     }
 
-                    .script-queued {
+                    .script-queued, .winding-down {
                         color: #f8a800;
                     }
 
-                    .script-running {
+                    .script-running, .running {
                         color: #45a113;
                     }
 
-                    .script-error {
+                    .script-error, .down {
                         color: #CD0A0A;
                     }
 
@@ -324,6 +324,18 @@
                 padding-top: 10px;
             }
 
+        }
+
+        .winding-down {
+            color: #f8a800;
+        }
+
+        .running {
+            color: #45a113;
+        }
+
+        .down {
+            color: #CD0A0A;
         }
 
     }

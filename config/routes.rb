@@ -13,10 +13,8 @@ Naf::Engine.routes.draw do
     resources :machine_affinity_slots
   end
 
-  resources :machine_runners, only: [:index, :show] do
-    resources :machine_runner_invocations, only: [:index, :show]
-  end
-
+  resources :machine_runners, only: [:index, :show]
+  resources :machine_runner_invocations, only: [:index, :show, :update]
   resources :logger_styles
   resources :logger_names
   resources :affinities

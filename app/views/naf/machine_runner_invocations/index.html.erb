@@ -1,44 +1,35 @@
 <% content_for :body do %>
-  <h2>Machine Runner Invocations</h2>
-  <%= link_to 'Back to Machine Runner', machine_runner_path(params[:machine_runner_id]) %>
-  </br>
-  </br>
-
-  <div id="record">
-    <table id='datatable'>
-      <thead>
-        <tr>
-          <th>Id</th>
-          <th>Created At</th>
-          <th>Machine Runner Id</th>
-          <th>Pid</th>
-          <th>Is Running</th>
-          <th>Wind Down</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% @machine_runner_invocations.each do |machine_runner_invocation| -%>
-          <tr>
-            <td><%= link_to machine_runner_invocation.id,
-                      machine_runner_machine_runner_invocation_path(machine_runner_invocation.machine_runner, machine_runner_invocation) %></td>
-            <td><%= machine_runner_invocation.created_at %></td>
-            <td><%= link_to machine_runner_invocation.machine_runner.id, machine_runner_path(machine_runner_invocation.machine_runner) %></td>
-            <td><%= machine_runner_invocation.pid %></td>
-            <td><%= machine_runner_invocation.is_running %></td>
-            <td><%= machine_runner_invocation.wind_down %></td>
-          </tr>
-        <% end -%>
-      </tbody>
-    </table>
-
-    <% content_for :javascripts do %>
-      <script type='text/javascript'>
-        jQuery(document).ready(function() {
-          jQuery('#datatable').addDataTable({});
-        });
-      </script>
-    <% end %>
+  <div id='page-label'>
+    <h3 id="record_name"><%= naf_table_title %> </h3>
   </div>
+  <br/>
+  <%= render partial: 'filter' %>
+  <%= render partial: 'naf/shared/select_per_page' %>
+
+  <table id='datatable'>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Started At</th>
+        <th>Machine Runner Id</th>
+        <th>Pid</th>
+        <th>Is Running</th>
+        <th>Wind Down</th>
+        <th>Deployment Tag</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr></tr>
+    </tbody>
+  </table>
+
+  <% content_for :javascripts do %>
+    <%= javascript_include_tag("dataTablesTemplates/machine_runner_invocations.js") %>
+    <script type='text/javascript'>
+      var sAjaxSource = "<%= naf.machine_runner_invocations_path(:json) %>";
+    </script>
+  <% end %>
+
 <% end %>
 
 <%= render partial: 'naf/shared/application' %>

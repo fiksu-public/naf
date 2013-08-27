@@ -11,12 +11,9 @@ gem 'jquery-ui-rails'
 gem 'awesome_print'
 gem 'will_paginate'
 gem 'mem_info'
+gem 'shoulda-matchers', '2.0.0'
+gem "timecop", '0.4.5'
 
 # For private repo testing on Travis
 # gem 'af', '=0.9.9', path: 'vendor/private'
 gem 'af', git: 'git@github.com:fiksu/af.git'
-
-# These gems should be encapsulated in test group, but test fails.
-# For now it will remain global.
-gem 'shoulda-matchers', '2.0.0'
-gem "timecop", '0.4.5'

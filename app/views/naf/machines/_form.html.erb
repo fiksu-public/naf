@@ -32,12 +32,6 @@
   </br>
 
   <div class="field">
-    <%= f.label :enabled %>
-    <%= f.check_box :enabled %>
-  </div>
-  </br>
-
-  <div class="field">
     <%= f.label 'Process pool size*' %>
     <%= f.text_field :thread_pool_size %>
   </div>
@@ -46,6 +40,12 @@
   <div class="field">
     <%= f.label :log_level %>
     <%= f.text_field :log_level %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :enabled %>
+    <%= f.check_box :enabled %>
   </div>
   </br>
   </br>

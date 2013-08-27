@@ -49,10 +49,7 @@ module Process::Naf
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
           machine = ::Naf::Machine.create(server_address: @server_address)
-          classification = ::Naf::AffinityClassification.location.id
-          affinity = ::Naf::Affinity.
-            find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id.to_s)
-          machine.machine_affinity_slots.create(affinity_id: affinity.id)
+          add_affinities(machine)
         end
 
         machine.server_note = @server_note unless @server_note.nil?
@@ -136,6 +133,36 @@ module Process::Naf
           puts "  #{parts.join('_')}"
         end
       end
+    end
+
+    private
+
+    def add_affinities(machine)
+      # Add Location Affinity
+      classification = ::Naf::AffinityClassification.location.id
+      affinity = ::Naf::Affinity.
+        find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id.to_s)
+      machine.machine_affinity_slots.create(affinity_id: affinity.id)
+
+      # Add Purpose Affinity
+      instance_type = `source /var/spool/ec2/meta-data.sh && echo $EC2_INSTANCE_TYPE`
+      if instance_type.present?
+        classification = ::Naf::AffinityClassification.purpose.id
+        affinity = ::Naf::Affinity.
+          find_or_create_by_affinity_classification_id_and_affinity_name(classification, instance_type)
+        machine.machine_affinity_slots.create(affinity_id: affinity.id)
+      end
+
+      # Add Weight Affinity
+      classification = ::Naf::AffinityClassification.weight.id
+      machine_cpus = (`cat /proc/cpuinfo | grep processor | wc -l`).strip.to_i
+      machine_memory = (`cat /proc/meminfo | grep MemTotal`).slice(/\d+/).to_i / (1024 * 1024)
+      cpu_affinity = ::Naf::Affinity.
+        find_or_create_by_affinity_classification_id_and_affinity_name(classification, 'cpus')
+      memory_affinity = ::Naf::Affinity.
+        find_or_create_by_affinity_classification_id_and_affinity_name(classification, 'memory')
+      machine.machine_affinity_slots.create(affinity_id: cpu_affinity.id, affinity_parameter: machine_cpus)
+      machine.machine_affinity_slots.create(affinity_id: memory_affinity.id, affinity_parameter: machine_memory)
     end
 
   end

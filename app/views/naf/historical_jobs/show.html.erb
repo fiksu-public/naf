@@ -98,65 +98,65 @@
         <tr>
           <td>Command</td>
           <td><%= @historical_job.command %></td>
-        </tr
+        </tr>
         <tr>
           <td>Started At</td>
           <td><%= @historical_job.started_at %></td>
-        </tr
+        </tr>
         <tr>
           <td>Finished At</td>
           <td><%= @historical_job.finished_at %></td>
-        </tr
+        </tr>
         <tr>
           <td>Run Time</td>
           <td><%= @logical_job.run_time %></td>
-        </tr
+        </tr>
         <tr>
           <td>Exit Status</td>
           <td><%= @historical_job.exit_status %></td>
-        </tr
+        </tr>
         <tr>
           <td>Script Type Name</td>
           <td><%= @historical_job.application_type.script_type_name %></td>
-        </tr
+        </tr>
         <tr>
           <td>Log Level</td>
           <td><%= @historical_job.log_level %></td>
-        </tr
+        </tr>
         <tr>
           <td>Tags</td>
           <td><%= @historical_job.tags %></td>
-        </tr
+        </tr>
         <tr>
           <td>Request To Terminate</td>
           <td><%= @historical_job.request_to_terminate %></td>
-        </tr
+        </tr>
         <tr>
           <td>Machine Started On Server Address</td>
           <td><%= @historical_job.started_on_machine.try(:server_address) %></td>
-        </tr
+        </tr>
         <tr>
           <td>Machine Started On Server Name</td>
           <td><%= @historical_job.started_on_machine.try(:server_name) %></td>
-        </tr
+        </tr>
         <tr>
           <td>Application Run Group Name</td>
           <td><%= @historical_job.application_run_group_name %></td>
-        </tr
+        </tr>
         <tr>
           <td>Application Run Group Limit</td>
           <td><%= @historical_job.application_run_group_limit %></td>
-        </tr
+        </tr>
         <tr>
           <td>Application Run Group Restriction Name</td>
           <td><%= @historical_job.application_run_group_restriction.application_run_group_restriction_name %></td>
-        </tr
+        </tr>
         <tr>
           <td><%= link_to "Historical Job Affinity Tabs",
                   historical_job_historical_job_affinity_tabs_path(@historical_job.id) %>
           </td>
           <td><%= @historical_job.affinities.map(&:affinity_name).join(', ') %></td>
-        </tr
+        </tr>
         <tr>
           <td>Terminate Job</td>
           <td><%= link_to image_tag('terminate.png',
