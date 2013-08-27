@@ -67,7 +67,7 @@ module Process::Naf
       if job
         unless @do_not_terminate
           if job.request_to_terminate
-            logger.alarm "terminating by request"
+            logger.warn "terminating by request"
             raise TerminationRequest.new(job, "job requested to terminate")
           end
           unless job.started_on_machine
@@ -94,8 +94,18 @@ module Process::Naf
 
     def update_job_tags(old_tags, new_tags)
       job = fetch_naf_job
-      job.remove_tags(old_tags)
-      job.add_tags(new_tags)
+      if job
+        job.remove_tags(old_tags.map(&:to_s))
+        job.add_tags(new_tags.map(&:to_s))
+      end
+    end
+
+    def add_job_tags(*new_tags)
+      update_job_tags([], new_tags)
+    end
+
+    def remove_job_tags(*old_tags)
+      update_job_tags(old_tags, [])
     end
 
     def work

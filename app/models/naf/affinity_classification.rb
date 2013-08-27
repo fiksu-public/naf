@@ -21,19 +21,19 @@ module Naf
     #+++++++++++++++++++++++++
 
     def self.purpose
-      return @purpose ||= find_by_affinity_classification_name('purpose')
+      @@purpose ||= find_by_affinity_classification_name('purpose')
     end
 
     def self.location
-      return @location ||= find_by_affinity_classification_name('location')
+      @@location ||= find_by_affinity_classification_name('location')
     end
 
     def self.application
-      return @application ||= find_by_affinity_classification_name('application')
+      @@application ||= find_by_affinity_classification_name('application')
     end
 
     def self.weight
-      return @weight ||= find_by_affinity_classification_name('weight')
+      @@weight ||= find_by_affinity_classification_name('weight')
     end
 
   end

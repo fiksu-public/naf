@@ -98,13 +98,20 @@ module Process::Naf
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
         # Create an invocation for this runner
-        invocation = ::Naf::MachineRunnerInvocation.create(machine_runner_id: machine_runner.id,
-                                                           pid: Process.pid,
-                                                           is_running: true,
-                                                           repository_name: (`git remote -v`).slice(/:.*\./)[1..-2],
-                                                           branch_name: (`git rev-parse --abbrev-ref HEAD`).strip,
-                                                           commit_information: (`git log --pretty="%H" -n 1`).strip,
-                                                           deployment_tag: (`git describe --abbrev=0 --tag`).strip)
+        repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
+        branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
+        commit_information = (`git log --pretty="%H" -n 1`).strip
+        deployment_tag = (`git describe --abbrev=0 --tag 2>&1`).strip
+        if deployment_tag.match(/fatal: No names found, cannot describe anything/)
+          deployment_tag = 'unknown'
+        end
+        invocation = ::Naf::MachineRunnerInvocation.create!(machine_runner_id: machine_runner.id,
+                                                            pid: Process.pid,
+                                                            is_running: true,
+                                                            repository_name: repository_name,
+                                                            branch_name: branch_name,
+                                                            commit_information: commit_information,
+                                                            deployment_tag: deployment_tag)
       ensure
         machine.unlock_for_runner_use
       end
@@ -197,17 +204,17 @@ module Process::Naf
             end
 
             unless dead_children.blank?
-              logger.error "dead children even with timeout during waitpid2(): #{dead_children.inspect}"
-              logger.error "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+              logger.error "#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+              logger.warn "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
             end
 
             break
           rescue Errno::ECHILD => e
-            logger.error "No child when we thought we had children #{@children.inspect}"
-            logger.error e
+            logger.error "#{machine} No child when we thought we had children #{@children.inspect}"
+            logger.warn e
             pid = @children.first.try(:first)
             status = nil
-            logger.error "pulling first child off list to clean it up: pid=#{pid}"
+            logger.warn "pulling first child off list to clean it up: pid=#{pid}"
           end
 
           if pid
@@ -233,10 +240,12 @@ module Process::Naf
                 # XXX ERROR no child for returned pid -- this can't happen
                 logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
               end
+            rescue ActiveRecord::ActiveRecordError => are
+              raise
             rescue StandardError => e
               # XXX just incase a job control failure -- more code here
               logger.error "some failure during child clean up"
-              logger.error e
+              logger.warn e
             end
           end
         end
@@ -247,7 +256,8 @@ module Process::Naf
 
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-      while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
+      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
+      while ::Naf::RunningJob.where(:started_on_machine_id => machine.id).count < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
           running_job = @job_fetcher.fetch_next_job
@@ -271,7 +281,7 @@ module Process::Naf
             running_job.historical_job.save!
           else
             # should never get here (well, hopefully)
-            logger.error "failed to execute #{running_job}"
+            logger.error "#{machine}: failed to execute #{running_job}"
             # Update job tags
             running_job.historical_job.remove_all_tags
             running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
@@ -281,10 +291,12 @@ module Process::Naf
             # Update job tags
             running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
           end
+        rescue ActiveRecord::ActiveRecordError => are
+          raise
         rescue StandardError => e
           # XXX rescue for various issues
-          logger.error "failure during job start"
-          logger.error e
+          logger.error "#{machine}: failure during job start"
+          logger.warn e
         end
       end
       logger.debug_gross "done starting jobs"
@@ -302,15 +314,15 @@ module Process::Naf
           ::Naf::ApplicationSchedule.unlock_schedules
 
           # check scheduled tasks
-          should_be_queued.each do |application_schedule|
+          should_be_queued(machine).each do |application_schedule|
             logger.info "scheduled application: #{application_schedule}"
             begin
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
                 @job_creator.queue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
-              logger.error "couldn't queue schedule because of prerequisite loop: #{jpl.message}"
-              logger.error jpl
+              logger.error "#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}"
+              logger.warn jpl
               application_schedule.enabled = false
               application_schedule.save!
               logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"
@@ -482,7 +494,7 @@ module Process::Naf
       end
     end
 
-    def should_be_queued
+    def should_be_queued(machine)
       not_finished_applications = ::Naf::HistoricalJob.
         queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
         where("finished_at IS NULL AND request_to_terminate = false").
@@ -516,7 +528,27 @@ module Process::Naf
         )
       end
 
-      return relative_schedules_what_need_queuin + exact_schedules_what_need_queuin
+      return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
+        # only queue applications that are not restricted by run group limits
+        if schedule.enqueue_backlogs
+          true
+        else
+          if (schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.no_limit ||
+              schedule.application_run_group_limit.nil? ||
+              schedule.application_run_group_name.nil?)
+            true
+          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_machine
+            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
+             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name,
+                                     :started_on_machine_id => machine.id).count) < schedule.application_run_group_limit
+          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines
+            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
+             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name).count) < schedule.application_run_group_limit
+          else
+            false
+          end
+        end
+      end
     end
 
     def memory_available_to_spawn?

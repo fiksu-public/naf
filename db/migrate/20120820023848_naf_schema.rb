@@ -270,7 +270,7 @@ class NafSchema < ActiveRecord::Migration
           application_run_group_name             text null,
           application_run_group_limit            integer null default 1,
 
-          started_on_machine_id                  integer null references #{schema_name}.machines,
+          started_on_machine_id                  integer not null references #{schema_name}.machines,
 
           started_at                             timestamp null,
           pid                                    integer null,

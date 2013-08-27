@@ -68,12 +68,12 @@ module Logical
 
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
-            select("id, priority, created_at").
+            select("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
             runnable_by_machine(machine).
-            exclude_run_group_names(run_group_names_above_limit).
+            is_not_restricted_by_run_group(machine).
             prerequisites_finished.
             weight_available_on_machine(machine).
-            group("id, priority, created_at").
+            group("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
             having("array(
               select affinity_id::integer
               from naf.historical_job_affinity_tabs
@@ -88,55 +88,18 @@ module Logical
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
             runnable_by_machine(machine).
-            exclude_run_group_names(run_group_names_above_limit).
+            is_not_restricted_by_run_group(machine).
             prerequisites_finished.
             weight_available_on_machine(machine).
             order_by_priority.limit(100)
         else
           # Machine can run any queued job
           possible_jobs = ::Naf::QueuedJob.
-            exclude_run_group_names(run_group_names_above_limit).
+            is_not_restricted_by_run_group(machine).
             prerequisites_finished.
             weight_available_on_machine(machine).
             order_by_priority.limit(100)
         end
-      end
-
-      # This method finds the group names that reached its limit and exclude them
-      # when fetching queued jobs
-      def run_group_names_above_limit
-        running_groups = ::Naf::RunningJob.
-          select("application_run_group_name, application_run_group_limit, count(*)").
-          group("application_run_group_name, application_run_group_limit")
-        queued_groups = ::Naf::QueuedJob.
-          select("application_run_group_name, application_run_group_limit, count(*)").
-          group("application_run_group_name, application_run_group_limit")
-
-        running_group_names_and_limits = {}
-        running_groups.each do |group|
-          if group.present? && group.application_run_group_name.present?
-            running_group_names_and_limits[group.application_run_group_name.to_sym] = [group.application_run_group_limit, group.count.to_i]
-          end
-        end
-        queued_group_names_and_limits = {}
-        queued_groups.each do |group|
-          if group.present? && group.application_run_group_name.present?
-            queued_group_names_and_limits[group.application_run_group_name.to_sym] = [group.application_run_group_limit, group.count.to_i]
-          end
-        end
-
-        names_excluded = []
-        running_group_names_and_limits.each do |key, values|
-          # Run group name present in QueuedJobs
-          if queued_group_names_and_limits[key].present?
-            # Check run group limit and number of running jobs in the group
-            if queued_group_names_and_limits[key][0] <= values[1]
-              names_excluded << key
-            end
-          end
-        end
-
-        names_excluded
       end
 
       def start_job(possible_job)

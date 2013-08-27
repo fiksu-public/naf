@@ -16,7 +16,7 @@ module Naf
     has_many :application_schedule_affinity_tabs,
       class_name: '::Naf::ApplicationScheduleAffinityTab',
       dependent: :destroy
-    has_many :machine_affinity_tabs,
+    has_many :machine_affinity_slots,
       class_name: '::Naf::MachineAffinitySlot',
       dependent: :destroy
 

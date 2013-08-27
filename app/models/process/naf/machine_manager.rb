@@ -1,36 +1,15 @@
 module Process::Naf
   class MachineManager < ::Process::Naf::Application
-
-    #----------------
-    # *** Options ***
-    #+++++++++++++++++
-
-    opt :server_name,
-        "set the machines server name (use with --update-machine)",
-        type: :string
-    opt :server_note,
-        "set the machines server note (use with --update-machine)",
-        type: :string
-    opt :server_address,
-        "set the machines server address (use with --update-machine)",
-        type: :string,
-        default: ::Naf::Machine.machine_ip_address
-    opt :update_machine,
-        "create or update an machine entry"
-    opt :enabled,
-        "enable machine"
-    opt :disabled,
-        "disable machine",
-        var: :enabled,
-        set: :false
-    opt :thread_pool_size,
-        "how many scripts can run at once",
-        type: :int
-    opt :list_affinities,
-        "show all affinities"
-    opt :add_affinity,
-        "add an affinity slot",
-        type: :strings
+    opt :server_name, "set the machines server name (use with --update-machine)", type: :string
+    opt :server_note, "set the machines server note (use with --update-machine)", type: :string
+    opt :server_address, "set the machines server address (use with --update-machine)", default: ::Naf::Machine.machine_ip_address
+    opt :update_machine, "create or update an machine entry"
+    opt :enabled, "enable machine"
+    opt :disabled, "disable machine", var: :enabled, set: :false
+    opt :thread_pool_size, "how many scripts can run at once", type: :int
+    opt :list_affinities, "show all affinities"
+    opt :add_affinities, "add an affinity slot", type: :strings
+    opt :add_weight_affinities, "add afffinity weights for cpu and memory", :default => true
 
     def work
       if @list_affinities
@@ -66,8 +45,11 @@ module Process::Naf
         end
       end
 
-      if @add_affinity
-        @add_affinity.each do |affinity_string|
+      if @add_weight_affinities
+      end
+
+      if @add_affinities
+        @add_affinities.each do |affinity_string|
           #
           # Parse the argument string. It should consists of 2 or 3 words separated
           # by underscores.

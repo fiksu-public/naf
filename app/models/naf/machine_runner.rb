@@ -44,7 +44,17 @@ module Naf
 
     def self.dead
       joins(:machine_runner_invocations).
-      where('naf.machine_runner_invocations.is_running IS FALSE')
+      where('naf.machine_runner_invocations.is_running IS FALSE').
+      where('NOT EXISTS(
+          SELECT
+            1
+          FROM
+            naf.machine_runner_invocations AS mri
+          WHERE
+            mri.machine_runner_id = naf.machine_runners.id AND
+            mri.is_running IS TRUE
+        )
+      ')
     end
 
   end

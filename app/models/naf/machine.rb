@@ -207,9 +207,9 @@ module Naf
     end
 
     def affinity
-      ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(
-        ::Naf::AffinityClassification.location.id, server_address
-      )
+      return ::Naf::Affinity.
+        where(:affinity_classification_id => ::Naf::AffinityClassification.location.id,
+              :affinity_name => self.id.to_s).first
     end
 
     def short_name_if_it_exist
