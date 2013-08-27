@@ -5,15 +5,15 @@
 </div>
 &nbsp;&nbsp;
 <div class="display-inline-block">
-  <%= label_tag :visible, 'Show disabled:' %>
-  <%= check_box_tag("show[disabled]", true, false, { class: 'datatable_variable' }) %>
+  <%= label_tag :visible, 'Show deleted:' %>
+  <%= check_box_tag("show[deleted]", true, false, { class: 'datatable_variable' }) %>
 </div>
 &nbsp;&nbsp;
 
 <% content_for :javascripts do %>
   <script type='text/javascript'>
     jQuery(document).ready(function() {
-      jQuery("#show_disabled").change(function () {
+      jQuery("#show_deleted").change(function () {
         SetFirstPage();
         return false;
       });

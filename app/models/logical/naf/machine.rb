@@ -11,6 +11,7 @@ module Logical
                  :server_address,
                  :server_note,
                  :enabled,
+                 :deleted,
                  :process_pool_size,
                  :last_checked_schedules_at,
                  :last_seen_alive_at,
@@ -31,7 +32,7 @@ module Logical
       end
 
       def self.all(filter = false)
-        ::Naf::Machine.include_disabled(filter).all.map{ |machine| new(machine) }
+        ::Naf::Machine.include_deleted(filter).all.map{ |machine| new(machine) }
       end
 
       def process_pool_size

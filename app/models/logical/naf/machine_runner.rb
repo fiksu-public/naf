@@ -23,7 +23,8 @@ module Logical
 
           values << ::Naf::HistoricalJob.
             joins('inner join naf.running_jobs nj on nj.id = naf.historical_jobs.id').
-            where(machine_runner_id: runner.id).count
+            joins(:machine_runner_invocation).
+            where('naf.machine_runner_invocations.machine_runner_id = ?', runner.id).count
           values << ''
 
           machine_runners << values

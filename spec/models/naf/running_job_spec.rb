@@ -94,7 +94,11 @@ module Naf
       end
 
       it "return the correct sum of affinity parameters for each affinity" do
-        ::Naf::RunningJob.affinity_weights(machine).should == { cpus: 1.0, memory: 1.0 }
+        ::Naf::RunningJob.affinity_weights(machine).should == { 1 => 0.0,
+                                                                2 => 0.0,
+                                                                3 => 0.0,
+                                                                4 => 1.0,
+                                                                5 => 1.0 }
       end
     end
 

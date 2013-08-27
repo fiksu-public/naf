@@ -25,6 +25,7 @@ FactoryGirl.define do
 
   factory :running_job_base, class: ::Naf::RunningJob do
     association :historical_job, factory: :job
+    association :started_on_machine, factory: :machine
     association :application_type, factory: :rails_app_type
     association :application_run_group_restriction, factory: :no_limit
     command "::Naf::RunningJob.test hello world"

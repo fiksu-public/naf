@@ -76,6 +76,7 @@ module Naf
         )
       )
       SQL
+
       return joins(:application_run_group_restriction).
         where(sql)
     end
@@ -111,24 +112,28 @@ module Naf
     end
 
     def self.weight_available_on_machine(machine)
-      machine_cpus = machine.parameter_weight('cpus')
-      machine_memory = machine.parameter_weight('memory')
+      machine_parameter_weights = {}
+      machine.machine_affinity_slots.each do |slot|
+        machine_parameter_weights[slot.affinity_id] = slot.affinity_parameter.to_f
+      end
+
       running_job_weights = ::Naf::RunningJob.affinity_weights(machine)
 
-      if machine_cpus > 0 && machine_memory > 0
-        ::Naf::QueuedJob.
-          check_weight_sum('cpus', running_job_weights[:cpus], machine_cpus).
-          check_weight_sum('memory', running_job_weights[:memory], machine_memory)
-      elsif machine_cpus > 0 || machine_memory > 0
-        parameters = (machine_cpus == 0 ? [machine_memory, 'memory'] : [machine_cpus, 'cpus'])
-        ::Naf::QueuedJob.
-          check_weight_sum(parameters[1], running_job_weights[parameters[1].to_sym], parameters[0])
-      else
+      queued_jobs = []
+      machine_parameter_weights.each do |affinity_id, parameter_weight|
+        queued_jobs |= ::Naf::QueuedJob.
+          check_weight_sum(affinity_id, running_job_weights[affinity_id], parameter_weight).
+          map(&:id)
+      end
+
+      if queued_jobs.empty?
         where({})
+      else
+        where('naf.queued_jobs.id NOT IN (?)', queued_jobs)
       end
     end
 
-    def self.check_weight_sum(parameter, running_job_weight_count, machine_weight_count)
+    def self.check_weight_sum(affinity_id, running_job_weight_count, machine_weight_count)
       where("
         id IN (
           SELECT
@@ -148,25 +153,9 @@ module Naf
             FROM
               naf.affinities AS a
             WHERE
-              a.affinity_name = '#{parameter}' AND
+              a.id = '#{affinity_id}' AND
                 t.affinity_id = a.id
-          ) AND COALESCE(affinity_parameter, 0) + #{running_job_weight_count} <= #{machine_weight_count}
-        ) OR NOT EXISTS (
-          SELECT
-            1
-          FROM
-            naf.historical_job_affinity_tabs AS t
-          WHERE
-            t.historical_job_id = queued_jobs.id AND
-            EXISTS (
-              SELECT
-                1
-              FROM
-                naf.affinities AS a
-              WHERE
-                a.affinity_name = '#{parameter}' AND
-                  t.affinity_id = a.id
-            )
+          ) AND COALESCE(affinity_parameter, 0) + #{running_job_weight_count} > #{machine_weight_count}
         )
       ")
     end

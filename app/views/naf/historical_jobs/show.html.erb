@@ -84,10 +84,10 @@
           <td><%= Process.pid %></td>
         </tr>
         <tr>
-          <td>Machine Runner Id</td>
+          <td>Machine Runner Invocation Id</td>
           <td>
-            <% if @historical_job.machine_runner_id.present? -%>
-              <%= link_to @historical_job.machine_runner_id, machine_runner_path(@historical_job.machine_runner) %>
+            <% if @historical_job.machine_runner_invocation_id.present? -%>
+              <%= link_to @historical_job.machine_runner_invocation_id, machine_runner_invocation_path(@historical_job.machine_runner_invocation) %>
             <% end -%>
           </td>
         </tr>

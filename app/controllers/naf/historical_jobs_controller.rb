@@ -109,8 +109,15 @@ module Naf
         @historical_job = Naf::HistoricalJob.find(params[:id])
         if @historical_job.update_attributes(params[:historical_job])
           if params[:historical_job][:request_to_terminate].present?
-            running_job = ::Naf::RunningJob.find_by_id(params[:id])
-            running_job.update_attributes(request_to_terminate: true) if running_job.present?
+            if queued_job = ::Naf::QueuedJob.find_by_id(params[:id])
+              @historical_job.finished_at = Time.zone.now
+              @historical_job.save!
+              queued_job.delete
+            end
+
+            if running_job = ::Naf::RunningJob.find_by_id(params[:id])
+              running_job.update_attributes(request_to_terminate: true)
+            end
           end
 
           format.html do

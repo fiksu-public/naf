@@ -64,7 +64,8 @@ class NafSchema < ActiveRecord::Migration
           marked_down                    boolean not null default false,
           marked_down_by_machine_id      integer null references #{schema_name}.machines,
           marked_down_at                 timestamp null,
-          log_level                      text null
+          log_level                      text null,
+          deleted                        boolean not null default false check (deleted = false OR enabled = false)
       );
       create table #{schema_name}.machine_affinity_slots
       (
@@ -220,7 +221,7 @@ class NafSchema < ActiveRecord::Migration
 
           log_level                              text null,
           tags                                   text[],
-          machine_runner_id                      integer null references #{schema_name}.machine_runners
+          machine_runner_invocation_id                      integer null references #{schema_name}.machine_runner_invocations
       );
       create table #{schema_name}.historical_job_prerequisites
       (

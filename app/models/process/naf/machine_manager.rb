@@ -9,7 +9,7 @@ module Process::Naf
     opt :thread_pool_size, "how many scripts can run at once", type: :int
     opt :list_affinities, "show all affinities"
     opt :add_affinities, "add an affinity slot", type: :strings
-    opt :add_weight_affinities, "add afffinity weights for cpu and memory", :default => true
+    opt :add_weight_affinities, "add afffinity weights for cpu and memory", default: true
 
     def work
       if @list_affinities
@@ -28,7 +28,7 @@ module Process::Naf
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
           machine = ::Naf::Machine.create(server_address: @server_address)
-          add_affinities(machine)
+          add_default_affinities(machine)
         end
 
         machine.server_note = @server_note unless @server_note.nil?
@@ -43,9 +43,6 @@ module Process::Naf
           puts "Machine address #{@server_address} is not present -- use --update-machine"
           exit 1
         end
-      end
-
-      if @add_weight_affinities
       end
 
       if @add_affinities
@@ -119,7 +116,7 @@ module Process::Naf
 
     private
 
-    def add_affinities(machine)
+    def add_default_affinities(machine)
       # Add Location Affinity
       classification = ::Naf::AffinityClassification.location.id
       affinity = ::Naf::Affinity.

@@ -1,9 +1,9 @@
 <%
   rows = @historical_jobs.each do |job|
     historical_job = ::Naf::HistoricalJob.find_by_id(job[0])
-    if job[1].present? && historical_job.present? && historical_job.machine_runner.present?
-      invocation = historical_job.machine_runner.machine_runner_invocations.try(:last)
-      if invocation.present? && invocation.status != 'dead'
+    if job[1].present? && historical_job.present? && historical_job.machine_runner_invocation.present?
+      invocation = historical_job.machine_runner_invocation
+      if invocation.status != 'dead' && job[10] == 'Running'
         job[1] = "<div class='" + invocation.status + "'>" + job[1] + "</div>".html_safe
       end
     end
@@ -13,9 +13,9 @@
                                 title: "View job(id: #{job[0]}, title: #{job[4]}) log in Papertrail"),
                                 job[12],
                                 { target: '_blank', class: "papertrail", id: job[0] }
-    job[12] << "&nbsp;&nbsp;&nbsp;".html_safe
 
-    unless job[10] == "Canceled"
+    unless job[10] == "Terminated"
+      job[12] << "&nbsp;&nbsp;&nbsp;".html_safe
       job[12] << (link_to image_tag('terminate.png',
                   class: 'action',
                   title: "Terminate job(id: #{job[0]}, title: #{job[4]})"),

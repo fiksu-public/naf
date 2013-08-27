@@ -12,7 +12,8 @@ module Naf
      :thread_pool_size,
      :log_level,
      :marked_down,
-     :short_name].each do |a|
+     :short_name,
+     :deleted].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -395,14 +396,14 @@ module Naf
     end
 
     describe "#affinity" do
-      it "return affinity associated with machine's server address" do
+      it "return affinity associated with machine's id" do
         affinity = FactoryGirl.create(:affinity, id: 4,
                                                  affinity_classification_id: 1,
-                                                 affinity_name: '0.0.0.1')
+                                                 affinity_name: machine.id.to_s)
         machine.affinity.should == affinity
       end
 
-      it "nil when there's no affinity associated with machine's server address" do
+      it "nil when there's no affinity associated with machine's id" do
         machine.affinity.should == nil
       end
     end
@@ -417,21 +418,6 @@ module Naf
         machine.short_name = nil
         machine.server_name = 'machine.example.com'
         machine.short_name_if_it_exist.should == 'machine.example.com'
-      end
-    end
-
-    describe "#parameter_weight" do
-      let!(:affinity_slot) {
-        FactoryGirl.create(:machine_affinity_slot_base, affinity_id: ::Naf::Affinity.find_by_id(1).id)
-      }
-
-      it "return the correct value for affinity parameter" do
-        affinity_slot.update_attributes!(affinity_parameter: 1)
-        machine.parameter_weight('normal').should == 1.0
-      end
-
-      it "return 0 when affinity slot doesn't have an affinity parameter" do
-        machine.parameter_weight('normal').should == 0.0
       end
     end
 

@@ -11,8 +11,8 @@ module Logical
               FROM
                 "#{::Naf.schema_name}"."historical_jobs" AS j
               WHERE
-                j.finished_at IS NOT NULL OR
-                j.request_to_terminate = true
+                (j.finished_at IS NOT NULL OR
+                 j.request_to_terminate = true)
                 #{conditions}
               ORDER BY
                 finished_at DESC NULLS LAST

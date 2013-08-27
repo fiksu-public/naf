@@ -57,24 +57,20 @@ module Naf
     end
 
     def self.affinity_weights(machine)
-      job_weights = {
-        cpus: 0,
-        memory: 0
-      }
+      affinity_ids = ::Naf::Affinity.all.map(&:id)
 
-      cpu_affinity = ::Naf::Affinity.find_by_affinity_name('cpus')
-      memory_affinity = ::Naf::Affinity.find_by_affinity_name('memory')
+      job_weights = {}
+      affinity_ids.each do |affinity_id|
+        job_weights[affinity_id] = 0
+      end
 
       ::Naf::RunningJob.where(started_on_machine_id: machine.id).all.each do |running_job|
-        job_weights[:cpus] += running_job.
-          historical_job.historical_job_affinity_tabs.
-          where(affinity_id: cpu_affinity.id).
-          first.try(:affinity_parameter).to_f
-
-        job_weights[:memory] += running_job.
-          historical_job.historical_job_affinity_tabs.
-          where(affinity_id: memory_affinity.id).
-          first.try(:affinity_parameter).to_f
+        affinity_ids.each do |affinity_id|
+          job_weights[affinity_id] += running_job.
+            historical_job.historical_job_affinity_tabs.
+            where(affinity_id: affinity_id).
+            first.try(:affinity_parameter).to_f
+        end
       end
 
       job_weights

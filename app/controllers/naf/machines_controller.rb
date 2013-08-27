@@ -12,7 +12,7 @@ module Naf
           set_page
 
           if params['show'].present?
-            filter = params['show']['disabled']
+            filter = params['show']['deleted']
           else
             filter = false
           end

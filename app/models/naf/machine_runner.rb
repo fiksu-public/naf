@@ -12,8 +12,6 @@ module Naf
       class_name: '::Naf::Machine'
     has_many :machine_runner_invocations,
       class_name: '::Naf::MachineRunnerInvocation'
-    has_many :historical_jobs,
-      class_name: '::Naf::HistoricalJob'
 
     #--------------------
     # *** Validations ***

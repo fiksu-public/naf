@@ -13,7 +13,8 @@ jQuery(document).ready(function() {
         { "sWidth": "12%"},
         { "sWidth": "8%"},
         { "sWidth": "14%"},
-        { "sWidth": "5%"},
+        { "sWidth": "4%"},
+        { "sWidth": "4%"},
         { "sWidth": "10%"},
         { "sWidth": "175px"},
         null,
@@ -31,6 +32,7 @@ jQuery(document).ready(function() {
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToMachines(nRow, aData);
+      colorizationDeletedOrHidden(nRow, aData);
       checkTimeFormat(nRow, aData);
       return nRow;
     }
@@ -66,6 +68,12 @@ function addLinkToMachines(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
+}
+
+function colorizationDeletedOrHidden(nRow, aData) {
+  if (aData[5] == 'true') {
+    jQuery(nRow).addClass('deleted_or_hidden');
+  }
 }
 
 function checkTimeFormat(nRow, aData) {

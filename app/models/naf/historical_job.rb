@@ -31,7 +31,7 @@ module Naf
                     :marked_dead_by_machine_id,
                     :log_level,
                     :tags,
-                    :machine_runner_id
+                    :machine_runner_invocation_id
 
     JOB_STALE_TIME = 1.week
     SYSTEM_TAGS = {
@@ -56,8 +56,8 @@ module Naf
       class_name: "::Naf::Application"
     belongs_to :application_run_group_restriction,
       class_name: "::Naf::ApplicationRunGroupRestriction"
-    belongs_to :machine_runner,
-      class_name: "::Naf::MachineRunner"
+    belongs_to :machine_runner_invocation,
+      class_name: "::Naf::MachineRunnerInvocation"
     # Must access instance methods job_prerequisites through helper methods so we can use partitioning sql
     has_many :historical_job_prerequisites,
       class_name: "::Naf::HistoricalJobPrerequisite",

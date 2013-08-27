@@ -37,11 +37,11 @@ module Naf
     #+++++++++++++++++++++++++
 
     def machine_server_address
-      return machine.server_address
+      machine.server_address
     end
 
     def machine_server_name
-      return machine.server_name
+      machine.server_name
     end
 
     def self.unpickle(preserve, unpickler)
@@ -53,6 +53,7 @@ module Naf
           a.save!
         end
       end
+
       return unpickler.generic_unpickle(self, preserve)
     end
 

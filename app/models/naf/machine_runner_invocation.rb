@@ -16,6 +16,8 @@ module Naf
 
     belongs_to :machine_runner,
       class_name: '::Naf::MachineRunner'
+    has_many :historical_jobs,
+      class_name: '::Naf::HistoricalJob'
 
     #--------------------
     # *** Validations ***

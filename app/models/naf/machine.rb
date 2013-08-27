@@ -13,7 +13,8 @@ module Naf
                     :thread_pool_size,
                     :log_level,
                     :marked_down,
-                    :short_name
+                    :short_name,
+                    :deleted
 
     IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
 
@@ -106,9 +107,9 @@ module Naf
       time.nil? || time < (Time.zone.now - check_period)
     end
 
-    def self.include_disabled(filter)
+    def self.include_deleted(filter)
       if !filter
-        where(enabled: true)
+        where(deleted: false)
       else
         where({})
       end
@@ -208,18 +209,12 @@ module Naf
 
     def affinity
       return ::Naf::Affinity.
-        where(:affinity_classification_id => ::Naf::AffinityClassification.location.id,
-              :affinity_name => self.id.to_s).first
+        where(affinity_classification_id: ::Naf::AffinityClassification.location.id,
+              affinity_name: self.id.to_s).first
     end
 
     def short_name_if_it_exist
       short_name || server_name
-    end
-
-    def parameter_weight(parameter)
-      machine_affinity_slots.
-        where(affinity_id: ::Naf::Affinity.find_by_affinity_name(parameter).id).
-        first.try(:affinity_parameter).to_f
     end
 
     def pickle(pickler)

@@ -69,10 +69,10 @@ module Logical
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
             select("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
+            weight_available_on_machine(machine).
             runnable_by_machine(machine).
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
-            weight_available_on_machine(machine).
             group("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
             having("array(
               select affinity_id::integer
@@ -87,17 +87,17 @@ module Logical
         elsif machine.machine_affinity_slots.present?
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
+            weight_available_on_machine(machine).
             runnable_by_machine(machine).
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
-            weight_available_on_machine(machine).
             order_by_priority.limit(100)
         else
           # Machine can run any queued job
           possible_jobs = ::Naf::QueuedJob.
+            weight_available_on_machine(machine).
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
-            weight_available_on_machine(machine).
             order_by_priority.limit(100)
         end
       end

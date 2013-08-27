@@ -275,7 +275,7 @@ module Process::Naf
             running_job.pid = pid
             running_job.historical_job.pid = pid
             running_job.historical_job.failed_to_start = false
-            running_job.historical_job.machine_runner_id = invocation.machine_runner_id
+            running_job.historical_job.machine_runner_invocation_id = invocation.id
             logger.info "job started : #{running_job}"
             running_job.save!
             running_job.historical_job.save!

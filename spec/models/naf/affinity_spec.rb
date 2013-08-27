@@ -27,7 +27,7 @@ module Naf
 
     it { should belong_to(:affinity_classification) }
     it { should have_many(:application_schedule_affinity_tabs) }
-    it { should have_many(:machine_affinity_tabs) }
+    it { should have_many(:machine_affinity_slots) }
 
     #--------------------
     # *** Validations ***

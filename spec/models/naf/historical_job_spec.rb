@@ -27,7 +27,7 @@ module Naf
      :marked_dead_by_machine_id,
      :log_level,
      :tags,
-     :machine_runner_id].each do |a|
+     :machine_runner_invocation_id].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -46,7 +46,7 @@ module Naf
     it { should belong_to(:marked_dead_by_machine) }
     it { should belong_to(:application) }
     it { should belong_to(:application_run_group_restriction) }
-    it { should belong_to(:machine_runner) }
+    it { should belong_to(:machine_runner_invocation) }
     it { should have_many(:historical_job_prerequisites) }
     it { should have_many(:prerequisites) }
     it { should have_many(:historical_job_affinity_tabs) }
