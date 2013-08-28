@@ -80,7 +80,7 @@ module Logical::Naf::ConstructionZone
         (1..number_of_jobs).each do
           machine_parameters = {
             :application_run_group_limit => number_of_jobs,
-            :application_run_group_restriction => :Naf::ApplicationRunGroupRestriction.limited_per_machine
+            :application_run_group_restriction => ::Naf::ApplicationRunGroupRestriction.limited_per_machine
           }.merge(parameters)
           machine_parameters[:affinities] = (machine_parameters[:affinities] || []) + [machine.affinity]
           work_order = AdHocWorkOrder.new(machine_parameters)
