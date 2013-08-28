@@ -76,7 +76,7 @@ module Logical::Naf::ConstructionZone
 
     def enqueue_n_commands_on_machines(parameters, number_of_jobs = :from_limit, machines = [])
       machines.each do |machine|
-        number_of_jobs = (parameters[:application_run_group_limit] || 1) if parameters.number_of_jobs == :from_limit
+        number_of_jobs = (parameters[:application_run_group_limit] || 1) if number_of_jobs == :from_limit
         (1..number_of_jobs).each do
           machine_parameters = {
             :application_run_group_limit => number_of_jobs,
@@ -90,7 +90,7 @@ module Logical::Naf::ConstructionZone
     end
 
     def enqueue_n_commands(parameters, number_of_jobs = :from_limit)
-      number_of_jobs = (parameters[:application_run_group_limit] || 1) if parameters.number_of_jobs == :from_limit
+      number_of_jobs = (parameters[:application_run_group_limit] || 1) if number_of_jobs == :from_limit
       (1..number_of_jobs).each do
         work_order = AdHocWorkOrder.new({:application_run_group_limit => number_of_jobs}.merge(parameters))
         @foreman.enqueue(work_order)
