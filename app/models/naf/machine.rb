@@ -73,6 +73,21 @@ module Naf
       where(marked_down: true)
     end
 
+    def self.with_affinity(affinity_short_name)
+      sql = <<-SQL
+         exists (select
+                   1
+                 from
+                   #{::Naf::MachineAffinitySlot.table_name} as mas
+                 inner join #{::Naf::Affinities.table_name} as a on
+                   a.id = mas.affinity_id and
+                   a.short_name = ?
+                 where
+                   mas.machine_id = #{::Naf::Machine.table_name}.id)
+      SQL
+      return where([sql, affinity_short_name])
+    end
+
     def self.machine_ip_address
       begin
         Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]

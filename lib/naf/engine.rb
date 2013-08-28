@@ -1,6 +1,6 @@
 require 'rubygems'
 require 'will_paginate'
-require 'mem_info'
+require 'facter'
 require 'jquery-rails'
 require 'log4r_remote_syslog_outputter'
 require 'partitioned'

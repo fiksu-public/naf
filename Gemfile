@@ -10,7 +10,7 @@ end
 gem 'jquery-ui-rails'
 gem 'awesome_print'
 gem 'will_paginate'
-gem 'mem_info'
+gem 'facter'
 gem 'shoulda-matchers', '2.0.0'
 gem "timecop", '0.4.5'
 

@@ -53,7 +53,6 @@ module Process::Naf
                                               "#{af_name}.yml",
                                               "#{af_name}-#{Rails.env}.yml"]
       @last_machine_log_level = nil
-      @job_creator = ::Logical::Naf::JobCreator.new
     end
 
     def work
@@ -317,8 +316,10 @@ module Process::Naf
           should_be_queued(machine).each do |application_schedule|
             logger.info "scheduled application: #{application_schedule}"
             begin
+              naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
+              # this doesn't work very well for run_group_limits in the thousands
               Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-                @job_creator.queue_application_schedule(application_schedule)
+                naf_boss.enqueue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
               logger.error "#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}"
@@ -528,36 +529,17 @@ module Process::Naf
         )
       end
 
+      foreman = ::Logical::Naf::ConstructionZone::Foreman.new(machine)
       return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
-        # only queue applications that are not restricted by run group limits
-        if schedule.enqueue_backlogs
-          true
-        else
-          if (schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.no_limit ||
-              schedule.application_run_group_limit.nil? ||
-              schedule.application_run_group_name.nil?)
-            true
-          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_machine
-            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
-             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name,
-                                     :started_on_machine_id => machine.id).count) < schedule.application_run_group_limit
-          elsif schedule.application_run_group_restriction_id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines
-            (::Naf::QueuedJob.where(:application_run_group_name => schedule.application_run_group_name).count +
-             ::Naf::RunningJob.where(:application_run_group_name => schedule.application_run_group_name).count) < schedule.application_run_group_limit
-          else
-            false
-          end
-        end
+        schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
+                                                                    schedule.application_run_group_name,
+                                                                    schedule.application_run_group_limit)
       end
     end
 
     def memory_available_to_spawn?
-      begin
-        m = MemInfo.new
-        memory_used = (m.memused.to_f / m.memtotal)
-      rescue
-        return true
-      end
+      Facter.loadfacts
+      memory_used = (Facter.memoryfree_mb.to_f / Facter.memorysize_mb.to_f)
 
       if memory_used < @maximum_memory_usage
         logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"

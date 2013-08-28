@@ -52,5 +52,21 @@ module Naf
       invoke(job, job.command)
     end
 
+    def self.rails
+      @rails ||= find_by_script_type_command('rails')
+    end
+
+    def self.ruby
+      @ruby ||= find_by_script_type_command('ruby')
+    end
+
+    def self.bash_command
+      @bash_command ||= find_by_script_type_command('bash command')
+    end
+
+    def self.bash_script
+      @bash_script ||= find_by_script_type_command('bash script')
+    end
+
   end
 end
