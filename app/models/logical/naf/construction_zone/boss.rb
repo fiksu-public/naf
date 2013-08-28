@@ -1,5 +1,9 @@
 module Logical::Naf::ConstructionZone
   class Boss
+    include ::Af::Application::Component
+
+    create_proxy_logger
+
     def initialize(machine = Naf::Machine.current)
       @foreman = Foreman.new(machine)
     end
@@ -75,8 +79,10 @@ module Logical::Naf::ConstructionZone
     end
 
     def enqueue_n_commands_on_machines(parameters, number_of_jobs = :from_limit, machines = [])
+      logger.detail "enqueuing #{parameters[:command]} #{number_of_jobs} time(s) on #{machines.length} machine(s)"
       machines.each do |machine|
         number_of_jobs = (parameters[:application_run_group_limit] || 1) if number_of_jobs == :from_limit
+        logger.info "enqueuing #{parameters[:command]} #{number_of_jobs} time(s) on #{machine}"
         (1..number_of_jobs).each do
           machine_parameters = {
             :application_run_group_limit => number_of_jobs,
@@ -91,6 +97,7 @@ module Logical::Naf::ConstructionZone
 
     def enqueue_n_commands(parameters, number_of_jobs = :from_limit)
       number_of_jobs = (parameters[:application_run_group_limit] || 1) if number_of_jobs == :from_limit
+      logger.info "enqueuing #{parameters[:command]} #{number_of_jobs} time(s) on #{machine}"
       (1..number_of_jobs).each do
         work_order = AdHocWorkOrder.new({:application_run_group_limit => number_of_jobs}.merge(parameters))
         @foreman.enqueue(work_order)
