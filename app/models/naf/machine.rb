@@ -79,7 +79,7 @@ module Naf
                    1
                  from
                    #{::Naf::MachineAffinitySlot.table_name} as mas
-                 inner join #{::Naf::Affinities.table_name} as a on
+                 inner join #{::Naf::Affinity.table_name} as a on
                    a.id = mas.affinity_id and
                    a.short_name = ?
                  where
