@@ -23,8 +23,8 @@ jQuery(document).ready(function() {
         { "sWidth": "4%"},      // Priority
         { "sWidth": "4%"},      // Enabled
         { "sWidth": "4%"},      // Enqueue Backlogs
-        { "sWidth": "8%"},      // Run Time
-        { "sWidth": "8%"},      // Last Queued At
+        { "sWidth": "5%"},      // Run Time
+        { "sWidth": "10%"},      // Last Queued At
         { "sWidth": "8%"},      // Prerequisites
         { "sWidth": "4%"},      // Actions
         null,
@@ -82,7 +82,7 @@ function colorizationDeletedOrHidden(nRow, aData) {
 }
 
 function checkTimeFormat(nRow, aData) {
-  var l_q_a_array = jQuery(aData[10]).text().split(',');
+  var l_q_a_array = jQuery(aData[11]).text().split(',');
   var last_queued_at;
   if(jQuery('#time_format').val() == 'lexically') {
     last_queued_at = l_q_a_array[0];
@@ -90,5 +90,5 @@ function checkTimeFormat(nRow, aData) {
     last_queued_at = l_q_a_array[1];
   }
 
-  jQuery('td:nth-child(11)', nRow).empty().append(jQuery(aData[10]).text(last_queued_at));
+  jQuery('td:nth-child(12)', nRow).empty().append(jQuery(aData[11]).text(last_queued_at));
 }
