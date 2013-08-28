@@ -53,19 +53,19 @@ module Naf
     end
 
     def self.rails
-      @rails ||= find_by_script_type_command('rails')
+      @rails ||= find_by_script_type_name('rails')
     end
 
     def self.ruby
-      @ruby ||= find_by_script_type_command('ruby')
+      @ruby ||= find_by_script_type_name('ruby')
     end
 
     def self.bash_command
-      @bash_command ||= find_by_script_type_command('bash command')
+      @bash_command ||= find_by_script_type_name('bash command')
     end
 
     def self.bash_script
-      @bash_script ||= find_by_script_type_command('bash script')
+      @bash_script ||= find_by_script_type_name('bash script')
     end
 
   end
