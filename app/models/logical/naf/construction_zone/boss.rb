@@ -1,11 +1,10 @@
 module Logical::Naf::ConstructionZone
   class Boss
     include ::Af::Application::Component
-
     create_proxy_logger
 
-    def initialize(machine = Naf::Machine.current)
-      @foreman = Foreman.new(machine)
+    def initialize()
+      @foreman = Foreman.new()
     end
 
     def enqueue_application(application,

@@ -529,7 +529,7 @@ module Process::Naf
         )
       end
 
-      foreman = ::Logical::Naf::ConstructionZone::Foreman.new(machine)
+      foreman = ::Logical::Naf::ConstructionZone::Foreman.new()
       return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
         schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
                                                                     schedule.application_run_group_name,
