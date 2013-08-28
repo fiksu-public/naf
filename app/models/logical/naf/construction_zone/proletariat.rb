@@ -4,7 +4,7 @@ module Logical::Naf::ConstructionZone
       ::Naf::HistoricalJob.transaction do
         historical_job = create_historical_job(parameters, affinities, prerequisites)
         queued_job = create_queued_job(historical_job)
-        return historical_job, queued_job
+        return historical_job
       end
     end
 
@@ -14,10 +14,12 @@ module Logical::Naf::ConstructionZone
         affinities.each do |affinity|
           ::Naf::HistoricalJobAffinityTab.create(affinity.merge(historical_job_id: historical_job.id))
         end
-        # XXX this next function should be moved out of historical job, maybe
         historical_job.verify_prerequisites(prerequisites)
         prerequisites.each do |prerequisite|
-          ::Naf::HistoricalJobPrerequisite.create(prerequisite.merge(historical_job_id: historical_job.id))
+          ::Naf::HistoricalJobPrerequisite.create({
+                                                    historical_job_id: historical_job.id,
+                                                    prerequisite_historical_job_id: prerequisite.id
+                                                  })
         end
         return historical_job
       end

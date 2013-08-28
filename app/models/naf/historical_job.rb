@@ -285,6 +285,8 @@ module Naf
         reject{ |j| j.nil? }
     end
 
+    # XXX This should go away (it was moved to ConstructionZone::Foreman)
+
     def verify_prerequisites(these_jobs)
       these_jobs.each do |this_job|
         if this_job.id == id

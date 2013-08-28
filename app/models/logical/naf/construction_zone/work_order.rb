@@ -79,32 +79,8 @@ module Logical::Naf::ConstructionZone
       end
     end
 
-    def historical_job_prerequisite_parameters
-      @prerequisites.map do |prerequisite|
-        if prerequisite.is_a?(Integer)
-          # the job id
-          {
-            :prerequisite_historical_job_id => prerequisite
-          }
-        elsif (prerequisite.is_a?(::Naf::HistoricalJob) ||
-               prerequisite.is_a?(::Naf::QueuedJob) ||
-               prerequisite.is_a?(::Naf::RunningJob))
-          # the job
-          {
-            :prerequisite_historical_job_id => prerequisite.id
-          }
-        elsif prerequisite.is_a?(Array)
-          # create_job returns and array of [historical job, queued job]
-          # first better be a Naf::HistoricalJob
-          prerequisite_object = {
-            :prerequisite_historical_job_id => prerequisite.first.try(:id)
-          }
-          raise "no prerequisite provided" if prerequisite_object[:prerequisite_historical_job_id].nil?
-          prerequisite_object
-        else
-          raise "unknown prerequisite kind: #{prerequisite.inspect}"
-        end
-      end
+    def historical_job_prerequisite_historical_jobs
+      return @prerequisites
     end
   end
 end

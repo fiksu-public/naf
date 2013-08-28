@@ -12,7 +12,7 @@ module Logical::Naf::ConstructionZone
                                  work_order.application_run_group_limit)
         @proletariat.create_job(work_order.historical_job_parameters,
                                 work_order.historical_job_affinity_tab_parameters,
-                                work_order.historical_job_prerequisite_parameters)
+                                work_order.historical_job_prerequisite_historical_jobs)
       end
     end
 
