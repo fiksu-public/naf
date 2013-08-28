@@ -1,23 +1,23 @@
  <%
   rows = @machines.each do |machine|
-    machine[12] = link_to image_tag('papertrail_machine.png',
+    machine[11] = link_to image_tag('papertrail_machine.png',
                                     class: 'action',
                                     title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) log in Papertrail"),
-                                    machine[12], { target: '_blank', class: "papertrail", id: machine[0] }
-    machine[12] << "&nbsp;&nbsp;".html_safe
-    machine[12] << (link_to image_tag('papertrail_machine_runner.png',
+                                    machine[11], { target: '_blank', class: "papertrail", id: machine[0] }
+    machine[11] << "&nbsp;&nbsp;".html_safe
+    machine[11] << (link_to image_tag('papertrail_machine_runner.png',
                                       class: 'action',
                                       title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) runner log in Papertrail"),
-                                      machine[13], { target: '_blank', class: "papertrail", id: machine[0] })
-    machine[12] << "&nbsp;&nbsp;".html_safe
-    unless machine[11]
-      machine[12] << (link_to image_tag('terminate.png',
+                                      machine[12], { target: '_blank', class: "papertrail", id: machine[0] })
+    machine[11] << "&nbsp;&nbsp;".html_safe
+    unless machine[10]
+      machine[11] << (link_to image_tag('terminate.png',
                                         class: 'action',
                                         title: "Mark machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) down"),
                                         "#", { class: "terminate", id: machine[0] })
     end
-    machine.delete_at(13)
-    machine.delete_at(11)
+    machine.delete_at(12)
+    machine.delete_at(10)
   end
 %>
 <%= raw rows %>

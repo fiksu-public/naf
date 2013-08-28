@@ -117,8 +117,8 @@ module Process::Naf
     private
 
     def add_default_affinities(machine)
-      # Add Location Affinity
-      classification = ::Naf::AffinityClassification.location.id
+      # Add Machine Affinity
+      classification = ::Naf::AffinityClassification.machine.id
       affinity = ::Naf::Affinity.
         find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id.to_s)
       machine.machine_affinity_slots.create(affinity_id: affinity.id)

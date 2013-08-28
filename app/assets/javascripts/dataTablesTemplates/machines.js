@@ -14,13 +14,12 @@ jQuery(document).ready(function() {
         { "sWidth": "8%"},
         { "sWidth": "14%"},
         { "sWidth": "4%"},
-        { "sWidth": "4%"},
         { "sWidth": "10%"},
-        { "sWidth": "175px"},
-        null,
+        { "sWidth": "12%"},
+        { "sWidth": "12%"},
         { "sWidth": "6%"},
         { "sWidth": "10%"},
-        { "sWidth": "70px"}
+        { "sWidth": "6%"}
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });

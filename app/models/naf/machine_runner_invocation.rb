@@ -24,11 +24,7 @@ module Naf
     #++++++++++++++++++++
 
     validates :machine_runner_id,
-              :pid,
-              :commit_information,
-              :branch_name,
-              :repository_name,
-              :deployment_tag, presence: true
+              :pid, presence: true
 
     #----------------------
     # *** Class Methods ***

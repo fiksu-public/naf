@@ -2,6 +2,14 @@
   rows = @rows.each do |row|
   	row[0] = link_to row[0], machine_runner_invocation_path(row[0])
   	row[2] = link_to row[2], machine_runner_path(row[2])
+    row[3] = link_to row[3][1], machine_path(row[3][0])
+    if row[6].present?
+      row[6] = link_to row[6], "https://github.com/#{row[8]}/commit/#{row[6]}"
+    else
+      row[6] = '<i>Unknown</i>'
+    end
+    row[7] = '<i>None</i>' if row[7].blank?
+    row.delete_at(8)
   end
 %>
 

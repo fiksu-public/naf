@@ -41,7 +41,9 @@ module Naf
     end
 
     def self.dead
+      joins(:machine).
       joins(:machine_runner_invocations).
+      where('naf.machines.enabled IS TRUE').
       where('naf.machine_runner_invocations.is_running IS FALSE').
       where('NOT EXISTS(
           SELECT

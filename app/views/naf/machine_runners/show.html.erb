@@ -55,25 +55,31 @@
           <td><%= @machine_runner.id %></td>
         </tr>
         <tr>
-          <td>Created At</td>
+          <td>Started At</td>
           <td><%= @machine_runner.created_at %></td>
         </tr>
         <tr>
-          <td>Machine Id</td>
-          <td><%= link_to @machine_runner.machine.id, machine_path(@machine_runner.machine) %></td>
+          <td>Server Name</td>
+          <td>
+            <% machine = ::Logical::Naf::Machine.new(::Naf::Machine.find_by_id(@machine_runner.machine.id)) %>
+            <%= link_to machine.name, machine_path(@machine_runner.machine) %>
+          </td>
         </tr>
         <tr>
           <td>Runner Cwd</td>
           <td><%= @machine_runner.runner_cwd %></td>
         </tr>
-        <tr>
-          <td>Wind Down Runner</td>
-          <td><%= link_to image_tag('terminate.png',
-            class: 'action',
-            title: "Wind Down Runner(id: #{@machine_runner.machine_runner_invocation.last.id})"),
-            "#", { class: "wind_down" }
-          %></td>
-        </tr>
+        <% invocation = @machine_runner.machine_runner_invocations.last %>
+        <% if invocation.present? && invocation.is_running && !invocation.wind_down -%>
+          <tr>
+            <td>Wind Down Runner</td>
+            <td><%= link_to image_tag('terminate.png',
+              class: 'action',
+              title: "Wind Down Runner(id: #{@machine_runner.machine_runner_invocations.last.id})"),
+              "#", { class: "wind_down" }
+            %></td>
+          </tr>
+        <% end -%>
       </tbody>
     </table>
     </br>
@@ -82,12 +88,11 @@
     <table id="naf_table_show">
       <thead>
         <tr>
-          <th>Id</th>
-          <th>Started At</th>
-          <th>Last Seen</th>
+          <th width="7%">Id</th>
+          <th width="25%">Started At</th>
+          <th width="25%">Last Seen</th>
           <th>Pid</th>
-          <th>Is Running</th>
-          <th>Wind Down</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
@@ -97,8 +102,7 @@
           <td><%= invocation.created_at %></td>
           <td><%= invocation.updated_at %></td>
           <td><%= invocation.pid %></td>
-          <td><%= invocation.is_running %></td>
-          <td><%= invocation.wind_down %></td>
+          <td class="<%= invocation.status %>"><%= invocation.status.gsub('-', ' ').split.map(&:capitalize).join(' ') %></td>
         </tr>
         <% end -%>
       </tbody>

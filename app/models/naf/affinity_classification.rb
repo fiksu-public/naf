@@ -36,5 +36,9 @@ module Naf
       @@weight ||= find_by_affinity_classification_name('weight')
     end
 
+    def self.machine
+      @@machine ||= find_by_affinity_classification_name('machine')
+    end
+
   end
 end

@@ -3,12 +3,14 @@ module Naf
     include Naf::ApplicationHelper
 
     before_filter :set_rows_per_page
+    before_filter :set_search_status
 
     def index
       respond_to do |format|
         format.html
         format.json do
           set_page
+          set_status
 
           params[:search][:direction] = params['sSortDir_0']
           params[:search][:order] = Logical::Naf::Job::ORDER[params['iSortCol_0']]

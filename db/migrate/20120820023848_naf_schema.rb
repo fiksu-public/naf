@@ -29,7 +29,7 @@ class NafSchema < ActiveRecord::Migration
           affinity_classification_name   text not null unique
       );
       insert into #{schema_name}.affinity_classifications (affinity_classification_name) values
-        ('location'), ('purpose'), ('application'), ('weight');
+        ('location'), ('purpose'), ('application'), ('weight'), ('machine');
       create table #{schema_name}.affinities
       (
           id                            serial not null primary key,
@@ -94,10 +94,10 @@ class NafSchema < ActiveRecord::Migration
           pid                   integer not null,
           is_running            boolean not null default true,
           wind_down             boolean not null default false,
-          commit_information    text not null,
-          branch_name           text not null,
-          repository_name       text not null,
-          deployment_tag        text not null
+          commit_information    text null,
+          branch_name           text null,
+          repository_name       text null,
+          deployment_tag        text null
       );
       create table #{schema_name}.application_types
       (

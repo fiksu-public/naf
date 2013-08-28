@@ -96,14 +96,24 @@ module Process::Naf
         machine_runner = ::Naf::MachineRunner.
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
-        # Create an invocation for this runner
+
         repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
+        if repository_name.match(/fatal/)
+          repository_name = nil
+        end
         branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
+        if branch_name.match(/fatal/)
+          branch_name = nil
+        end
         commit_information = (`git log --pretty="%H" -n 1`).strip
+        if commit_information.match(/fatal/)
+          commit_information = nil
+        end
         deployment_tag = (`git describe --abbrev=0 --tag 2>&1`).strip
         if deployment_tag.match(/fatal: No names found, cannot describe anything/)
-          deployment_tag = 'unknown'
+          deployment_tag = nil
         end
+        # Create an invocation for this runner
         invocation = ::Naf::MachineRunnerInvocation.create!(machine_runner_id: machine_runner.id,
                                                             pid: Process.pid,
                                                             is_running: true,
