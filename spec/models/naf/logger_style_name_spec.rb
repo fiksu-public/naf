@@ -28,7 +28,6 @@ module Naf
     #++++++++++++++++++++
 
     it { should validate_presence_of(:logger_name_id) }
-    it { should validate_presence_of(:logger_level_id) }
     it { should validate_presence_of(:logger_style_id) }
 
     describe "uniqueness"do

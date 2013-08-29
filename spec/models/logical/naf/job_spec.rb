@@ -227,17 +227,17 @@ module Logical
 
         it "show correct run time when job has started < 60 seconds ago" do
           historical_job.started_at = Time.zone.now - 10.seconds
-          job.started_at.should == '10 seconds ago'
+          job.started_at.should =~ /10 seconds ago/
         end
 
         it "show correct run time when job has started >= 60 seconds and < 2 days ago" do
           historical_job.started_at = Time.zone.now - 6.hours
-          job.started_at.should == '-6h0m'
+          job.started_at.should =~ /-6h0m/
         end
 
         it "show correct run time when job has started <= 2 days ago" do
           historical_job.started_at = Time.zone.now - 3.days
-          job.started_at.should == '3 days ago'
+          job.started_at.should =~ /3 days ago/
         end
       end
 

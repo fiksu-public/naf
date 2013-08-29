@@ -30,7 +30,7 @@
           <td><%= link_to affinity.id, affinity_path(affinity) %></td>
           <td><%= affinity.affinity_classification.affinity_classification_name %></td>
           <td>
-            <% if affinity.affinity_classification.affinity_classification_name == 'location' -%>
+            <% if affinity.affinity_classification.affinity_classification_name == 'machine' -%>
               <% affinity_name = ::Naf::Machine.find_by_id(affinity.affinity_name) %>
               <%= link_to affinity.affinity_name, machine_path(affinity_name) if affinity_name %>
             <% else -%>

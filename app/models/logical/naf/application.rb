@@ -54,7 +54,7 @@ module Logical
           if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
-              application_scope.where(["lower(#{Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+              application_scope.where(["lower(#{::Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
             else
               application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
             end
@@ -123,8 +123,6 @@ module Logical
         if schedule = @app.application_schedule
           if schedule.application_run_group_name.blank?
             "not set"
-          elsif schedule.application_run_group_name == command
-            "command"
           else
             schedule.application_run_group_name
           end
