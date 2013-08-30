@@ -269,11 +269,11 @@ module Logical
         if @job.started_at.present?
           value = Time.zone.now - @job.started_at
           if value < 60
-            "#{value.to_i} seconds ago"
+            "#{value.to_i} seconds ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           elsif value < 172_800
             time_difference(value)
           elsif value >= 172_800
-            "#{time_ago_in_words(@job.started_at, true)} ago"
+            "#{time_ago_in_words(@job.started_at, true)} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           else
             ""
           end
@@ -292,7 +292,7 @@ module Logical
         days = value % 7
         hours += days * 24 if days > 0
 
-        "-#{hours.to_i}h#{minutes.to_i}m"
+        "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
       end
 
       def has_started?

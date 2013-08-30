@@ -11,7 +11,6 @@ module Logical
                        :server_address,
                        :server_note,
                        :enabled,
-                       :deleted,
                        :process_pool_size,
                        :last_checked_schedules_at,
                        :last_seen_alive_at,

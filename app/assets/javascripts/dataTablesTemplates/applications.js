@@ -24,7 +24,7 @@ jQuery(document).ready(function() {
         { "sWidth": "4%"},      // Enabled
         { "sWidth": "4%"},      // Enqueue Backlogs
         { "sWidth": "5%"},      // Run Time
-        { "sWidth": "10%"},      // Last Queued At
+        { "sWidth": "10%"},     // Last Queued At
         { "sWidth": "8%"},      // Prerequisites
         { "sWidth": "4%"},      // Actions
         null,

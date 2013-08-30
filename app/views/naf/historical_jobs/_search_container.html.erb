@@ -57,7 +57,7 @@
         <%= select(:search, :application_type_id,
                     Naf::ApplicationType.all.collect {
                       |type| [type.script_type_name, type.id]
-                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable' }) %>
+                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable', style: "width:170px" }) %>
       </div>
       <br/>
 
@@ -66,20 +66,24 @@
         <%= select(:search, :application_run_group_restriction_id,
                     Naf::ApplicationRunGroupRestriction.all.collect {
                       |a| [a.application_run_group_restriction_name, a.id]
-                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable' }) %>
+                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable', style: "width:170px" }) %>
       </div>
       <br/>
 
       <div class="field">
         <%= label(:failed_to_start, "Failed to Start:") %>
-        <%= select(:search, :failed_to_start, [["Ignore", nil], ["True", false], ["False", nil]], { }, { class: 'datatable_variable' }) %>
+        <%= select(:search, :failed_to_start,
+                            [["Ignore", nil], ["True", true], ["False", nil]],
+                            { }, { class: 'datatable_variable', style: "width:170px" }) %>
       </div>
       <br/>
     </div>
     <div style="width:30%; padding-left:40px;" class="display-inline-block">
       <div class="field">
         <%= label(:request_to_terminate, "Request to Terminate:") %>
-        <%= select(:search, :request_to_terminate, [["Ignore", nil], ["True", true], ["False", false]], {}, { class: 'datatable_variable' }) %>
+        <%= select(:search, :request_to_terminate,
+                            [["Ignore", nil], ["True", true], ["False", false]],
+                            {}, { class: 'datatable_variable', style: "width:170px" }) %>
       </div>
       <br/>
 

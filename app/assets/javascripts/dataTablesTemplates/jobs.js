@@ -12,19 +12,19 @@ jQuery(document).ready(function() {
     ],
     "bAutoWidth": false,
     "aoColumns": [
-        { "sWidth": "4%"},              // Id
-        { "sWidth": "7%"},              // Server
-        { "sWidth": "4%"},              // Pid
-        { "sWidth": "13%"},             // Queued Time
-        { "sWidth": "25%"},             // Title
-        null,                           // Started At
-        null,                           // Finished At
-        null,                           // Run Time
-        null,                           // Affinities
-        null,                           // Tags
-        { "asSorting": [ "desc" ] },    // Status
-        null,                           // Application URL
-        { "sWidth": "6%"}               // Actions
+        { "sWidth": "3%"},                              // Id
+        { "sWidth": "7%"},                              // Server
+        { "sWidth": "4%"},                              // Pid
+        { "sWidth": "12%"},                             // Queued Time
+        { "sWidth": "25%"},                             // Title
+        { "sWidth": "11%"},                             // Started At
+        { "sWidth": "11%"},                             // Finished At
+        { "sWidth": "6%"},                              // Run Time
+        { "sWidth": "12%"},                             // Affinities
+        { "sWidth": "8%"},                              // Tags
+        { "asSorting": [ "desc" ], "sWidth": "6%" },    // Status
+        null,                                           // Application URL
+        { "sWidth": "6%"}                               // Actions
     ],
     "fnInitComplete" : function() {
       initPageSelect();

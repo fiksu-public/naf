@@ -63,6 +63,7 @@ module Naf
 
     def edit
       @application = Naf::Application.find(params[:id])
+      check_application_run_group_name
       app_schedule = @application.application_schedule
       if app_schedule.blank?
         build_app_schedule = @application.build_application_schedule
@@ -79,6 +80,7 @@ module Naf
 
     def update
       @application = Naf::Application.find(params[:id])
+      set_application_run_group_name
       if @application.update_attributes(params[:application])
         app_schedule = @application.application_schedule
         if app_schedule.present?

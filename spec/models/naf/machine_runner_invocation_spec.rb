@@ -33,10 +33,6 @@ module Naf
 
     it { should validate_presence_of(:machine_runner_id) }
     it { should validate_presence_of(:pid) }
-    it { should validate_presence_of(:commit_information) }
-    it { should validate_presence_of(:branch_name) }
-    it { should validate_presence_of(:repository_name) }
-    it { should validate_presence_of(:deployment_tag) }
 
   end
 end
