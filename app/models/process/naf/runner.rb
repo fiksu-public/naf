@@ -548,7 +548,7 @@ module Process::Naf
     end
 
     def memory_available_to_spawn?
-      Facter.loadfacts
+      Facter.clear
       memory_used = (Facter.memoryfree_mb.to_f / Facter.memorysize_mb.to_f)
 
       if memory_used < @maximum_memory_usage
