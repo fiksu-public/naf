@@ -549,13 +549,15 @@ module Process::Naf
 
     def memory_available_to_spawn?
       Facter.clear
-      memory_used = (Facter.memoryfree_mb.to_f / Facter.memorysize_mb.to_f) * 100.0
+      memory_size = Facter.memorysize_mb.to_f
+      memory_free = Facter.memoryfree_mb.to_f
+      memory_free_percentage = (memory_free / memory_size) * 100.0
 
-      if memory_used < @maximum_memory_usage
-        logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+      if memory_free_percentage >= (100.0 - @maximum_memory_usage)
+        logger.detail "memory available: #{memory_free_percentage}% < #{100.0 - @maximum_memory_usage}% (max percent)"
         return true
       end
-      logger.alarm "not enough memory to spawn: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+      logger.alarm "not enough memory to spawn: memory available: #{memory_free_percentage}% < #{100.0 - @maximum_memory_usage}% (max percent)"
 
       return false
     end
