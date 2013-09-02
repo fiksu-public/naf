@@ -554,10 +554,10 @@ module Process::Naf
       memory_free_percentage = (memory_free / memory_size) * 100.0
 
       if memory_free_percentage >= (100.0 - @maximum_memory_usage)
-        logger.detail "memory available: #{memory_free_percentage}% < #{100.0 - @maximum_memory_usage}% (max percent)"
+        logger.detail "memory available: #{memory_free_percentage}% (free) >= #{100.0 - @maximum_memory_usage}% (max percent)"
         return true
       end
-      logger.alarm "not enough memory to spawn: memory available: #{memory_free_percentage}% < #{100.0 - @maximum_memory_usage}% (max percent)"
+      logger.alarm "not enough memory to spawn: #{memory_free_percentage}% (free) < #{100.0 - @maximum_memory_usage}% (max percent)"
 
       return false
     end
