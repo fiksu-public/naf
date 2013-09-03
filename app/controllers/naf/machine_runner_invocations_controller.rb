@@ -28,7 +28,7 @@ module Naf
         @machine_runner_invocation = Naf::MachineRunnerInvocation.find(params[:id])
         format.json do
           if params[:machine_runner_invocation][:request_to_wind_down].present?
-            @machine_runner_invocation.update_attributes!(wind_down: true)
+            @machine_runner_invocation.update_attributes!(wind_down_at: Time.zone.now)
             @machine_runner_invocation.machine_runner.reload
             render json: { success: true }.to_json
           else
@@ -36,6 +36,23 @@ module Naf
           end
         end
       end
+    end
+
+    def wind_down_all
+      if ::Naf::MachineRunnerInvocation.where('wind_down_at IS NULL AND is_running IS TRUE').
+        count == 0
+
+        flash[:error] = "There aren't any Machine Runners to wind down!"
+        redirect_to machine_runners_path
+        return
+      end
+
+      ::Naf::MachineRunnerInvocation.
+        where('wind_down_at IS NULL AND is_running IS TRUE').
+        update_all(wind_down_at: Time.zone.now)
+
+      redirect_to machine_runners_path,
+                    notice: 'Machine Runners are winding down!'
     end
 
   end

@@ -19,7 +19,7 @@ jQuery(document).ready(function() {
         { "sWidth": "25%"},                             // Title
         { "sWidth": "11%"},                             // Started At
         { "sWidth": "11%"},                             // Finished At
-        { "sWidth": "6%"},                              // Run Time
+        { "sWidth": "7%"},                              // Run Time
         { "sWidth": "12%"},                             // Affinities
         { "sWidth": "8%"},                              // Tags
         { "asSorting": [ "desc" ], "sWidth": "6%" },    // Status
@@ -94,18 +94,23 @@ function addLinkToTitle(nRow, aData) {
 function checkTimeFormat(nRow, aData) {
   var start_array = aData[5].split(',');
   var finish_array = aData[6].split(',');
+  var run_time_array = aData[7].split(',');
   var started_at;
   var finished_at;
+  var run_time;
   if(jQuery('#time_format').val() == 'lexically') {
     started_at = start_array[0];
     finished_at = finish_array[0];
+    run_time = run_time_array[0];
   } else {
     started_at = start_array[1];
     finished_at = finish_array[1];
+    run_time = run_time_array[1];
   }
 
   jQuery('td:nth-child(6)', nRow).empty().append(started_at);
   jQuery('td:nth-child(7)', nRow).empty().append(finished_at);
+  jQuery('td:nth-child(8)', nRow).empty().append(run_time);
 }
 
 function alignmentButtons(nRow, aData) {

@@ -42,12 +42,12 @@ class NafSchema < ActiveRecord::Migration
           affinity_note                 text null,
           unique (affinity_classification_id, affinity_name)
       );
-      insert into #{schema_name}.affinities (affinity_classification_id, affinity_name) values
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'normal'),
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'canary'),
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial'),
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'memory'),
-         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'cpus');
+      insert into #{schema_name}.affinities (affinity_classification_id, affinity_name, affinity_short_name) values
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'normal', 'normal'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'canary', 'canary'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'purpose'), 'perennial', 'perennial'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'memory', 'memory'),
+         ((select id from #{schema_name}.affinity_classifications where affinity_classification_name = 'weight'), 'cpus', 'cpus');
       create table #{schema_name}.machines
       (
           id                             serial not null primary key,
@@ -93,7 +93,7 @@ class NafSchema < ActiveRecord::Migration
           machine_runner_id     integer not null references naf.machine_runners,
           pid                   integer not null,
           is_running            boolean not null default true,
-          wind_down             boolean not null default false,
+          wind_down_at          timestamp null,
           commit_information    text null,
           branch_name           text null,
           repository_name       text null,

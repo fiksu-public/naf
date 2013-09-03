@@ -282,7 +282,7 @@ module Logical
         end
       end
 
-      def time_difference(value)
+      def time_difference(value, time_format_on=true)
         seconds = value % 60
         value = (value - seconds) / 60
         minutes = value % 60
@@ -290,9 +290,17 @@ module Logical
         hours = value % 24
         value = (value - hours) / 24
         days = value % 7
-        hours += days * 24 if days > 0
+        more_hours = hours + days * 24 if days > 0
 
-        "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+        if time_format_on
+          "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+        else
+          if days < 2
+            "-#{more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
+          else
+            "-#{days.to_i}d#{hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
+          end
+        end
       end
 
       def has_started?
@@ -306,9 +314,9 @@ module Logical
       def run_time
         if @job.started_at.present?
           if @job.finished_at.present?
-            Time.at(@job.finished_at - @job.started_at).utc.strftime("%Hh%Mm%Ss")
+            time_difference(@job.finished_at - @job.started_at, false)[1..-1]
           else
-            Time.at(Time.zone.now - @job.started_at).utc.strftime("%Hh%Mm%Ss")
+            time_difference(Time.zone.now - @job.started_at, false)[1..-1]
           end
         else
           ""

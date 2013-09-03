@@ -1,0 +1,6 @@
+<% content_for :body do %>
+  <div id="display-container"><%= render(partial: 'form') %></div>
+  <%= render partial: 'graph', locals: { url: 'running_scripts', right: 300, width: 1650 } %>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

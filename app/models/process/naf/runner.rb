@@ -82,7 +82,7 @@ module Process::Naf
               begin
                 retval = Process.kill(0, invocation.pid)
                 logger.detail "#{retval} = kill(0, #{invocation.pid}) -- process alive, marking runner invocation as winding down"
-                invocation.wind_down = true
+                invocation.wind_down_at = Time.zone.now
                 invocation.save!
               rescue Errno::ESRCH
                 logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
@@ -180,14 +180,14 @@ module Process::Naf
       end
 
       invocation.reload
-      if invocation.wind_down
+      if invocation.wind_down_at.present?
         logger.warn "invocation asked to wind down"
         if @children.length == 0
           return false;
         end
       end
 
-      check_schedules(machine) if !invocation.wind_down
+      check_schedules(machine) if invocation.wind_down_at.blank?
 
       # clean up children that have exited
       logger.detail "cleaning up dead children: #{@children.length}"
@@ -265,8 +265,10 @@ module Process::Naf
 
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
-      while ::Naf::RunningJob.where(:started_on_machine_id => machine.id).count < machine.thread_pool_size && memory_available_to_spawn? && !invocation.wind_down
+      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && invocation.wind_down_at.blank?
+      while ::Naf::RunningJob.where(:started_on_machine_id => machine.id).count < machine.thread_pool_size &&
+        memory_available_to_spawn? && invocation.wind_down_at.blank?
+
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
           running_job = @job_fetcher.fetch_next_job

@@ -7,6 +7,11 @@ jQuery(document).ready(function() {
     "fnInitComplete" : function() {
       initPageSelect();
     },
+    "aaSorting": [[1, 'desc']],
+    "bSort": true,
+    "aoColumnDefs": [
+      { "bSortable": false, "aTargets": [2, 4, 5, 6, 7, 8] },
+    ],
     "bAutoWidth": false,
     "aoColumns": [
         { "sWidth": "5%"},              // Id
@@ -71,7 +76,7 @@ function colorizationStatus(nRow, aData) {
       jQuery('td:nth-child(7) div', nRow).addClass('winding-down');
       break;
     case 'Dead':
-      jQuery('td:nth-child(7) div', nRow).addClass('down');
+      jQuery('td:nth-child(7) div', nRow).addClass('dead');
       break;
   }
 }

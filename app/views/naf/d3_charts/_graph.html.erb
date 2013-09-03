@@ -1,0 +1,117 @@
+<script type='text/javascript'>
+  var margin = {top: 20, right: <%= right %>, bottom: 30, left: 50},
+      width = <%= width %> - margin.left - margin.right,
+      height = 500 - margin.top - margin.bottom;
+
+  var parseDate = d3.time.format.utc("%Y-%m-%dT%H:%M:%SZ").parse;
+
+  var x = d3.time.scale()
+      .range([0, width]);
+
+  var y = d3.scale.linear()
+      .range([height, 0]);
+
+  var color = d3.scale.category10();
+
+  var xAxis = d3.svg.axis()
+      .scale(x)
+      .orient("bottom");
+
+  var yAxis = d3.svg.axis()
+      .scale(y)
+      .orient("left");
+
+  var line = d3.svg.line()
+      .interpolate("basis")
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.num_naf_jobs); });
+
+  var svg = d3.select("body").select("div").select("div").select("div[id=bd]").select("div[id=child_bd]").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  d3.json("/job_system/d3_charts/<%=url%>.json?<%=@url_params-%>", function(error, data) {
+    var colors = new Array
+    colors['queued'] = '#FF8800'
+    colors['running'] = '#00FF00'
+    colors['errored'] = '#FF0000'
+
+    color.domain(d3.keys(data[0]).filter(function(key) { return key !== "date"; }));
+
+    data.forEach(function(d) {
+      d.date = parseDate(d.date);
+    });
+
+    var job_statuses = color.domain().map(function(name) {
+      return {
+        name: name,
+        values: data.map(function(d) {
+          return {date: d.date, num_naf_jobs: +d[name]};
+        })
+      };
+    });
+
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+
+    y.domain([
+      d3.min(job_statuses, function(c) { return d3.min(c.values, function(v) { return v.num_naf_jobs; }); }),
+      d3.max(job_statuses, function(c) { return d3.max(c.values, function(v) { return v.num_naf_jobs; }); })
+    ]);
+
+    svg.append("g")
+        .attr("class", "x axis")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    svg.append("g")
+        .attr("class", "y axis")
+        .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 6)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text("Total N/Af Jobs");
+
+    var job_status = svg.selectAll(".job_status")
+        .data(job_statuses)
+        .enter().append("g")
+        .attr("class", "job_status");
+
+    job_status.append("path")
+        .attr("class", "line")
+        .attr("d", function(d) { return line(d.values); })
+        .style("stroke", function(d) { return colors[d.name]; });
+
+    // add legend
+    var legend = svg.append("g")
+        .attr("class", "legend")
+        .attr("height", 100)
+        .attr("width", 100)
+        .attr('transform', 'translate(65,50)')
+
+      legend.selectAll('rect')
+        .data(job_statuses)
+        .enter()
+        .append("rect")
+        .attr("x", width - 65)
+        .attr("y", function(d, i){ return i *  20;})
+        .attr("width", 10)
+        .attr("height", 10)
+        .style("fill", function(d) {
+          return colors[d.name];
+        })
+
+      legend.selectAll('text')
+        .data(job_statuses)
+        .enter()
+        .append("text")
+        .attr("x", width - 52)
+        .attr("y", function(d, i){ return i *  20 + 9;})
+        .text(function(d) {
+          return d.name;
+        });
+  });
+</script>

@@ -19,7 +19,12 @@ module Logical
       def self.to_array(column, order, filter)
         machine_runner_invocations = []
         order_by = COLUMNS[column].to_s + ' ' + order
-        ::Naf::MachineRunnerInvocation.choose(filter).order(order_by).all.each do |invocation|
+
+        if order_by =~ /status/
+          order_by = "is_running #{order}, wind_down_at #{order}"
+        end
+
+        ::Naf::MachineRunnerInvocation.joins(machine_runner: :machine).choose(filter).order(order_by).all.each do |invocation|
           values = []
           invocation_hash = invocation.attributes
           COLUMNS.each do |key|

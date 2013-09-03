@@ -200,13 +200,13 @@ module Logical
         it "show correct run time when job has finished" do
           historical_job.started_at = Time.zone.now - 6.seconds
           historical_job.finished_at = Time.zone.now
-          job.run_time.should == '00h00m06s'
+          job.run_time.should == '0h0m6s'
         end
 
         it "show correct run time when job is running" do
           historical_job.started_at = Time.zone.now - 3.seconds
           historical_job.finished_at = nil
-          job.run_time.should == '00h00m03s'
+          job.run_time.should == '0h0m3s'
         end
 
         it "show correct run time when job has not started" do

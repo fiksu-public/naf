@@ -13,10 +13,10 @@ module Logical
                  :application_run_group_name,
                  :application_run_group_restriction_name,
                  :application_run_group_limit,
-                 :priority,
                  :enabled,
                  :enqueue_backlogs,
                  :run_time,
+                 :affinities,
                  :prerequisites,
                  :deleted,
                  :visible]
@@ -148,6 +148,28 @@ module Logical
 
       def enqueue_backlogs
         application_schedule.try(:enqueue_backlogs)
+      end
+
+      def affinities
+        affinity_tab_records = @app.application_schedule.try(:application_schedule_affinity_tabs)
+        return "" if affinity_tab_records.nil?
+
+        affinity_tabs = ""
+        affinity_tab_records.each do |tab|
+          if tab.affinity.affinity_short_name.present?
+            affinity_tabs << tab.affinity.affinity_short_name
+          else
+            affinity_tabs << tab.affinity.affinity_name
+          end
+
+          if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+            affinity_tabs << "(#{tab.affinity_parameter}), "
+          else
+            affinity_tabs << ", "
+          end
+        end
+
+        affinity_tabs[0..-3]
       end
 
     end

@@ -17,6 +17,7 @@
 //= require underscore
 //= require jquery.dataTables
 //= require jquery.dataTables.custom
+//= require d3
 
 function remove_fields(link) {
   jQuery(link).prev("input[type=hidden]").val("1");

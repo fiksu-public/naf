@@ -14,7 +14,11 @@ Naf::Engine.routes.draw do
   end
 
   resources :machine_runners, only: [:index, :show]
-  resources :machine_runner_invocations, only: [:index, :show, :update]
+  resources :machine_runner_invocations, only: [:index, :show, :update] do
+    collection do
+      get :wind_down_all
+    end
+  end
   resources :logger_styles
   resources :logger_names
   resources :affinities
@@ -28,6 +32,16 @@ Naf::Engine.routes.draw do
   resources :janitorial_drop_assignments, controller: "janitorial_assignments",
                                           type: "Naf::JanitorialDropAssignment",
                                           except: [:destroy]
+
+  resources :d3_charts, only: [] do
+    collection do
+      get :jobs
+      get :runner_jobs
+      get :errored_jobs
+      get :running_scripts
+    end
+  end
+  match "d3_charts" => "d3_charts#jobs"
 
   match "jobs" => "historical_jobs#index"
   root to: "historical_jobs#index"

@@ -15,7 +15,7 @@
     <% end %>
     <% if ::Naf::MachineRunner.dead.count > 0 -%>
       <td>
-        <div class="down"><%= ::Naf::MachineRunner.dead.uniq.count %> down</div>
+        <div class="down"><%= ::Naf::MachineRunner.dead.count %> down</div>
       </td>
     <% end %>
  </tr>

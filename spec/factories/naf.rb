@@ -136,7 +136,6 @@ FactoryGirl.define do
     association :machine_runner, factory: :machine_runner
     sequence(:pid) { |n| n }
     is_running false
-    wind_down false
     commit_information '123456'
     branch_name 'branch'
     repository_name 'app/example'

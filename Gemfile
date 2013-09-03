@@ -13,6 +13,7 @@ gem 'will_paginate'
 gem 'facter'
 gem 'shoulda-matchers', '2.0.0'
 gem "timecop", '0.4.5'
+gem 'd3_rails'
 
 # For private repo testing on Travis
 # gem 'af', '=0.9.9', path: 'vendor/private'

@@ -16,15 +16,15 @@ jQuery(document).ready(function() {
         { "sWidth": "2%"},      // Id
         { "sWidth": "12%"},     // Title
         { "sWidth": "7%"},      // Short Name
-        { "sWidth": "9%"},      // Script Type Name
+        { "sWidth": "6%"},      // Script Type Name
         null,                   // Application Run Group Name
-        { "sWidth": "12%"},     // Application Run Group Restriction Name
+        { "sWidth": "9%"},      // Application Run Group Restriction Name
         { "sWidth": "7%"},      // Application Run Group Limit
-        { "sWidth": "4%"},      // Priority
         { "sWidth": "4%"},      // Enabled
         { "sWidth": "4%"},      // Enqueue Backlogs
-        { "sWidth": "5%"},      // Run Time
+        { "sWidth": "8%"},      // Run Time
         { "sWidth": "10%"},     // Last Queued At
+        { "sWidth": "8%"},      // Affinities
         { "sWidth": "8%"},      // Prerequisites
         { "sWidth": "4%"},      // Actions
         null,
@@ -76,13 +76,13 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[12] == 'true' || aData[13] == 'false' || aData[14] == '') {
+  if (aData[11] == 'true' || aData[12] == 'false' || aData[13] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
 
 function checkTimeFormat(nRow, aData) {
-  var l_q_a_array = jQuery(aData[11]).text().split(',');
+  var l_q_a_array = jQuery(aData[10]).text().split(',');
   var last_queued_at;
   if(jQuery('#time_format').val() == 'lexically') {
     last_queued_at = l_q_a_array[0];
@@ -90,5 +90,5 @@ function checkTimeFormat(nRow, aData) {
     last_queued_at = l_q_a_array[1];
   }
 
-  jQuery('td:nth-child(12)', nRow).empty().append(jQuery(aData[11]).text(last_queued_at));
+  jQuery('td:nth-child(11)', nRow).empty().append(jQuery(aData[10]).text(last_queued_at));
 }
