@@ -2,6 +2,7 @@ module Process::Naf
   class Application
     module Component
       def self.included(base)
+        base.send(:include, ::Af::Application::Component)
         base.extend(ClassMethods)
       end
 
