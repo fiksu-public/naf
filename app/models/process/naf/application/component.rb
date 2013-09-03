@@ -3,11 +3,10 @@ module Process::Naf
     module Component
       def self.included(base)
         base.extend(ClassMethods)
-        base.send(:include, ::Af::Application::Component)
       end
 
       module ClassMethods
-        base.send(:extend, ::Af::Application::Component::ClassMethods)
+        # XXX not used yet
       end
 
       def fetch_naf_job
