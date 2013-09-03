@@ -4,9 +4,17 @@ module Logical
   module Naf
     class MachineRunner
 
-      def self.to_array
+      COLUMNS = [
+        'id',
+        'created_at',
+        'server_name',
+        'runner_cwd'
+      ]
+
+      def self.to_array(column, order)
         machine_runners = []
-        ::Naf::MachineRunner.enabled.order('created_at DESC').all.each do |runner|
+        order_by = COLUMNS[column].to_s + ' ' + order
+        ::Naf::MachineRunner.enabled.order(order_by).all.each do |runner|
           values = []
           runner.attributes.each do |key, value|
             if key == 'created_at'

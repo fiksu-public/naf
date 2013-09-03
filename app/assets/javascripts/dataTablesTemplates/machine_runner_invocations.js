@@ -15,7 +15,7 @@ jQuery(document).ready(function() {
         { "sWidth": "10%"},             // Pid
         { "sWidth": "10%"},             // Status
         { "sWidth": "25%"},             // Latest Commit
-        { "sWidth": "10%"},              // Deployment Tag
+        { "sWidth": "10%"},             // Deployment Tag
     ],
     "fnInitComplete" : function() {
       initPageSelect();
@@ -54,7 +54,7 @@ function colorizationStatus(nRow, aData) {
       jQuery('td:nth-child(6) div', nRow).addClass('winding-down');
       break;
     case 'Dead':
-      jQuery('td:nth-child(6) div', nRow).addClass('down');
+      jQuery('td:nth-child(6) div', nRow).addClass('dead');
       break;
   }
 }

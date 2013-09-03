@@ -29,7 +29,11 @@ module Naf
                                   "loggers" => ["logger_styles", "logger_names"],
                                   "janitorial_assignments" => ["janitorial_archive_assignments",
                                                                "janitorial_create_assignments",
-                                                               "janitorial_drop_assignments"]
+                                                               "janitorial_drop_assignments"],
+                                  "d3_charts" => ["jobs",
+                                                  "errored_jobs",
+                                                  "runner_jobs",
+                                                  "running_scripts"]
                                 }
 
     def naf_tabs
@@ -57,6 +61,16 @@ module Naf
           [tab, "application_schedule_affinity_tabs"].include?(controller_name)
         when "loggers"
           ["logger_styles", "logger_names"].include?(controller_name)
+        when "d3_charts"
+          [tab, "jobs", "errored_jobs", "runner_jobs", "running_scripts"].include?(controller_name)
+        when "jobs"
+          [tab].include?(params[:action])
+        when "errored_jobs"
+          [tab].include?(params[:action])
+        when "runner_jobs"
+          [tab].include?(params[:action])
+        when "running_scripts"
+          [tab].include?(params[:action])
         when "janitorial_assignments"
           ["Naf::JanitorialArchiveAssignment",
            "Naf::JanitorialCreateAssignment",
@@ -107,6 +121,8 @@ module Naf
         "Janitorial Create Assignment"
       elsif current_page?(naf.janitorial_drop_assignments_path)
         "Janitorial Drop Assignment"
+      elsif current_page?(naf.d3_charts_path)
+        "Charts"
       elsif current_page?(main_app.naf_path)
         "Jobs"
       else
@@ -166,6 +182,16 @@ module Naf
           link_to "Janitorial Create Assignments", naf.janitorial_create_assignments_path
         when "janitorial_drop_assignments"
           link_to "Janitorial Drop Assignments", naf.janitorial_drop_assignments_path
+        when "d3_charts"
+          link_to "Charts", naf.d3_charts_path
+        when "jobs"
+          link_to "Jobs Chart", naf.jobs_d3_charts_path
+        when "runner_jobs"
+          link_to "Runner Jobs Chart", naf.runner_jobs_d3_charts_path
+        when "errored_jobs"
+          link_to "Errored Jobs Chart", naf.errored_jobs_d3_charts_path
+        when "running_scripts"
+          link_to "Running Scripts Chart", naf.running_scripts_d3_charts_path
         else
           link_to name.split('_').map(&:capitalize).join(' '), { controller: name, action: 'index'}
       end

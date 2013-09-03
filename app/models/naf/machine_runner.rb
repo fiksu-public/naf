@@ -32,29 +32,17 @@ module Naf
 
     def self.running
       joins(:machine_runner_invocations).
-      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down IS FALSE')
+      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down_at IS NULL')
     end
 
     def self.winding_down
       joins(:machine_runner_invocations).
-      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down IS TRUE')
+      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down_at IS NOT NULL')
     end
 
     def self.dead
-      joins(:machine).
-      joins(:machine_runner_invocations).
-      where('naf.machines.enabled IS TRUE').
-      where('naf.machine_runner_invocations.is_running IS FALSE').
-      where('NOT EXISTS(
-          SELECT
-            1
-          FROM
-            naf.machine_runner_invocations AS mri
-          WHERE
-            mri.machine_runner_id = naf.machine_runners.id AND
-            mri.is_running IS TRUE
-        )
-      ')
+      (::Naf::MachineRunner.joins(:machine).where('naf.machines.enabled IS TRUE').pluck(:machine_id) -
+        ::Naf::MachineRunner.running.pluck(:machine_id)).uniq
     end
 
   end

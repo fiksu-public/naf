@@ -10,10 +10,10 @@ module Logical
                        :application_run_group_name,
                        :application_run_group_restriction_name,
                        :application_run_group_limit,
-                       :priority,
                        :enabled,
                        :enqueue_backlogs,
                        :run_time,
+                       :affinities,
                        :prerequisites,
                        :deleted,
                        :visible] }

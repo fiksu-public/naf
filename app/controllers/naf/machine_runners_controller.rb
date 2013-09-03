@@ -10,7 +10,7 @@ module Naf
           set_page
 
           @total_records = ::Naf::MachineRunner.count(:all)
-          @rows = ::Logical::Naf::MachineRunner.to_array.
+          @rows = ::Logical::Naf::MachineRunner.to_array(params['iSortCol_0'].to_i, params['sSortDir_0']).
             paginate(page: @page, per_page: @rows_per_page)
 
           render layout: 'naf/layouts/jquery_datatables'

@@ -65,22 +65,16 @@ module Naf
 
     def validate_affinity_name
       if affinity_classification.present? &&
-        affinity_classification.affinity_classification_name == 'location'
+        affinity_classification.affinity_classification_name == 'machine'
 
-        begin
-          machine = ::Naf::Machine.find_by_server_address(affinity_name)
-        rescue ActiveRecord::StatementInvalid
-          return 'Invalid syntax for type inet'
-        end
-
+        machine = ::Naf::Machine.find_by_id(affinity_name)
         if machine.blank?
-          return "Invalid IP address. There isn't a machine with that address!"
+          return "There isn't a machine with that id!"
         end
-        self.affinity_name = machine.id.to_s
 
         count = ::Naf::Affinity.
           where(affinity_classification_id: ::Naf::AffinityClassification.
-                  find_by_affinity_classification_name('location').id,
+                  find_by_affinity_classification_name('machine').id,
                 affinity_name: machine.id.to_s).count
 
         if count > 0

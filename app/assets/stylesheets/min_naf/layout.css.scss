@@ -1,345 +1,384 @@
 #naf {
-
-    #fluid {
-
-        .display-inline-block {
-            display: inline-block;
-        }
-
-        #bd, #child_bd {
-            padding: 10px;
-
-            #page-label {
-                float: none;
-            }
-
-            #show_search_container_link {
-                margin-top: 10px;
-            }
-
-            #search_container {
-                border: 1px solid #E1E1E1;
-                border-top-left-radius: 7px;
-                border-top-right-radius: 7px;
-                border-bottom-left-radius: 5px;
-                border-bottom-right-radius: 5px;
-                padding: 15px;
-                margin-top: 10px;
-                margin-bottom: 5px;
-                display: none;
-                #job_search, #application_search {
-                    padding: 10px;
-                    div.field{
-                        clear:both;
-                        text-align:right;
-                        line-height:15px;
-                        label {
-                            float:left;
-                        }
-                    }
-                    div {
-                        vertical-align: top;
-                    }
-                }
-            }
-
-            #flash_message {
-                #notice {
-                    background-color: #E1FFD1;
-                    border: 1px solid #C5F8AC;
-                    color: #499524;
-                    margin: 0;
-                    padding: 12px;
-                }
-            }
-
-            #page-select-container, #refresh-page-container {
-                display: none;
-                float: right;
-                margin-top: -1px;
-                padding: 2px 2px;
-                width: 205px;
-            }
-
-            #datatable_wrapper {
-                #datatable_processing {
-                    color: #45a113;
-                    font-style: bold;
-                    font-size: 14px;
-                    margin: 0 0 6px 0;
-                    background-color: #e5f4e1;
-                    border: 1px solid #d5f1cd;
-                    padding: 4px 8px 4px 8px;
-                }
-
-                #datatable_paginate {
-                    #page-select-container {
-                        label {
-                            position: relative;
-                            top: 4px;
-                        }
-                    }
-                    #refresh-page-container {
-                        margin-right: 200px;
-                        input {
-                          width: 13px;
-                        }
-                    }
-                    #iDisplayLength {
-                        background-color: #FFFFFF;
-                    }
-                    .page-select {
-                        border: 1px solid #E1E1E1;
-                        cursor: pointer;
-                        float: right;
-                        width: 95px;
-                    }
-                }
-
-                #datatable {
-                    table-layout:fixed;
-
-                    width:100%;
-                    border-collapse: collapse;
-                    td, th {
-                        margin: 0;
-                        padding: 3px 0 3px 3px;
-                    }
-
-                    tbody tr {
-                        &:nth-child(even) {
-                          background-color: #F4F4F4;
-                        }
-                    }
-
-                    tr td a img {
-                        margin: 0;
-                    }
-
-                    td {
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        overflow: hidden;
-                    }
-
-                    .ui-icon {
-                        float: left;
-                    }
-
-                    .center {
-                        text-align: center;
-                    }
-
-                    .script-queued, .winding-down {
-                        color: #f8a800;
-                    }
-
-                    .script-running, .running {
-                        color: #45a113;
-                    }
-
-                    .script-error, .down {
-                        color: #CD0A0A;
-                    }
-
-                    .script-finished {
-                        color: #000000;
-                    }
-
-                    .deleted_or_hidden {
-                        background-color: #ffcccc !important;
-                    }
-                }
-
-                #datatable_info {
-                    margin: 6px 0 8px 0 ;
-                }
-
-                .dataTables_info {
-                    margin: 8px 0 6px 0 ;
-                }
-
-                .ui-buttonset .ui-button {
-                    border: 1px solid #CECECE;
-                    color: #333333;
-                    margin: 0;
-                    padding: 4px 12px;
-                }
-
-                .ui-state-default {
-                    background-color: #F4F4F4;
-                    background-image: none;
-                    border: 1px solid #E1E1E1;
-                    font-weight: normal;
-                }
-            }
-
-            #record {
-                td, th {
-                    padding-right: 30px;
-                }
-
-                #runner td, th {
-                  padding-right: 8px;
-                }
-
-                #table_record {
-                    margin-top: 10px;
-                }
-
-                #naf_table_show {
-                    table-layout:fixed;
-                    width:50%;
-                    border-collapse: collapse;
-                    td, th {
-                      margin: 0;
-                      padding: 4px 0 4px 4px;
-                    }
-
-                    thead tr {
-                      background-color: #F4F4F4;
-                    }
-
-                    tbody tr {
-                      &:nth-child(even) {
-                        background-color: #F4F4F4;
-                      }
-                    }
-
-                    tr td a img {
-                      margin: 0;
-                    }
-
-                    td {
-                      text-overflow: ellipsis;
-                      white-space: nowrap;
-                      overflow: hidden;
-                    }
-
-                    .center {
-                      text-align: center;
-                    }
-                }
-
-                .field label {
-                  width: 12em;
-                  float: left;
-                  text-align: left;
-                  margin-right: 1em;
-                  display: block;
-                }
-
-                .text_area {
-                  margin-left: 15.5em;
-                }
-
-                #errorExplanation {
-                     background-color: #FEF1EC;
-                     border: 1px solid #FFE4D8;
-                     color: #CD0A0A;
-                     line-height: 24px;
-                     margin: 0 0 0.8em;
-                     padding: 12px;
-                }
-
-                .validation-error {
-                    color: #CD0A0A;
-                }
-
-                input.check_box_input {
-                    width: 13px;
-                }
-
-                .scrollable-output {
-                    border: 1px solid #E1E1E1;
-                    height: 500px;
-                    overflow-x:auto;
-                    width: 98%;
-                    background-color: #2d2d2d;
-                    color: #ffffff;
-                    padding: 5px 10px 5px 0px;
-
-                    #event_list {
-                        word-wrap: break-word;
-                        padding-left: 10px;
-                        margin: 0;
-                        list-style: none outside none;
-                        li {
-                            padding-left: 20px;
-                            text-indent: -15px;
-                        }
-                    }
-
-                    .msg {
-                        background: none repeat scroll 0 0 #202020;
-                        border: 1px solid #303030;
-                        box-shadow: 0 0 5px #000000;
-                        border-radius: 5px 5px 5px 5px;
-                        margin: 20px auto;
-                        min-width: 600px;
-                        padding: 40px 25px;
-                        position: relative;
-                        text-align: center;
-                        width: 65%;
-                        font-size: 20px;
-                    }
-                }
-
-                #stdout_header {
-                    width: 98%;
-                    input {
-                        width: 24em;
-                    }
-
-                    #papertrail_search_submit {
-                        width: 12em;
-                    }
-
-                    #papertrail_time {
-                        display: none;
-                    }
-
-                    #automatic_data_update {
-                        float:right;
-                        padding-top: 4px;
-                        max-width: 215px;
-                        input[type=checkbox] {
-                            width: 13px;
-                            top: -5px;
-                        }
-                        input {
-                            width: 100px;
-                        }
-                    }
-                }
-
-                h4 {
-                    margin: 10px 0 5px 0;
-                    font-weight: bold;
-                }
-
-            }
-
-            #parent_links {
-                padding-top: 10px;
-            }
-
-        }
-
-        .winding-down {
-            color: #f8a800;
-        }
-
-        .running {
-            color: #45a113;
-        }
-
-        .down {
-            color: #CD0A0A;
-        }
-
+  #fluid {
+    .display-inline-block {
+      display: inline-block;
     }
 
+    #bd, #child_bd {
+      padding: 10px;
+
+      #page-label {
+        float: none;
+      }
+
+      #show_search_container_link {
+        margin-top: 10px;
+      }
+
+      #search_container {
+        border: 1px solid #E1E1E1;
+        border-top-left-radius: 7px;
+        border-top-right-radius: 7px;
+        border-bottom-left-radius: 5px;
+        border-bottom-right-radius: 5px;
+        padding: 15px;
+        margin-top: 10px;
+        margin-bottom: 5px;
+        display: none;
+        #job_search, #application_search {
+          padding: 10px;
+          div.field{
+            clear:both;
+            text-align:right;
+            line-height:15px;
+            label {
+              float:left;
+            }
+          }
+          div {
+            vertical-align: top;
+          }
+        }
+      }
+
+      #flash_message {
+        #notice {
+          background-color: #E1FFD1;
+          border: 1px solid #C5F8AC;
+          color: #499524;
+          margin: 0;
+          padding: 12px;
+        }
+      }
+
+      #page-select-container, #refresh-page-container {
+        display: none;
+        float: right;
+        margin-top: -1px;
+        padding: 2px 2px;
+        width: 205px;
+      }
+
+      #datatable_wrapper {
+        #datatable_processing {
+          color: #45a113;
+          font-style: bold;
+          font-size: 14px;
+          margin: 0 0 6px 0;
+          background-color: #e5f4e1;
+          border: 1px solid #d5f1cd;
+          padding: 4px 8px 4px 8px;
+        }
+
+        #datatable_paginate {
+          #page-select-container {
+            label {
+              position: relative;
+              top: 4px;
+            }
+          }
+          #refresh-page-container {
+            margin-right: 200px;
+            input {
+              width: 13px;
+            }
+          }
+          #iDisplayLength {
+            background-color: #FFFFFF;
+          }
+          .page-select {
+            border: 1px solid #E1E1E1;
+            cursor: pointer;
+            float: right;
+            width: 95px;
+          }
+        }
+
+        #datatable {
+          table-layout:fixed;
+
+          width:100%;
+          border-collapse: collapse;
+          td, th {
+            margin: 0;
+            padding: 3px 0 3px 3px;
+          }
+
+          tbody tr {
+            &:nth-child(even) {
+              background-color: #F4F4F4;
+            }
+          }
+
+          tr td a img {
+            margin: 0;
+          }
+
+          td {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+
+          .ui-icon {
+            float: left;
+          }
+
+          .center {
+            text-align: center;
+          }
+
+          .script-queued, .winding-down {
+            color: #f8a800;
+          }
+
+          .script-running, .running {
+            color: #45a113;
+          }
+
+          .script-error, .dead {
+            color: #CD0A0A;
+          }
+
+          .script-finished {
+            color: #000000;
+          }
+
+          .deleted_or_hidden {
+            background-color: #ffcccc !important;
+          }
+        }
+
+        #datatable_info {
+          margin: 6px 0 8px 0 ;
+        }
+
+        .dataTables_info {
+          margin: 8px 0 6px 0 ;
+        }
+
+        .ui-buttonset .ui-button {
+          border: 1px solid #CECECE;
+          color: #333333;
+          margin: 0;
+          padding: 4px 12px;
+        }
+
+        .ui-state-default {
+          background-color: #F4F4F4;
+          background-image: none;
+          border: 1px solid #E1E1E1;
+          font-weight: normal;
+        }
+      }
+
+      #record {
+        td, th {
+          padding-right: 30px;
+        }
+
+        #runner td, th {
+          padding-right: 8px;
+        }
+
+        #table_record {
+          margin-top: 10px;
+        }
+
+        #naf_table_show {
+          table-layout:fixed;
+          width:50%;
+          border-collapse: collapse;
+          td, th {
+            margin: 0;
+            padding: 4px 0 4px 4px;
+          }
+
+          thead tr {
+            background-color: #F4F4F4;
+          }
+
+          tbody tr {
+            &:nth-child(even) {
+              background-color: #F4F4F4;
+            }
+          }
+
+          tr td a img {
+            margin: 0;
+          }
+
+          td {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+
+          .center {
+            text-align: center;
+          }
+        }
+
+        .field label {
+          width: 12em;
+          float: left;
+          text-align: left;
+          margin-right: 1em;
+          display: block;
+        }
+
+        .text_area {
+          margin-left: 15.5em;
+        }
+
+        #errorExplanation {
+           background-color: #FEF1EC;
+           border: 1px solid #FFE4D8;
+           color: #CD0A0A;
+           line-height: 24px;
+           margin: 0 0 0.8em;
+           padding: 12px;
+        }
+
+        .validation-error {
+          color: #CD0A0A;
+        }
+
+        input.check_box_input {
+          width: 13px;
+        }
+
+        .scrollable-output {
+          border: 1px solid #E1E1E1;
+          height: 500px;
+          overflow-x:auto;
+          width: 98%;
+          background-color: #2d2d2d;
+          color: #ffffff;
+          padding: 5px 10px 5px 0px;
+
+          #event_list {
+            word-wrap: break-word;
+            padding-left: 10px;
+            margin: 0;
+            list-style: none outside none;
+            li {
+              padding-left: 20px;
+              text-indent: -15px;
+            }
+          }
+
+          .msg {
+            background: none repeat scroll 0 0 #202020;
+            border: 1px solid #303030;
+            box-shadow: 0 0 5px #000000;
+            border-radius: 5px 5px 5px 5px;
+            margin: 20px auto;
+            min-width: 600px;
+            padding: 40px 25px;
+            position: relative;
+            text-align: center;
+            width: 65%;
+            font-size: 20px;
+          }
+        }
+
+        #stdout_header {
+          width: 98%;
+          input {
+            width: 24em;
+          }
+
+          #papertrail_search_submit {
+            width: 12em;
+          }
+
+          #papertrail_time {
+            display: none;
+          }
+
+          #automatic_data_update {
+            float:right;
+            padding-top: 4px;
+            max-width: 215px;
+            input[type=checkbox] {
+              width: 13px;
+              top: -5px;
+            }
+            input {
+              width: 100px;
+            }
+          }
+        }
+
+        h4 {
+          margin: 10px 0 5px 0;
+          font-weight: bold;
+        }
+      }
+
+      #parent_links {
+        padding-top: 10px;
+      }
+
+      svg {
+        .graph_table{
+          table-layout:fixed;
+          width:50%;
+          border-collapse: collapse;
+          td, th {
+            margin: 0;
+            padding: 40px 0 40px 40px;
+          }
+
+          tr {
+            &:nth-child(even) {
+              background-color: #F4F4F4;
+            }
+          }
+
+          td {
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+          }
+        }
+
+        .axis path,
+        .axis line {
+          fill: none;
+          stroke: #000;
+          shape-rendering: crispEdges;
+        }
+
+        .x.axis path {
+          display: none;
+        }
+
+        .line {
+          fill: none;
+          stroke: steelblue;
+          stroke-width: 1.5px;
+        }
+      }
+
+      .wind-bttn {
+        width:10%;
+      }
+    }
+
+    .winding-down {
+      color: #f8a800;
+    }
+
+    .running {
+      color: #45a113;
+    }
+
+    .dead {
+      color: #CD0A0A;
+    }
+  }
 }
 
 /*
@@ -351,7 +390,6 @@ Flash Error Message
 .error {
   margin: 0 0 0.8em 0;
   background-color: #fef1ec;
-  padding: 12px;
   border: 1px solid #ffe4d8;
   color: #cd0a0a;
   line-height:40px;

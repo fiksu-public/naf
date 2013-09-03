@@ -35,7 +35,6 @@
     });
   </script>
 
-
   <div id="record">
     <h2>Machine Runner</h2>
     <%= link_to 'Back to Machine Runners', machine_runners_path %>
@@ -70,7 +69,7 @@
           <td><%= @machine_runner.runner_cwd %></td>
         </tr>
         <% invocation = @machine_runner.machine_runner_invocations.last %>
-        <% if invocation.present? && invocation.is_running && !invocation.wind_down -%>
+        <% if invocation.present? && invocation.is_running && invocation.wind_down_at.blank? -%>
           <tr>
             <td>Wind Down Runner</td>
             <td><%= link_to image_tag('terminate.png',
