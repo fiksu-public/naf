@@ -21,7 +21,13 @@ module Logical::Naf::ConstructionZone
       @application_run_group_name = (application_run_group_name == :command ? command : application_run_group_name)
       @application_run_group_limit = application_run_group_limit
       @priority = priority
-      @affinities = affinities
+      @affinities = if affinities.nil?
+                      []
+                    elsif affinities.is_a? Array
+                      affinities
+                    else
+                      [affinities]
+                    end
       @prerequisites = prerequisites
       @enqueue_backlogs = enqueue_backlogs
       @application = application
