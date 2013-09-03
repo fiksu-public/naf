@@ -92,6 +92,20 @@ module Process::Naf
       end
     end
 
+    def job_tag_block(*tags, &block)
+      job = fetch_naf_job
+      begin
+        if job
+          add_job_tags(*tags)
+        end
+        yield if block.present?
+      ensure
+        if job
+          remove_job_tags(*tags)
+        end
+      end
+    end
+
     def update_job_tags(old_tags, new_tags)
       job = fetch_naf_job
       if job

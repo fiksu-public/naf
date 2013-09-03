@@ -31,9 +31,9 @@ module Process::Naf
         type: :string,
         default: ::Naf::Machine.machine_ip_address,
         hidden: true
-    opt :maximum_memory_usage,
-        "percentage of memory used which will limit  process spawning",
-        default: 85.0,
+    opt :minimum_memory_free,
+        "percentage of memory free below which will limit process spawning",
+        default: 15.0,
         argument_note: "PERCENT"
     opt :disable_gc_modifications,
         "don't modify ruby GC parameters",
@@ -550,14 +550,16 @@ module Process::Naf
     end
 
     def memory_available_to_spawn?
-      Facter.loadfacts
-      memory_used = (Facter.memoryfree_mb.to_f / Facter.memorysize_mb.to_f)
+      Facter.clear
+      memory_size = Facter.memorysize_mb.to_f
+      memory_free = Facter.memoryfree_mb.to_f
+      memory_free_percentage = (memory_free / memory_size) * 100.0
 
-      if memory_used < @maximum_memory_usage
-        logger.detail "memory available: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+      if (memory_free_percentage >= @minimum_memory_free)
+        logger.detail "memory available: #{memory_free_percentage}% (free) >= #{@minimum_memory_free}% (min percent)"
         return true
       end
-      logger.info "not enough memory to spawn: #{memory_used} (used) < #{@maximum_memory_usage} (max percent)"
+      logger.alarm "not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
 
       return false
     end

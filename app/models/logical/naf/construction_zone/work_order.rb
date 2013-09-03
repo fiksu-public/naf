@@ -21,7 +21,13 @@ module Logical::Naf::ConstructionZone
       @application_run_group_name = (application_run_group_name == :command ? command : application_run_group_name)
       @application_run_group_limit = application_run_group_limit
       @priority = priority
-      @affinities = affinities
+      @affinities = if affinities.nil?
+                      []
+                    elsif affinities.is_a? Array
+                      affinities
+                    else
+                      [affinities]
+                    end
       @prerequisites = prerequisites
       @enqueue_backlogs = enqueue_backlogs
       @application = application
@@ -45,7 +51,7 @@ module Logical::Naf::ConstructionZone
         if affinity.is_a? Symbol
           # short_name of affinity
           affinity_object = {
-            :affinity_id => ::Naf::Affinity.find_by_short_name(affinity).try(:id)
+            :affinity_id => ::Naf::Affinity.find_by_affinity_short_name(affinity).try(:id)
           }
           raise "no affinity provided" if affinity_object[:affinity_id].nil?
           affinity_object
@@ -61,14 +67,16 @@ module Logical::Naf::ConstructionZone
         elsif affinity.is_a? ::Naf::ApplicationScheduleAffinityTab
           # affinity_for application_schedule_affinity_tab
         elsif affinity.is_a? Hash
-          # should have key: :affinity_id or :affinity_short_name
+          # should have key: :affinity_id or :affinity_short_name or :affinity_name
           # may have key: :affinity_parameter
           affinity_object = {
           }
           if affinity.has_key?(:affinity_id)
             affinity_object[:affinity_id] = affinity[:affinity_id]
+          elsif affinity.has_key?(:affinity_name)
+            affinity_object[:affinity_id] = ::Naf::Affinity.find_by_affinity_name(affinity[:affinity_name]).try(:id)
           elsif affinity.has_key?(:affinity_short_name)
-            affinity_object[:affinity_id] = ::Naf::Affinity.find_by_short_name(affinity[:affinity_short_name]).try(:id)
+            affinity_object[:affinity_id] = ::Naf::Affinity.find_by_affinity_short_name(affinity[:affinity_short_name]).try(:id)
           end
           raise "no affinity provided" if affinity_object[:affinity_id].nil?
           affinity_object[:affinity_parameter] = affinity[:affinity_parameter] if affinity.has_key?(:affinity_parameter)
