@@ -7,7 +7,7 @@ module Process::Naf
       end
 
       module ClassMethods
-        # XXX not used yet
+        base.send(:extend, ::Af::Application::Component::ClassMethods)
       end
 
       def fetch_naf_job
