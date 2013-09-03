@@ -553,7 +553,7 @@ module Process::Naf
       memory_free = Facter.memoryfree_mb.to_f
       memory_free_percentage = (memory_free / memory_size) * 100.0
 
-      if memory_free_percentage >= @minimum_memory_free)
+      if (memory_free_percentage >= @minimum_memory_free)
         logger.detail "memory available: #{memory_free_percentage}% (free) >= #{@minimum_memory_free}% (min percent)"
         return true
       end
