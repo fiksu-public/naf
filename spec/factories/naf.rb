@@ -135,7 +135,6 @@ FactoryGirl.define do
   factory :machine_runner_invocation, class: ::Naf::MachineRunnerInvocation do
     association :machine_runner, factory: :machine_runner
     sequence(:pid) { |n| n }
-    is_running false
     commit_information '123456'
     branch_name 'branch'
     repository_name 'app/example'

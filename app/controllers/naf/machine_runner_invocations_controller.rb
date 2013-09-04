@@ -39,7 +39,7 @@ module Naf
     end
 
     def wind_down_all
-      if ::Naf::MachineRunnerInvocation.where('wind_down_at IS NULL AND is_running IS TRUE').
+      if ::Naf::MachineRunnerInvocation.where('wind_down_at IS NULL').
         count == 0
 
         flash[:error] = "There aren't any Machine Runners to wind down!"
@@ -48,7 +48,7 @@ module Naf
       end
 
       ::Naf::MachineRunnerInvocation.
-        where('wind_down_at IS NULL AND is_running IS TRUE').
+        where('wind_down_at IS NULL').
         update_all(wind_down_at: Time.zone.now)
 
       redirect_to machine_runners_path,

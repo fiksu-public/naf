@@ -463,35 +463,6 @@ html {
         padding-top: 10px;
       }
 
-      .graph_table {
-        table-layout:fixed;
-        width:10%;
-        border-collapse: collapse;
-        td, th {
-          margin: 0;
-          padding: 4px 0 4px 4px;
-        }
-      }
-
-      svg {
-        .axis path,
-        .axis line {
-          fill: none;
-          stroke: #000;
-          shape-rendering: crispEdges;
-        }
-
-        .x.axis path {
-          display: none;
-        }
-
-        .line {
-          fill: none;
-          stroke: steelblue;
-          stroke-width: 1.5px;
-        }
-      }
-
       .wind-bttn {
         width:10%;
       }

@@ -32,12 +32,12 @@ module Naf
 
     def self.running
       joins(:machine_runner_invocations).
-      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down_at IS NULL')
+      where('naf.machine_runner_invocations.dead_at IS NULL AND naf.machine_runner_invocations.wind_down_at IS NULL')
     end
 
     def self.winding_down
       joins(:machine_runner_invocations).
-      where('naf.machine_runner_invocations.is_running IS TRUE AND naf.machine_runner_invocations.wind_down_at IS NOT NULL')
+      where('naf.machine_runner_invocations.dead_at IS NULL AND naf.machine_runner_invocations.wind_down_at IS NOT NULL')
     end
 
     def self.dead

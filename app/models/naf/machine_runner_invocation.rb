@@ -3,7 +3,7 @@ module Naf
     # Protect from mass-assignment issue
     attr_accessible :machine_runner_id,
                     :pid,
-                    :is_running,
+                    :dead_at,
                     :wind_down_at,
                     :commit_information,
                     :branch_name,
@@ -54,7 +54,7 @@ module Naf
     #+++++++++++++++++++++++++
 
     def status
-      if self.is_running
+      if self.dead_at.blank?
         if self.wind_down_at.present?
           # Runner is Waiting for jobs to finish running,
           # and will not start any other jobs

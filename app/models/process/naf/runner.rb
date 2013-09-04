@@ -78,7 +78,7 @@ module Process::Naf
         # Wind down other runners
         machine.machine_runners.each do |machine_runner|
           machine_runner.machine_runner_invocations.each do |invocation|
-            if invocation.is_running
+            if invocation.dead_at.blank?
               begin
                 retval = Process.kill(0, invocation.pid)
                 logger.detail "#{retval} = kill(0, #{invocation.pid}) -- process alive, marking runner invocation as winding down"
@@ -86,7 +86,7 @@ module Process::Naf
                 invocation.save!
               rescue Errno::ESRCH
                 logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
-                invocation.is_running = false
+                invocation.dead_at = Time.zone.now
                 invocation.save!
               end
             end
@@ -116,7 +116,6 @@ module Process::Naf
         # Create an invocation for this runner
         invocation = ::Naf::MachineRunnerInvocation.create!(machine_runner_id: machine_runner.id,
                                                             pid: Process.pid,
-                                                            is_running: true,
                                                             repository_name: repository_name,
                                                             branch_name: branch_name,
                                                             commit_information: commit_information,
@@ -128,7 +127,7 @@ module Process::Naf
       begin
         work_machine(machine, invocation)
       ensure
-        invocation.is_running = false
+        invocation.dead_at = Time.zone.now
         invocation.save!
       end
     end
@@ -229,18 +228,15 @@ module Process::Naf
           if pid
             begin
               child_job = @children.delete(pid)
-              # Update job tags
-              child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-              child_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
 
               if child_job.present?
+                # Update job tags
+                child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+
                 if status.nil? || status.exited? || status.signaled?
                   logger.info { "cleaning up dead child: #{child_job.reload}" }
                   finish_job(child_job,
                              { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
-
-                  # Update jog tags
-                  child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
                 else
                   # this can happen if the child is sigstopped
                   logger.warn "child waited for did not exit: #{child_job}, status: #{status.inspect}"
@@ -293,14 +289,8 @@ module Process::Naf
           else
             # should never get here (well, hopefully)
             logger.error "#{machine}: failed to execute #{running_job}"
-            # Update job tags
-            running_job.historical_job.remove_all_tags
-            running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
 
             finish_job(running_job, { failed_to_start: true })
-
-            # Update job tags
-            running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
           end
         rescue ActiveRecord::ActiveRecordError => are
           raise
@@ -369,10 +359,15 @@ module Process::Naf
     end
 
     def finish_job(running_job, updates = {})
+      running_job.historical_job.remove_all_tags
+      running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+
       ::Naf::HistoricalJob.transaction do
         update_historical_job(updates.merge({ finished_at: Time.zone.now }), running_job.id)
         running_job.delete
       end
+
+      running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
     end
 
     # kill(0, pid) seems to fail during at_exit block
@@ -387,15 +382,8 @@ module Process::Naf
       @children.clone.each do |pid, child|
         send_signal_and_maybe_clean_up(child, "KILL")
 
-        # Update job tags
-        child.historical_job.remove_all_tags
-        child.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
-
         # force job down
         finish_job(child)
-
-        # Update job tags
-        child.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
       end
     end
 
@@ -450,28 +438,14 @@ module Process::Naf
         logger.alarm "sending SIG_KILL to process: #{job}"
         send_signal_and_maybe_clean_up(job, "KILL")
 
-        # Update job tags
-        job.historical_job.remove_all_tags
-        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
-
         # job force job down
         finish_job(job)
-
-        # Update job tags
-        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
       end
     end
 
     def send_signal_and_maybe_clean_up(job, signal)
       if job.pid.nil?
-        # Update job tags
-        job.historical_job.remove_all_tags
-        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
-
         finish_job(job)
-
-        # Update job tags
-        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
 
         return false
       end
@@ -482,15 +456,8 @@ module Process::Naf
       rescue Errno::ESRCH
         logger.detail "ESRCH = kill(#{signal}, #{job.pid})"
 
-        # Update job tags
-        job.historical_job.remove_all_tags
-        job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
-
         # job does not exist -- mark it finished
         finish_job(job)
-
-        # Update job tags
-        job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
 
         return false
       end

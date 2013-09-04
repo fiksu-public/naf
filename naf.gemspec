@@ -23,7 +23,6 @@ Gem::Specification.new do |s|
   s.add_dependency "jquery-rails"
   s.add_dependency 'will_paginate'
   s.add_dependency 'facter'
-  s.add_dependency 'd3-rails'
   s.add_development_dependency "pg"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "factory_girl_rails", "~> 4.0.0"

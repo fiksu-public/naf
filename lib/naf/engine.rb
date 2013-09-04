@@ -4,7 +4,6 @@ require 'facter'
 require 'jquery-rails'
 require 'log4r_remote_syslog_outputter'
 require 'partitioned'
-require 'd3-rails'
 
 module Naf
   class Engine < ::Rails::Engine

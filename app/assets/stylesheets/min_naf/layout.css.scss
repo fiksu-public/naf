@@ -321,47 +321,6 @@
         padding-top: 10px;
       }
 
-      svg {
-        .graph_table{
-          table-layout:fixed;
-          width:50%;
-          border-collapse: collapse;
-          td, th {
-            margin: 0;
-            padding: 40px 0 40px 40px;
-          }
-
-          tr {
-            &:nth-child(even) {
-              background-color: #F4F4F4;
-            }
-          }
-
-          td {
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-          }
-        }
-
-        .axis path,
-        .axis line {
-          fill: none;
-          stroke: #000;
-          shape-rendering: crispEdges;
-        }
-
-        .x.axis path {
-          display: none;
-        }
-
-        .line {
-          fill: none;
-          stroke: steelblue;
-          stroke-width: 1.5px;
-        }
-      }
-
       .wind-bttn {
         width:10%;
       }

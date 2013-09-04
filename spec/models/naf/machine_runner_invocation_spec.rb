@@ -5,7 +5,7 @@ module Naf
     # Mass-assignment
     [:machine_runner_id,
      :pid,
-     :is_running,
+     :dead_at,
      :wind_down_at,
      :commit_information,
      :branch_name,

@@ -33,16 +33,6 @@ Naf::Engine.routes.draw do
                                           type: "Naf::JanitorialDropAssignment",
                                           except: [:destroy]
 
-  resources :d3_charts, only: [] do
-    collection do
-      get :jobs
-      get :runner_jobs
-      get :errored_jobs
-      get :running_scripts
-    end
-  end
-  match "d3_charts" => "d3_charts#jobs"
-
   match "jobs" => "historical_jobs#index"
   root to: "historical_jobs#index"
 end

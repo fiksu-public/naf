@@ -21,7 +21,7 @@ module Logical
         order_by = COLUMNS[column].to_s + ' ' + order
 
         if order_by =~ /status/
-          order_by = "is_running #{order}, wind_down_at #{order}"
+          order_by = "dead_at #{order}, wind_down_at #{order}"
         end
 
         ::Naf::MachineRunnerInvocation.joins(machine_runner: :machine).choose(filter).order(order_by).all.each do |invocation|

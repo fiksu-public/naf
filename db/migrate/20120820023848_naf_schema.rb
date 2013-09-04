@@ -92,7 +92,7 @@ class NafSchema < ActiveRecord::Migration
           updated_at            timestamp,
           machine_runner_id     integer not null references naf.machine_runners,
           pid                   integer not null,
-          is_running            boolean not null default true,
+          dead_at               timestamp null,
           wind_down_at          timestamp null,
           commit_information    text null,
           branch_name           text null,
