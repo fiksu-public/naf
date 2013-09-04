@@ -35,6 +35,7 @@ module Naf
 
     JOB_STALE_TIME = 1.week
     SYSTEM_TAGS = {
+      startup: '$startup',
       pre_work: '$pre-work',
       work: '$work',
       cleanup: '$cleanup'
