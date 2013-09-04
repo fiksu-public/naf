@@ -32,7 +32,7 @@
     .append("g")
       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-  d3.json("/job_system/d3_charts/<%=url%>.json?<%=@url_params-%>", function(error, data) {
+  d3.json("/job_system/d3_charts/<%=url%>.json?<%=@url_params-%>", function(data) {
     var colors = new Array
     colors['queued'] = '#FF8800'
     colors['running'] = '#00FF00'
