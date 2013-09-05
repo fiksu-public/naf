@@ -68,7 +68,7 @@
         </tr>
         <tr>
           <td>Status</td>
-          <td><%= @logical_job.status %></td>
+          <td class="<%= add_color(@logical_job.status) %>"><%= @logical_job.status %></td>
         </tr>
         <tr>
           <td>Server</td>
@@ -97,7 +97,7 @@
         </tr>
         <tr>
           <td>Command</td>
-          <td><%= @historical_job.command %></td>
+          <td style="white-space: pre-wrap;"><%= @historical_job.command %></td>
         </tr>
         <tr>
           <td>Started At</td>
@@ -141,7 +141,7 @@
         </tr>
         <tr>
           <td>Application Run Group Name</td>
-          <td><%= @historical_job.application_run_group_name %></td>
+          <td style="white-space: pre-wrap;"><%= @historical_job.application_run_group_name %></td>
         </tr>
         <tr>
           <td>Application Run Group Limit</td>
@@ -173,17 +173,18 @@
     <table id="naf_table_show">
       <thead>
         <tr>
-          <th>ID</th>
+          <th width="10%">ID</th>
           <th>Command</th>
-          <th>Status</th>
+          <th width="15%">Status</th>
         </tr>
       </thead>
       <tbody>
         <% @historical_job.prerequisites.each do |prereq| -%>
         <tr>
           <td><%= link_to prereq.id, historical_job_path(prereq) %></td>
-          <td><%= prereq.command %></td>
-          <td><%= ::Logical::Naf::Job.new(prereq).status %></td>
+          <td style="white-space: pre-wrap;"><%= prereq.command %></td>
+          <% job = ::Logical::Naf::Job.new(prereq) %>
+          <td class="<%= add_color(job.status) %>"><%= job.status %></td>
         </tr>
         <% end -%>
       </tbody>

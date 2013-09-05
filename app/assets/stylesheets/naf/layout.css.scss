@@ -468,7 +468,7 @@ html {
       }
     }
 
-    .winding-down {
+    .winding-down, .queued {
       color: #f8a800;
     }
 
@@ -476,7 +476,7 @@ html {
       color: #45a113;
     }
 
-    .dead {
+    .dead, .error {
       color: #CD0A0A;
     }
   }

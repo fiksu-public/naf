@@ -67,8 +67,14 @@
 </div>
 <br/>
 
-<% f.fields_for :application_schedule_prerequisites do |builder| %>
-  <%= render "application_schedule_prerequisites", f: builder %>
+<% if @show_prerequisite %>
+  <%= f.fields_for :application_schedule_prerequisites do |builder| %>
+    <%= render "application_schedule_prerequisites", f: builder %>
+  <% end %>
+<% else %>
+  <% f.fields_for :application_schedule_prerequisites do |builder| %>
+    <%= render "application_schedule_prerequisites", f: builder %>
+  <% end %>
 <% end %>
 
 <%= naf_link_to_add_fields "Add Schedule Prerequisite", f, :application_schedule_prerequisites %>

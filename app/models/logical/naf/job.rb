@@ -181,6 +181,9 @@ module Logical
 
           jobs = ::Naf::HistoricalJob.find_by_sql([sql, values])
 
+          ap jobs
+          ap conditions
+
           jobs.map{ |physical_job| new(physical_job) }
         else
           job_scope = self.get_job_scope(search)

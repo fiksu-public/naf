@@ -41,9 +41,7 @@ module Logical
       # A job without affinity tabs can be run on any machine
       # A job with affinity tabs can only run on machines:
       #   - that have matching affinity slot(s)
-      #   - don't have any affinity slots
       #
-      # A machine without affinity slots can run any jobs
       # A machine with non-required affinity slots can run jobs:
       #   - that don't have any affinity tabs
       #   - that have affinity tab(s) that match affinity slot(s)

@@ -9,6 +9,14 @@ module Naf
       return where("enabled")
     end
 
+    def self.pickleables(pickler)
+      old_model_names = ['::Naf::Job',
+                         '::Naf::JobCreatedAt',
+                         '::Naf::JobPrerequisite',
+                         '::Naf::JobAffinityTab']
+      return where('model_name NOT IN (?)', old_model_names)
+    end
+
     #-------------------------
     # *** Instance Methods ***
     #+++++++++++++++++++++++++

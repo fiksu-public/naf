@@ -14,7 +14,7 @@
                                 job[12],
                                 { target: '_blank', class: "papertrail", id: job[0] }
 
-    if job[10] == "Running" || job[10] == 'Queued'
+    if job[10] == "Running" || job[10] == 'Queued' || job[10] == 'Waiting'
       job[12] << "&nbsp;&nbsp;&nbsp;".html_safe
       job[12] << (link_to image_tag('terminate.png',
                   class: 'action',

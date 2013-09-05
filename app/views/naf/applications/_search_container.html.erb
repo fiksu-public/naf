@@ -57,33 +57,38 @@
 </div>
 
 <% content_for :javascripts do %>
-    <script type='text/javascript'>
-        jQuery(document).ready(function() {
-            jQuery("#search_container").hide();
-            jQuery("#search_container_link").click(function () {
-                if (jQuery("#search_container").css('display') == 'none') {
-                    jQuery("#search_container_link").text("Hide additional search parameters");
-                }else {
-                    jQuery("#search_container_link").text("Show additional search parameters");
-                }
-                jQuery("#search_container").slideToggle("slow");
-            });
-            jQuery("#application_search").submit(function () {
-                SetFirstPage();
-                return false;
-            });
-            jQuery("#search_visible").change(function () {
-                SetFirstPage();
-                return false;
-            });
-            jQuery("#search_deleted").change(function () {
-                SetFirstPage();
-                return false;
-            });
-            jQuery("#time_format").change(function () {
-                SetFirstPage();
-                return false;
-            });
-        });
-    </script>
+  <script type='text/javascript'>
+    jQuery(document).ready(function() {
+      jQuery("#search_container").hide();
+
+      jQuery("#search_container_link").click(function () {
+        if (jQuery("#search_container").css('display') == 'none') {
+          jQuery("#search_container_link").text("Hide additional search parameters");
+        }else {
+          jQuery("#search_container_link").text("Show additional search parameters");
+        }
+        jQuery("#search_container").slideToggle("slow");
+      });
+
+      jQuery("#application_search").submit(function () {
+        SetFirstPage();
+        return false;
+      });
+
+      jQuery("#search_visible").change(function () {
+        SetFirstPage();
+        return false;
+      });
+
+      jQuery("#search_deleted").change(function () {
+        SetFirstPage();
+        return false;
+      });
+
+      jQuery("#time_format").change(function () {
+        SetFirstPage();
+        return false;
+      });
+    });
+  </script>
 <% end %>

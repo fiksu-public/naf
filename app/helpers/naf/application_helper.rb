@@ -261,5 +261,15 @@ module Naf
       link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", id: 'add_prerequisite')
     end
 
+    def add_color(status)
+      if status == 'Running'
+        'running'
+      elsif status == 'Queued' || status == 'Waiting'
+        'queued'
+      elsif status =~ /Terminat/ || status == 'Error' || status == 'Failed to Start'
+        'dead'
+      end
+    end
+
   end
 end

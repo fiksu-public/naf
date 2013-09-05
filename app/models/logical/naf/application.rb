@@ -131,7 +131,13 @@ module Logical
 
       def method_missing(method_name, *arguments, &block)
         case method_name
-        when :application_run_group_restriction_name, :application_run_group_name, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled
+        when :application_run_group_restriction_name,
+             :application_run_group_name,
+             :run_start_minute,
+             :priority,
+             :application_run_group_limit,
+             :visible,
+             :enabled
           if schedule = @app.application_schedule
             schedule.send(method_name, *arguments, &block)
           else

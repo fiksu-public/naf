@@ -77,7 +77,7 @@
         </tr>
         <tr>
           <td>Command</td>
-          <td><%= @application.command %></td>
+          <td style="white-space: pre-wrap;"><%= @application.command %></td>
         </tr>
         <tr>
           <td>Title</td>
@@ -98,7 +98,7 @@
         <% if @application.application_schedule.present? %>
           <tr>
             <td>Application Run Group Name</td>
-            <td><%= @logical_application.application_run_group_name %></td>
+            <td style="white-space: pre-wrap;"><%= @logical_application.application_run_group_name %></td>
           </tr>
           <tr>
             <td>Application Run Group Limit</td>
@@ -157,7 +157,7 @@
       <table id="naf_table_show">
         <thead>
           <tr>
-            <th>ID</th>
+            <th width="10%">ID</th>
             <th>Command</th>
           </tr>
         </thead>
@@ -165,7 +165,7 @@
           <% @application.application_schedule.application_schedule_prerequisites.each do |prereq| -%>
           <tr>
             <td><%= link_to prereq.prerequisite_application_schedule.id, application_path(prereq.prerequisite_application_schedule.application) %></td>
-            <td><%= prereq.prerequisite_application_schedule.application.command %></td>
+            <td style="white-space: pre-wrap;"><%= prereq.prerequisite_application_schedule.application.command %></td>
           </tr>
           <% end -%>
         </tbody>
@@ -189,7 +189,8 @@
             <td><%= link_to job.id, historical_job_path(job) %></td>
             <td><%= "#{time_ago_in_words(job.created_at, true)} ago" %></td>
             <td style="white-space: pre-wrap;"><%= job.command %></td>
-            <td><%= ::Logical::Naf::Job.new(job).status %></td>
+            <% job = ::Logical::Naf::Job.new(job) %>
+            <td class="<%= add_color(job.status) %>"><%= job.status %></td>
           </tr>
         <% end -%>
       </tbody>
