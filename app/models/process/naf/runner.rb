@@ -526,7 +526,7 @@ module Process::Naf
         logger.detail "memory available: #{memory_free_percentage}% (free) >= #{@minimum_memory_free}% (min percent)"
         return true
       end
-      logger.alarm "not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
+      logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
 
       return false
     end
