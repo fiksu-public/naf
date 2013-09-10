@@ -178,11 +178,7 @@ module Logical
               JobStatuses::Terminated.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
-
           jobs = ::Naf::HistoricalJob.find_by_sql([sql, values])
-
-          ap jobs
-          ap conditions
 
           jobs.map{ |physical_job| new(physical_job) }
         else
