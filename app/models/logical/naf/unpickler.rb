@@ -45,7 +45,7 @@ module ::Logical::Naf
             reference_instance = retrieve_reference(value)
             if reference_instance.nil?
               logger.error value.inspect
-              logger.error { references.map{|r| r.inspect}.join("\n") }
+              logger.error { references.map{ |r| r.inspect }.join("\n") }
               raise "couldn't find reference for #{value.inspect} in #{preserve.inspect}"
             end
             attributes[method_name.to_sym] = reference_instance.id
