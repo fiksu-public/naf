@@ -1,6 +1,5 @@
 module Naf
   class Affinity < NafBase
-<<<<<<< HEAD
     # Protect from mass-assignment issue
     attr_accessible :affinity_classification_id,
                     :affinity_name,
