@@ -22,6 +22,6 @@ module EngineRouting
 
   def process_action(action, parameters = nil, session = nil, flash = nil, method = "GET")
     parameters ||= {}
-    process(action, parameters.merge!(:use_route => :naf), session, flash, method)
+    process(action, parameters.merge!(use_route: :naf), session, flash, method)
   end
 end

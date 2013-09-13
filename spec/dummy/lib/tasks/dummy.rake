@@ -1,6 +1,6 @@
 require 'fileutils'
-# Add methods for aliasing and overriding rake tasks                                                                                                                                          
-# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task                                                                                                     
+# Add methods for aliasing and overriding rake tasks
+# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
     new_name = "#{fq_name}:original"
@@ -14,7 +14,7 @@ end
 
 def override_task(*args, &block)
   name, params, deps = Rake.application.resolve_args(args.dup)
-  fq_name = Rake.application.instance_variable_get(:@scope).dup.push(name).join(':')
+  fq_name = Rake.application.instance_variable_get(:@scope).to_a.reverse.push(name).join(':')
   alias_task(fq_name)
   Rake::Task.define_task(*args, &block)
 end
@@ -24,7 +24,7 @@ end
 namespace :db do
   namespace :structure do
     desc 'Dump the database structure to db/structure.sql. Specify another file with DB_STRUCTURE=db/my_structure.sql'
-    override_task :dump => :environment do
+    override_task dump: :environment do
       abcs = ActiveRecord::Base.configurations
       filename = ENV['DB_STRUCTURE'] || File.join(Rails.root, "db", "structure.sql")
       case abcs[Rails.env]['adapter']

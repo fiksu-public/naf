@@ -1,0 +1,36 @@
+<% content_for :body do %>
+  <div id='page-label'>
+    <h3 id="record_name"><%= naf_table_title %> </h3>
+  </div>
+  <br/>
+  <%= render partial: 'filter' %>
+  <%= render partial: 'naf/shared/select_per_page' %>
+
+  <table id='datatable'>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Started At</th>
+        <th>Machine Runner Id</th>
+        <th>Server Name</th>
+        <th>Pid</th>
+        <th>Status</th>
+        <th>Latest Commit</th>
+        <th>Deployment Tag</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr></tr>
+    </tbody>
+  </table>
+
+  <% content_for :javascripts do %>
+    <%= javascript_include_tag("dataTablesTemplates/machine_runner_invocations.js") %>
+    <script type='text/javascript'>
+      var sAjaxSource = "<%= naf.machine_runner_invocations_path(:json) %>";
+    </script>
+  <% end %>
+
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

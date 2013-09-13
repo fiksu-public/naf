@@ -1,0 +1,91 @@
+<% content_for :body do %>
+  <div id="record">
+    <h2>Machine Runner Invocation</h2>
+    <%= link_to 'Back to Machine Runner Invocations', machine_runner_invocations_path %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Id</td>
+          <td><%= @machine_runner_invocation.id %></td>
+        </tr>
+        <tr>
+          <td>Started At</td>
+          <td><%= @machine_runner_invocation.created_at %></td>
+        </tr>
+        <tr>
+          <td>Last Seen At</td>
+          <td><%= @machine_runner_invocation.updated_at %></td>
+        </tr>
+        <tr>
+          <td>Machine Runner Id</td>
+          <td><%= link_to @machine_runner_invocation.machine_runner.id, machine_runner_path(@machine_runner_invocation.machine_runner) %></td>
+        </tr>
+        <tr>
+          <td>Pid</td>
+          <td><%= @machine_runner_invocation.pid %></td>
+        </tr>
+        <tr>
+          <td>Wind Down At</td>
+          <td><%= @machine_runner_invocation.wind_down_at %></td>
+        </tr>
+        <tr>
+          <td>Dead At</td>
+          <td><%= @machine_runner_invocation.dead_at %></td>
+        </tr>
+        <tr>
+          <td>Latest Commit</td>
+          <td>
+            <% if @machine_runner_invocation.commit_information.present? -%>
+              <%= link_to @machine_runner_invocation.commit_information,
+                    "https://github.com/#{@machine_runner_invocation.repository_name}/commit/#{@machine_runner_invocation.commit_information}" %>
+            <% else -%>
+              <i>Unknown</i>
+            <% end -%>
+          </td>
+        </tr>
+        <tr>
+          <td>Branch Name</td>
+          <td>
+            <% if @machine_runner_invocation.branch_name.present? -%>
+              <%= @machine_runner_invocation.branch_name %>
+            <% else -%>
+              <i>Unknown</i>
+            <% end -%>
+          </td>
+        </tr>
+        <tr>
+          <td>Repository Name</td>
+          <td>
+            <% if @machine_runner_invocation.repository_name.present? -%>
+              <%= @machine_runner_invocation.repository_name %>
+            <% else -%>
+              <i>Unknown</i>
+            <% end -%>
+          </td>
+        </tr>
+        <tr>
+          <td>Deployment Tag</td>
+          <td>
+            <% if @machine_runner_invocation.deployment_tag.present? -%>
+              <%= @machine_runner_invocation.deployment_tag %>
+            <% else -%>
+              <i>None</i>
+            <% end -%>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+  </div>
+<% end %>
+<%= render partial: 'naf/shared/application' %>

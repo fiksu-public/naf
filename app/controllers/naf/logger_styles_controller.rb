@@ -5,19 +5,18 @@ module Naf
 
     def index
       @rows = Naf::LoggerStyle.all
-      render :template => 'naf/datatable'
+      render template: 'naf/datatable'
     end
 
     def show
-      @record = Naf::LoggerStyle.find(params[:id])
-      render :template => 'naf/record'
+      @logger_style = Naf::LoggerStyle.find(params[:id])
     end
 
     def destroy
       @logger_style = Naf::LoggerStyle.find(params[:id])
       @logger_style.destroy
       flash[:notice] = "Logger Style '#{@logger_style.name}' was successfully deleted."
-      redirect_to(:action => "index")
+      redirect_to(action: "index")
     end
 
     def new
@@ -28,9 +27,10 @@ module Naf
     def create
       @logger_style = Naf::LoggerStyle.new(params[:logger_style])
       if @logger_style.save
-        redirect_to(@logger_style, :notice => "Logger Style '#{@logger_style.name}' was successfully created.")
+        redirect_to(@logger_style,
+                    notice: "Logger Style '#{@logger_style.name}' was successfully created.")
       else
-        render :action => "new"
+        render action: "new"
       end
     end
 
@@ -41,9 +41,10 @@ module Naf
     def update
       @logger_style = Naf::LoggerStyle.find(params[:id])
       if @logger_style.update_attributes(params[:logger_style])
-        redirect_to(@logger_style, :notice => "Logger Style '#{@logger_style.name}' was successfully updated.")
+        redirect_to(@logger_style,
+                    notice: "Logger Style '#{@logger_style.name}' was successfully updated.")
       else
-        render :action => "edit"
+        render action: "edit"
       end
     end
 

@@ -1,0 +1,26 @@
+<%
+  rows = @historical_jobs.each do |job|
+    historical_job = ::Naf::HistoricalJob.find_by_id(job[0])
+    if job[1].present? && historical_job.present? && historical_job.machine_runner_invocation.present?
+      invocation = historical_job.machine_runner_invocation
+      if invocation.status != 'dead' && job[10] == 'Running'
+        job[1] = "<div class='" + invocation.status + "'>" + job[1] + "</div>".html_safe
+      end
+    end
+
+    job[12] = link_to image_tag('papertrail_job.png',
+                                class: 'action',
+                                title: "View job(id: #{job[0]}, title: #{job[4]}) log in Papertrail"),
+                                job[12],
+                                { target: '_blank', class: "papertrail", id: job[0] }
+
+    if job[10] == "Running" || job[10] == 'Queued' || job[10] == 'Waiting'
+      job[12] << "&nbsp;&nbsp;&nbsp;".html_safe
+      job[12] << (link_to image_tag('terminate.png',
+                  class: 'action',
+                  title: "Terminate job(id: #{job[0]}, title: #{job[4]})"),
+                  "#", { class: "terminate", id: job[0]})
+    end
+  end
+%>
+<%= raw rows %>

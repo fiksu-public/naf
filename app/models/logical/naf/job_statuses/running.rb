@@ -13,18 +13,17 @@ module Logical
           end
           <<-SQL
             (
-             SELECT
-               j.*,
-               NULL AS job_id
+              SELECT
+                j.*, null AS "historical_job_id"
               FROM
-               #{::Naf::Job.table_name} AS j
+                "#{::Naf.schema_name}"."historical_jobs" AS j
               WHERE
-               j.started_at IS NOT NULL AND
-               j.finished_at IS NULL AND
-               j.request_to_terminate = false
-               #{conditions}
+                j.started_at IS NOT NULL AND
+                j.finished_at IS NULL AND
+                j.request_to_terminate = false
+              #{conditions}
               ORDER BY
-               #{order} #{direction}
+                #{order} #{direction}
             )
           SQL
         end

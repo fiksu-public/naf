@@ -1,14 +1,15 @@
 module Process::Naf
   class MachineManager < ::Process::Naf::Application
-    opt :server_name, "set the machines server name (use with --update-machine)", :type => :string
-    opt :server_note, "set the machines server note (use with --update-machine)", :type => :string
-    opt :server_address, "set the machines server address (use with --update-machine)", :type => :string, :default => ::Naf::Machine.machine_ip_address
+    opt :server_name, "set the machines server name (use with --update-machine)", type: :string
+    opt :server_note, "set the machines server note (use with --update-machine)", type: :string
+    opt :server_address, "set the machines server address (use with --update-machine)", default: ::Naf::Machine.machine_ip_address
     opt :update_machine, "create or update an machine entry"
     opt :enabled, "enable machine"
-    opt :disabled, "disable machine", :var => :enabled, :set => :false
-    opt :thread_pool_size, "how many scripts can run at once", :type => :int
+    opt :disabled, "disable machine", var: :enabled, set: :false
+    opt :thread_pool_size, "how many scripts can run at once", type: :int
     opt :list_affinities, "show all affinities"
-    opt :add_affinity, "add an affinity slot", :type => :strings
+    opt :add_affinities, "add an affinity slot", type: :strings
+    opt :add_weight_affinities, "add afffinity weights for cpu and memory", default: true
 
     def work
       if @list_affinities
@@ -26,11 +27,8 @@ module Process::Naf
       if @update_machine
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
-          machine = ::Naf::Machine.create(:server_address => @server_address)
-          classification = ::Naf::AffinityClassification.location.id
-          affinity = ::Naf::Affinity.
-            find_or_create_by_affinity_classification_id_and_affinity_name(classification, @server_address)
-          machine.machine_affinity_slots.create(:affinity_id => affinity.id)
+          machine = ::Naf::Machine.create(server_address: @server_address)
+          add_default_affinities(machine)
         end
 
         machine.server_note = @server_note unless @server_note.nil?
@@ -47,8 +45,16 @@ module Process::Naf
         end
       end
 
-      if @add_affinity
-        @add_affinity.each do |affinity_string|
+      if @add_affinities
+        @add_affinities.each do |affinity_string|
+          #
+          # Parse the argument string. It should consists of 2 or 3 words separated
+          # by underscores.
+          #
+          # Example:
+          #   - location_1_required
+          #   - purpose_large
+          #
           parts = affinity_string.split('_')
           if parts.length == 2
             classification_name = parts[0]
@@ -62,12 +68,16 @@ module Process::Naf
             puts "no idea how to interpret affinity classification in: '#{affinity_string}'"
             exit 1
           end
-          affinity_classificiation = ::Naf::AffinityClassification.
+
+          # Find the Affinity Classification in the Database
+          affinity_classification = ::Naf::AffinityClassification.
             find_by_affinity_classification_name(classification_name)
-          unless affinity_classificiation
+          unless affinity_classification
             puts "could not find affinity classification: '#{classification_name}'"
             exit 1
           end
+
+          # Find the Affinity in the Database
           affinity = ::Naf::Affinity.
             find_by_affinity_classification_id_and_affinity_name(affinity_classification.id,
                                                                  affinity_name)
@@ -75,8 +85,10 @@ module Process::Naf
             puts "could not find affinity: '#{affinity_name}' with classification: '#{classification_name}'"
             exit 1
           end
-          machine.machine_affinity_slots.create(:affinity_id => affinity.id,
-                                                :required => required)
+
+          # Create an affinity slot for the machine
+          machine.machine_affinity_slots.create(affinity_id: affinity.id,
+                                                required: required)
         end
       end
 
@@ -101,5 +113,38 @@ module Process::Naf
         end
       end
     end
+
+    private
+
+    def add_default_affinities(machine)
+      # Add Machine Affinity
+      classification = ::Naf::AffinityClassification.machine.id
+      affinity = ::Naf::Affinity.
+        find_or_create_by_affinity_classification_id_and_affinity_name(classification, machine.id.to_s)
+      machine.machine_affinity_slots.create(affinity_id: affinity.id)
+
+      if machine == ::Naf::Machine.current
+        # Add Purpose Affinity
+        instance_type = `source /var/spool/ec2/meta-data.sh && echo $EC2_INSTANCE_TYPE`
+        if instance_type.present?
+          classification = ::Naf::AffinityClassification.purpose.id
+          affinity = ::Naf::Affinity.
+            find_or_create_by_affinity_classification_id_and_affinity_name(classification, instance_type)
+          machine.machine_affinity_slots.create(affinity_id: affinity.id)
+        end
+
+        # Add Weight Affinity
+        classification = ::Naf::AffinityClassification.weight.id
+        machine_cpus = (`cat /proc/cpuinfo | grep processor | wc -l`).strip.to_i
+        machine_memory = (`cat /proc/meminfo | grep MemTotal`).slice(/\d+/).to_i / (1024 * 1024)
+        cpu_affinity = ::Naf::Affinity.
+          find_or_create_by_affinity_classification_id_and_affinity_name(classification, 'cpus')
+        memory_affinity = ::Naf::Affinity.
+          find_or_create_by_affinity_classification_id_and_affinity_name(classification, 'memory')
+        machine.machine_affinity_slots.create(affinity_id: cpu_affinity.id, affinity_parameter: machine_cpus)
+        machine.machine_affinity_slots.create(affinity_id: memory_affinity.id, affinity_parameter: machine_memory)
+      end
+    end
+
   end
 end

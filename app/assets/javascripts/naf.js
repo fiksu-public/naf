@@ -12,13 +12,11 @@
 //
 //= require jquery
 //= require jquery_ujs
-//= require jquery-ui
 //= require date
 //= require iso8601
 //= require underscore
 //= require jquery.dataTables
 //= require jquery.dataTables.custom
-
 
 function remove_fields(link) {
   jQuery(link).prev("input[type=hidden]").val("1");

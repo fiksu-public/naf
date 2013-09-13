@@ -13,16 +13,25 @@ jQuery(document).ready(function() {
         { "sWidth": "12%"},
         { "sWidth": "8%"},
         { "sWidth": "14%"},
-        { "sWidth": "5%"},
+        { "sWidth": "4%"},
         { "sWidth": "10%"},
-        { "sWidth": "175px"},
-        null,
+        { "sWidth": "12%"},
+        { "sWidth": "12%"},
         { "sWidth": "6%"},
         { "sWidth": "10%"},
-        { "sWidth": "70px"}
+        { "sWidth": "6%"}
     ],
+    "fnServerData": function ( sSource, aoData, fnCallback ) {
+      _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
+      jQuery.getJSON( sSource, aoData, function (json) {
+        fnCallback(json);
+        initPaging();
+        addTitles();
+      });
+    },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       addLinkToMachines(nRow, aData);
+      colorizationDeletedOrHidden(nRow, aData);
       checkTimeFormat(nRow, aData);
       return nRow;
     }
@@ -31,7 +40,7 @@ jQuery(document).ready(function() {
    // Setup the datatable.
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery(document).on("click", '.terminate', function(){
+  jQuery(document).delegate('.terminate', "click", function(){
     var answer = confirm("You are going to mark machine down. Are you sure you want to do this?");
     if (!answer) {
       return false;
@@ -58,6 +67,12 @@ function addLinkToMachines(nRow, aData) {
   var id = aData[0];
   var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
+}
+
+function colorizationDeletedOrHidden(nRow, aData) {
+  if (aData[5] == 'true') {
+    jQuery(nRow).addClass('deleted_or_hidden');
+  }
 }
 
 function checkTimeFormat(nRow, aData) {

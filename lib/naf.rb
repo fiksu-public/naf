@@ -2,15 +2,13 @@ require "naf/engine"
 require 'naf/configuration'
 
 module Naf
-
   class << self
-    
     attr_writer :configuration
 
     def configure
       yield(configuration)
     end
-    
+
     def configuration
       @configuration ||= Configuration.new
     end
@@ -45,8 +43,6 @@ module Naf
 
     def using_another_database?
       model_class != ActiveRecord::Base
-    end  
-
+    end
   end
-
 end

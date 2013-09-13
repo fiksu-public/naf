@@ -6,10 +6,10 @@ module Naf
 
     def index
       respond_to do |format|
-        format.html do
-        end
+        format.html
         format.json do
           set_page
+
           applications = []
           application = []
           params[:search][:visible] = params[:search][:visible] ? false : true
@@ -24,15 +24,16 @@ module Naf
             application =[]
           end
           @total_display_records = applications.count
-          @applications = applications.paginate(:page => @page, :per_page => @rows_per_page)
-          render :layout => 'naf/layouts/jquery_datatables'
+          @applications = applications.paginate(page: @page, per_page: @rows_per_page)
+
+          render layout: 'naf/layouts/jquery_datatables'
         end
       end
     end
 
     def show
-      @record = Logical::Naf::Application.new(Naf::Application.find(params[:id]))
-      render :template => 'naf/record'
+      @application = Naf::Application.find(params[:id])
+      @logical_application = Logical::Naf::Application.new(@application)
     end
 
     def new
@@ -42,7 +43,6 @@ module Naf
     end
 
     def create
-      set_application_run_group_name
       @application = Naf::Application.new(params[:application])
       if @application.save
         app_schedule = @application.application_schedule
@@ -52,11 +52,12 @@ module Naf
             prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
+        redirect_to(@application,
+                    notice: "Application #{@application.title} was successfully created. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         set_shown_schedule_and_prerequisite
         @application.build_application_schedule unless params[:application].try(:[], :application_schedule_attributes).try(:[], :_destroy) == "0"
-        render :action => "new"
+        render action: "new"
       end
     end
 
@@ -78,8 +79,8 @@ module Naf
     end
 
     def update
-      set_application_run_group_name
       @application = Naf::Application.find(params[:id])
+      set_application_run_group_name
       if @application.update_attributes(params[:application])
         app_schedule = @application.application_schedule
         if app_schedule.present?
@@ -88,18 +89,27 @@ module Naf
             prerequisite.title
           end.join(', ')
         end
-        redirect_to(@application, :notice => "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
+        redirect_to(@application,
+                    notice: "Application #{@application.title} was successfully updated. #{'Prerequisites: ' + prerequisites if app_schedule.try(:prerequisites).try(:present?) }")
       else
         set_shown_schedule_and_prerequisite
-        render :action => "edit"
+        render action: "edit"
       end
     end
-
 
     private
 
     def set_cols_and_attributes
-      more_attributes = [:script_type_name, :application_run_group_name, :application_run_group_restriction_name, :run_interval, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled ]
+      more_attributes = [:script_type_name,
+                         :application_run_group_name,
+                         :application_run_group_restriction_name,
+                         :run_interval,
+                         :run_start_minute,
+                         :priority,
+                         :application_run_group_limit,
+                         :visible,
+                         :enabled,
+                         :enqueue_backlogs ]
       @attributes = Naf::Application.attribute_names.map(&:to_sym) | more_attributes
       @cols = Logical::Naf::Application::COLUMNS
     end

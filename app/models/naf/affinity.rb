@@ -1,33 +1,54 @@
 module Naf
   class Affinity < NafBase
+    # Protect from mass-assignment issue
+    attr_accessible :affinity_classification_id,
+                    :affinity_name,
+                    :selectable,
+                    :affinity_short_name,
+                    :affinity_note
 
-    validates :affinity_classification_id, :presence => true
-    validates :affinity_name, :presence => true, :length => {:minimum => 1}
-    validates :affinity_short_name, :uniqueness => true, :allow_blank => true,
-              :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
-                           :message => "letters should be first" }
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
+
+    belongs_to :affinity_classification,
+      class_name: '::Naf::AffinityClassification'
+    has_many :application_schedule_affinity_tabs,
+      class_name: '::Naf::ApplicationScheduleAffinityTab',
+      dependent: :destroy
+    has_many :machine_affinity_slots,
+      class_name: '::Naf::MachineAffinitySlot',
+      dependent: :destroy
+
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
+
+    validates :affinity_classification_id,
+              :affinity_name, presence: true
+    validates :affinity_name, length: { minimum: 1 }
+    validates :affinity_short_name, uniqueness: true,
+                                    allow_blank: true,
+                                    allow_nil: true,
+                                    format: {
+                                      with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                                      message: 'letters should be first'
+                                    }
+
     before_save :check_blank_values
 
-    belongs_to :affinity_classification, :class_name => '::Naf::AffinityClassification'
-    has_many :application_schedule_affinity_tabs, :class_name => '::Naf::ApplicationScheduleAffinityTab', :dependent => :destroy
-    has_many :machine_affinity_tabs, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
+    #--------------------
+    # *** Delegations ***
+    #++++++++++++++++++++
 
+    delegate :affinity_classification_name, to: :affinity_classification
 
-    delegate :affinity_classification_name, :to => :affinity_classification
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
 
-    attr_accessible :affinity_classification_id, :affinity_name, :selectable, :affinity_short_name, :affinity_note
-
-    scope :selectable,  where(:selectable => true)
-
-    def to_s
-      components = []
-      unless selectable
-        components << "UNSELECTABLE"
-      end
-      components << "classification: \"#{affinity_classification_name}\""
-      components << "name: \"#{affinity_name}\""
-
-      return "::Naf::Affinity<#{components.join(', ')}>"
+    def self.selectable
+      where(selectable: true)
     end
 
     def self.pre_unpickle(unpickler)
@@ -78,11 +99,47 @@ module Naf
                  association_affinity_value: preserve['affinity_name'] } => instance }
     end
 
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    def to_s
+      components = []
+      components << "UNSELECTABLE" unless selectable
+      components << "classification: \"#{affinity_classification_name}\""
+      components << "name: \"#{affinity_name}\""
+
+      return "::Naf::Affinity<#{components.join(', ')}>"
+    end
+
+    def validate_affinity_name
+      if affinity_classification.present? &&
+        affinity_classification.affinity_classification_name == 'machine'
+
+        machine = ::Naf::Machine.find_by_id(affinity_name)
+        if machine.blank?
+          return "There isn't a machine with that id!"
+        end
+
+        count = ::Naf::Affinity.
+          where(affinity_classification_id: ::Naf::AffinityClassification.
+                  find_by_affinity_classification_name('machine').id,
+                affinity_name: machine.id.to_s).count
+
+        if count > 0
+          return 'An affinity with the pair value (affinity_classification_id, affinity_name) already exists!'
+        end
+      end
+
+      nil
+    end
+
     private
 
     def check_blank_values
       self.affinity_short_name = nil if self.affinity_short_name.blank?
       self.affinity_note = nil if self.affinity_note.blank?
     end
+
   end
 end

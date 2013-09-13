@@ -5,11 +5,18 @@ module Logical
 
     describe Machine do
       let(:physical_machine) { FactoryGirl.create(:machine)  }
-
       let(:physical_machine_two) { FactoryGirl.create(:machine_two) }
-
-      let(:columns) {[:id, :server_name, :server_address, :server_note, :enabled, :process_pool_size, :last_checked_schedules_at, :last_seen_alive_at, :log_level, :affinities, :marked_down]}
-      
+      let(:columns) { [:id,
+                       :server_name,
+                       :server_address,
+                       :server_note,
+                       :enabled,
+                       :process_pool_size,
+                       :last_checked_schedules_at,
+                       :last_seen_alive_at,
+                       :log_level,
+                       :affinities,
+                       :marked_down] }
 
       it "to_hash should return with the specified columns" do
         logical_machine = Machine.new(physical_machine)
@@ -36,7 +43,6 @@ module Logical
         logical_machine.last_seen_alive_at.split(',').first.should =~ /ago$/
       end
 
-
       context "Class Methods," do
         it "all should return an array of logical wrappers around machines" do
           machine = physical_machine
@@ -48,15 +54,8 @@ module Logical
           Machine.all.should be_a(Array)
           Machine.all.should have(2).items
         end
-
       end
-
-
-
-
-
     end
 
   end
 end
-

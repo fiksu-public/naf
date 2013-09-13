@@ -3,38 +3,58 @@ module Logical
     class Application
 
       attr_reader :app
-      
+
       include ActionView::Helpers::TextHelper
 
-      COLUMNS = [:id, :title, :short_name, :script_type_name, :application_run_group_name, :application_run_group_restriction_name, :application_run_group_limit, :priority, :run_time, :prerequisites, :deleted, :visible]
+      COLUMNS = [:id,
+                 :title,
+                 :short_name,
+                 :script_type_name,
+                 :application_run_group_name,
+                 :application_run_group_restriction_name,
+                 :application_run_group_limit,
+                 :enabled,
+                 :enqueue_backlogs,
+                 :run_time,
+                 :affinities,
+                 :prerequisites,
+                 :deleted,
+                 :visible]
 
-      FILTER_FIELDS = [:deleted, :enabled, :visible]
+      FILTER_FIELDS = [:deleted,
+                       :enabled,
+                       :visible]
 
-      SEARCH_FIELDS = [:title, :application_run_group_name, :command, :short_name]
+      SEARCH_FIELDS = [:title,
+                       :application_run_group_name,
+                       :command,
+                       :short_name]
 
       def initialize(naf_app)
         @app = naf_app
       end
-      
+
       def self.search(search)
         application_scope = ::Naf::Application.
           joins("LEFT JOIN #{::Naf.schema_name}.application_schedules ON #{::Naf.schema_name}.application_schedules.application_id = #{::Naf.schema_name}.applications.id").
             order("id desc")
+
         FILTER_FIELDS.each do |field|
           if search.present? and search[field].present?
             application_scope =
             if field == :enabled || field == :visible
-              application_scope.where(:application_schedules => { field => search[field] })
+              application_scope.where(application_schedules: { field => search[field] })
             else
               application_scope.where(field => search[field])
             end
           end
         end
+
         SEARCH_FIELDS.each do |field|
           if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
-              application_scope.where(["lower(#{Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+              application_scope.where(["lower(#{::Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
             else
               application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
             end
@@ -43,7 +63,7 @@ module Logical
 
         application_scope.map{ |physical_app| new(physical_app) }
       end
-      
+
       def to_hash
         Hash[ COLUMNS.map{ |m| [m, send(m)] } ]
       end
@@ -51,7 +71,7 @@ module Logical
       def command
         @app.command
       end
-      
+
       def run_start_minute
         output = ""
         if schedule = @app.application_schedule and schedule.run_start_minute.present?
@@ -103,8 +123,6 @@ module Logical
         if schedule = @app.application_schedule
           if schedule.application_run_group_name.blank?
             "not set"
-          elsif schedule.application_run_group_name == command
-            "command"
           else
             schedule.application_run_group_name
           end
@@ -113,7 +131,13 @@ module Logical
 
       def method_missing(method_name, *arguments, &block)
         case method_name
-        when :application_run_group_restriction_name, :application_run_group_name, :run_start_minute, :priority, :application_run_group_limit, :visible, :enabled
+        when :application_run_group_restriction_name,
+             :application_run_group_name,
+             :run_start_minute,
+             :priority,
+             :application_run_group_limit,
+             :visible,
+             :enabled
           if schedule = @app.application_schedule
             schedule.send(method_name, *arguments, &block)
           else
@@ -127,7 +151,33 @@ module Logical
           end
         end
       end
-      
+
+      def enqueue_backlogs
+        application_schedule.try(:enqueue_backlogs)
+      end
+
+      def affinities
+        affinity_tab_records = @app.application_schedule.try(:application_schedule_affinity_tabs)
+        return "" if affinity_tab_records.nil?
+
+        affinity_tabs = ""
+        affinity_tab_records.each do |tab|
+          if tab.affinity.affinity_short_name.present?
+            affinity_tabs << tab.affinity.affinity_short_name
+          else
+            affinity_tabs << tab.affinity.affinity_name
+          end
+
+          if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+            affinity_tabs << "(#{tab.affinity_parameter}), "
+          else
+            affinity_tabs << ", "
+          end
+        end
+
+        affinity_tabs[0..-3]
+      end
+
     end
   end
 end

@@ -1,0 +1,201 @@
+<% content_for :body do %>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <script type='text/javascript'>
+    jQuery(document).ready(function () {
+      jQuery(document).delegate('.terminate', "click", function(){
+        var answer = confirm("You are terminating this job. Are you sure you want to do this?");
+        if (!answer) {
+          return false;
+        }
+        var id = <%= @historical_job.id %>;
+        var url = '/job_system/historical_jobs/' + id;
+        jQuery.ajax({
+          url:url,
+          type:'POST',
+          dataType:'json',
+          data:{ "historical_job[request_to_terminate]":1, "historical_job_id":id, "_method":"put" },
+          success:function (data) {
+            if (data.success) {
+              var title = data.title ? data.title : data.command
+              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              setTimeout('window.location.reload()', 5600);
+            }
+          }
+        });
+      });
+    });
+  </script>
+
+  <div id="record">
+    <h2>Historical Job</h2>
+    <% if flash[:error] -%>
+      <div class="error"><%= flash[:error] %></div></br>
+    <% end -%>
+
+    <%= link_to 'Back to Jobs', historical_jobs_path %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to 'Edit', edit_historical_job_path(@historical_job) %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to "Add Affinity", new_historical_job_historical_job_affinity_tab_path(@historical_job) %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Title</td>
+          <td><%= @historical_job.title %></td>
+        </tr>
+        <tr>
+          <td>ID</td>
+          <td><%= @historical_job.id %></td>
+        </tr>
+        <tr>
+          <td>Status</td>
+          <td class="<%= add_color(@logical_job.status) %>"><%= @logical_job.status %></td>
+        </tr>
+        <tr>
+          <td>Server</td>
+          <td><%=
+            if @historical_job.started_on_machine.present?
+              name = @historical_job.started_on_machine.short_name
+              name.present? ? name : @historical_job.started_on_machine.server_address
+            end
+          %></td>
+        </tr>
+        <tr>
+          <td>Pid</td>
+          <td><%= @historical_job.pid %></td>
+        </tr>
+        <tr>
+          <td>Machine Runner Invocation Id</td>
+          <td>
+            <% if @historical_job.machine_runner_invocation_id.present? -%>
+              <%= link_to @historical_job.machine_runner_invocation_id, machine_runner_invocation_path(@historical_job.machine_runner_invocation) %>
+            <% end -%>
+          </td>
+        </tr>
+        <tr>
+          <td>Queued Time</td>
+          <td><%= @historical_job.created_at.localtime.strftime("%Y-%m-%d %r") %></td>
+        </tr>
+        <tr>
+          <td>Command</td>
+          <td style="white-space: pre-wrap;"><%= @historical_job.command %></td>
+        </tr>
+        <tr>
+          <td>Started At</td>
+          <td><%= @historical_job.started_at %></td>
+        </tr>
+        <tr>
+          <td>Finished At</td>
+          <td><%= @historical_job.finished_at %></td>
+        </tr>
+        <tr>
+          <td>Run Time</td>
+          <td><%= @logical_job.run_time %></td>
+        </tr>
+        <tr>
+          <td>Exit Status</td>
+          <td><%= @historical_job.exit_status %></td>
+        </tr>
+        <tr>
+          <td>Script Type Name</td>
+          <td><%= @historical_job.application_type.script_type_name %></td>
+        </tr>
+        <tr>
+          <td>Log Level</td>
+          <td><%= @historical_job.log_level %></td>
+        </tr>
+        <tr>
+          <td>Tags</td>
+          <td><%= @historical_job.tags %></td>
+        </tr>
+        <tr>
+          <td>Request To Terminate</td>
+          <td><%= @historical_job.request_to_terminate %></td>
+        </tr>
+        <tr>
+          <td>Machine Started On Server Address</td>
+          <td><%= @historical_job.started_on_machine.try(:server_address) %></td>
+        </tr>
+        <tr>
+          <td>Machine Started On Server Name</td>
+          <td><%= @historical_job.started_on_machine.try(:server_name) %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Name</td>
+          <td style="white-space: pre-wrap;"><%= @historical_job.application_run_group_name %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Limit</td>
+          <td><%= @historical_job.application_run_group_limit %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Restriction Name</td>
+          <td><%= @historical_job.application_run_group_restriction.application_run_group_restriction_name %></td>
+        </tr>
+        <tr>
+          <td><%= link_to "Historical Job Affinity Tabs",
+                  historical_job_historical_job_affinity_tabs_path(@historical_job.id) %>
+          </td>
+          <td><%= @historical_job.affinities.map(&:affinity_name).join(', ') %></td>
+        </tr>
+        <tr>
+          <td>Terminate Job</td>
+          <td><%= link_to image_tag('terminate.png',
+            class: 'action',
+            title: "Terminate job(id: #{@historical_job.id}, title: #{@historical_job.title})"),
+            "#", { class: "terminate" }
+          %></td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+    <h2>Prerequisites</h2>
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th width="10%">ID</th>
+          <th>Command</th>
+          <th width="15%">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @historical_job.prerequisites.each do |prereq| -%>
+        <tr>
+          <td><%= link_to prereq.id, historical_job_path(prereq) %></td>
+          <td style="white-space: pre-wrap;"><%= prereq.command %></td>
+          <% job = ::Logical::Naf::Job.new(prereq) %>
+          <td class="<%= add_color(job.status) %>"><%= job.status %></td>
+        </tr>
+        <% end -%>
+      </tbody>
+    </table>
+    </br>
+
+    <h2>Stdout</h2>
+    <iframe src="<%= naf_papertrail_link(@historical_job, true) %>" id="stdout" class="scrollable-output">
+      Your browser doesn't support iframe!
+    </iframe>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

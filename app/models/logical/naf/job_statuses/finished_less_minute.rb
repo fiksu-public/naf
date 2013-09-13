@@ -6,16 +6,15 @@ module Logical
         def self.all(conditions)
           <<-SQL
             (
-             SELECT
-               j.*,
-               NULL AS job_id
+              SELECT
+                j.*, NULL AS "historical_job_id"
               FROM
-               #{::Naf::Job.table_name} AS j
+                "#{::Naf.schema_name}"."historical_jobs" AS j
               WHERE
-               j.finished_at > '#{Time.zone.now - 1.minute}'
-               #{conditions}
+                j.finished_at > '#{Time.zone.now - 1.minute}'
+                #{conditions}
               ORDER BY
-               finished_at DESC
+                finished_at DESC
             )
           SQL
         end

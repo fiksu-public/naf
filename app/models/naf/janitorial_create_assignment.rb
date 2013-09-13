@@ -1,11 +1,26 @@
 module Naf
   class JanitorialCreateAssignment < JanitorialAssignment
-    validate :deleted_enabled_check
-    validates :assignment_order,
-          :numericality => { :only_integer => true, :greater_than_or_equal_to => 0, :less_than => 2147483647 }
-    validates :model_name, :presence => true
+    # Protect from mass-assignment issue
+    attr_accessible :model_name,
+                    :assignment_order,
+                    :enabled,
+                    :deleted
 
-    attr_accessible :model_name, :assignment_order, :enabled, :deleted
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
+
+    validate :deleted_enabled_check
+    validates :assignment_order, numericality: {
+                                   only_integer: true,
+                                   greater_than_or_equal_to: 0,
+                                   less_than: 2147483647
+                                 }
+    validates :model_name, presence: true
+
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
 
     def do_janitorial_work(target_model)
       target_model.create_new_partitions
@@ -16,5 +31,6 @@ module Naf
         errors.add(:deleted, "or Enabled must be false")
       end
     end
+
   end
 end

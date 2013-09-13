@@ -1,24 +1,35 @@
 <%= form_for([@machine, @slot]) do |f| %>
-  
+
   <% if @slot.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@slot.errors.count, "error") %> prohibited this Machine Affinity Slot from being saved:</h2>
   </div>
   <% end %>
- 
-  <%= f.hidden_field :machine_id, :value => @machine.id %>
+
+  <%= f.hidden_field :machine_id, value: @machine.id %>
 
   <div class="field">
-    <%= f.label :affinity_id, "Affinity*" %><br />
-    <%= f.select(:affinity_id, ::Naf::Affinity.selectable.map{ |a| [a.affinity_name, a.id] }, :include_blank => true) %>
+    <%= f.label :affinity_id, "Affinity*" %></br>
+    <%= f.select(:affinity_id,
+                 ::Naf::Affinity.selectable.map{
+                    |a| [a.affinity_classification.affinity_classification_name + ', ' + a.affinity_name, a.id]
+                 },
+                 include_blank: true) %>
   </div>
+  </br>
 
   <div class="field">
-    <%= f.label :required %>  <br />
+    <%= f.label :affinity_parameter %></br>
+    <%= f.text_field :affinity_parameter %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :required %></br>
     <%= f.check_box :required %>
   </div>
+  </br>
 
-  <br />
   <div class="actions">
     <%= f.submit %>
   </div>

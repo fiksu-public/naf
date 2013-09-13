@@ -6,21 +6,21 @@ module Logical
         def self.all(conditions)
           <<-SQL
             (
-             SELECT DISTINCT
-               j.*,
-               jp.job_id
+              SELECT DISTINCT
+                j.*, jp."historical_job_id"
               FROM
-               #{::Naf::Job.table_name} AS j
-              LEFT JOIN #{::Naf::JobPrerequisite.table_name} AS jp ON
-               j.id = jp.job_id
+                "#{::Naf.schema_name}"."historical_jobs" AS j
+              LEFT JOIN
+                "#{::Naf.schema_name}"."historical_job_prerequisites" AS jp
+                ON j."id" = jp."historical_job_id"
               WHERE
-               j.finished_at IS NULL AND
-               j.request_to_terminate = FALSE AND
-               jp.job_id IS NULL AND
-               j.started_at IS NULL
-               #{conditions}
+                j.finished_at IS NULL AND
+                j.request_to_terminate = false AND
+                jp.historical_job_id IS NULL AND
+                j.started_at IS NULL
+              #{conditions}
               ORDER BY
-               created_at DESC
+                created_at desc
             )
           SQL
         end

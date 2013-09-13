@@ -11,7 +11,7 @@ Gem::Specification.new do |s|
   s.date        = '2013-09-13'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
   s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
-  s.authors     = ["Keith Gabryelski", "Nathaniel Lim", "Aleksandr Dembskiy", "Leonardo Meira"]
+  s.authors     = ["Keith Gabryelski", "Leonardo Meira", "Nathaniel Lim", "Aleksandr Dembskiy"]
   s.email       = ['keith@fiksu.com', 'lmeira@fiksu.com']
   s.files       = `git ls-files`.split("\n")
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_dependency "log4r_remote_syslog_outputter", ">= 0.0.1"
   s.add_dependency "jquery-rails"
   s.add_dependency 'will_paginate'
-  s.add_dependency 'mem_info'
+  s.add_dependency 'facter'
   s.add_development_dependency "pg"
   s.add_development_dependency "rspec-rails"
   s.add_development_dependency "factory_girl_rails", "~> 4.0.0"

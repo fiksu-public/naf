@@ -1,38 +1,79 @@
-# A wrapper around Naf::Job
-# used for rendering in views
+# A wrapper around Naf::HistoricalJob used for rendering in views
 
 module Logical
   module Naf
     class Job
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
-      
-      COLUMNS = [:id, :server, :pid, :queued_time, :title, :started_at, :finished_at, :run_time, :affinities, :status]
-      
-      ATTRIBUTES = [:title, :id, :status, :server, :pid, :queued_time, :command, :started_at, :finished_at,  :run_time, :exit_status, :script_type_name, :log_level, :request_to_terminate, :machine_started_on_server_address,
-                    :machine_started_on_server_name, :application_run_group_name, :application_run_group_limit, :application_run_group_restriction_name]
-      
-      FILTER_FIELDS = [:application_type_id, :application_run_group_restriction_id, :priority, :failed_to_start, :pid, :exit_status, :request_to_terminate, :started_on_machine_id]
+
+      COLUMNS = [:id,
+                 :server,
+                 :pid,
+                 :queued_time,
+                 :title,
+                 :started_at,
+                 :finished_at,
+                 :run_time,
+                 :affinities,
+                 :tags,
+                 :status]
+
+      ATTRIBUTES = [:title,
+                    :id,
+                    :status,
+                    :server,
+                    :pid,
+                    :queued_time,
+                    :command,
+                    :started_at,
+                    :finished_at,
+                    :run_time,
+                    :exit_status,
+                    :script_type_name,
+                    :log_level,
+                    :request_to_terminate,
+                    :machine_started_on_server_address,
+                    :machine_started_on_server_name,
+                    :application_run_group_name,
+                    :application_run_group_limit,
+                    :application_run_group_restriction_name]
+
+      FILTER_FIELDS = [:application_type_id,
+                       :application_run_group_restriction_id,
+                       :priority,
+                       :failed_to_start,
+                       :pid,
+                       :exit_status,
+                       :request_to_terminate,
+                       :started_on_machine_id]
 
       SEARCH_FIELDS = [:command, :application_run_group_name]
 
-      ORDER = { '0' => "id", '2' => "pid", '3' => "created_at", '5' => "started_at", '6' => "finished_at", '9' => "status" }
+      # Mapping of datatable column positions and job attributes
+      ORDER = { '0' => "id",
+                '2' => "pid",
+                '3' => "created_at",
+                '5' => "started_at",
+                '6' => "finished_at",
+                '10' => "status" }
 
       def initialize(naf_job)
         @job = naf_job
       end
-      
+
       def method_missing(method_name, *arguments, &block)
         if @job.respond_to?(method_name)
           @job.send(method_name, *arguments, &block)
         else
           super
         end
-     end
-      
+      end
+
       def status
-        if @job.request_to_terminate
-          "Canceled"
+        if @job.request_to_terminate && @job.finished_at.nil?
+          "Terminating"
+        elsif @job.request_to_terminate && @job.finished_at.present?
+          "Terminated"
         elsif @job.started_at and (not @job.finished_at)
           "Running"
         elsif (not @job.started_at) and (not @job.finished_at) and @job.failed_to_start
@@ -50,20 +91,6 @@ module Logical
         end
       end
 
-      def run_time
-        start_time = @job.started_at
-        end_time = @job.finished_at
-        if start_time and end_time
-          return Time.at((end_time - start_time).round).utc.strftime("%H:%M:%S")
-        else
-          return ""
-        end
-      end
-      
-      def queued_time
-        created_at.localtime.strftime("%Y-%m-%d %r")
-      end
-      
       def title
         if application
           application.title
@@ -83,7 +110,7 @@ module Logical
       end
 
       def server
-        if started_on_machine 
+        if started_on_machine
           name = started_on_machine.short_name_if_it_exist
           if name.blank?
             started_on_machine.server_address
@@ -92,7 +119,7 @@ module Logical
           end
         end
       end
-      
+
       # Given search, a hash of the search query for jobs on the queue,
       # build up and return the ActiveRecord scope
       #
@@ -131,10 +158,12 @@ module Logical
               JobStatuses::Running.all(:queued, conditions) + "union all\n" +
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
-              JobStatuses::FinishedLessMinute.all(conditions)
+              JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
+              JobStatuses::Terminated.all(conditions)
             when :running
               JobStatuses::Running.all(conditions) + "union all\n" +
-              JobStatuses::FinishedLessMinute.all(conditions)
+              JobStatuses::FinishedLessMinute.all(conditions) + "union all\n" +
+              JobStatuses::Terminated.all(conditions)
             when :waiting
               JobStatuses::Waiting.all(conditions)
             when :finished
@@ -146,11 +175,10 @@ module Logical
               JobStatuses::Queued.all(conditions) + "union all\n" +
               JobStatuses::Waiting.all(conditions) + "union all\n" +
               JobStatuses::Finished.all(conditions) + "union all\n" +
-              JobStatuses::Canceled.all(conditions)
+              JobStatuses::Terminated.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
-
-          jobs = ::Naf::Job.find_by_sql([sql, values])
+          jobs = ::Naf::HistoricalJob.find_by_sql([sql, values])
 
           jobs.map{ |physical_job| new(physical_job) }
         else
@@ -170,7 +198,7 @@ module Logical
         job_scope = self.get_job_scope(search)
 
         if search[:status] == 'waiting'
-          job_scope = job_scope.select{|job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 }
+          job_scope = job_scope.select{ |job| job.prerequisites.select{ |pre| pre.started_at.nil? }.size > 0 }
         end
 
         job_scope.count
@@ -180,17 +208,17 @@ module Logical
         status = search[:status].blank? ? :all : search[:status]
         case status.to_sym
           when :queued
-            job_scope = ::Naf::Job.queued_status
+            job_scope = ::Naf::HistoricalJob.queued_status
           when :running
-            job_scope = ::Naf::Job.running_status
+            job_scope = ::Naf::HistoricalJob.running_status
           when :waiting
-            job_scope = ::Naf::Job.queued_with_waiting
+            job_scope = ::Naf::HistoricalJob.queued_with_waiting
           when :finished
-            job_scope = ::Naf::Job.finished
+            job_scope = ::Naf::HistoricalJob.finished
           when :errored
-            job_scope = ::Naf::Job.errored
+            job_scope = ::Naf::HistoricalJob.errored
           else
-            job_scope = ::Naf::Job.scoped
+            job_scope = ::Naf::HistoricalJob.scoped
         end
 
         FILTER_FIELDS.each do |field|
@@ -204,7 +232,7 @@ module Logical
       end
 
       def self.find(id)
-        physical_job = ::Naf::Job.find(id)
+        physical_job = ::Naf::HistoricalJob.find(id)
         physical_job ? new(physical_job) : nil
       end
 
@@ -215,9 +243,9 @@ module Logical
           return nil
         end
       end
-      
+
       def to_detailed_hash
-        Hash[ ATTRIBUTES.map{ |m| 
+        Hash[ ATTRIBUTES.map{ |m|
           case m
           when :started_at, :finished_at
             if value = @job.send(m)
@@ -226,28 +254,74 @@ module Logical
               [m, '']
             end
           else
-            [m, send(m)] 
+            [m, send(m)]
           end
         }]
       end
-    
+
       # Format the hash of a job record nicely for the table
       def to_hash
         Hash[ COLUMNS.map{ |m| [m, send(m)] } ]
       end
-      
+
       def started_at
-        if value = @job.started_at
-          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
+        if @job.started_at.present?
+          value = Time.zone.now - @job.started_at
+          if value < 60
+            "#{value.to_i} seconds ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+          elsif value < 172_800
+            time_difference(value)
+          elsif value >= 172_800
+            "#{time_ago_in_words(@job.started_at, true)} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+          else
+            ""
+          end
         else
           ""
+        end
+      end
+
+      def time_difference(value, time_format_on=true)
+        seconds = value % 60
+        value = (value - seconds) / 60
+        minutes = value % 60
+        value = (value - minutes) / 60
+        hours = value % 24
+        value = (value - hours) / 24
+        days = value % 7
+        more_hours = hours + days * 24 if days > 0
+
+        if time_format_on
+          "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+        else
+          if days < 2
+            "-#{more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
+          else
+            "-#{days.to_i}d#{hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
+          end
         end
       end
 
       def has_started?
         @job.started_at.present?
       end
-      
+
+      def queued_time
+        created_at.localtime.strftime("%Y-%m-%d %r")
+      end
+
+      def run_time
+        if @job.started_at.present?
+          if @job.finished_at.present?
+            time_difference(@job.finished_at - @job.started_at, false)[1..-1]
+          else
+            time_difference(Time.zone.now - @job.started_at, false)[1..-1]
+          end
+        else
+          ""
+        end
+      end
+
       def finished_at
         if value = @job.finished_at
           "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
@@ -258,12 +332,24 @@ module Logical
 
       def affinities
         @job.job_affinities.map do |job_affinity|
-          if job_affinity.affinity_short_name
-            job_affinity.affinity_short_name
-          else
-            job_affinity.affinity_classification_name + '_' + job_affinity.affinity_name
+          if job_affinity.present?
+            if job_affinity.affinity_short_name.present?
+              job_affinity.affinity_short_name
+            else
+              job_affinity.affinity_classification_name + '_' + job_affinity.affinity_name
+            end
           end
         end.join(", \n")
+      end
+
+      def tags
+        if @job.tags.present?
+          # Only show custom visible tags
+          job_tags = @job.tags.gsub(/[{}]/,'').split(',')
+          (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
+        else
+          nil
+        end
       end
 
     end

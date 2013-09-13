@@ -9,22 +9,24 @@ jQuery(document).ready(function() {
     },
     "bAutoWidth": false,
     "aoColumnDefs": [
-      { "bVisible": false, "aTargets": [ 12, 13 ] },
-      { "sClass": "center", "aTargets": [ 6, 7, 11 ] }
+      { "bVisible": false, "aTargets": [ 14, 15 ] },    // turn off visibility
+      { "sClass": "center", "aTargets": [ 6, 7, 8, 9, 12, 13 ] }
     ],
     "aoColumns": [
-        { "sWidth": "2%"},
-        { "sWidth": "12%"},
-        { "sWidth": "7%"},
-        { "sWidth": "9%"},
-        null,
-        { "sWidth": "14%"},
-        { "sWidth": "8%"},
-        { "sWidth": "4%"},
-        { "sWidth": "8%"},
-        { "sWidth": "8%"},
-        { "sWidth": "7%"},
-        { "sWidth": "50px"},
+        { "sWidth": "2%"},      // Id
+        { "sWidth": "12%"},     // Title
+        { "sWidth": "7%"},      // Short Name
+        { "sWidth": "6%"},      // Script Type Name
+        null,                   // Application Run Group Name
+        { "sWidth": "9%"},      // Application Run Group Restriction Name
+        { "sWidth": "7%"},      // Application Run Group Limit
+        { "sWidth": "4%"},      // Enabled
+        { "sWidth": "4%"},      // Enqueue Backlogs
+        { "sWidth": "8%"},      // Run Time
+        { "sWidth": "10%"},     // Last Queued At
+        { "sWidth": "8%"},      // Affinities
+        { "sWidth": "8%"},      // Prerequisites
+        { "sWidth": "4%"},      // Actions
         null,
         null
     ],
@@ -42,19 +44,24 @@ jQuery(document).ready(function() {
       checkTimeFormat(nRow, aData);
       return nRow;
     }
-  }; // datatable
+  };
 
-   // Setup the datatable.
+  // Setup the datatable
   jQuery('#datatable').addDataTable(dataTableOptions);
 
-  jQuery(document).on("click", '.enqueue', function(){
+  jQuery(document).delegate('.enqueue', "click", function(){
     var answer = confirm("Adding application as a job on the queue?");
     if (!answer) {
       return false;
     }
-    jQuery.post(postSource, { "job[application_id]": jQuery(this).attr('id') }, function(data) {
+    jQuery.post(postSource, { "historical_job[application_id]": jQuery(this).attr('id') }, function(data) {
       if (data.success) {
         jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
+                appendTo('#flash_message').slideDown().delay(5000).slideUp();
+        jQuery('#datatable').dataTable().fnDraw();
+      }
+      else {
+        jQuery("<div class='error'>Sorry, \'" +  data.title + "\' cannot add a Job to the queue right now!</div>").
                 appendTo('#flash_message').slideDown().delay(5000).slideUp();
         jQuery('#datatable').dataTable().fnDraw();
       }
@@ -69,13 +76,13 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[12] == 'true' || aData[13] == 'false' || aData[13] == '') {
+  if (aData[11] == 'true' || aData[12] == 'false' || aData[13] == '') {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
 
 function checkTimeFormat(nRow, aData) {
-  var l_q_a_array = jQuery(aData[9]).text().split(',');
+  var l_q_a_array = jQuery(aData[10]).text().split(',');
   var last_queued_at;
   if(jQuery('#time_format').val() == 'lexically') {
     last_queued_at = l_q_a_array[0];
@@ -83,5 +90,5 @@ function checkTimeFormat(nRow, aData) {
     last_queued_at = l_q_a_array[1];
   }
 
-  jQuery('td:nth-child(10)', nRow).empty().append(jQuery(aData[9]).text(last_queued_at));
+  jQuery('td:nth-child(11)', nRow).empty().append(jQuery(aData[10]).text(last_queued_at));
 }

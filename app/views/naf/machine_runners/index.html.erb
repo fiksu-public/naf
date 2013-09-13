@@ -1,0 +1,82 @@
+<% content_for :body do %>
+  <div id='page-label'>
+    <h3 id="record_name"><%= naf_table_title %> </h3>
+  </div>
+  <br/>
+  <%= render partial: 'naf/shared/select_per_page' %>
+
+  <div id="flash_message">
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
+    <% if flash[:error] -%>
+      <script type='text/javascript'>
+        jQuery("<p class='error'><%= flash[:error] %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end -%>
+  </div>
+
+  <script type='text/javascript'>
+    // Action: Wind Down Runner
+    jQuery(document).delegate('.wind_down_all', "click", function() {
+      var answer = confirm("You are winding down all runners. Are you sure you want to do this?");
+      if (!answer) {
+        return false;
+      }
+      var url = '/job_system/machine_runner_invocations/';
+      jQuery.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: { "machine_runner_invocation[request_to_wind_down]": 1, "option": "all", "_method": "put" },
+        success:function (data) {
+          if (data.success) {
+            jQuery("<p id='notice'>The machine runner is winding down!</p>").
+            appendTo('#flash_message').slideDown().delay(5000).slideUp();
+            jQuery('#datatable').dataTable().fnDraw();
+            window.location.reload()
+          }
+        }
+      });
+    });
+  </script>
+
+  <%= button_to "Wind Down All Runners",
+                { controller: :machine_runner_invocations, action: 'wind_down_all' },
+                { method: :get, class: 'wind-bttn' } %>
+
+  <table id='datatable'>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Runner Started At</th>
+        <th>Server Name</th>
+        <th>Runner Cwd</th>
+        <th>Runner Invocation Id</th>
+        <th>Runner Pid</th>
+        <th>Runner Invocation Status</th>
+        <th>Jobs Running</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr></tr>
+    </tbody>
+  </table>
+
+  <% content_for :javascripts do %>
+    <%= javascript_include_tag("dataTablesTemplates/machine_runners.js") %>
+    <script type='text/javascript'>
+      var sAjaxSource = "<%= naf.machine_runners_path(:json) %>";
+    </script>
+  <% end %>
+
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

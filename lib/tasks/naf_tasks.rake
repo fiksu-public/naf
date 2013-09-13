@@ -1,7 +1,7 @@
 require 'fileutils'
 
-# Add methods for aliasing and overriding rake tasks                                                                                                                         
-# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task 
+# Add methods for aliasing and overriding rake tasks
+# From: http://metaskills.net/2010/5/26/the-alias_method_chain-of-rake-override-rake-task
 
 Rake::TaskManager.class_eval do
   def alias_task(fq_name)
@@ -18,25 +18,22 @@ end
 
 def override_task(*args, &block)
   name, params, deps = Rake.application.resolve_args(args.dup)
-  fq_name = Rake.application.instance_variable_get(:@scope).dup.push(name).join(':')
+  fq_name = Rake.application.instance_variable_get(:@scope).to_a.reverse.push(name).join(':')
   alias_task(fq_name)
   Rake::Task.define_task(*args, &block)
 end
-
-
 
 # --------------------------------------------------
 # ---------------Custom Rake Tasks for Naf----------
 # --------------------------------------------------
 
 namespace :naf do
-
   namespace :isolate do
     desc "Custom isolation Engine migrations to db/naf/migrate folder, for use on non-primary database"
     task :migrations do
 
       puts "Moving naf migration files to folder: #{isolated_naf_migrations_folder}"
-      
+
       FileUtils.mkdir(isolated_naf_folder) unless Dir.exists?(isolated_naf_folder)
       FileUtils.mkdir(isolated_naf_migrations_folder) unless Dir.exists?(isolated_naf_migrations_folder)
 
@@ -58,16 +55,17 @@ namespace :naf do
 
   namespace :janitor do
     desc "create partitioning infrastructure for naf tables"
-    task :infrastructure => :environment do
-      model_names = [::Naf::Job.name,::Naf::JobCreatedAt.name,::Naf::JobPrerequisite.name,::Naf::JobAffinityTab.name,::Naf::ApplicationSchedulePrerequisite.name]
+    task infrastructure: :environment do
+      model_names = [::Naf::HistoricalJob.name,
+                     ::Naf::HistoricalJobPrerequisite.name,
+                     ::Naf::HistoricalJobAffinityTab.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
     end
-    
   end
 
   namespace :db do
     desc "Custom migrate task, connects to correct database, migrations found in db/naf/migrate"
-    task :migrate => :environment do
+    task migrate: :environment do
       if using_another_database? and naf_migrations.size > 0
         puts "Running naf migrations with database configuration: #{naf_environment}"
         puts naf_migrations
@@ -81,9 +79,9 @@ namespace :naf do
         Rake::Task['db:migrate'].invoke
       end
     end
-    
+
     desc "Perform a rollback on the on the naf migrations"
-    task :rollback => :environment do
+    task rollback: :environment do
       if using_another_database? and naf_migrations.size > 0
         connect_to_naf_database do
           step = ENV['STEP'] ? ENV['STEP'].to_i : 1
@@ -94,11 +92,11 @@ namespace :naf do
         Rake::Task['db:rollback'].invoke
       end
     end
-    
+
     namespace :migrate do
 
       desc 'Runs the "up" for a given migration VERSION.'
-      task :up => [:environment] do
+      task up: [:environment] do
         if using_another_database? and naf_migrations.size > 0
           connect_to_naf_database do
             version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
@@ -111,7 +109,7 @@ namespace :naf do
       end
 
       desc 'Runs the "down" for a given migration VERSION.'
-      task :down => [:environment] do
+      task down: [:environment] do
         if using_another_database? and naf_migrations.size > 0
           connect_to_naf_database do
             version = ENV['VERSION'] ? ENV['VERSION'].to_i : nil
@@ -124,7 +122,7 @@ namespace :naf do
       end
 
       desc "Show the status of migrations"
-      task :status => :environment do
+      task status: :environment do
         if using_another_database? and naf_migrations.size > 0
           connect_to_naf_database do
             config = ActiveRecord::Base.configurations[naf_environment]
@@ -158,13 +156,9 @@ namespace :naf do
       end
     end
 
-
-
-
   namespace :structure do
-
     desc "Dump the naf_development schema"
-    task :dump => :environment do
+    task dump: :environment do
       env = "naf_#{::Rails.env}"
       config = ActiveRecord::Base.configurations[env]
       ENV['PGHOST'] = config["host"] if config["host"]
@@ -179,14 +173,13 @@ namespace :naf do
     end
   end
 
-    
   namespace :test do
      desc "Drop the Naf Test database"
-      task :purge => :environment do
+      task purge: :environment do
         abcs = ActiveRecord::Base.configurations
         config = abcs['naf_test']
-        ActiveRecord::Base.clear_active_connections! 
-        ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public')) 
+        ActiveRecord::Base.clear_active_connections!
+        ActiveRecord::Base.establish_connection(config.merge('database' => 'postgres', 'schema_search_path' => 'public'))
         ActiveRecord::Base.connection.drop_database config['database']
         @encoding = config['encoding'] || ENV['CHARSET'] || 'utf8'
         begin
@@ -199,7 +192,7 @@ namespace :naf do
         end
       end
       desc "Clone naf_development to naf_test"
-      task :clone_structure => [ "naf:db:structure:dump", "naf:db:test:purge" ] do
+      task clone_structure: [ "naf:db:structure:dump", "naf:db:test:purge" ] do
         abcs = ActiveRecord::Base.configurations
         config = abcs['naf_test']
         ENV['PGHOST'] = config["host"] if config["host"]
@@ -212,7 +205,7 @@ namespace :naf do
   end
 
   desc "Undo all of the naf schema migrations"
-  task :schema_rollback => :environment do
+  task schema_rollback: :environment do
     puts "Rolling back all of Naf migrations"
     if using_another_database? and naf_migrations.size > 0
       connect_to_naf_database do
@@ -226,8 +219,8 @@ namespace :naf do
   end
 
   desc "Delete all of the naf schema migrations files that were installed"
-  task :remove_migration_files => [:environment, :schema_rollback] do
-    naf_migrations.each do |migration| 
+  task remove_migration_files: [:environment, :schema_rollback] do
+    naf_migrations.each do |migration|
       if using_another_database? and naf_migrations.size > 0
         file_path = "#{isolated_naf_migrations_folder}#{migration}"
       else
@@ -249,19 +242,19 @@ namespace :naf do
   end
 
   desc "Deletes initalizers, configs that were installed, revert edit to config/routes"
-  task :system_teardown => :environment do
+  task system_teardown: :environment do
     # The first two files configured to be removed, if someone is using an older versions of naf
     files_to_remove = [
       "config/initializers/job_system_initializer.rb",
       "config/job_system_config.yml",
-      "config/initializers/naf_initializer.rb", 
-      "config/initializers/naf.rb", 
+      "config/initializers/naf_initializer.rb",
+      "config/initializers/naf.rb",
       "config/naf_log4r.yml",
       "config/naf_config.yml"
     ]
-    edit_file_line_regex_hash = { 
+    edit_file_line_regex_hash = {
       "config/routes.rb" => %r{$  mount Naf::Engine, :at => "/job_system"\s*\n}
-    } 
+    }
     files_to_remove.each do |file|
       file_path = "#{Rails.root}/#{file}"
       if File.exists?(file_path)
@@ -277,8 +270,8 @@ namespace :naf do
   end
 
   desc "remove partitioning infrastructure for naf tables"
-  task :remove_partitions => :environment do
-    klasses = [::Naf::Job,::Naf::JobCreatedAt,::Naf::JobPrerequisite,::Naf::JobAffinityTab]
+  task remove_partitions: :environment do
+    klasses = [::Naf::HistoricalJob, ::Naf::HistoricalJobPrerequisite, ::Naf::HistoricalJobAffinityTab]
     existing_schemas = database_schemas
     schemas = klasses.map{ |klass| klass.configurator.schema_name }
     if using_another_database?
@@ -294,11 +287,10 @@ namespace :naf do
     end
   end
   desc "The master task for completely expunging the installation of the naf Engine"
-  task :teardown => [:system_teardown, :remove_migration_files, :remove_partitions] do
+  task teardown: [:system_teardown, :remove_migration_files, :remove_partitions] do
   end
 
 end
-
 
 # Helper Methods
 
@@ -329,7 +321,7 @@ def using_another_database?
 end
 
 # Specifiy the naf environment, the configuration that migrations with run under,
-# If the naf_#{Rails.env} configuration exists in in database.yml, choose that, 
+# If the naf_#{Rails.env} configuration exists in in database.yml, choose that,
 # else choose Rails.env
 def naf_environment
   naf_environments = ActiveRecord::Base.configurations.keys.select{|env| env == "naf_#{Rails.env}"}
@@ -376,5 +368,3 @@ end
 
 class NafConfigurationError < Exception
 end
-
-

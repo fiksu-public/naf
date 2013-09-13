@@ -4,7 +4,6 @@ module Naf
   describe ApplicationsController  do
 
     it "should respond with the index action" do
-      ::Logical::Naf::Application.should_not_receive(:all).and_return([])
       get :index
       response.should render_template("naf/applications/index")
       response.should be_success
@@ -13,8 +12,7 @@ module Naf
     it "should respond with show action" do
       id = 5
       Application.should_receive(:find).with("5").and_return(nil)
-      get :show, :id => id
-      response.should render_template("naf/record")
+      get :show, id: id
       response.should be_success
     end
 
@@ -22,7 +20,7 @@ module Naf
 
       it "should build a new application schedule if it was destroyed" do
         @id = 5
-        controller.stub!(:check_application_run_group_name).and_return(nil)
+        controller.stub(:check_application_run_group_name).and_return(nil)
         app_mock = mock_model(Application)
         schedule_mock = mock_model(ApplicationSchedule)
         schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)
@@ -35,7 +33,7 @@ module Naf
 
       it "should respond without building a new application schedule" do
         @id = 5
-        controller.stub!(:check_application_run_group_name).and_return(nil)
+        controller.stub(:check_application_run_group_name).and_return(nil)
         app_mock = mock_model(Application)
         schedule_mock = mock_model(ApplicationSchedule)
         schedule_prerequisites = mock_model(ApplicationSchedulePrerequisite)
@@ -47,16 +45,16 @@ module Naf
       end
 
       after(:each) do
-        get :edit, :id => @id
+        get :edit, id: @id
         response.should render_template("naf/applications/edit")
         response.should be_success
       end
     end
 
     it "should respond with affinity new" do
-      app = mock('app')
-      app_schedule = mock('application_schedule')
-      schedule_prerequisites = mock('schedule_prerequisites')
+      app = double('app')
+      app_schedule = double('application_schedule')
+      schedule_prerequisites = double('schedule_prerequisites')
       Application.should_receive(:new).and_return(app)
       app.should_receive(:build_application_schedule).and_return(app_schedule)
       app_schedule.should_receive(:application_schedule_prerequisites).and_return(schedule_prerequisites)
@@ -65,35 +63,38 @@ module Naf
       response.should render_template("naf/applications/new")
       response.should be_success
     end
-    
+
     context "on the create action" do
-      let(:valid_app)        { mock_model(Application, :save => true, :application_schedule => nil, :id => 5)  }
-      let(:invalid_app)      { mock_model(Application, :save => false) }
+      let(:valid_app) { mock_model(Application, save: true, application_schedule: nil, id: 5)  }
+      let(:invalid_app) { mock_model(Application, save: false) }
+
       it "should redirect to show when valid" do
         Application.should_receive(:new).and_return(valid_app)
-        post :create, :application =>{}
+        post :create, application: {}
         response.should redirect_to(application_path(valid_app.id))
       end
+
       it "should re-render to new when invalid" do
-        invalid_app.stub!(:build_application_schedule)
+        invalid_app.stub(:build_application_schedule)
         Application.should_receive(:new).and_return(invalid_app)
-        post :create, :application => {}
+        post :create, application: {}
         response.should render_template("naf/applications/new")
       end
     end
 
     context "on the updated action" do
-      let(:valid_app)   { mock_model(Application, :update_attributes => true, :application_schedule => nil, :id => 5) }
-      let(:invalid_app) { mock_model(Application, :update_attributes => false, :id => 5) }
-     
+      let(:valid_app) { mock_model(Application, update_attributes: true, application_schedule: nil, id: 5) }
+      let(:invalid_app) { mock_model(Application, update_attributes: false, id: 5) }
+
       it "should redirect to show when valid" do
         Application.should_receive(:find).with("5").and_return(valid_app)
-        post :update, :id => 5, :application =>{}
+        post :update, id: 5, application: {}
         response.should redirect_to(application_path(valid_app.id))
       end
+
       it "should re-render to new when invalid" do
         Application.should_receive(:find).and_return(invalid_app)
-        post :update, :id => 5, :application => {}
+        post :update, id: 5, application: {}
         response.should render_template("naf/applications/edit")
       end
     end
@@ -103,9 +104,6 @@ module Naf
       cols = assigns(:cols)
       attributes = assigns(:attributes)
     end
-  
-  
 
-    
   end
 end

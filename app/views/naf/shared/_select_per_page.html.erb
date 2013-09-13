@@ -32,6 +32,11 @@
         jQuery('#datatable').dataTable().fnDraw();
       });
 
+      <% if controller_name == 'historical_jobs' %>
+        timeout_id = setTimeout(redrawDatatable, 10000);
+        jQuery('#auto_refresh').prop('checked', true);
+      <% end %>
+
       jQuery('#refresh_datatable').click(function(){
         jQuery('#datatable').dataTable().fnDraw();
       });
@@ -45,25 +50,23 @@
           timeout_id = null;
         }
       });
-
     });
 
   </script>
 <% end %>
 
 <div id='refresh-page-container'>
-  <%= link_to "Refresh Table", "#", :id => :refresh_datatable %>
+  <%= link_to "Refresh Table", "#", id: :refresh_datatable %>
   &nbsp;&nbsp;
   <%= label_tag :auto_refresh, 'Auto Refresh:' %>
-  <%= check_box_tag :auto_refresh, 1, false, :id => :auto_refresh %>
+  <%= check_box_tag :auto_refresh, 1, false, id: :auto_refresh %>
 </div>
 
 <div id="page-select-container" class="ui-state-default ui-corner-all">
-  <% default_page_options = [20, 50, 100, 250] %>
-  <%= form_tag({ :controller => params[:controller], :action => params[:action], :format => 'js' },
-    :method => :get) do %>
-    <%= label_tag :iDisplayLength, "Rows Per Page:", :class => "label" %> 
-    <%= select_tag :iDisplayLength, 
-      options_for_select(default_page_options, @rows_per_page), :class => "page-select datatable_variable ui-state-default ui-corner-all" %>
+  <%= form_tag({ controller: params[:controller], action: params[:action], format: 'js' }, method: :get) do %>
+    <%= label_tag :iDisplayLength, "Rows Per Page:", class: "label" %>
+    <%= select_tag :iDisplayLength,
+        options_for_select(::Naf.configuration.default_page_options,  @rows_per_page),
+        class: "page-select datatable_variable ui-state-default ui-corner-all" %>
   <% end %>
 </div>

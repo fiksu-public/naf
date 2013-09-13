@@ -24,5 +24,20 @@ module Naf
     def set_page
       @page = (params[:iDisplayStart] ? ( params[:iDisplayStart].to_i / @rows_per_page ) + 1 : 1)
     end
+
+    def set_search_status
+      @search_status = cookies[:search_status]
+    end
+
+    # Sets current search status
+    def set_status
+      status = params[:search][:status]
+      if status.present?
+        @search_status = status.to_sym
+      else
+        @search_status = :all
+      end
+      cookies[:search_status] = @search_status
+    end
   end
 end

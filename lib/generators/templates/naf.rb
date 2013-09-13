@@ -9,4 +9,3 @@ Naf.configure do |config|
   # config.papertrail_token =
 
 end
-

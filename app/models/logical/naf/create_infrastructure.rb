@@ -42,6 +42,7 @@ module Logical
           end
         end
       end
+
     end
   end
 end

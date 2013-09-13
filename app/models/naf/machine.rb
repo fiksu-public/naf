@@ -5,33 +5,145 @@ module Naf
     include ::Af::Application::SafeProxy
     include PgAdvisoryLocker
 
+    # Protect from mass-assignment issue
+    attr_accessible :server_address,
+                    :server_name,
+                    :server_note,
+                    :enabled,
+                    :thread_pool_size,
+                    :log_level,
+                    :marked_down,
+                    :short_name,
+                    :deleted
+
     IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
 
-    validates :server_address, :presence => true
-    validates :short_name, :uniqueness => true, :allow_blank => true,
-              :format => { :with => /^[a-zA-Z_][a-zA-Z0-9_]*$/,
-                           :message => "letters should be first (use only letters and numbers)" }
+    #--------------------
+    # *** Validations ***
+    #++++++++++++++++++++
+
+    validates :server_address,
+              :thread_pool_size, presence: true
+    validates :short_name, uniqueness: true,
+                           allow_blank: true,
+                           allow_nil: true,
+                           format: {
+                             with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                             message: "letters should be first (use only letters and numbers)"
+                           }
+    validates :server_address, format: {
+                                 with: IP_REGEX,
+                                 message: "is not a valid IP address"
+                               },
+                               if: :server_address
+    validates :server_address, uniqueness: true,
+                               if: :correct_server_address?
+    validates :thread_pool_size, numericality: {
+                                   only_integer: true,
+                                   greater_than: -2147483648,
+                                   less_than: 2147483647
+                                 }
     before_save :check_blank_values
-    validates :server_address, :format => {:with => IP_REGEX, :message => "is not a valid IP address"}, :if => :server_address
-    validates :server_address, :uniqueness => true, :if => :correct_server_address?
-    validates :thread_pool_size,
-              :numericality => { :only_integer => true, :greater_than => -2147483648, :less_than => 2147483647 }
 
-    has_many :machine_affinity_slots, :class_name => '::Naf::MachineAffinitySlot', :dependent => :destroy
-    has_many :affinities, :through => :machine_affinity_slots
+    #---------------------
+    # *** Associations ***
+    #+++++++++++++++++++++
 
-    attr_accessible :server_address, :server_name, :server_note, :enabled, :thread_pool_size, :log_level, :marked_down, :short_name
+    has_many :machine_affinity_slots,
+      class_name: '::Naf::MachineAffinitySlot',
+      dependent: :destroy
+    has_many :affinities,
+      through: :machine_affinity_slots
+    has_many :machine_runners,
+      class_name: '::Naf::MachineRunner'
 
-    def try_lock_for_runner_use(&block)
-      return advisory_try_lock(&block)
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
+
+    def self.enabled
+      where(enabled: true)
+    end
+
+    def self.up
+      where(marked_down: false)
+    end
+
+    def self.down
+      where(marked_down: true)
+    end
+
+    def self.with_affinity(affinity_short_name)
+      sql = <<-SQL
+         exists (select
+                   1
+                 from
+                   #{::Naf::MachineAffinitySlot.table_name} as mas
+                 inner join #{::Naf::Affinity.table_name} as a on
+                   a.id = mas.affinity_id and
+                   a.affinity_short_name = ?
+                 where
+                   mas.machine_id = #{::Naf::Machine.table_name}.id)
+      SQL
+      return where([sql, affinity_short_name])
+    end
+
+    def self.machine_ip_address
+      begin
+        Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
+      rescue StandardError
+        "127.0.0.1"
+      end
+    end
+
+    def self.hostname
+      begin
+        Socket.gethostname
+      rescue StandardError
+        "local"
+      end
+    end
+
+    def self.local_machine
+      where(server_address: machine_ip_address).first
+    end
+
+    def self.current
+      local_machine
+    end
+
+    def self.last_time_schedules_were_checked
+      self.maximum(:last_checked_schedules_at)
+    end
+
+    def self.is_it_time_to_check_schedules?(check_period)
+      time = Naf::Machine.last_time_schedules_were_checked
+
+      time.nil? || time < (Time.zone.now - check_period)
+    end
+
+    def self.include_deleted(filter)
+      if !filter
+        where(deleted: false)
+      else
+        where({})
+      end
+    end
+
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    def lock_for_runner_use(&block)
+      advisory_lock(&block)
     end
 
     def unlock_for_runner_use
-      return advisory_unlock
+      advisory_unlock
     end
 
     def machine_logger
-      return af_logger(self.class.name)
+      af_logger(self.class.name)
     end
 
     def to_s
@@ -41,57 +153,19 @@ module Naf
       else
         components << "DISABLED"
       end
-      if marked_down
-        components << "DOWN!"
-      end
+      components << "DOWN!" if marked_down
       components << "id: #{id}"
       components << "address: #{server_address}"
       components << "name: \"#{server_name}\"" unless server_name.blank?
       components << "pool size: #{thread_pool_size}"
       components << "last checked schedules: #{last_checked_schedules_at}"
       components << "last seen: #{last_seen_alive_at}"
-      
+
       return "::Naf::Machine<#{components.join(', ')}>"
-    end
-
-    def self.enabled
-      return where(:enabled => true)
-    end
-
-    def self.up
-      return where(:marked_down => false)
-    end
-
-    def self.down
-      return where(:marked_down => true)
-    end
-
-    def self.machine_ip_address
-      return Socket::getaddrinfo(hostname, "echo", Socket::AF_INET)[0][3]
-    rescue StandardError
-      return "127.0.0.1"
-    end
-
-    def self.hostname
-      Socket.gethostname
-    rescue StandardError
-      return "local"
-    end
-
-    def self.local_machine
-      return where(:server_address => machine_ip_address).first
     end
 
     def correct_server_address?
       server_address.present? and IP_REGEX =~ server_address
-    end
-
-    def self.current
-      return local_machine
-    end
-
-    def self.last_time_schedules_were_checked
-      return self.maximum(:last_checked_schedules_at)
     end
 
     def mark_checked_schedule
@@ -116,26 +190,25 @@ module Naf
       save!
     end
 
-    def self.is_it_time_to_check_schedules?(check_period)
-      time = Naf::Machine.last_time_schedules_were_checked
-      return time.nil? || time < (Time.zone.now - check_period)
-    end
-
     def is_stale?(period)
       # if last_seen_alive_at is nil then the runner has not been started yet -- hold off
       # claiming it is stale until the runner is run at least once.
-      return self.last_seen_alive_at.present? && self.last_seen_alive_at < (Time.zone.now - period)
+      self.last_seen_alive_at.present? && self.last_seen_alive_at < (Time.zone.now - period)
     end
 
     def mark_processes_as_dead(by_machine)
-      ::Naf::Job.recently_queued.not_finished.started_on(self).each do |job|
+      ::Naf::RunningJob.where(created_at: (Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME)..Time.zone.now).
+        where("request_to_terminate = false").
+        started_on(self).each do |job|
+
         marking_at = Time.zone.now
         machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
-        job.request_to_terminate = true
-        job.marked_dead_by_machine_id = by_machine.id
-        job.marked_dead_at = marking_at
-        job.finished_at = marking_at
+        job.request_to_terminate = job.historical_job.request_to_terminate = true
+        job.marked_dead_by_machine_id = job.historical_job.marked_dead_by_machine_id = by_machine.id
+        job.marked_dead_at = job.historical_job.marked_dead_at = marking_at
+        job.historical_job.finished_at = marking_at
         job.save!
+        job.historical_job.save!
       end
     end
 
@@ -150,7 +223,9 @@ module Naf
     end
 
     def affinity
-      return ::Naf::Affinity.find_by_affinity_classification_id_and_affinity_name(::Naf::AffinityClassification.location.id, server_address)
+      return ::Naf::Affinity.
+        where(affinity_classification_id: ::Naf::AffinityClassification.location.id,
+              affinity_name: self.id.to_s).first
     end
 
     def short_name_if_it_exist
@@ -177,5 +252,6 @@ module Naf
       self.server_note = nil if self.server_note.blank?
       self.log_level = nil if self.log_level.blank?
     end
+
   end
 end

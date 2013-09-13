@@ -1,0 +1,11 @@
+<% content_for :body do %>
+	<div id="record">
+	  <%= link_to 'Back', controller: 'historical_job_affinity_tabs', action: 'show', id: @tab.id, historical_job_id: @job.id %>
+
+	  <h3 id="record_name">Editing Historical Job Affinity Tab</h3>
+
+	  <%= render 'form' %>
+	</div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

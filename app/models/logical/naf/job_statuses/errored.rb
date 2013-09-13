@@ -6,20 +6,17 @@ module Logical
         def self.all(conditions)
           <<-SQL
             (
-             SELECT
-               j.*,
-               NULL AS job_id
+              SELECT
+                j.*, null AS "historical_job_id"
               FROM
-               #{::Naf::Job.table_name} AS j
+                "#{::Naf.schema_name}"."historical_jobs" AS j
               WHERE
-               (
                 j.finished_at IS NOT NULL AND
-                j.exit_status > 0 OR
-                j.request_to_terminate = true
-               )
-               #{conditions}
+                (j.exit_status > 0 OR
+                j.request_to_terminate = true)
+                #{conditions}
               ORDER BY
-               finished_at DESC
+                finished_at desc
             )
           SQL
         end
