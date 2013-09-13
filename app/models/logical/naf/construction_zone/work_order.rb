@@ -92,7 +92,7 @@ module Logical::Naf::ConstructionZone
       # already been checked, we only need to check if the prerequisites are NOT
       # the current job we are inserting (which can't happen in the current code path)
       @prerequisites.each do |prerequisite|
-        raise "found a non Naf::HistoricalJob in prerequistites" unless prerequisite.is_a? ::Naf::HistoricalJob
+        raise "found a non Naf::HistoricalJob in prerequisites: #{prerequisite.inspect}" unless prerequisite.is_a? ::Naf::HistoricalJob
       end
       return @prerequisites
     end
