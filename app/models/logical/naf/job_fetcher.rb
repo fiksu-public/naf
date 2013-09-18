@@ -58,7 +58,7 @@ module Logical
           required_machine_affinities = ::Naf::Machine.
             select("ARRAY(
               SELECT affinity_id
-              FROM naf.machine_affinity_slots
+              FROM #{::Naf.schema_name}.machine_affinity_slots
               WHERE machine_id = #{machine.id} AND required = true
               ORDER BY affinity_id) AS required_affinities").
             group("required_affinities").
@@ -66,18 +66,18 @@ module Logical
 
           # Choose queued jobs that can be run by the machine
           possible_jobs = ::Naf::QueuedJob.
-            select("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
+            select("#{::Naf.schema_name}.queued_jobs.id, #{::Naf.schema_name}.queued_jobs.priority, #{::Naf.schema_name}.queued_jobs.created_at").
             weight_available_on_machine(machine).
             runnable_by_machine(machine).
             is_not_restricted_by_run_group(machine).
             prerequisites_finished.
-            group("naf.queued_jobs.id, naf.queued_jobs.priority, naf.queued_jobs.created_at").
+            group("#{::Naf.schema_name}.queued_jobs.id, #{::Naf.schema_name}.queued_jobs.priority, #{::Naf.schema_name}.queued_jobs.created_at").
             having("array(
               select affinity_id::integer
-              from naf.historical_job_affinity_tabs
+              from #{::Naf.schema_name}.historical_job_affinity_tabs
               where historical_job_id = queued_jobs.id and affinity_id in (
                select affinity_id
-               from naf.machine_affinity_slots
+               from #{::Naf.schema_name}.machine_affinity_slots
                where machine_id = #{machine.id} and required = true)
               order by affinity_id) = '#{required_machine_affinities}'").
             order_by_priority.

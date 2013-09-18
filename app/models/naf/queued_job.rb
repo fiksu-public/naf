@@ -52,27 +52,27 @@ module Naf
     def self.is_not_restricted_by_run_group(machine)
       sql = <<-SQL
       (
-        naf.queued_jobs.application_run_group_name is null OR
-        naf.queued_jobs.application_run_group_limit is null OR
-        naf.application_run_group_restrictions.application_run_group_restriction_name = 'no limit' OR
+        #{Naf.schema_name}.queued_jobs.application_run_group_name is null OR
+        #{Naf.schema_name}.queued_jobs.application_run_group_limit is null OR
+        #{Naf.schema_name}.application_run_group_restrictions.application_run_group_restriction_name = 'no limit' OR
         (
-          naf.application_run_group_restrictions.application_run_group_restriction_name = 'limited per machine' AND
+          #{Naf.schema_name}.application_run_group_restrictions.application_run_group_restriction_name = 'limited per machine' AND
           (select
-            count(*) < naf.queued_jobs.application_run_group_limit
+            count(*) < #{Naf.schema_name}.queued_jobs.application_run_group_limit
            from
-             naf.running_jobs as rj
+             #{Naf.schema_name}.running_jobs as rj
            where
-             rj.application_run_group_name = naf.queued_jobs.application_run_group_name and
+             rj.application_run_group_name = #{Naf.schema_name}.queued_jobs.application_run_group_name and
              rj.started_on_machine_id = #{machine.id})
         ) OR
         (
           application_run_group_restrictions.application_run_group_restriction_name = 'limited per all machines' AND
           (select
-            count(*) < naf.queued_jobs.application_run_group_limit
+            count(*) < #{Naf.schema_name}.queued_jobs.application_run_group_limit
            from
-             naf.running_jobs as rj
+             #{Naf.schema_name}.running_jobs as rj
            where
-             rj.application_run_group_name = naf.queued_jobs.application_run_group_name)
+             rj.application_run_group_name = #{Naf.schema_name}.queued_jobs.application_run_group_name)
         )
       )
       SQL
@@ -84,11 +84,11 @@ module Naf
     def self.runnable_by_machine(machine)
       where("NOT EXISTS (
         SELECT 1
-        FROM naf.historical_job_affinity_tabs AS t
-        WHERE t.historical_job_id = naf.queued_jobs.id AND
+        FROM #{::Naf.schema_name}.historical_job_affinity_tabs AS t
+        WHERE t.historical_job_id = #{::Naf.schema_name}.queued_jobs.id AND
           NOT EXISTS (
             SELECT 1
-            FROM naf.machine_affinity_slots AS s
+            FROM #{::Naf.schema_name}.machine_affinity_slots AS s
             WHERE s.affinity_id = t.affinity_id AND
               s.machine_id = #{machine.id}
           )
@@ -99,11 +99,11 @@ module Naf
     def self.prerequisites_finished
       where("NOT EXISTS (
         SELECT 1
-        FROM naf.historical_job_prerequisites AS p
-        WHERE p.historical_job_id = naf.queued_jobs.id AND
+        FROM #{::Naf.schema_name}.historical_job_prerequisites AS p
+        WHERE p.historical_job_id = #{::Naf.schema_name}.queued_jobs.id AND
           EXISTS (
             SELECT 1
-            FROM naf.historical_jobs AS j
+            FROM #{::Naf.schema_name}.historical_jobs AS j
             WHERE p.prerequisite_historical_job_id = j.id AND
               j.finished_at IS NULL
           )
@@ -129,7 +129,7 @@ module Naf
       if queued_jobs.empty?
         where({})
       else
-        where('naf.queued_jobs.id NOT IN (?)', queued_jobs)
+        where("#{::Naf.schema_name}.queued_jobs.id NOT IN (?)", queued_jobs)
       end
     end
 
@@ -139,19 +139,19 @@ module Naf
           SELECT
             historical_job_id
           FROM
-            naf.historical_job_affinity_tabs AS t
+            #{::Naf.schema_name}.historical_job_affinity_tabs AS t
           WHERE EXISTS (
             SELECT
               1
             FROM
-              naf.queued_jobs AS j
+              #{::Naf.schema_name}.queued_jobs AS j
             WHERE
               t.historical_job_id = j.id
           ) AND EXISTS (
             SELECT
               1
             FROM
-              naf.affinities AS a
+              #{::Naf.schema_name}.affinities AS a
             WHERE
               a.id = '#{affinity_id}' AND
                 t.affinity_id = a.id

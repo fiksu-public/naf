@@ -81,7 +81,7 @@ class NafSchema < ActiveRecord::Migration
       (
           id                    serial not null primary key,
           created_at            timestamp not null default now(),
-          machine_id            integer not null references naf.machines,
+          machine_id            integer not null references #{schema_name}.machines,
           runner_cwd            text not null,
           unique (machine_id, runner_cwd)
       );
@@ -90,7 +90,7 @@ class NafSchema < ActiveRecord::Migration
           id                    serial not null primary key,
           created_at            timestamp not null default now(),
           updated_at            timestamp,
-          machine_runner_id     integer not null references naf.machine_runners,
+          machine_runner_id     integer not null references #{schema_name}.machine_runners,
           pid                   integer not null,
           dead_at               timestamp null,
           wind_down_at          timestamp null,
