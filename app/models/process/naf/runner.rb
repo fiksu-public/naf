@@ -517,7 +517,6 @@ module Process::Naf
     end
 
     def memory_available_to_spawn?
-      return true
       Facter.clear
       memory_size = Facter.memorysize_mb.to_f
       memory_free = Facter.memoryfree_mb.to_f
