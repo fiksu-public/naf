@@ -7,7 +7,7 @@ module Naf
         NafBase.superclass.should == Naf.model_class
       end
       it "should have the correctly set full table name prefix" do
-        NafBase.full_table_name_prefix.should == "#{Naf.schema_name}."
+        NafBase.full_table_name_prefix.should == "#{::Naf.schema_name}."
       end
     end
   end

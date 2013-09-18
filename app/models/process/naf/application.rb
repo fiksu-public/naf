@@ -16,7 +16,7 @@ module Process::Naf
     #+++++++++++++++++
 
     opt :naf_job_id,
-        "naf.historical_jobs.id for communication with scheduling system",
+        "#{::Naf.schema_name}.historical_jobs.id for communication with scheduling system",
         env: "NAF_JOB_ID",
         type: :int
     opt :do_not_terminate,

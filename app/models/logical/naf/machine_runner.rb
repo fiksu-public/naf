@@ -30,9 +30,9 @@ module Logical
           values << invocation.status.gsub('-', ' ').split.map(&:capitalize).join(' ')
 
           values << ::Naf::HistoricalJob.
-            joins('inner join naf.running_jobs nj on nj.id = naf.historical_jobs.id').
+            joins("inner join #{::Naf.schema_name}.running_jobs nj on nj.id = #{::Naf.schema_name}.historical_jobs.id").
             joins(:machine_runner_invocation).
-            where('naf.machine_runner_invocations.machine_runner_id = ?', runner.id).count
+            where("#{::Naf.schema_name}.machine_runner_invocations.machine_runner_id = ?", runner.id).count
           values << ''
 
           machine_runners << values

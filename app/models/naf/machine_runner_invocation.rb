@@ -33,16 +33,16 @@ module Naf
     def self.choose(filter)
       if filter.present? && filter == 'top'
         return joins(
-          'JOIN (
+          "JOIN (
             SELECT
               machine_runner_id, max(created_at) as created_at
             FROM
-              naf.machine_runner_invocations
+              #{::Naf.schema_name}.machine_runner_invocations
             GROUP BY
               machine_runner_id
             ) AS mri2
-          ON naf.machine_runner_invocations.created_at = mri2.created_at AND
-            naf.machine_runner_invocations.machine_runner_id = mri2.machine_runner_id'
+          ON #{::Naf.schema_name}.machine_runner_invocations.created_at = mri2.created_at AND
+            #{::Naf.schema_name}.machine_runner_invocations.machine_runner_id = mri2.machine_runner_id"
         )
       else
         return where({})
