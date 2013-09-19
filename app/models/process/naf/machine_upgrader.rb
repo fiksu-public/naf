@@ -36,7 +36,7 @@ module Process::Naf
 
     CLEAN_SYSTEM_MODELS = [
                            ::Naf::Machine,
-                           ::Naf::VERSION == '1.0.0' ? ::Naf::HistoricalJob : ::Naf::Job
+                           ::Naf::VERSION == '1.0.1' ? ::Naf::HistoricalJob : ::Naf::Job
                           ]
 
 
