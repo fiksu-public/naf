@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name        = "naf"
   s.version     = Naf::VERSION
   s.license     = 'New BSD License'
-  s.date        = '2013-09-21'
+  s.date        = '2013-09-26'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
   s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
   s.authors     = ["Keith Gabryelski", "Leonardo Meira", "Nathaniel Lim", "Aleksandr Dembskiy"]

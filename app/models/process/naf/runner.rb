@@ -97,8 +97,12 @@ module Process::Naf
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
 
-        repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
-        if repository_name.match(/fatal/)
+        begin
+          repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
+          if repository_name.match(/fatal/)
+            repository_name = nil
+          end
+        rescue
           repository_name = nil
         end
         branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
