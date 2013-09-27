@@ -98,7 +98,7 @@ module Process::Naf
                                                       runner_cwd: Dir.pwd)
 
         begin
-          repository_name = (`git remote -v`).slice(/:.*\./)[1..-2]
+          repository_name = (`git remote -v`).slice(/:\S+/).sub('.git','')[1..-1]
           if repository_name.match(/fatal/)
             repository_name = nil
           end
