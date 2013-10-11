@@ -19,4 +19,4 @@ With a management console, providing:
 
 === Please find up-to-date information on Naf here: {Naf Wiki}[http://www.github.com/fiksu/naf/wiki]
 
-=== Instructions on updgrading Naf to Version 1.0.0: {Instructions}[http://www.github.com/fiksu/naf/wiki/Upgrading]
+=== Instructions on updgrading Naf to Version 1.0.3: {Instructions}[http://www.github.com/fiksu/naf/wiki/Upgrading]
