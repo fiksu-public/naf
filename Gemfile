@@ -14,6 +14,4 @@ gem 'facter'
 gem 'shoulda-matchers', '2.0.0'
 gem "timecop", '0.4.5'
 
-# For private repo testing on Travis
-# gem 'af', '=0.9.9', path: 'vendor/private'
-gem 'af', git: 'git@github.com:fiksu/af.git'
+gem 'fiksu-af'
