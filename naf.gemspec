@@ -10,7 +10,8 @@ Gem::Specification.new do |s|
   s.license     = 'New BSD License'
   s.date        = '2013-10-14'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
-  s.description = "Infrastructure includes abstractions for machines, runners, affinities, easily importable to any Rails app"
+  s.description = "A cloud based distributed cron, application framework and operations console. Naf works as a distributed script running " +
+                  "system that provides scheduling, logging, alarming, machine redundancy, and the ability to set constraint during script execution"
   s.authors     = ["Keith Gabryelski", "Leonardo Meira", "Nathaniel Lim", "Aleksandr Dembskiy"]
   s.email       = ['keith@fiksu.com', 'lmeira@fiksu.com']
   s.files       = `git ls-files`.split("\n")
