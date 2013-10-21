@@ -33,7 +33,8 @@ module Naf
     end
 
     def invoke(job, command)
-      Process.spawn({ "NAF_JOB_ID" => job.id.to_s }, command)
+      ENV['NAF_JOB_ID'] = job.id.to_s
+      Open4::popen4(command)
     end
 
     def rails_invocator(job)

@@ -108,6 +108,70 @@
     </table>
     </br>
 
+    <h2>Logs</h2>
+    <div id="stdout_header">
+      <div>
+        <%= text_field_tag :log_search, nil, placeholder: 'Search query' %>
+        &nbsp;/&nbsp;
+        <%= text_field_tag :regex_options, nil, placeholder: 'Regex options' %>
+        &nbsp;&nbsp;
+        <%= button_tag 'Regex Help', id: "regex_help" %>
+        <div class="description">
+          <strong>Regex Options</strong>
+          <table cellpadding="5">
+            <thead>
+              <tr>
+                <td><b>Option</b></td>
+                <td><b>Notes</b></td>
+              </tr>
+              <tr>
+                <td>i</td>
+                <td>case insensitive</td>
+              </tr>
+              <tr>
+                <td>m</td>
+                <td>make dot match newlines</td>
+              </tr>
+              <tr>
+                <td>x</td>
+                <td>ignore whitespace in regex</td>
+              </tr>
+            </thead>
+          </table>
+        </div>
+
+        <div>
+          <%= label_tag :auto_update, 'Grep:' %>
+          <%= check_box_tag :grep, 1, false, id: :grep %>
+        </div>
+        </br>
+
+        <div>
+          <%= label_tag 'From:' %>
+          <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_from', dropdown_width: 'width: 6%;' } %>
+          </br>
+          <%= label_tag 'To:' %>&nbsp;&nbsp;&nbsp;&nbsp;
+          <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_to', dropdown_width: 'width: 6%;' } %>
+        </div>
+        </br>
+
+        <%= submit_tag("Search the logs", id: 'log_search_submit') %>
+        <%= link_to 'Full Screen',
+                    { controller: 'log_viewer', action: 'index', runner_id: @machine_runner.id },
+                    { class: 'full_screen' } %>
+      </div>
+    </div>
+
+    </br>
+    <div id="stdout" class="scrollable-output" ></div>
+
+  </div>
   </div>
 <% end %>
+
 <%= render partial: 'naf/shared/application' %>
+<%= render partial: 'naf/log_viewer/machine_log_display',
+           locals: {
+             logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@machine_runner.machine).runner}#{naf.logs_log_parsers_path}",
+             record_id: @machine_runner.id
+           } %>

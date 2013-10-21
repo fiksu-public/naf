@@ -21,7 +21,7 @@ module Naf
           machine = []
           @total_records = Naf::Machine.count(:all)
           Logical::Naf::Machine.all(filter).map(&:to_hash).map do |hash|
-            add_urls(hash).map do |key, value|
+            hash.map do |key, value|
               value = '' if value.nil?
               machine << value
             end
@@ -79,16 +79,6 @@ module Naf
           end
         end
       end
-    end
-
-    private
-
-    def add_urls(hash)
-      machine = ::Naf::Machine.find(hash[:id])
-      hash[:papertrail_url] = naf_papertrail_link(machine)
-      hash[:papertrail_runner_url] = naf_papertrail_link(machine, true)
-
-      hash
     end
 
   end

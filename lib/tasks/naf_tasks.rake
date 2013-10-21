@@ -60,6 +60,18 @@ namespace :naf do
                      ::Naf::HistoricalJobPrerequisite.name,
                      ::Naf::HistoricalJobAffinityTab.name]
       ::Logical::Naf::CreateInfrastructure.new(model_names).work
+
+      # When installing Naf, check the filesystem for existence of naflogs.
+      # If so, archive the logs before you start using the system.
+      if File.directory?(Naf::LOGGING_ROOT_DIRECTORY + "/naflogs")
+        # Each archive will have a unique path based on the time archived
+        time = Time.zone.now.to_s
+        FileUtils.mkdir_p(Naf::LOGGING_ROOT_DIRECTORY + Naf::LOGGING_ARCHIVE_DIRECTORY + "/#{time}")
+
+        # Move the naf logs into the archive directory
+        system "mv #{Naf::LOGGING_ROOT_DIRECTORY}/naflogs " +
+          "#{Naf::LOGGING_ROOT_DIRECTORY + Naf::LOGGING_ARCHIVE_DIRECTORY}/#{time.gsub(' ', '\ ')}"
+      end
     end
   end
 

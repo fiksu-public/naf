@@ -136,7 +136,7 @@
             <td><%= link_to "Application Schedule Affinity Tabs",
                     application_application_schedule_application_schedule_affinity_tabs_path(@application, @application.application_schedule) %>
             </td>
-            <td><%= @application.application_schedule.affinities.map(&:affinity_name).join(', ') %></td>
+            <td><%= @logical_application.affinities %></td>
           </tr>
         <% end %>
         <tr>

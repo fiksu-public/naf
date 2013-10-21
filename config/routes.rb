@@ -1,5 +1,5 @@
 Naf::Engine.routes.draw do
-  resources :historical_jobs do
+  resources :historical_jobs, except: [:edit] do
     resources :historical_job_affinity_tabs, except: [:destroy]
   end
 
@@ -22,6 +22,13 @@ Naf::Engine.routes.draw do
   resources :logger_styles
   resources :logger_names
   resources :affinities
+  resources :log_parsers, only: [] do
+    collection do
+      get :logs
+    end
+  end
+  resources :status, only: [:index]
+  resources :log_viewer, only: [:index]
 
   resources :janitorial_archive_assignments, controller: "janitorial_assignments",
                                              type: "Naf::JanitorialArchiveAssignment",

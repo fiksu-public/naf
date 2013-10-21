@@ -1,0 +1,158 @@
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    var id = "<%= job_id %>";
+    var status = "<%= status %>";
+    var logs_url = "<%= logs_url %>";
+    var search_params = jQuery('#log_search').val();
+    var regex_options = jQuery('#regex_options').val();
+    var last_line_number = null;
+    var search_command = false;
+    var grep = false;
+    var search_date_from_year = '';
+    var search_date_from_month = '';
+    var search_date_from_day = '';
+    var search_date_from_hour = '';
+    var search_date_from_minute = '';
+    var search_date_to_year = '';
+    var search_date_to_month = '';
+    var search_date_to_day = '';
+    var search_date_to_hour = '';
+    var search_date_to_minute = '';
+    var show_help_window = false;
+
+    jQuery(document).ready(function () {
+      jQuery(".description").hide();
+      getLog();
+      jQuery('#stdout').css('width', jQuery('#stdout').width());
+
+      jQuery('#log_search_submit').click(function () {
+        initializeVariables();
+
+        if(checkSearchDate(search_date_from_year, search_date_from_month, search_date_from_day,
+          search_date_from_hour, search_date_from_minute)){
+          getLog();
+        }
+        else{
+          resetDateFilters();
+          jQuery('#stdout').empty();
+          jQuery('#stdout').append('If specifying a date search, select a value for each dropdown (year/month/day/hour/minute)');
+        }
+      });
+
+      jQuery("#regex_help").click(function() {
+        if(show_help_window == false){
+          jQuery(".description").show();
+          show_help_window = true;
+        }
+        else{
+          jQuery(".description").hide();
+          show_help_window = false;
+        }
+      });
+    });
+
+    function callAjax(){
+      jQuery.ajax({
+        url: logs_url,
+        dataType: 'jsonp',
+        jsonpCallback: 'convertToJsonCallback',
+        xhrFields: {
+          withCredentials: true
+        },
+        data: {
+                'naf_job_id': id,
+                'last_line_number': last_line_number,
+                'search_params': search_params,
+                'regex_options': regex_options,
+                'grep': grep,
+                'from_time': [search_date_from_year,
+                              search_date_from_month,
+                              search_date_from_day,
+                              search_date_from_hour,
+                              search_date_from_minute],
+                'to_time': [search_date_to_year,
+                            search_date_to_month,
+                            search_date_to_day,
+                            search_date_to_hour,
+                            search_date_to_minute]
+              },
+        success: function(response) {
+          var logs = response['logs'];
+          last_line_number = response['last_line_number']
+
+          if(search_command == true){
+            jQuery('#stdout').empty();
+            if(logs == '') {
+              logs = "No logs were found for this search query!<br>";
+            }
+            jQuery('#stdout').append(logs);
+            search_command = false;
+          }
+          else{
+            if(logs == '' && jQuery('#stdout')[0].children.length == 0) {
+              logs = "No logs were found for this Job!<br>";
+            }
+
+            if(logs != ''){
+              if(last_line_number != null){
+                jQuery('#stdout').append(logs);
+              }
+              else{
+                jQuery('#stdout').prepend(logs);
+              }
+            }
+            jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+          }
+        },
+        error: function(response) {
+          jQuery('#stdout').prepend('Something went wrong, retry your search.');
+        }
+      });
+    }
+
+    function getLog() {
+      callAjax();
+      if(status == 'Running'){
+        setTimeout(getLog, 1000);
+      }
+    }
+
+    function initializeVariables(){
+      last_line_number = 0
+      search_command = true;
+      grep = jQuery('#grep').is(':checked');
+      search_params = jQuery('#log_search').val();
+      regex_options = jQuery('#regex_options').val();
+      time = jQuery('#time_search').val();
+      search_date_from_year = jQuery('#date_select_from_year').val();
+      search_date_from_month = jQuery('#date_select_from_month').val();
+      search_date_from_day = jQuery('#date_select_from_day').val();
+      search_date_from_hour = jQuery('#date_select_from_hour').val();
+      search_date_from_minute = jQuery('#date_select_from_minute').val();
+      search_date_to_year = jQuery('#date_select_to_year').val();
+      search_date_to_month = jQuery('#date_select_to_month').val();
+      search_date_to_day = jQuery('#date_select_to_day').val();
+      search_date_to_hour = jQuery('#date_select_to_hour').val();
+      search_date_to_minute = jQuery('#date_select_to_minute').val();
+    }
+
+    function resetDateFilters(){
+      search_date_from_year = '';
+      search_date_from_month = '';
+      search_date_from_day = '';
+      search_date_from_hour = '';
+      search_date_from_minute = '';
+      search_date_to_year = '';
+      search_date_to_month = '';
+      search_date_to_day = '';
+      search_date_to_hour = '';
+      search_date_to_minute = '';
+    }
+
+    function checkSearchDate(year, month, day, hour, minute){
+      return (year == '' && month == '' && day == '' && hour == '' && minute == '') ||
+      (year != '' && month != '' && day != '' && hour != '' && minute != '')
+    }
+
+  </script>
+<% end %>

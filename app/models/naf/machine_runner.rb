@@ -47,5 +47,13 @@ module Naf
         ::Naf::MachineRunner.running.pluck(:machine_id)).uniq
     end
 
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    def current_invocation
+      machine_runner_invocations.where(dead_at: nil, wind_down_at: nil).order(:id).last
+    end
+
   end
 end

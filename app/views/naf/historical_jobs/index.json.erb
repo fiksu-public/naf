@@ -10,9 +10,9 @@
 
     job[12] = link_to image_tag('papertrail_job.png',
                                 class: 'action',
-                                title: "View job(id: #{job[0]}, title: #{job[4]}) log in Papertrail"),
-                                job[12],
-                                { target: '_blank', class: "papertrail", id: job[0] }
+                                title: "View job(id: #{job[0]}, title: #{job[4]}) log"),
+                                url_for({ controller: 'log_viewer', action: 'index', naf_job_id: job[0] }),
+                                { target: '_blank', id: job[0] }
 
     if job[10] == "Running" || job[10] == 'Queued' || job[10] == 'Waiting'
       job[12] << "&nbsp;&nbsp;&nbsp;".html_safe

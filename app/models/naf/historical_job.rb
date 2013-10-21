@@ -99,6 +99,9 @@ module Naf
 
     delegate :application_run_group_restriction_name, to: :application_run_group_restriction
     delegate :script_type_name, to: :application_type
+    delegate :affinity_name,
+             :affinity_classification_name,
+             :affinity_short_name, to: :affinity
 
     #------------------
     # *** Partition ***

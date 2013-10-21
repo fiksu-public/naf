@@ -178,7 +178,7 @@ module Logical
               JobStatuses::Terminated.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
-          jobs = ::Naf::HistoricalJob.find_by_sql([sql, values])
+          jobs = ::Naf::HistoricalJob.find_by_sql([sql, values]).uniq
 
           jobs.map{ |physical_job| new(physical_job) }
         else
@@ -331,13 +331,15 @@ module Logical
       end
 
       def affinities
-        @job.job_affinities.map do |job_affinity|
-          if job_affinity.present?
-            if job_affinity.affinity_short_name.present?
-              job_affinity.affinity_short_name
+        @job.historical_job_affinity_tabs.map do |tab|
+          if tab.affinity_short_name.present?
+            if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+              tab.affinity_short_name + "(#{tab.affinity_parameter})"
             else
-              job_affinity.affinity_classification_name + '_' + job_affinity.affinity_name
+              tab.affinity_short_name
             end
+          else
+            tab.affinity_classification_name + '_' + tab.affinity_name
           end
         end.join(", \n")
       end
@@ -349,6 +351,25 @@ module Logical
           (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
         else
           nil
+        end
+      end
+
+      def runner
+        if @job.machine_runner_invocation.present?
+          machine = @job.machine_runner_invocation.machine_runner.machine
+          if machine.present?
+            if machine.server_name.present?
+              machine.server_name.to_s
+            else
+              if Rails.env == 'development'
+                "localhost:#{Rails::Server.new.options[:Port]}"
+              else
+                machine.server_address
+              end
+            end
+          end
+        else
+          ''
         end
       end
 

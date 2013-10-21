@@ -6,11 +6,3 @@ log4r_config:
         date_pattern: '%y%m%d %H:%M:%S.%L'
         pattern     : '%d pid=%p jid=%g %C %l %M'
         type        : PatternFormatter
-
-    - type: PapertrailOutputter
-      name: papertrail
-      port: 0 # XXX put your papertrail port here
-      program: jid(%g)
-      formatter:
-        pattern     : '%C %l %M'
-        type        : PatternFormatter

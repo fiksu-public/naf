@@ -3,6 +3,13 @@ require 'timeout'
 module Process::Naf
   class Runner < ::Af::Application
 
+    NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
+      Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
+    NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
+    NAF_SCHEMA = Naf.schema_name
+    NAF_LOG_PATH = "#{Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/"
+    JOB_LOG_MAX_SIZE = 10_000
+
     #----------------
     # *** Options ***
     #+++++++++++++++++
@@ -143,9 +150,10 @@ module Process::Naf
       # Make sure no processes are thought to be running on this machine
       terminate_old_processes(machine) if @kill_all_runners
 
-      logger.info "working: #{machine}"
+      logger.info escape_html("working: #{machine}")
 
       @children = {}
+      @threads = {}
 
       at_exit {
         ::Af::Application.singleton.emergency_teardown
@@ -166,10 +174,10 @@ module Process::Naf
 
       # Check machine status
       if !machine.enabled
-        logger.warn "this machine is disabled #{machine}"
+        logger.warn escape_html("this machine is disabled #{machine}")
         return false
       elsif machine.marked_down
-        logger.warn "this machine is marked down #{machine}"
+        logger.warn escape_html("this machine is marked down #{machine}")
         return false
       end
 
@@ -216,13 +224,13 @@ module Process::Naf
             end
 
             unless dead_children.blank?
-              logger.error "#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}"
+              logger.error escape_html("#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}")
               logger.warn "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
             end
 
             break
           rescue Errno::ECHILD => e
-            logger.error "#{machine} No child when we thought we had children #{@children.inspect}"
+            logger.error escape_html("#{machine} No child when we thought we had children #{@children.inspect}")
             logger.warn e
             pid = @children.first.try(:first)
             status = nil
@@ -238,12 +246,17 @@ module Process::Naf
                 child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
 
                 if status.nil? || status.exited? || status.signaled?
-                  logger.info { "cleaning up dead child: #{child_job.reload}" }
+                  logger.info { escape_html("cleaning up dead child: #{child_job.reload}") }
                   finish_job(child_job,
                              { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
+
+                  thread = @threads.delete(pid)
+                  logger.detail escape_html("cleaning up threads: #{thread.inspect}")
+                  logger.detail escape_html("thread list: #{Thread.list}")
+                  thread.join
                 else
                   # this can happen if the child is sigstopped
-                  logger.warn "child waited for did not exit: #{child_job}, status: #{status.inspect}"
+                  logger.warn escape_html("child waited for did not exit: #{child_job}, status: #{status.inspect}")
                 end
               else
                 # XXX ERROR no child for returned pid -- this can't happen
@@ -278,21 +291,37 @@ module Process::Naf
             break
           end
 
-          logger.info "starting new job : #{running_job}"
+          logger.info escape_html("starting new job : #{running_job.inspect}")
 
-          pid = running_job.historical_job.spawn
+          # fork and run
+          pid, stdin, stdout, stderr = running_job.historical_job.spawn
+          stdin.close
+
+          # Reset NAF_JOB_ID
+          ENV.delete('NAF_JOB_ID')
           if pid
             @children[pid] = running_job
             running_job.pid = pid
             running_job.historical_job.pid = pid
             running_job.historical_job.failed_to_start = false
             running_job.historical_job.machine_runner_invocation_id = invocation.id
-            logger.info "job started : #{running_job}"
+            logger.info escape_html("job started : #{running_job}")
             running_job.save!
             running_job.historical_job.save!
+
+            # Spawn a thread to output the log of each job to files.
+            #
+            # Make sure not to execute any database calls inside this
+            # block, as it will start an ActiveRecord connection for each
+            # thread and eventually raise a ConnetionTimeoutError, resulting
+            # the runner to exit.
+            thread = Thread.new do
+              log_output_until_job_finishes(running_job.id, stdout, stderr)
+            end
+            @threads[pid] = thread
           else
             # should never get here (well, hopefully)
-            logger.error "#{machine}: failed to execute #{running_job}"
+            logger.error escape_html("#{machine}: failed to execute #{running_job}")
 
             finish_job(running_job, { failed_to_start: true })
           end
@@ -300,7 +329,7 @@ module Process::Naf
           raise
         rescue StandardError => e
           # XXX rescue for various issues
-          logger.error "#{machine}: failure during job start"
+          logger.error escape_html("#{machine}: failure during job start")
           logger.warn e
         end
       end
@@ -308,6 +337,80 @@ module Process::Naf
 
       return true
 
+    end
+
+    def log_output_until_job_finishes(job_id, stdout, stderr)
+      find_or_create_directories(job_id)
+
+      # Track the number of logs
+      line_number = 1
+      # Each log file path is unique
+      job_log_file = File.open(NAF_LOG_PATH + "/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
+
+      # Continue reading logs from stdout/stderror until it reaches end of file
+      while true
+        read_pipes = []
+        read_pipes << stdout if stdout
+        read_pipes << stderr if stderr
+        return if (read_pipes.length == 0)
+
+        error_pipes = read_pipes.clone
+        read_array, write_array, error_array = Kernel.select(read_pipes, nil, error_pipes, 1)
+
+        unless error_array.blank?
+          logger.error escape_html("job(#{job_id}): select returned error for #{error_pipes.inspect} (read_pipes: #{read_pipes.inspect})")
+          # XXX we should probably close the errored FDs
+        end
+
+        unless read_array.blank?
+          for r in read_array do
+            log_lines = ""
+            job_log_file = check_job_log(job_log_file, job_id, line_number)
+
+            begin
+              # Read from stdout in chunks
+              logs = r.read_nonblock(10240).split("\n")
+              # Parse each log line into JSON
+              logs.each do |log|
+                log_lines << JSON.pretty_generate({
+                  line_number: line_number,
+                  output_time: Time.zone.now.to_s,
+                  message: log.strip,
+                  job_id: job_id
+                })
+                line_number += 1
+              end
+            rescue Errno::EAGAIN
+            rescue Errno::EINTR
+            rescue EOFError => eof
+              stdout = nil if r == stdout
+              stderr = nil if r == stderr
+            else
+              job_log_file.write(log_lines)
+              # Since the file is buffered, we want to tell it to write in chunks.
+              # Files should be shown as the scripts runs.
+              job_log_file.flush
+            end
+          end
+        end
+      end
+
+      job_log_file.close
+    end
+
+    def find_or_create_directories(job_id)
+      # Create the directory path if it doesn't exist
+      FileUtils.mkdir_p(NAF_LOG_PATH + "/jobs/#{job_id}") unless File.directory?(NAF_LOG_PATH + "/jobs/#{job_id}")
+    end
+
+    def check_job_log(file, job_id, line_number)
+      # When a file gets too large, close it and continue writing to another file
+      if file.size > JOB_LOG_MAX_SIZE
+        file.close
+        file = File.open(NAF_LOG_PATH + "/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
+      end
+
+      file
     end
 
     def check_schedules(machine)
@@ -320,7 +423,7 @@ module Process::Naf
 
           # check scheduled tasks
           should_be_queued(machine).each do |application_schedule|
-            logger.info "scheduled application: #{application_schedule}"
+            logger.info escape_html("scheduled application: #{application_schedule}")
             begin
               naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
               # this doesn't work very well for run_group_limits in the thousands
@@ -328,18 +431,18 @@ module Process::Naf
                 naf_boss.enqueue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
-              logger.error "#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}"
+              logger.error escape_html("#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}")
               logger.warn jpl
               application_schedule.enabled = false
               application_schedule.save!
-              logger.alarm "Application Schedule disabled due to loop: #{application_schedule}"
+              logger.alarm escape_html("Application Schedule disabled due to loop: #{application_schedule}")
             end
           end
 
           # check the runner machines
           ::Naf::Machine.enabled.up.each do |runner_to_check|
             if runner_to_check.is_stale?(@runner_stale_period.minutes)
-              logger.alarm "runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}"
+              logger.alarm escape_html("runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}")
               runner_to_check.mark_machine_down(machine)
             end
           end
@@ -401,7 +504,7 @@ module Process::Naf
       end
       logger.info "number of old jobs to sift through: #{jobs.length}"
       jobs.each do |job|
-        logger.detail "job still around: #{job}"
+        logger.detail escape_html("job still around: #{job}")
         if job.request_to_terminate == false
           logger.warn "politely asking process: #{job.pid} to terminate itself"
           job.request_to_terminate = true
@@ -425,7 +528,7 @@ module Process::Naf
         return
       end
       jobs.each do |job|
-        logger.warn "sending SIG_TERM to process: #{job}"
+        logger.warn escape_html("sending SIG_TERM to process: #{job}")
         send_signal_and_maybe_clean_up(job, "TERM")
       end
 
@@ -439,7 +542,7 @@ module Process::Naf
 
       # kill with fire
       assigned_jobs(machine).each do |job|
-        logger.alarm "sending SIG_KILL to process: #{job}"
+        logger.alarm escape_html("sending SIG_KILL to process: #{job}")
         send_signal_and_maybe_clean_up(job, "KILL")
 
         # job force job down
@@ -533,6 +636,10 @@ module Process::Naf
       logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
 
       return false
+    end
+
+    def escape_html(str)
+      CGI::escapeHTML(str)
     end
 
   end

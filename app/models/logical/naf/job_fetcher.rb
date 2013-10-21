@@ -142,8 +142,7 @@ module Logical
         log_levels = {}
         unless machine.log_level.blank?
           begin
-            log_level_hash = JSON.parse(machine.log_level)
-            log_levels.merge!(log_level_hash)
+            log_levels.merge!(retrieve_log_levels(machine.log_level))
           rescue StandardError => e
             logger.error "couldn't parse machine.log_level: #{machine.log_level}: (#{e.message})"
           end
@@ -151,15 +150,46 @@ module Logical
 
         unless running_job.application.nil? || running_job.application.log_level.blank?
           begin
-            log_level_hash = JSON.parse(running_job.application.log_level)
-            log_levels.merge!(log_level_hash)
+            log_levels.merge!(retrieve_log_levels(running_job.application.log_level, running_job.application.command))
           rescue StandardError => e
             logger.error "couldn't parse running_job.application.log_level: #{running_job.application.log_level}: (#{e.message})"
           end
         end
 
         running_job.log_level = log_levels.to_json
+        running_job.historical_job.log_level = log_levels.to_json
+        running_job.historical_job.save!
         running_job.save!
+      end
+
+      def retrieve_log_levels(log_level, command = nil)
+        log_level_hash = {}
+
+        if log_level[0] == '{'
+          # String is in JSON format
+          log_level_hash = JSON.parse(log_level)
+        else
+          if log_level.include?('=')
+            # Pairs of logger_name=logger_level were given
+            log_level.split(',').each do |elem|
+              name, level = elem.split('=')
+              log_level_hash[name.strip.to_sym] = level.strip
+            end
+          else
+            # Only log level threshold was given
+            if command.present?
+              key = command.split('.').first
+              if key[0..1] == '::'
+                key = key[2..-1]
+              end
+              log_level_hash[key] = log_level
+            else
+              log_level_hash[:default] = log_level
+            end
+          end
+        end
+
+        log_level_hash
       end
 
     end
