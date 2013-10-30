@@ -176,28 +176,15 @@ module Logical::Naf
           end
 
           # Sort log lines based on timestamp
-          # @jsons = jsons.sort do |x, y|
-          #   sort_files(x, y)
-          # end
+          @jsons = jsons.sort do |x, y|
+            sort_files(x, y)
+          end
         end
       end
 
-
-      #
-      # TODO: For certain logs (i.e. error logs), it seems to have a different log
-      # format without a timestamp. The ideal would be to sort by the timestamp supplied
-      # by the log4r configuration, as it is more accurate.
-      #
       def sort_files(x, y)
         if x.present? && y.present?
           Time.parse(x['output_time']).to_i <=> Time.parse(y['output_time']).to_i
-          # if x['message'].present? && y['message'].present?
-          #   t1 = Time.parse(x['message'].scan(/\d{2}:\d{2}:\d{2}.\d{3}/).first)
-          #   t2 = Time.parse(y['message'].scan(/\d{2}:\d{2}:\d{2}.\d{3}/).first)
-          #   t1 <=> t2
-          # else
-          #   Time.parse(x['output_time']).to_i <=> Time.parse(y['output_time']).to_i
-          # end
         end
       end
 
