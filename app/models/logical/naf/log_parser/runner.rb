@@ -4,8 +4,6 @@ module Logical::Naf
   module LogParser
     class Runner < Base
 
-      NAF_LOG_PATH = "#{::Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/runners/"
-
       attr_accessor :search_params,
                     :regex_options,
                     :grep,
@@ -130,7 +128,7 @@ module Logical::Naf
           end
 
           # Sort log lines based on timestamp
-          @jsons = jsons.sort { |x, y| Time.parse(x['output_time']).to_i <=> Time.parse(y['output_time']).to_i }
+          @jsons = jsons.sort { |x, y| Time.parse(x['output_time']) <=> Time.parse(y['output_time']) }
         end
 
         if logs_size <= LOG_SIZE_CHUNKS
@@ -251,7 +249,7 @@ module Logical::Naf
         if log_type == 'old' && s3_log_reader.present?
           return s3_log_reader.runner_log_files(runner_id)
         else
-          files = Dir[NAF_LOG_PATH + "*/invocations/*/*"]
+          files = Dir["#{::Naf::PREFIX_PATH}/runners/*/invocations/*/*"]
           # Sort log files based on time
           files = files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
 

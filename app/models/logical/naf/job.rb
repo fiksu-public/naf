@@ -295,7 +295,7 @@ module Logical
           "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
         else
           if days < 2
-            "-#{more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
+            "-#{hours.to_i + more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
           else
             "-#{days.to_i}d#{hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
           end

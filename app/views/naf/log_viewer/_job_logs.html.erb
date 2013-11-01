@@ -54,11 +54,12 @@
                 </div>
                 <div style="display: table-cell;">
                   <strong style="margin-left: 10%; size: 10%">Job Information</strong>
-                  <table id='naf_table_show' style="margin-left: 10%; width: 75%">
+                  <table id='naf_table_show' style="margin-left: 10%; width: 92.5%">
                     <thead>
                       <tr>
                         <td width="7%">ID</td>
                         <td>Command</td>
+                        <td width="30%">Server</td>
                         <td width="8%">Pid</td>
                         <td width="15%">Status</td>
                       </tr>
@@ -67,8 +68,9 @@
                       <tr>
                         <td><%= @job.id %></td>
                         <td style="white-space: pre-wrap;"><%= @job.command %></td>
-                        <td><%= @job.pid %></td>
                         <% logical_job = ::Logical::Naf::Job.new(@job) %>
+                        <td><%= logical_job.runner %></td>
+                        <td><%= @job.pid %></td>
                         <td class="<%= add_color(logical_job.status) %>"><%= logical_job.status %></td>
                       </tr>
                     </tbody>
@@ -78,6 +80,9 @@
             </div>
             </br>
 
+            <%= label_tag :auto_scroll, 'Auto Scroll:' %>
+            <%= check_box_tag :scroll, 1, false, id: :scroll %>
+            </br></br>
             <%= submit_tag("Search the logs", id: 'log_search_submit') %>
             &nbsp;&nbsp;&nbsp;
             <%= link_to 'Back to Job', { controller: 'historical_jobs', action: 'show', id: @job.id } %>
@@ -88,6 +93,7 @@
   </div>
 </div>
 
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output-expanded' } %>
 <%= render partial: 'job_log_display', locals: { job_id: @job.id,
                                                  status: logical_job.status,
                                                  runner: logical_job.runner,

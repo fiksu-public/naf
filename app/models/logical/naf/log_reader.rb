@@ -4,11 +4,6 @@ module Logical
   module Naf
     class LogReader
 
-      NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
-        Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
-      NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
-      NAF_SCHEMA = ::Naf.schema_name
-      NAF_LOG_PATH = "#{::Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/jobs/"
       DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
 
       def log_files
@@ -69,9 +64,9 @@ module Logical
 
       def prefix
         if @runner_id.present?
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/runners/#{@runner_id}/invocations/"
+          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naf/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf::NAF_SCHEMA}/runners/#{@runner_id}/invocations/"
         else
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/jobs/"
+          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naf/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf::NAF_SCHEMA}/jobs/"
         end
       end
 

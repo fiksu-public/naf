@@ -3,13 +3,8 @@ require 'aws'
 module Process::Naf
   class LogArchiver < ::Process::Naf::Application
 
-    NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
-      Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
-    NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
-    NAF_SCHEMA = Naf.schema_name
-    PREFIX_PATH = "#{Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}"
-    NAF_JOBS_LOG_PATH = "#{PREFIX_PATH}/jobs/"
-    NAF_RUNNERS_LOG_PATH = "#{PREFIX_PATH}/runners/*/invocations/"
+    NAF_JOBS_LOG_PATH = "#{::Naf::PREFIX_PATH}/jobs/"
+    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/runners/*/invocations/"
     DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
 
   	def work

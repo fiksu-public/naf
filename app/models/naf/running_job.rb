@@ -48,6 +48,11 @@ module Naf
       where(started_on_machine_id: machine.id)
     end
 
+    def self.started_on_invocation(invocation_id)
+      joins(:historical_job).
+      where("#{::Naf.schema_name}.historical_jobs.machine_runner_invocation_id = #{invocation_id}")
+    end
+
     def self.in_run_group(run_group_name)
       where(application_run_group_name: run_group_name)
     end

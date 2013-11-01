@@ -3,12 +3,9 @@ require 'timeout'
 module Process::Naf
   class Runner < ::Af::Application
 
-    NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
-      Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
-    NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
-    NAF_SCHEMA = Naf.schema_name
-    NAF_LOG_PATH = "#{Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/"
     JOB_LOG_MAX_SIZE = 10_000
+
+    attr_accessor :machine
 
     #----------------
     # *** Options ***
@@ -63,15 +60,9 @@ module Process::Naf
     end
 
     def work
-      unless @disable_gc_modifications
-        # These configuration changes will help forked processes, not the runner
-        ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
-        ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
-        ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
-        ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
-      end
+      check_gc_configurations
 
-      machine = ::Naf::Machine.find_by_server_address(@server_address)
+      @machine = ::Naf::Machine.find_by_server_address(@server_address)
 
       unless machine.present?
         logger.fatal "This machine is not configued correctly (ipaddress: #{@server_address})."
@@ -82,73 +73,93 @@ module Process::Naf
 
       machine.lock_for_runner_use
       begin
-        # Wind down other runners
-        machine.machine_runners.each do |machine_runner|
-          machine_runner.machine_runner_invocations.each do |invocation|
-            if invocation.dead_at.blank?
-              begin
-                retval = Process.kill(0, invocation.pid)
-                logger.detail "#{retval} = kill(0, #{invocation.pid}) -- process alive, marking runner invocation as winding down"
-                invocation.wind_down_at = Time.zone.now
-                invocation.save!
-              rescue Errno::ESRCH
-                logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
-                invocation.dead_at = Time.zone.now
-                invocation.save!
-              end
-            end
-          end
-        end
+        wind_down_runners
+
         # Create a machine runner, if it doesn't exist
         machine_runner = ::Naf::MachineRunner.
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
-
-        begin
-          repository_name = (`git remote -v`).slice(/:\S+/).sub('.git','')[1..-1]
-          if repository_name.match(/fatal/)
-            repository_name = nil
-          end
-        rescue
-          repository_name = nil
-        end
-        branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
-        if branch_name.match(/fatal/)
-          branch_name = nil
-        end
-        commit_information = (`git log --pretty="%H" -n 1`).strip
-        if commit_information.match(/fatal/)
-          commit_information = nil
-        end
-        deployment_tag = (`git describe --abbrev=0 --tag 2>&1`).strip
-        if deployment_tag.match(/fatal: No names found, cannot describe anything/)
-          deployment_tag = nil
-        end
         # Create an invocation for this runner
-        invocation = ::Naf::MachineRunnerInvocation.create!(machine_runner_id: machine_runner.id,
-                                                            pid: Process.pid,
-                                                            repository_name: repository_name,
-                                                            branch_name: branch_name,
-                                                            commit_information: commit_information,
-                                                            deployment_tag: deployment_tag)
+        invocation = ::Naf::MachineRunnerInvocation.
+          create!({ machine_runner_id: machine_runner.id, pid: Process.pid }.merge!(retrieve_invocation_information))
       ensure
         machine.unlock_for_runner_use
       end
 
       begin
-        work_machine(machine, invocation)
+        work_machine(invocation)
       ensure
         invocation.dead_at = Time.zone.now
         invocation.save!
       end
     end
 
-    def work_machine(machine, invocation)
+    def check_gc_configurations
+      unless @disable_gc_modifications
+        # These configuration changes will help forked processes, not the runner
+        ENV['RUBY_HEAP_MIN_SLOTS'] = '500000'
+        ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
+        ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
+        ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
+      end
+    end
+
+    def wind_down_runners
+      machine.machine_runners.each do |machine_runner|
+        machine_runner.machine_runner_invocations.each do |invocation|
+          if invocation.dead_at.blank?
+            begin
+              retval = Process.kill(0, invocation.pid)
+              logger.detail "#{retval} = kill(0, #{invocation.pid}) -- process alive, marking runner invocation as winding down"
+              invocation.wind_down_at = Time.zone.now
+              invocation.save!
+            rescue Errno::ESRCH
+              logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
+              invocation.dead_at = Time.zone.now
+              invocation.save!
+              terminate_old_processes(invocation.id)
+            end
+          end
+        end
+      end
+    end
+
+    def retrieve_invocation_information
+      begin
+        repository_name = (`git remote -v`).slice(/:\S+/).sub('.git','')[1..-1]
+        if repository_name.match(/fatal/)
+          repository_name = nil
+        end
+      rescue
+        repository_name = nil
+      end
+      branch_name = (`git rev-parse --abbrev-ref HEAD`).strip
+      if branch_name.match(/fatal/)
+        branch_name = nil
+      end
+      commit_information = (`git log --pretty="%H" -n 1`).strip
+      if commit_information.match(/fatal/)
+        commit_information = nil
+      end
+      deployment_tag = (`git describe --abbrev=0 --tag 2>&1`).strip
+      if deployment_tag.match(/fatal: No names found, cannot describe anything/)
+        deployment_tag = nil
+      end
+
+      {
+        repository_name: repository_name,
+        branch_name: branch_name,
+        commit_information: commit_information,
+        deployment_tag: deployment_tag
+      }
+    end
+
+    def work_machine(invocation)
       machine.mark_alive
       machine.mark_up
 
       # Make sure no processes are thought to be running on this machine
-      terminate_old_processes(machine) if @kill_all_runners
+      terminate_old_processes if @kill_all_runners
 
       logger.info escape_html("working: #{machine}")
 
@@ -162,14 +173,14 @@ module Process::Naf
       @job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
       while true
-        break unless work_machine_loop(machine, invocation)
+        break unless work_machine_loop(invocation)
         GC.start
       end
 
       logger.info "runner quitting"
     end
 
-    def work_machine_loop(machine, invocation)
+    def work_machine_loop(invocation)
       machine.reload
 
       # Check machine status
@@ -183,12 +194,7 @@ module Process::Naf
 
       machine.mark_alive
 
-      if machine.log_level != @last_machine_log_level
-        @last_machine_log_level = machine.log_level
-        unless @last_machine_log_level.blank?
-          logging_configurator.parse_and_set_logger_levels(@last_machine_log_level)
-        end
-      end
+      check_log_level
 
       invocation.reload
       if invocation.wind_down_at.present?
@@ -198,8 +204,62 @@ module Process::Naf
         end
       end
 
-      check_schedules(machine) if invocation.wind_down_at.blank?
+      check_schedules if invocation.wind_down_at.blank?
 
+      cleanup_dead_children
+
+      start_new_jobs(invocation)
+
+      return true
+    end
+
+    def check_log_level
+      if machine.log_level != @last_machine_log_level
+        @last_machine_log_level = machine.log_level
+        unless @last_machine_log_level.blank?
+          logging_configurator.parse_and_set_logger_levels(@last_machine_log_level)
+        end
+      end
+    end
+
+    def check_schedules
+      if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
+        logger.debug "it's time to check schedules"
+        if ::Naf::ApplicationSchedule.try_lock_schedules
+          logger.debug_gross "checking schedules"
+          machine.mark_checked_schedule
+          ::Naf::ApplicationSchedule.unlock_schedules
+
+          # check scheduled tasks
+          should_be_queued.each do |application_schedule|
+            logger.info escape_html("scheduled application: #{application_schedule}")
+            begin
+              naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
+              # this doesn't work very well for run_group_limits in the thousands
+              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+                naf_boss.enqueue_application_schedule(application_schedule)
+              end
+            rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
+              logger.error escape_html("#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}")
+              logger.warn jpl
+              application_schedule.enabled = false
+              application_schedule.save!
+              logger.alarm escape_html("Application Schedule disabled due to loop: #{application_schedule}")
+            end
+          end
+
+          # check the runner machines
+          ::Naf::Machine.enabled.up.each do |runner_to_check|
+            if runner_to_check.is_stale?(@runner_stale_period.minutes)
+              logger.alarm escape_html("runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}")
+              runner_to_check.mark_machine_down(machine)
+            end
+          end
+        end
+      end
+    end
+
+    def cleanup_dead_children
       # clean up children that have exited
       logger.detail "cleaning up dead children: #{@children.length}"
 
@@ -275,11 +335,13 @@ module Process::Naf
         logger.detail "sleeping in loop: #{@loop_sleep_time} seconds"
         sleep(@loop_sleep_time)
       end
+    end
 
+    def start_new_jobs(invocation)
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
       # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && invocation.wind_down_at.blank?
-      while ::Naf::RunningJob.where(:started_on_machine_id => machine.id).count < machine.thread_pool_size &&
+      while ::Naf::RunningJob.where(started_on_machine_id: machine.id).count < machine.thread_pool_size &&
         memory_available_to_spawn? && invocation.wind_down_at.blank?
 
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
@@ -334,9 +396,6 @@ module Process::Naf
         end
       end
       logger.debug_gross "done starting jobs"
-
-      return true
-
     end
 
     def log_output_until_job_finishes(job_id, stdout, stderr)
@@ -345,7 +404,7 @@ module Process::Naf
       # Track the number of logs
       line_number = 1
       # Each log file path is unique
-      job_log_file = File.open(NAF_LOG_PATH + "/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
+      job_log_file = File.open("#{::Naf::PREFIX_PATH}/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
 
       # Continue reading logs from stdout/stderror until it reaches end of file
       while true
@@ -374,7 +433,7 @@ module Process::Naf
               logs.each do |log|
                 log_lines << JSON.pretty_generate({
                   line_number: line_number,
-                  output_time: Time.zone.now.to_s,
+                  output_time: Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
                   message: log.strip,
                   job_id: job_id
                 })
@@ -400,54 +459,17 @@ module Process::Naf
 
     def find_or_create_directories(job_id)
       # Create the directory path if it doesn't exist
-      FileUtils.mkdir_p(NAF_LOG_PATH + "/jobs/#{job_id}") unless File.directory?(NAF_LOG_PATH + "/jobs/#{job_id}")
+      FileUtils.mkdir_p("#{::Naf::PREFIX_PATH}/jobs/#{job_id}") unless File.directory?("#{::Naf::PREFIX_PATH}/jobs/#{job_id}")
     end
 
     def check_job_log(file, job_id, line_number)
       # When a file gets too large, close it and continue writing to another file
       if file.size > JOB_LOG_MAX_SIZE
         file.close
-        file = File.open(NAF_LOG_PATH + "/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
+        file = File.open("#{::Naf::PREFIX_PATH}/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
       end
 
       file
-    end
-
-    def check_schedules(machine)
-      if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
-        logger.debug "it's time to check schedules"
-        if ::Naf::ApplicationSchedule.try_lock_schedules
-          logger.debug_gross "checking schedules"
-          machine.mark_checked_schedule
-          ::Naf::ApplicationSchedule.unlock_schedules
-
-          # check scheduled tasks
-          should_be_queued(machine).each do |application_schedule|
-            logger.info escape_html("scheduled application: #{application_schedule}")
-            begin
-              naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
-              # this doesn't work very well for run_group_limits in the thousands
-              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
-                naf_boss.enqueue_application_schedule(application_schedule)
-              end
-            rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
-              logger.error escape_html("#{machine} couldn't queue schedule because of prerequisite loop: #{jpl.message}")
-              logger.warn jpl
-              application_schedule.enabled = false
-              application_schedule.save!
-              logger.alarm escape_html("Application Schedule disabled due to loop: #{application_schedule}")
-            end
-          end
-
-          # check the runner machines
-          ::Naf::Machine.enabled.up.each do |runner_to_check|
-            if runner_to_check.is_stale?(@runner_stale_period.minutes)
-              logger.alarm escape_html("runner is stale for #{@runner_stale_period} minutes, #{runner_to_check}")
-              runner_to_check.mark_machine_down(machine)
-            end
-          end
-        end
-      end
     end
 
     # XXX update_all doesn't support "from_partition" so we have this helper
@@ -494,10 +516,10 @@ module Process::Naf
       end
     end
 
-    def terminate_old_processes(machine)
+    def terminate_old_processes(invocation_id = nil)
       # check if any processes are hanging around and ask them
       # politely if they will please terminate
-      jobs = assigned_jobs(machine)
+      jobs = assigned_jobs(invocation_id)
       if jobs.length == 0
         logger.detail "no jobs to remove"
         return
@@ -514,7 +536,7 @@ module Process::Naf
 
       # wait
       (1..@wait_time_for_processes_to_terminate).each do |i|
-        num_assigned_jobs = assigned_jobs(machine).length
+        num_assigned_jobs = assigned_jobs(invocation_id).length
         return if num_assigned_jobs == 0
         logger.debug_medium "#{i}/#{@wait_time_for_processes_to_terminate}: sleeping 1 second while we wait for " +
           "#{num_assigned_jobs} assigned job(s) to terminate as requested"
@@ -522,7 +544,7 @@ module Process::Naf
       end
 
       # nudge them to terminate
-      jobs = assigned_jobs(machine)
+      jobs = assigned_jobs(invocation_id)
       if jobs.length == 0
         logger.debug_gross "assigned jobs have exited after asking to terminate nicely"
         return
@@ -534,14 +556,14 @@ module Process::Naf
 
       # wait
       (1..5).each do |i|
-        num_assigned_jobs = assigned_jobs(machine).length
+        num_assigned_jobs = assigned_jobs(invocation_id).length
         return if num_assigned_jobs == 0
         logger.debug_medium "#{i}/5: sleeping 1 second while we wait for #{num_assigned_jobs} assigned job(s) to terminate from SIG_TERM"
         sleep(1)
       end
 
       # kill with fire
-      assigned_jobs(machine).each do |job|
+      assigned_jobs(invocation_id).each do |job|
         logger.alarm escape_html("sending SIG_KILL to process: #{job}")
         send_signal_and_maybe_clean_up(job, "KILL")
 
@@ -575,13 +597,19 @@ module Process::Naf
       return send_signal_and_maybe_clean_up(job, 0)
     end
 
-    def assigned_jobs(machine)
-      return ::Naf::RunningJob.assigned_jobs(machine).select do |job|
-        is_job_process_alive?(job)
+    def assigned_jobs(invocation_id)
+      if invocation_id.present?
+        return ::Naf::RunningJob.started_on_invocation(invocation_id).select do |job|
+          is_job_process_alive?(job)
+        end
+      else
+        return ::Naf::RunningJob.assigned_jobs(machine).select do |job|
+          is_job_process_alive?(job)
+        end
       end
     end
 
-    def should_be_queued(machine)
+    def should_be_queued
       not_finished_applications = ::Naf::HistoricalJob.
         queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
         where("finished_at IS NULL AND request_to_terminate = false").

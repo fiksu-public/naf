@@ -144,6 +144,7 @@
 <% end %>
 
 <%= render partial: 'naf/shared/application' %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output' } %>
 <%= render partial: 'naf/log_viewer/machine_log_display',
            locals: {
              logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@machine).runner}#{naf.logs_log_parsers_path}",

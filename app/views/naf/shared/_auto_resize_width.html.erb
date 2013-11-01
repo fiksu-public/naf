@@ -1,0 +1,7 @@
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    window.onresize = function() {
+      jQuery('<%= div_class %>').width(jQuery(window).width() - 50);
+    }
+  </script>
+<% end %>

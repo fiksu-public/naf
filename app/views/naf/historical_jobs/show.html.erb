@@ -211,10 +211,14 @@
         </div>
         </br>
 
+        <%= label_tag :auto_scroll, 'Auto Scroll:' %>
+        <%= check_box_tag :scroll, 1, false, id: :scroll %>
+        </br></br>
         <%= submit_tag("Search the logs", id: 'log_search_submit') %>
         <%= link_to 'Full Screen',
                     { controller: 'log_viewer', action: 'index', naf_job_id: @historical_job.id },
                     { class: 'full_screen' } %>
+
       </div>
     </div>
 
@@ -225,6 +229,7 @@
 <% end %>
 
 <%= render partial: 'naf/shared/application' %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output' } %>
 <%= render partial: 'naf/log_viewer/job_log_display',
            locals: { job_id: @historical_job.id,
                      status: @logical_job.status,

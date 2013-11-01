@@ -4,10 +4,6 @@ module Logical::Naf
   module LogParser
     class Base
 
-      NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
-        Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
-      NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
-      NAF_SCHEMA = ::Naf.schema_name
       REGEX_OPTIONS = {
         'i' => Regexp::IGNORECASE,
         'x' => Regexp::EXTENDED,

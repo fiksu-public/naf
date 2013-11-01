@@ -4,8 +4,6 @@ module Logical::Naf
   module LogParser
     class Job < Base
 
-      NAF_LOG_PATH = "#{::Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/jobs/"
-
 	    attr_accessor :naf_job_id,
                     :end_position,
                     :last_line_checked,
@@ -33,7 +31,7 @@ module Logical::Naf
             last_line_number = elem['line_number']
           end
 
-          output.insert(0, "&nbsp;&nbsp;#{elem['output_time']}, #{elem['message']}</br>")
+          output.insert(0, "&nbsp;&nbsp;#{elem['line_number']} #{elem['output_time']}: #{elem['message']}</br>")
         end
 
         return {
@@ -54,12 +52,12 @@ module Logical::Naf
           end
 
 					# Sort log lines based on timestamp
-					@jsons = jsons.sort{ |x, y| Time.parse(x['output_time']).to_i <=> Time.parse(y['output_time']).to_i }
+					@jsons = jsons.sort{ |x, y| x['line_number'] <=> y['line_number'] }
 				end
     	end
 
       def get_files
-        files = Dir[NAF_LOG_PATH + "#{naf_job_id}/*"]
+        files = Dir["#{::Naf::PREFIX_PATH}/jobs/#{naf_job_id}/*"]
 
         if files.empty?
           @check_s3 = true

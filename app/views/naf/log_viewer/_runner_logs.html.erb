@@ -85,6 +85,7 @@
   </div>
 </div>
 
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output-expanded' } %>
 <%= render partial: 'machine_log_display',
            locals: {
              logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@runner.machine).runner}#{naf.logs_log_parsers_path}",

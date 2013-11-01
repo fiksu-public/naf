@@ -100,8 +100,11 @@
               else{
                 jQuery('#stdout').prepend(logs);
               }
+
+              if(jQuery('#scroll').prop('checked') == true){
+                jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+              }
             }
-            jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
           }
         },
         error: function(response) {

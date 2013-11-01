@@ -3,11 +3,6 @@ require 'open4'
 module Process::Naf
   class MachineRunner < ::Process::Naf::Application
 
-    NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?
-      Rails.configuration.database_configuration[Rails.env]['host'] : 'localhost'
-    NAF_DATABASE = Rails.configuration.database_configuration[Rails.env]['database']
-    NAF_SCHEMA = Naf.schema_name
-    NAF_LOG_PATH = "#{Naf::LOGGING_ROOT_DIRECTORY}/naflogs/#{NAF_DATABASE_HOSTNAME}/#{NAF_DATABASE}/#{NAF_SCHEMA}/"
   	LOG_MAX_SIZE = 10_000
 
     attr_accessor :runner,
@@ -72,7 +67,7 @@ module Process::Naf
                 log_lines << JSON.pretty_generate({
                 	invocation_id: invocation.id,
                   line_number: line_number,
-                  output_time: Time.zone.now.to_s,
+                  output_time: Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
                   message: log.strip
                 })
                 @line_number += 1
@@ -120,13 +115,13 @@ module Process::Naf
 
     def create_log_file
       # Create the directory path if it doesn't exist
-      unless File.directory?(NAF_LOG_PATH + "/runners/#{runner.id}/invocations/#{invocation.id}")
-        FileUtils.mkdir_p(NAF_LOG_PATH + "/runners/#{runner.id}/invocations/#{invocation.id}")
+      unless File.directory?("#{::Naf::PREFIX_PATH}/runners/#{runner.id}/invocations/#{invocation.id}")
+        FileUtils.mkdir_p("#{::Naf::PREFIX_PATH}/runners/#{runner.id}/invocations/#{invocation.id}")
       end
 
-      file = Dir[NAF_LOG_PATH + "runners/runner.id/invocations/invocation.id/#{file_line_number}_*"].first
+      file = Dir["#{::Naf::PREFIX_PATH}/runners/runner.id/invocations/invocation.id/#{file_line_number}_*"].first
       if file.blank?
-        file = File.open(NAF_LOG_PATH + "/runners/#{runner.id}/invocations/#{invocation.id}/#{file_line_number}_#{Time.zone.now}.json", 'wb')
+        file = File.open("#{::Naf::PREFIX_PATH}/runners/#{runner.id}/invocations/#{invocation.id}/#{file_line_number}_#{Time.zone.now}.json", 'wb')
       end
 
       file
@@ -137,7 +132,7 @@ module Process::Naf
       if file.size > LOG_MAX_SIZE
         @file_line_number = @line_number
         file.close
-        file = File.open(NAF_LOG_PATH + "/runners/#{runner.id}/invocations/#{invocation.id}/#{file_line_number}_#{Time.zone.now}.json", 'wb')
+        file = File.open("#{::Naf::PREFIX_PATH}/runners/#{runner.id}/invocations/#{invocation.id}/#{file_line_number}_#{Time.zone.now}.json", 'wb')
       end
 
       file
