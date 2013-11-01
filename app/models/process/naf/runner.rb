@@ -91,6 +91,7 @@ module Process::Naf
       ensure
         invocation.dead_at = Time.zone.now
         invocation.save!
+        terminate_old_processes(invocation.id)
       end
     end
 

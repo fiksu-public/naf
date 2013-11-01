@@ -61,6 +61,22 @@ module Naf
       end
     end
 
+    describe "#started_on_invocation" do
+      let!(:invocation) { FactoryGirl.create(:machine_runner_invocation) }
+      before do
+        running_job.historical_job.machine_runner_invocation = invocation
+        running_job.historical_job.save!
+      end
+
+      it "return the correct job record" do
+        ::Naf::RunningJob.started_on_invocation(invocation.id).should == [running_job]
+      end
+
+      it "return nothing when no running jobs are associated invocation" do
+        ::Naf::RunningJob.started_on_invocation(invocation.id + 1).should == []
+      end
+    end
+
     describe "#in_run_group" do
       it "return the correct job record" do
         ::Naf::RunningJob.should_receive(:where).and_return([running_job])

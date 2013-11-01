@@ -313,7 +313,11 @@ module Logical
       def run_time
         if @job.started_at.present?
           if @job.finished_at.present?
-            time_difference(@job.finished_at - @job.started_at, false)[1..-1]
+            if @job.started_at - @job.finished_at > 0
+              time_difference(@job.started_at - @job.finished_at, false)[1..-1]
+            else
+              time_difference(@job.finished_at - @job.started_at, false)[1..-1]
+            end
           else
             time_difference(Time.zone.now - @job.started_at, false)[1..-1]
           end
