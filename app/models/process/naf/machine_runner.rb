@@ -3,14 +3,14 @@ require 'open4'
 module Process::Naf
   class MachineRunner < ::Process::Naf::Application
 
-  	LOG_MAX_SIZE = 10_000
+    LOG_MAX_SIZE = 10_000
 
     attr_accessor :runner,
                   :invocation,
                   :line_number,
                   :file_line_number
 
-  	def work
+    def work
       # Track the number of logs
       @line_number = 1
       @file_line_number = 1
@@ -22,20 +22,20 @@ module Process::Naf
       end
 
       # fork and run
-    	pid, stdin, stdout, stderr = Open4::popen4(::Naf::ApplicationType::SCRIPT_RUNNER + " ::Process::Naf::Runner.run")
-    	stdin.close
+      pid, stdin, stdout, stderr = Open4::popen4(::Naf::ApplicationType::SCRIPT_RUNNER + " ::Process::Naf::Runner.run")
+      stdin.close
 
       check_runner(invocation_count)
 
-    	while true
+      while true
       	write_logs(stdout, stderr)
         break if invocation.reload.status == 'dead'
       end
-  	end
+    end
 
-  	private
+    private
 
-  	def write_logs(stdout, stderr)
+    def write_logs(stdout, stderr)
       # Each log file path is unique
       log_file = create_log_file
 
@@ -65,11 +65,11 @@ module Process::Naf
               # Parse each log line into JSON
               logs.each do |log|
                 log_lines << JSON.pretty_generate({
-                	invocation_id: invocation.id,
-                  line_number: line_number,
-                  output_time: Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
-                  message: log.strip
-                })
+                                                    invocation_id: invocation.id,
+                                                    line_number: line_number,
+                                                    output_time: Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
+                                                    message: log.strip
+                                                  })
                 @line_number += 1
               end
             rescue Errno::EAGAIN
