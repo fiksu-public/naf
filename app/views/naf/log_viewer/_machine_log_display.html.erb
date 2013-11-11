@@ -6,8 +6,6 @@
     var logs_url = "<%= logs_url %>";
     var search_params = null;
     var regex_options = null;
-    var last_line_number = null;
-    var new_line_number = null;
     var search_command = false;
     var grep = false;
     var search_date_from_year = '';
@@ -21,14 +19,14 @@
     var search_date_to_hour = '';
     var search_date_to_minute = '';
     var show_help_window = false;
-    var last_id_checked = null;
-    var newest_id_checked = null;
     var logs = null;
     var old_height = null;
     var new_height = null;
     var log_type = 'new';
     var newest_log = null;
     var read_from_s3 = false;
+    var last_file_checked = null;
+    var newest_file_checked = null;
 
     jQuery(document).ready(function () {
       jQuery(".description").hide();
@@ -57,7 +55,17 @@
         }
         else if(jQuery('#stdout')[0].scrollHeight - jQuery('#stdout').scrollTop() == jQuery('#stdout').innerHeight()){
           log_type = 'new'
-          getLog();
+          newest_log = jQuery('#stdout')[0].children.item(jQuery('#stdout')[0].children.length - 2).innerHTML;
+
+          if(jQuery('#auto_scroll').text() == 'Auto Scroll (OFF)'){
+            jQuery('#auto_scroll').click();
+          }
+        }
+        else{
+          if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+            jQuery('#auto_scroll').text('Auto Scroll (OFF)');
+            jQuery('#auto_scroll').addClass('auto_scroll_off');
+          }
         }
       });
 
@@ -69,6 +77,19 @@
         else{
           jQuery(".description").hide();
           show_help_window = false;
+        }
+      });
+
+      jQuery('#auto_scroll').click(function(){
+        if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+          jQuery('#auto_scroll').text('Auto Scroll (OFF)');
+          jQuery('#auto_scroll').addClass('auto_scroll_off');
+        }
+        else{
+          jQuery('#auto_scroll').text('Auto Scroll (ON)');
+          jQuery('#auto_scroll').removeClass('auto_scroll_off');
+          jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+          getLog();
         }
       });
     });
@@ -87,10 +108,8 @@
                 'log_type': log_type,
                 'newest_log': newest_log,
                 'read_from_s3': read_from_s3,
-                'last_line_number': last_line_number,
-                'last_id_checked': last_id_checked,
-                'new_line_number': new_line_number,
-                'newest_id_checked': newest_id_checked,
+                'last_file_checked': last_file_checked,
+                'newest_file_checked': newest_file_checked,
                 'search_params': jQuery('#log_search').val(),
                 'regex_options': jQuery('#regex_options').val(),
                 'grep': grep,
@@ -120,10 +139,6 @@
             search_command = false;
           }
           else{
-            if(jQuery('#stdout').text() != ''){
-              newest_log = jQuery('#stdout')[0].children.item(jQuery('#stdout')[0].children.length - 2).innerHTML;
-            }
-
             if(logs == '' && jQuery('#stdout')[0].children.length == 0) {
               logs = "No logs were found for this Job!<br>";
             }
@@ -158,16 +173,16 @@
 
     function getLog() {
       callAjax();
-      // setTimeout(getLog, 1000);
+      if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+        setTimeout(getLog, 5000);
+      }
     }
 
     function initializeVariables(){
       newest_log = null;
       logs = null;
-      last_line_number = null;
-      new_line_number = null;
-      last_id_checked = null;
-      newest_id_checked = null;
+      last_file_checked = null;
+      newest_file_checked = null;
       show_help_window = false;
       search_command = true;
       grep = jQuery('#grep').is(':checked');
@@ -199,20 +214,17 @@
     }
 
     function updateVariables(response){
-      if(response['last_line_number'] != ''){
-        last_line_number = response['last_line_number'];
-      }
-      if(response['new_line_number'] != ''){
-        new_line_number = response['new_line_number'];
-      }
-      if(response['stopped_at_id'] != ''){
-        last_id_checked = response['stopped_at_id'];
-      }
-      if(response['newest_id_checked'] != ''){
-        newest_id_checked = response['newest_id_checked'];
-      }
       if(response['read_from_s3'] != ''){
         read_from_s3 = response['read_from_s3'];
+      }
+      if(response['last_file_checked'] != ''){
+        last_file_checked = response['last_file_checked'];
+      }
+      if(response['newest_file_checked'] != ''){
+        newest_file_checked = response['newest_file_checked'];
+      }
+      if(response['newest_log'] != ''){
+        newest_log = response['newest_log'];
       }
     }
 

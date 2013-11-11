@@ -9,7 +9,8 @@ module Logical::Naf
         'x' => Regexp::EXTENDED,
         'm' => Regexp::MULTILINE
       }
-      DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
+      DATE_REGEX = /((\d){8}_(\d){6})/
+      UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/
       LOG_SIZE_CHUNKS = 50
 
       attr_accessor  :search_params,

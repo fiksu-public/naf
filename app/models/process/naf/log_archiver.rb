@@ -3,8 +3,8 @@ require 'aws'
 module Process::Naf
   class LogArchiver < ::Process::Naf::Application
 
-    NAF_JOBS_LOG_PATH = "#{::Naf::PREFIX_PATH}/jobs/"
-    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/runners/*/invocations/"
+    NAF_JOBS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/"
+    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/invocations/"
     DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
 
   	def work

@@ -17,7 +17,6 @@ module Logical::Naf
         @end_position = params['last_line_number'].to_i
     		@last_line_checked = params['last_line_number']
         @jsons = []
-        @s3_log_reader = ::Logical::Naf::LogReader.new
         @check_s3 = false
     	end
 
@@ -57,11 +56,22 @@ module Logical::Naf
     	end
 
       def get_files
-        files = Dir["#{::Naf::PREFIX_PATH}/jobs/#{naf_job_id}/*"]
+        files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/#{naf_job_id}/*"]
 
         if files.empty?
           @check_s3 = true
-          files = s3_log_reader.retrieve_job_files(naf_job_id)
+          begin
+            @s3_log_reader = ::Logical::Naf::LogReader.new
+            files = s3_log_reader.retrieve_job_files(naf_job_id)
+          rescue
+            @jsons << {
+              'line_number' => 0,
+              'output_time' => Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
+              'message' => 'AWS S3 Access Denied. Please check your permissions.'
+            }
+
+            return []
+          end
         end
 
         # Sort log files based on time

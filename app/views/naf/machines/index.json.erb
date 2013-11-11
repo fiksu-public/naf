@@ -1,15 +1,15 @@
  <%
   rows = @machines.each do |machine|
-    machine[11] = link_to image_tag('papertrail_machine.png',
+    machine[11] = link_to image_tag('machine.png',
                                     class: 'action',
-                                    title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) log in Papertrail"),
+                                    title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) log"),
                                     url_for({ controller: 'log_viewer', action: 'index', machine_id: machine[0] }),
                                     { target: '_blank', id: machine[0] }
     machine[11] << "&nbsp;&nbsp;".html_safe
-    machine[11] << (link_to image_tag('papertrail_machine_runner.png',
+    machine[11] << (link_to image_tag('machine_runner.png',
                                       class: 'action',
-                                      title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) runner log in Papertrail"),
-                                      url_for({ controller: 'log_viewer', action: 'index', runner_id: ::Naf::Machine.find_by_id(machine[0]).machine_runners.first.try(:id) }),
+                                      title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) runner log"),
+                                      url_for({ controller: 'log_viewer', action: 'index', runner_id: ::Naf::Machine.find_by_id(machine[0]).machine_runners.order(:id).last.try(:id) }),
                                       { target: '_blank', id: machine[0] })
     machine[11] << "&nbsp;&nbsp;".html_safe
     unless machine[10]

@@ -292,7 +292,7 @@ module Logical
         more_hours = hours + days * 24 if days > 0
 
         if time_format_on
-          "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+          "-#{hours.to_i + more_hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
         else
           if days < 2
             "-#{hours.to_i + more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
@@ -313,7 +313,7 @@ module Logical
       def run_time
         if @job.started_at.present?
           if @job.finished_at.present?
-            if @job.started_at - @job.finished_at > 0
+            if @job.started_at > @job.finished_at
               time_difference(@job.started_at - @job.finished_at, false)[1..-1]
             else
               time_difference(@job.finished_at - @job.started_at, false)[1..-1]

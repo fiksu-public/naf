@@ -2,8 +2,10 @@
   <div id="fluid">
     <div id='bd'>
       <div id="record">
+        <FONT FACE= "Courier New">
         <div id="stdout" class="scrollable-output-expanded"></div>
         </br>
+        <FONT FACE= "Arial">
 
         <div id="stdout_header">
           <div>
@@ -37,6 +39,7 @@
               </table>
             </div>
 
+            <%= link_to 'Auto Scroll (ON)', '#', id: :auto_scroll %>
             <div>
               <%= label_tag :auto_update, 'Grep:' %>
               <%= check_box_tag :grep, 1, false, id: :grep %>

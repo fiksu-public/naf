@@ -8,7 +8,8 @@ module Naf
                     :commit_information,
                     :branch_name,
                     :repository_name,
-                    :deployment_tag
+                    :deployment_tag,
+                    :uuid
 
     #---------------------
     # *** Associations ***

@@ -236,14 +236,24 @@ module Logical::Naf
         if log_type == 'old' && s3_log_reader.present?
           return s3_log_reader.log_files
         else
-          files = Dir["#{::Naf::PREFIX_PATH}/jobs/*/*"]
+          files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/*/*"]
           # Sort log files based on time
           files = files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
 
           if files.empty?
-            @s3_log_reader = ::Logical::Naf::LogReader.new
-            @read_from_s3 = true
-            return s3_log_reader.log_files
+            begin
+              @s3_log_reader = ::Logical::Naf::LogReader.new
+              @read_from_s3 = true
+              return s3_log_reader.log_files
+            rescue
+              @jsons << {
+                'line_number' => 0,
+                'output_time' => Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
+                'message' => 'AWS S3 Access Denied. Please check your permissions.'
+              }
+
+              return []
+            end
           else
             return files
           end

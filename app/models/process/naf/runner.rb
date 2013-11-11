@@ -45,6 +45,9 @@ module Process::Naf
     opt :kill_all_runners,
         "don't wait for runners to wind down and finish running their jobs",
         default: false
+    opt :invocation_uuid,
+        "unique identifer used for runner logs",
+        default: `uuidgen`
 
     def initialize
       super
@@ -73,6 +76,7 @@ module Process::Naf
 
       machine.lock_for_runner_use
       begin
+        cleanup_old_processes
         wind_down_runners
 
         # Create a machine runner, if it doesn't exist
@@ -81,7 +85,9 @@ module Process::Naf
                                                       runner_cwd: Dir.pwd)
         # Create an invocation for this runner
         invocation = ::Naf::MachineRunnerInvocation.
-          create!({ machine_runner_id: machine_runner.id, pid: Process.pid }.merge!(retrieve_invocation_information))
+          create!({ machine_runner_id: machine_runner.id,
+                    pid: Process.pid,
+                    uuid: @invocation_uuid }.merge!(retrieve_invocation_information))
       ensure
         machine.unlock_for_runner_use
       end
@@ -91,7 +97,7 @@ module Process::Naf
       ensure
         invocation.dead_at = Time.zone.now
         invocation.save!
-        terminate_old_processes(invocation.id)
+        cleanup_old_processes
       end
     end
 
@@ -102,6 +108,14 @@ module Process::Naf
         ENV['RUBY_HEAP_SLOTS_INCREMENT'] = '250000'
         ENV['RUBY_HEAP_SLOTS_GROWTH_FACTOR'] = '1'
         ENV['RUBY_GC_MALLOC_LIMIT'] = '50000000'
+      end
+    end
+
+    def cleanup_old_processes
+      machine.machine_runners.each do |runner|
+        runner.machine_runner_invocations.where('dead_at IS NOT NULL').each do |invocation|
+          terminate_old_processes(invocation.id)
+        end
       end
     end
 
@@ -205,11 +219,12 @@ module Process::Naf
         end
       end
 
-      check_schedules if invocation.wind_down_at.blank?
+      if invocation.wind_down_at.blank?
+        check_schedules
+        start_new_jobs(invocation)
+      end
 
       cleanup_dead_children
-
-      start_new_jobs(invocation)
 
       return true
     end
@@ -400,12 +415,8 @@ module Process::Naf
     end
 
     def log_output_until_job_finishes(job_id, stdout, stderr)
-      find_or_create_directories(job_id)
-
-      # Track the number of logs
-      line_number = 1
-      # Each log file path is unique
-      job_log_file = File.open("#{::Naf::PREFIX_PATH}/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
+      log_file = ::Logical::Naf::LogFile.new("#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/#{job_id}")
+      log_file.open
 
       # Continue reading logs from stdout/stderror until it reaches end of file
       while true
@@ -423,54 +434,27 @@ module Process::Naf
         end
 
         unless read_array.blank?
-          for r in read_array do
-            log_lines = ""
-            job_log_file = check_job_log(job_log_file, job_id, line_number)
-
-            begin
-              # Read from stdout in chunks
-              logs = r.read_nonblock(10240).split("\n")
-              # Parse each log line into JSON
-              logs.each do |log|
-                log_lines << JSON.pretty_generate({
-                  line_number: line_number,
-                  output_time: Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
-                  message: log.strip,
-                  job_id: job_id
-                })
-                line_number += 1
+          begin
+            for r in read_array do
+              begin
+                # Parse each log line into JSON
+                r.read_nonblock(10240).split("\n").each do |log|
+                  log_file << log.rstrip
+                end
+              rescue Errno::EAGAIN
+              rescue Errno::EINTR
+              rescue EOFError => eof
+                stdout = nil if r == stdout
+                stderr = nil if r == stderr
               end
-            rescue Errno::EAGAIN
-            rescue Errno::EINTR
-            rescue EOFError => eof
-              stdout = nil if r == stdout
-              stderr = nil if r == stderr
-            else
-              job_log_file.write(log_lines)
-              # Since the file is buffered, we want to tell it to write in chunks.
-              # Files should be shown as the scripts runs.
-              job_log_file.flush
             end
+          ensure
+            log_file.write
           end
         end
       end
 
-      job_log_file.close
-    end
-
-    def find_or_create_directories(job_id)
-      # Create the directory path if it doesn't exist
-      FileUtils.mkdir_p("#{::Naf::PREFIX_PATH}/jobs/#{job_id}") unless File.directory?("#{::Naf::PREFIX_PATH}/jobs/#{job_id}")
-    end
-
-    def check_job_log(file, job_id, line_number)
-      # When a file gets too large, close it and continue writing to another file
-      if file.size > JOB_LOG_MAX_SIZE
-        file.close
-        file = File.open("#{::Naf::PREFIX_PATH}/jobs/#{job_id}/#{line_number}_#{Time.zone.now}.json", 'wb')
-      end
-
-      file
+      log_file.close
     end
 
     # XXX update_all doesn't support "from_partition" so we have this helper

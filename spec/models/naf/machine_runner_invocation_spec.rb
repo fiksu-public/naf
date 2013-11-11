@@ -10,7 +10,8 @@ module Naf
      :commit_information,
      :branch_name,
      :repository_name,
-     :deployment_tag].each do |a|
+     :deployment_tag,
+     :uuid].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
