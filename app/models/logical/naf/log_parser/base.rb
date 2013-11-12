@@ -11,7 +11,7 @@ module Logical::Naf
       }
       DATE_REGEX = /((\d){8}_(\d){6})/
       UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/
-      LOG_SIZE_CHUNKS = 50
+      LOG_SIZE_CHUNKS = 150
 
       attr_accessor  :search_params,
                      :regex_options,
@@ -64,7 +64,7 @@ module Logical::Naf
           search_built_time << search_time[4]
         end
         # Second
-        search_built_time << ':00 UTC'
+        search_built_time << ':00 -0500'
 
         search_built_time
       end
@@ -89,6 +89,20 @@ module Logical::Naf
         end
 
         result
+      end
+
+      def get_s3_files
+        begin
+          yield
+        rescue
+          @jsons << {
+            'line_number' => 0,
+            'output_time' => Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
+            'message' => 'AWS S3 Access Denied. Please check your permissions.'
+          }
+
+          return []
+        end
       end
 
     end

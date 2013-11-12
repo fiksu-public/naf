@@ -3,13 +3,19 @@
     machine[11] = link_to image_tag('machine.png',
                                     class: 'action',
                                     title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) log"),
-                                    url_for({ controller: 'log_viewer', action: 'index', machine_id: machine[0] }),
+                                    url_for({ controller: 'log_viewer',
+                                              action: 'index',
+                                              record_id: machine[0],
+                                              record_type: 'machine' }),
                                     { target: '_blank', id: machine[0] }
     machine[11] << "&nbsp;&nbsp;".html_safe
     machine[11] << (link_to image_tag('machine_runner.png',
                                       class: 'action',
                                       title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) runner log"),
-                                      url_for({ controller: 'log_viewer', action: 'index', runner_id: ::Naf::Machine.find_by_id(machine[0]).machine_runners.order(:id).last.try(:id) }),
+                                      url_for({ controller: 'log_viewer',
+                                                action: 'index',
+                                                record_id: ::Naf::Machine.find_by_id(machine[0]).machine_runners.order(:id).last.try(:id),
+                                                record_type: 'runner' }),
                                       { target: '_blank', id: machine[0] })
     machine[11] << "&nbsp;&nbsp;".html_safe
     unless machine[10]

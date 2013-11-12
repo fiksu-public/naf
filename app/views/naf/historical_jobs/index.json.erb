@@ -11,7 +11,7 @@
     job[12] = link_to image_tag('job.png',
                                 class: 'action',
                                 title: "View job(id: #{job[0]}, title: #{job[4]}) log"),
-                                url_for({ controller: 'log_viewer', action: 'index', naf_job_id: job[0] }),
+                                url_for({ controller: 'log_viewer', action: 'index', record_id: job[0], record_type: 'job' }),
                                 { target: '_blank', id: job[0] }
 
     if job[10] == "Running" || job[10] == 'Queued' || job[10] == 'Waiting'

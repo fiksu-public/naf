@@ -17,7 +17,8 @@ module Logical::Naf
                     :s3_log_reader,
                     :invocations_ids,
                     :last_file_checked,
-                    :newest_file_checked
+                    :newest_file_checked,
+                    :runner_id
 
       def initialize(params)
         super(params)
@@ -29,6 +30,7 @@ module Logical::Naf
         @invocations_ids = {}
         @last_file_checked = params['last_file_checked']
         @newest_file_checked = params['newest_file_checked']
+        @runner_id = params['record_id']
       end
 
       def logs
@@ -98,12 +100,6 @@ module Logical::Naf
         end
       end
 
-      def sort_files(x, y)
-        if x.present? && y.present?
-          Time.parse(x['output_time']).to_i <=> Time.parse(y['output_time']).to_i
-        end
-      end
-
       def get_json_from_log_file(file)
         if s3_log_reader.present?
           s3_log_reader.retrieve_file(file)
@@ -166,25 +162,12 @@ module Logical::Naf
         end
       end
 
-      def get_s3_files
-        begin
-          yield
-        rescue
-          @jsons << {
-            'line_number' => 0,
-            'output_time' => Time.zone.now.strftime("%Y-%m-%d %H:%M:%S.%L"),
-            'message' => 'AWS S3 Access Denied. Please check your permissions.'
-          }
-
-          return []
-        end
-      end
-
       def filter_log_messages(log, file)
         # Check that the message matches the search query. Highlight the matching results
-        match = Regexp.new(search_params, regex_options).match(log['message'])
-        if match.to_s.present?
-          log['message'].gsub!(match.to_s, "<span style='background-color:yellow;'>#{match.to_s}</span>")
+        if search_params.present?
+          log['message'].scan(Regexp.new(search_params, regex_options)).each do |match|
+            log['message'].gsub!(match, "<span style='background-color:yellow;'>#{match}</span>")
+          end
         end
 
         log['id'] = get_invocation_id(file.scan(UUID_REGEX).first)

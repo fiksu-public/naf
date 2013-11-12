@@ -1,8 +1,8 @@
 <% content_for :javascripts do %>
   <script type='text/javascript'>
     var record_id = "<%= record_id %>";
-    var record_type = null;
-    setRecordType();
+    var logical_type = null;
+    setLogicalType();
     var logs_url = "<%= logs_url %>";
     var search_params = null;
     var regex_options = null;
@@ -39,7 +39,7 @@
         if(checkSearchDate(search_date_from_year, search_date_from_month, search_date_from_day,
           search_date_from_hour, search_date_from_minute)){
           log_type = 'old';
-          getLog();
+          callAjax();
         }
         else{
           resetDateFilters();
@@ -55,7 +55,7 @@
         }
         else if(jQuery('#stdout')[0].scrollHeight - jQuery('#stdout').scrollTop() == jQuery('#stdout').innerHeight()){
           log_type = 'new'
-          newest_log = jQuery('#stdout')[0].children.item(jQuery('#stdout')[0].children.length - 2).innerHTML;
+          newest_log = jQuery('#stdout')[0].children.item(jQuery('#stdout')[0].children.length - 1).innerHTML;
 
           if(jQuery('#auto_scroll').text() == 'Auto Scroll (OFF)'){
             jQuery('#auto_scroll').click();
@@ -63,8 +63,7 @@
         }
         else{
           if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
-            jQuery('#auto_scroll').text('Auto Scroll (OFF)');
-            jQuery('#auto_scroll').addClass('auto_scroll_off');
+            setAutoScrollOff();
           }
         }
       });
@@ -82,12 +81,10 @@
 
       jQuery('#auto_scroll').click(function(){
         if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
-          jQuery('#auto_scroll').text('Auto Scroll (OFF)');
-          jQuery('#auto_scroll').addClass('auto_scroll_off');
+          setAutoScrollOff();
         }
         else{
-          jQuery('#auto_scroll').text('Auto Scroll (ON)');
-          jQuery('#auto_scroll').removeClass('auto_scroll_off');
+          setAutoScrollOn();
           jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
           getLog();
         }
@@ -104,7 +101,7 @@
         },
         data: {
                 'record_id': record_id,
-                'record_type': record_type,
+                'logical_type': logical_type,
                 'log_type': log_type,
                 'newest_log': newest_log,
                 'read_from_s3': read_from_s3,
@@ -133,6 +130,7 @@
             jQuery('#stdout').append(logs);
             if(jQuery('#stdout').text() == '') {
               logs = "No logs were found for this search query!<br>";
+              setAutoScrollOff();
             }
             jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
 
@@ -140,7 +138,8 @@
           }
           else{
             if(logs == '' && jQuery('#stdout')[0].children.length == 0) {
-              logs = "No logs were found for this Job!<br>";
+              logs = "&nbsp;&nbsp;<span>No logs were found!<br></span>";
+              setAutoScrollOff();
             }
 
             if(logs != ''){
@@ -172,8 +171,8 @@
     }
 
     function getLog() {
-      callAjax();
       if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+        callAjax();
         setTimeout(getLog, 5000);
       }
     }
@@ -233,13 +232,27 @@
       (year != '' && month != '' && day != '' && hour != '' && minute != '')
     }
 
-    function setRecordType(){
-      if("<%= @machine.present? %>" == 'true'){
-        record_type = 'machine';
+    function setLogicalType(){
+      logical_type = '::Logical::Naf::LogParser::';
+      if('<%= record_type %>' == 'machine'){
+        logical_type += 'Machine';
       }
-      else{
-        record_type = 'runner';
+      else if('<%= record_type %>' == 'runner'){
+        logical_type += 'Runner';
       }
+      else if('<%= record_type %>' == 'job'){
+        logical_type += 'Job';
+      }
+    }
+
+    function setAutoScrollOn(){
+      jQuery('#auto_scroll').text('Auto Scroll (ON)');
+      jQuery('#auto_scroll').removeClass('auto_scroll_off');
+    }
+
+    function setAutoScrollOff(){
+      jQuery('#auto_scroll').text('Auto Scroll (OFF)');
+      jQuery('#auto_scroll').addClass('auto_scroll_off');
     }
 
   </script>

@@ -5,7 +5,8 @@ module Process::Naf
 
     JOB_LOG_MAX_SIZE = 10_000
 
-    attr_accessor :machine
+    attr_accessor :machine,
+                  :current_invocation
 
     #----------------
     # *** Options ***
@@ -84,7 +85,7 @@ module Process::Naf
           find_or_create_by_machine_id_and_runner_cwd(machine_id: machine.id,
                                                       runner_cwd: Dir.pwd)
         # Create an invocation for this runner
-        invocation = ::Naf::MachineRunnerInvocation.
+        @current_invocation = ::Naf::MachineRunnerInvocation.
           create!({ machine_runner_id: machine_runner.id,
                     pid: Process.pid,
                     uuid: @invocation_uuid }.merge!(retrieve_invocation_information))
@@ -93,10 +94,10 @@ module Process::Naf
       end
 
       begin
-        work_machine(invocation)
+        work_machine
       ensure
-        invocation.dead_at = Time.zone.now
-        invocation.save!
+        @current_invocation.dead_at = Time.zone.now
+        @current_invocation.save!
         cleanup_old_processes
       end
     end
@@ -114,14 +115,14 @@ module Process::Naf
     def cleanup_old_processes
       machine.machine_runners.each do |runner|
         runner.machine_runner_invocations.where('dead_at IS NOT NULL').each do |invocation|
-          terminate_old_processes(invocation.id)
+          terminate_old_processes(invocation)
         end
       end
     end
 
     def wind_down_runners
-      machine.machine_runners.each do |machine_runner|
-        machine_runner.machine_runner_invocations.each do |invocation|
+      machine.machine_runners.each do |runner|
+        runner.machine_runner_invocations.each do |invocation|
           if invocation.dead_at.blank?
             begin
               retval = Process.kill(0, invocation.pid)
@@ -132,7 +133,7 @@ module Process::Naf
               logger.detail "ESRCH = kill(0, #{invocation.pid}) -- marking runner invocation as not running"
               invocation.dead_at = Time.zone.now
               invocation.save!
-              terminate_old_processes(invocation.id)
+              terminate_old_processes(invocation)
             end
           end
         end
@@ -169,12 +170,12 @@ module Process::Naf
       }
     end
 
-    def work_machine(invocation)
+    def work_machine
       machine.mark_alive
       machine.mark_up
 
       # Make sure no processes are thought to be running on this machine
-      terminate_old_processes if @kill_all_runners
+      terminate_old_processes(machine) if @kill_all_runners
 
       logger.info escape_html("working: #{machine}")
 
@@ -188,14 +189,14 @@ module Process::Naf
       @job_fetcher = ::Logical::Naf::JobFetcher.new(machine)
 
       while true
-        break unless work_machine_loop(invocation)
+        break unless work_machine_loop
         GC.start
       end
 
       logger.info "runner quitting"
     end
 
-    def work_machine_loop(invocation)
+    def work_machine_loop
       machine.reload
 
       # Check machine status
@@ -211,17 +212,15 @@ module Process::Naf
 
       check_log_level
 
-      invocation.reload
-      if invocation.wind_down_at.present?
+      @current_invocation.reload
+      if current_invocation.wind_down_at.present?
         logger.warn "invocation asked to wind down"
         if @children.length == 0
           return false;
         end
-      end
-
-      if invocation.wind_down_at.blank?
+      else
         check_schedules
-        start_new_jobs(invocation)
+        start_new_jobs
       end
 
       cleanup_dead_children
@@ -353,12 +352,12 @@ module Process::Naf
       end
     end
 
-    def start_new_jobs(invocation)
+    def start_new_jobs
       # start new jobs
       logger.detail "starting new jobs, num children: #{@children.length}/#{machine.thread_pool_size}"
-      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && invocation.wind_down_at.blank?
+      # XXX while @children.length < machine.thread_pool_size && memory_available_to_spawn? && current_invocation.wind_down_at.blank?
       while ::Naf::RunningJob.where(started_on_machine_id: machine.id).count < machine.thread_pool_size &&
-        memory_available_to_spawn? && invocation.wind_down_at.blank?
+        memory_available_to_spawn? && current_invocation.wind_down_at.blank?
 
         logger.debug_gross "fetching jobs because: children: #{@children.length} < #{machine.thread_pool_size} (poolsize)"
         begin
@@ -382,7 +381,7 @@ module Process::Naf
             running_job.pid = pid
             running_job.historical_job.pid = pid
             running_job.historical_job.failed_to_start = false
-            running_job.historical_job.machine_runner_invocation_id = invocation.id
+            running_job.historical_job.machine_runner_invocation_id = current_invocation.id
             logger.info escape_html("job started : #{running_job}")
             running_job.save!
             running_job.historical_job.save!
@@ -501,10 +500,10 @@ module Process::Naf
       end
     end
 
-    def terminate_old_processes(invocation_id = nil)
+    def terminate_old_processes(record)
       # check if any processes are hanging around and ask them
       # politely if they will please terminate
-      jobs = assigned_jobs(invocation_id)
+      jobs = assigned_jobs(record)
       if jobs.length == 0
         logger.detail "no jobs to remove"
         return
@@ -521,7 +520,7 @@ module Process::Naf
 
       # wait
       (1..@wait_time_for_processes_to_terminate).each do |i|
-        num_assigned_jobs = assigned_jobs(invocation_id).length
+        num_assigned_jobs = assigned_jobs(record).length
         return if num_assigned_jobs == 0
         logger.debug_medium "#{i}/#{@wait_time_for_processes_to_terminate}: sleeping 1 second while we wait for " +
           "#{num_assigned_jobs} assigned job(s) to terminate as requested"
@@ -529,7 +528,7 @@ module Process::Naf
       end
 
       # nudge them to terminate
-      jobs = assigned_jobs(invocation_id)
+      jobs = assigned_jobs(record)
       if jobs.length == 0
         logger.debug_gross "assigned jobs have exited after asking to terminate nicely"
         return
@@ -541,14 +540,14 @@ module Process::Naf
 
       # wait
       (1..5).each do |i|
-        num_assigned_jobs = assigned_jobs(invocation_id).length
+        num_assigned_jobs = assigned_jobs(record).length
         return if num_assigned_jobs == 0
         logger.debug_medium "#{i}/5: sleeping 1 second while we wait for #{num_assigned_jobs} assigned job(s) to terminate from SIG_TERM"
         sleep(1)
       end
 
       # kill with fire
-      assigned_jobs(invocation_id).each do |job|
+      assigned_jobs(record).each do |job|
         logger.alarm escape_html("sending SIG_KILL to process: #{job}")
         send_signal_and_maybe_clean_up(job, "KILL")
 
@@ -582,9 +581,9 @@ module Process::Naf
       return send_signal_and_maybe_clean_up(job, 0)
     end
 
-    def assigned_jobs(invocation_id)
-      if invocation_id.present?
-        return ::Naf::RunningJob.started_on_invocation(invocation_id).select do |job|
+    def assigned_jobs(record)
+      if record.kind_of? ::Naf::MachineRunnerInvocation
+        return ::Naf::RunningJob.started_on_invocation(current_invocation.id).select do |job|
           is_job_process_alive?(job)
         end
       else
