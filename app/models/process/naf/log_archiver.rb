@@ -4,8 +4,8 @@ module Process::Naf
   class LogArchiver < ::Process::Naf::Application
 
     NAF_JOBS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/"
-    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/invocations/"
-    DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
+    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/*"
+    DATE_REGEX = /((\d){8}_(\d){6})/
 
   	def work
   		# Use AWS credentials to access S3

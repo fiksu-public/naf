@@ -4,7 +4,7 @@ module Naf
 	if ['test', 'development'].include?(Rails.env)
 		LOGGING_ROOT_DIRECTORY = 'var/log'
 	else
-		LOGGING_ROOT_DIRECTORY = '/var/log/'
+		LOGGING_ROOT_DIRECTORY = '/var/log'
 	end
 
   NAF_DATABASE_HOSTNAME = Rails.configuration.database_configuration[Rails.env]['host'].present? ?

@@ -54,8 +54,16 @@ module Logical::Naf
           end
         else
           files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/*"]
-          # Sort log files based on time
-          return files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
+          if files.present?
+            # Sort log files based on time
+            return files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
+          else
+            get_s3_files do
+              @read_from_s3 = 'true'
+              @s3_log_reader = ::Logical::Naf::LogReader.new
+              return retrieve_log_files_from_s3
+            end
+          end
         end
       end
 

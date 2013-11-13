@@ -64,9 +64,9 @@ module Logical
 
       def prefix
         if @runner_id.present?
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naf/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf::NAF_SCHEMA}/runners/#{@runner_id}/invocations/"
+          "naf/#{project_name}/#{Rails.env}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/runners/#{@runner_id}/invocations/"
         else
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/naf/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf::NAF_SCHEMA}/jobs/"
+          "naf/#{project_name}/#{Rails.env}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/jobs/"
         end
       end
 

@@ -43,12 +43,20 @@ module Logical::Naf
         if log_type == 'old' && read_from_s3 == 'true'
           get_s3_files do
             @s3_log_reader = ::Logical::Naf::LogReader.new
-            return s3_log_reader.retrieve_job_files(record_id)
+            return retrieve_log_files_from_s3
           end
         else
           files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/#{record_id}/*"]
-          # Sort log files based on time
-          return files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
+          if files.present?
+            # Sort log files based on time
+            return files.sort { |x, y| Time.parse(y.scan(DATE_REGEX)[0][0]) <=> Time.parse(x.scan(DATE_REGEX)[0][0]) }
+          else
+            get_s3_files do
+              @read_from_s3 = 'true'
+              @s3_log_reader = ::Logical::Naf::LogReader.new
+              return retrieve_log_files_from_s3
+            end
+          end
         end
       end
 
