@@ -583,11 +583,11 @@ module Process::Naf
 
     def assigned_jobs(record)
       if record.kind_of? ::Naf::MachineRunnerInvocation
-        return ::Naf::RunningJob.started_on_invocation(current_invocation.id).select do |job|
+        return ::Naf::RunningJob.started_on_invocation(record.id).select do |job|
           is_job_process_alive?(job)
         end
       else
-        return ::Naf::RunningJob.assigned_jobs(machine).select do |job|
+        return ::Naf::RunningJob.assigned_jobs(record).select do |job|
           is_job_process_alive?(job)
         end
       end
