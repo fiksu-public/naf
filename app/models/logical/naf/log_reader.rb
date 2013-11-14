@@ -17,9 +17,7 @@ module Logical
             files << file
           end
         end
-        files = sort_files(files)
-
-        return files
+        return sort_files(files)
       end
 
       def runner_log_files(runner_id)
@@ -34,9 +32,7 @@ module Logical
             files << file
           end
         end
-        files = sort_files(files)
-
-        return files
+        return sort_files(files)
       end
 
 
@@ -72,7 +68,7 @@ module Logical
 
       def sort_files(files)
         files.sort do |x, y|
-          -Time.parse(x.scan(/\d{4}-.*UTC/).first).to_i <=> -Time.parse(y.scan(/\d{4}-.*UTC/).first).to_i
+          -Time.parse(x.scan(/\d{8}_\d{4}/).last).to_i <=> -Time.parse(y.scan(/\d{8}_\d{4}/).last).to_i
         end
       end
 

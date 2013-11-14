@@ -30,11 +30,15 @@ module Logical::Naf
         newest_log
       end
 
+      def retrieve_log_files_from_s3
+        s3_log_reader.log_files
+      end
+
       def get_files
         if log_type == 'old' && read_from_s3 == 'true'
           get_s3_files do
             @s3_log_reader = ::Logical::Naf::LogReader.new
-            return s3_log_reader.log_files
+            return retrieve_log_files_from_s3
           end
         else
           files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/*/*"]

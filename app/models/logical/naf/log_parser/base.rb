@@ -101,13 +101,23 @@ module Logical::Naf
           sort_jsons
 
           if logs_size >= LOG_SIZE_CHUNKS
-            @last_file_checked = file.scan(/\d+_.*/).first
+            update_last_file_checked(file.scan(/\d+_\d{8}_\d{6}.*/).first)
             break
           end
         end
 
         if logs_size < LOG_SIZE_CHUNKS && files.present?
-           @last_file_checked = files.last.scan(/\d+_.*/).first
+           update_last_file_checked(files.last.scan(/\d+_\d{8}_\d{6}.*/).first)
+        end
+      end
+
+      def update_last_file_checked(file)
+        if file.present? && last_file_checked.present?
+          if Time.parse(file.scan(/\d{8}_\d{6}/).first) < Time.parse(last_file_checked.scan(/\d{8}_\d{6}/).first)
+            @last_file_checked = file
+          end
+        elsif file.present?
+          @last_file_checked = file
         end
       end
 
@@ -135,7 +145,7 @@ module Logical::Naf
               end
             end
 
-            if files.size == 0
+            if files.size == 0 && read_from_s3 != 'true'
               get_s3_files do
                 @read_from_s3 = 'true'
                 @s3_log_reader = ::Logical::Naf::LogReader.new
@@ -157,10 +167,10 @@ module Logical::Naf
 
         if files.present?
           if newest_file_checked.blank?
-            @newest_file_checked = files[0].scan(/\d+_.*/).first
+            @newest_file_checked = files[0].scan(/\d+_\d{8}_\d{6}.*/).first
           else
             if Time.parse(newest_file_checked.scan(DATE_REGEX)[0][0]) < Time.parse(files[0].scan(DATE_REGEX)[0][0])
-              @newest_file_checked = files[0].scan(/\d+_.*/).first
+              @newest_file_checked = files[0].scan(/\d+_\d{8}_\d{6}.*/).first
             end
           end
         end
