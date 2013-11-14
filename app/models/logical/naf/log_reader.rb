@@ -42,7 +42,7 @@ module Logical
 
       def retrieve_job_files(job_id)
         tree = bucket.objects.with_prefix(prefix + "#{job_id}").as_tree
-        tree.children.select(&:leaf?).collect(&:key)
+        sort_files(tree.children.select(&:leaf?).collect(&:key))
       end
 
       private

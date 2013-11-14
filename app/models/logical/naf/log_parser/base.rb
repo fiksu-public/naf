@@ -134,7 +134,7 @@ module Logical::Naf
         original_size = files.size
 
         files.each_with_index do |file, index|
-          filename = file.scan(/\d+_.*/).first
+          filename = file.scan(/\d+_\d{8}_\d{6}.*/).first
 
           if log_type == 'old'
             if filename == last_file_checked
