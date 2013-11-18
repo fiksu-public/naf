@@ -36,7 +36,7 @@ module Naf
     end
 
     def show
-      @machine = Naf::Machine.find(params[:id])
+      @machine = Naf::Machine.includes(:machine_affinity_slots).find(params[:id])
     end
 
     def new
@@ -80,6 +80,11 @@ module Naf
         end
       end
     end
+
+    def last_checked_schedule_at
+      render json: { last_checked_schedule_at: ::Naf::Machine.last_time_schedules_were_checked.strftime('%Y-%m-%d %H:%M:%S UTC') }
+    end
+
 
   end
 end

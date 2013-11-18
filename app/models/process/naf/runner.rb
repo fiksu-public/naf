@@ -287,22 +287,7 @@ module Process::Naf
               pid, status = Process.waitpid2(-1)
             end
           rescue Timeout::Error
-            # XXX is there a race condition where a child process exits
-            # XXX has not set pid or status yet and timeout fires?
-            # XXX i bet there is
-            # XXX so this code is here:
-            dead_children = []
-            @children.each do |pid, child|
-              unless is_job_process_alive?(child)
-                dead_children << child
-              end
-            end
-
-            unless dead_children.blank?
-              logger.error escape_html("#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}")
-              logger.warn "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
-            end
-
+            check_dead_children_not_exited_properly
             break
           rescue Errno::ECHILD => e
             logger.error escape_html("#{machine} No child when we thought we had children #{@children.inspect}")
@@ -314,29 +299,7 @@ module Process::Naf
 
           if pid
             begin
-              child_job = @children.delete(pid)
-
-              if child_job.present?
-                # Update job tags
-                child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-
-                if status.nil? || status.exited? || status.signaled?
-                  logger.info { escape_html("cleaning up dead child: #{child_job.reload}") }
-                  finish_job(child_job,
-                             { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
-
-                  thread = @threads.delete(pid)
-                  logger.detail escape_html("cleaning up threads: #{thread.inspect}")
-                  logger.detail escape_html("thread list: #{Thread.list}")
-                  thread.join
-                else
-                  # this can happen if the child is sigstopped
-                  logger.warn escape_html("child waited for did not exit: #{child_job}, status: #{status.inspect}")
-                end
-              else
-                # XXX ERROR no child for returned pid -- this can't happen
-                logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
-              end
+              cleanup_dead_child(pid, status)
             rescue ActiveRecord::ActiveRecordError => are
               raise
             rescue StandardError => e
@@ -349,6 +312,50 @@ module Process::Naf
       else
         logger.detail "sleeping in loop: #{@loop_sleep_time} seconds"
         sleep(@loop_sleep_time)
+      end
+    end
+
+    # XXX is there a race condition where a child process exits
+    # XXX has not set pid or status yet and timeout fires?
+    # XXX i bet there is
+    # XXX so this code is here:
+    def check_dead_children_not_exited_properly
+      dead_children = []
+      @children.each do |pid, child|
+        unless is_job_process_alive?(child)
+          dead_children << child
+        end
+      end
+
+      unless dead_children.blank?
+        logger.error escape_html("#{machine}: dead children even with timeout during waitpid2(): #{dead_children.inspect}")
+        logger.warn "this isn't necessarily incorrect -- look for the pids to be cleaned up next round, if not: call it a bug"
+      end
+    end
+
+    def cleanup_dead_child(pid, status)
+      child_job = @children.delete(pid)
+
+      if child_job.present?
+        # Update job tags
+        child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+
+        if status.nil? || status.exited? || status.signaled?
+          logger.info { escape_html("cleaning up dead child: #{child_job.reload}") }
+          finish_job(child_job,
+                     { exit_status: (status && status.exitstatus), termination_signal: (status && status.termsig) })
+
+          thread = @threads.delete(pid)
+          logger.detail escape_html("cleaning up threads: #{thread.inspect}")
+          logger.detail escape_html("thread list: #{Thread.list}")
+          thread.join
+        else
+          # this can happen if the child is sigstopped
+          logger.warn escape_html("child waited for did not exit: #{child_job}, status: #{status.inspect}")
+        end
+      else
+        # XXX ERROR no child for returned pid -- this can't happen
+        logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
       end
     end
 

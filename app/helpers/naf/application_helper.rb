@@ -222,12 +222,6 @@ module Naf
       end
     end
 
-    def include_actions_in_table?
-      current_page?(naf.root_url) or
-      current_page?(controller: 'applications', action: 'index') or
-        current_page?(controller: 'historical_jobs', action: 'index')
-    end
-
     def naf_link_to_remove_fields(name, f)
       f.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)")
     end

@@ -87,7 +87,7 @@ module Logical::Naf::ConstructionZone
             :application_run_group_limit => number_of_jobs,
             :application_run_group_restriction => ::Naf::ApplicationRunGroupRestriction.limited_per_machine
           }.merge(parameters)
-          machine_parameters[:affinities] = 
+          machine_parameters[:affinities] =
             [machine.affinity] + if machine_parameters[:affinities].nil?
                                    []
                                  elsif machine_parameters[:affinities].is_a? Array

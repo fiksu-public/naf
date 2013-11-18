@@ -1,11 +1,10 @@
 <%= form_for(@logger_name) do |f| %>
-  
   <% if @logger_name.errors.any? %>
   <div id="errorExplanation">
     <h2><%= pluralize(@logger_name.errors.count, "error") %> prohibited Logger Name from being saved:</h2>
   </div>
   <% end %>
- 
+
   <div class="field">
     <%= f.label :name, "Name*" %><br />
     <%= f.text_field :name %>

@@ -22,5 +22,17 @@ module Naf
       @machine_runner = Naf::MachineRunner.find(params[:id])
     end
 
+    def runner_count
+      running = ::Naf::MachineRunner.running.uniq.count
+      winding_down = ::Naf::MachineRunner.winding_down.uniq.count
+      down = ::Naf::MachineRunner.dead.count
+
+      render json: {
+        running: running,
+        winding_down: winding_down,
+        down: down
+      }
+    end
+
   end
 end

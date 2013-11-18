@@ -11,9 +11,16 @@ Naf::Engine.routes.draw do
 
   resources :machines, except: [:destroy] do
     resources :machine_affinity_slots
+    collection do
+      get :last_checked_schedule_at
+    end
   end
 
-  resources :machine_runners, only: [:index, :show]
+  resources :machine_runners, only: [:index, :show] do
+    collection do
+      get :runner_count
+    end
+  end
   resources :machine_runner_invocations, only: [:index, :show, :update] do
     collection do
       get :wind_down_all

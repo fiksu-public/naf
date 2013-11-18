@@ -6,7 +6,7 @@ module Naf
     def index
       @rows = []
       if params[:machine_id]
-        @rows = Naf::MachineAffinitySlot.where(machine_id: params[:machine_id])
+        @rows = Naf::MachineAffinitySlot.includes(:machine, :affinity).where(machine_id: params[:machine_id])
       end
       render template: 'naf/datatable'
     end

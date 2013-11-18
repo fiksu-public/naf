@@ -2,7 +2,7 @@ module Naf
   class HistoricalJobAffinityTabsController < Naf::ApplicationController
 
     before_filter :set_cols_and_attributes
-  
+
     def index
       @rows = []
       if params[:historical_job_id]

@@ -239,16 +239,6 @@ module Logical::Naf
         search_built_time
       end
 
-      def check_new_logs(line_number)
-        return true if log_type == 'old'
-
-        if newest_line_checked.present?
-          line_number.to_i > newest_line_checked
-        else
-          false
-        end
-      end
-
       def get_option_value(options)
         return 0 if options.blank?
 

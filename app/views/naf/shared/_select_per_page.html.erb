@@ -19,6 +19,7 @@
     // Redraw datatable.
     var redrawDatatable = function() {
       jQuery("#datatable").dataTable().fnDraw(false);
+      checkRunnersAndSchedules();
       if ( jQuery('#auto_refresh').is(':checked') ) {
         timeout_id = setTimeout(redrawDatatable, 10000);
       }
@@ -39,6 +40,7 @@
 
       jQuery('#refresh_datatable').click(function(){
         jQuery('#datatable').dataTable().fnDraw();
+        checkRunnersAndSchedules();
       });
 
       // Set change event to enabled/disable auto-refresh
@@ -51,6 +53,37 @@
         }
       });
     });
+
+    function checkRunnersAndSchedules() {
+      <% if controller_name == 'historical_jobs' %>
+        updateRunnerCount();
+        updateLastCheckedScheduleAt();
+      <% end %>
+    }
+
+    function updateRunnerCount() {
+      jQuery.ajax({
+        url: '/job_system/machine_runners/runner_count',
+        type: 'GET',
+        dataType: 'json',
+        success:function (data) {
+          jQuery('.running').text(data['running'] + ' running');
+          jQuery('.winding-down').text(data['winding_down'] + ' winding down');
+          jQuery('.down').text(data['down'] + ' down');
+        }
+      });
+    }
+
+    function updateLastCheckedScheduleAt() {
+      jQuery.ajax({
+        url: '/job_system/machines/last_checked_schedule_at',
+        type: 'GET',
+        dataType: 'json',
+        success:function (data) {
+          jQuery('.last_checked_schedule_at').text(data['last_checked_schedule_at']);
+        }
+      });
+    }
 
   </script>
 <% end %>
@@ -66,7 +99,7 @@
   <%= form_tag({ controller: params[:controller], action: params[:action], format: 'js' }, method: :get) do %>
     <%= label_tag :iDisplayLength, "Rows Per Page:", class: "label" %>
     <%= select_tag :iDisplayLength,
-        options_for_select(::Naf.configuration.default_page_options,  @rows_per_page),
+        options_for_select(::Naf.configuration.default_page_options, @rows_per_page),
         class: "page-select datatable_variable ui-state-default ui-corner-all" %>
   <% end %>
 </div>
