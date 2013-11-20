@@ -518,15 +518,15 @@ html {
       }
     }
 
-    .winding-down, .queued {
+    .winding-down, .queued, .winding-down-count {
       color: #f8a800;
     }
 
-    .running {
+    .running, .running-count {
       color: #45a113;
     }
 
-    .dead, .error {
+    .dead, .error, .down-count {
       color: #CD0A0A;
     }
   }

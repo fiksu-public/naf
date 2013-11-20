@@ -6,7 +6,6 @@ module Naf
     let(:model_class) { MachineAffinitySlot}
 
     it "should respond with index action nested under machine" do
-      model_class.should_receive(:where).with({ machine_id: "1" }).and_return([])
       get :index, machine_id: 1
       response.should render_template("naf/datatable")
       response.should be_success

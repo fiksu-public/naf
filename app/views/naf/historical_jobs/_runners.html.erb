@@ -6,13 +6,13 @@
       </div>
     </td>
     <td>
-      <div class="running"><%= ::Naf::MachineRunner.running.uniq.count %> running</div>
+      <div class="running-count"><%= ::Naf::MachineRunner.running.uniq.count %> running</div>
     </td>
     <td>
-      <div class="winding-down"><%= ::Naf::MachineRunner.winding_down.uniq.count %> winding down</div>
+      <div class="winding-down-count"><%= ::Naf::MachineRunner.winding_down.uniq.count %> winding down</div>
     </td>
     <td>
-      <div class="down"><%= ::Naf::MachineRunner.dead.count %> down</div>
+      <div class="down-count"><%= ::Naf::MachineRunner.dead.count %> down</div>
     </td>
  </tr>
 </table>

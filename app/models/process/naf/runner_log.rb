@@ -1,7 +1,7 @@
 require 'open4'
 
 module Process::Naf
-  class MachineRunner < ::Af::Application
+  class RunnerLog < ::Af::Application
 
     opt :invocation_uuid,
         "unique identifer used for runner logs",

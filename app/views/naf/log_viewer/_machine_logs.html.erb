@@ -52,6 +52,7 @@
   </div>
 </div>
 
+<%= render partial: 'update_page_title', locals: { title: "Machine(#{@machine.id}) Logs" } %>
 <%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output-expanded' } %>
 <%= render partial: 'log_display',
            locals: {

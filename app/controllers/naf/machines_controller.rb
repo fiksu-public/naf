@@ -82,7 +82,7 @@ module Naf
     end
 
     def last_checked_schedule_at
-      render json: { last_checked_schedule_at: ::Naf::Machine.last_time_schedules_were_checked.strftime('%Y-%m-%d %H:%M:%S UTC') }
+      render json: { last_checked_schedule_at: ::Naf::Machine.last_time_schedules_were_checked.try(:strftime, '%Y-%m-%d %H:%M:%S UTC') }
     end
 
 

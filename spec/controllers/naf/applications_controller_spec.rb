@@ -65,8 +65,9 @@ module Naf
     end
 
     context "on the create action" do
-      let(:valid_app) { mock_model(Application, save: true, application_schedule: nil, id: 5)  }
-      let(:invalid_app) { mock_model(Application, save: false) }
+      let(:application_schedule) { mock_model(ApplicationSchedule, application_run_group_name: 'command', prerequisites: []) }
+      let(:valid_app) { mock_model(Application, save: true, id: 5, update_attributes: true, application_schedule: application_schedule) }
+      let(:invalid_app) { mock_model(Application, save: false, update_attributes: false, application_schedule: application_schedule) }
 
       it "should redirect to show when valid" do
         Application.should_receive(:new).and_return(valid_app)

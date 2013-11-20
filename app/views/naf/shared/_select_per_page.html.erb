@@ -67,9 +67,9 @@
         type: 'GET',
         dataType: 'json',
         success:function (data) {
-          jQuery('.running').text(data['running'] + ' running');
-          jQuery('.winding-down').text(data['winding_down'] + ' winding down');
-          jQuery('.down').text(data['down'] + ' down');
+          jQuery('.running-count').text(data['running'] + ' running');
+          jQuery('.winding-down-count').text(data['winding_down'] + ' winding down');
+          jQuery('.down-count').text(data['down'] + ' down');
         }
       });
     }
@@ -80,7 +80,12 @@
         type: 'GET',
         dataType: 'json',
         success:function (data) {
-          jQuery('.last_checked_schedule_at').text(data['last_checked_schedule_at']);
+          if(data['last_checked_schedule_at'] == null){
+            jQuery('.last_checked_schedule_at').text('');
+          }
+          else{
+            jQuery('.last_checked_schedule_at').text(data['last_checked_schedule_at']);
+          }
         }
       });
     }

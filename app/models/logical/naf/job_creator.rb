@@ -14,17 +14,8 @@ module Logical
         # jobs (running/queued) is equal to or greater than the application
         # run group limit, or if enqueue_backlogs is set to false. If so,
         # do not add the job to the queue
-        running_jobs = ::Naf::RunningJob.
-          select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
-          where('command = ? AND application_run_group_name = ?',
-            application.command, application_run_group_name).
-          group('application_run_group_name, application_run_group_limit').first
-
-        queued_jobs = ::Naf::QueuedJob.
-          select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
-          where('command = ? AND application_run_group_name = ?',
-            application.command, application_run_group_name).
-          group('application_run_group_name, application_run_group_limit').first
+        running_jobs = retrieve_jobs(::Naf::RunningJob, application.command, application_run_group_name)
+        queued_jobs = retrieve_jobs(::Naf::QueuedJob, application.command, application_run_group_name)
 
         if enqueue == false && (running_jobs.present? || queued_jobs.present?)
           group_limit = running_jobs.try(:application_run_group_limit).to_i + queued_jobs.try(:application_run_group_limit).to_i
@@ -55,17 +46,18 @@ module Logical
                                                    affinity_parameter: affinity_parameter)
           end
 
-          historical_job.verify_prerequisites(prerequisites)
-          # Create historical job prerequisites for each prerequisite associated with the historical job
-          prerequisites.each do |prerequisite|
-            ::Naf::HistoricalJobPrerequisite.create(historical_job_id: historical_job.id,
-                                                    prerequisite_historical_job_id: prerequisite.id)
-          end
+          verify_and_create_prerequisites(historical_job, prerequisites)
 
           create_queue_job(historical_job)
 
           return historical_job
         end
+      end
+
+      def retrieve_jobs(klass, command, application_run_group_name)
+        klass.select('application_run_group_limit, MAX(created_at) AS created_at, count(*)').
+          where('command = ? AND application_run_group_name = ?', command, application_run_group_name).
+          group('application_run_group_name, application_run_group_limit').first
       end
 
       def queue_application_schedule(application_schedule, schedules_queued_already = [])
@@ -114,15 +106,20 @@ module Logical
             ::Naf::HistoricalJobAffinityTab.create(historical_job_id: historical_job.id, affinity_id: affinity.id)
           end
 
-          historical_job.verify_prerequisites(prerequisites)
-          prerequisites.each do |prerequisite|
-            ::Naf::HistoricalJobPrerequisite.create(historical_job_id: historical_job.id,
-                                                    prerequisite_historical_job_id: prerequisite.id)
-          end
+          verify_and_create_prerequisites(historical_job, prerequisites)
 
           create_queue_job(historical_job)
 
           return historical_job
+        end
+      end
+
+      def verify_and_create_prerequisites(job, prerequisites)
+        job.verify_prerequisites(prerequisites)
+        # Create historical job prerequisites for each prerequisite associated with the historical job
+        prerequisites.each do |prerequisite|
+          ::Naf::HistoricalJobPrerequisite.create(historical_job_id: job.id,
+                                                  prerequisite_historical_job_id: prerequisite.id)
         end
       end
 

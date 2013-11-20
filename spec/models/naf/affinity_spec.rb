@@ -81,6 +81,27 @@ module Naf
       end
     end
 
+    describe '#validate_affinity_name' do
+      it 'return nil when classification is not present' do
+        normal.affinity_classification = nil
+        normal.validate_affinity_name.should be_nil
+      end
+
+      it 'return proper message when machine associated with affinity is not found' do
+        normal.affinity_classification.affinity_classification_name = 'machine'
+        normal.validate_affinity_name.should == "There isn't a machine with that id!"
+      end
+
+      it 'return proper message when pair value (affinity_classification_id, affinity_name) already exists' do
+        normal.affinity_name = FactoryGirl.create(:machine).id.to_s
+        normal.affinity_classification.affinity_classification_name = 'machine'
+        normal.save
+        normal.affinity_classification.save
+
+        normal.validate_affinity_name.should == 'An affinity with the pair value (affinity_classification_id, affinity_name) already exists!'
+      end
+    end
+
     #----------------------
     # *** Class Methods ***
     #++++++++++++++++++++++

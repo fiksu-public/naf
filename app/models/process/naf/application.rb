@@ -7,7 +7,7 @@ module Process::Naf
       def initialize(job, reason)
         @job = job
         @reason = reason
-        super("Requested to terminate: #{reason}")
+        super("Requested to terminate by Naf: #{reason}")
       end
     end
 

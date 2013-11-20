@@ -5,7 +5,6 @@ module Naf
 
 
     it "should respond with the affinity index" do
-      Affinity.should_receive(:all).and_return([])
       get :index
       response.should be_success
     end
