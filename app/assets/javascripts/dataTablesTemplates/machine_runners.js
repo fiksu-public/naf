@@ -35,7 +35,8 @@ jQuery(document).ready(function() {
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
       colorizationStatus(nRow, aData);
       return nRow;
-    }
+    },
+    "sDom": "Rlfrtip"
   };
 
    // Setup the datatable.

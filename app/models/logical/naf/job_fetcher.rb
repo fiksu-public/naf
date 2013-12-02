@@ -18,8 +18,8 @@ module Logical
 
           if running_job.present?
             # Update tags
-            running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-            running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+            running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+            running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
 
             # found a job
             parse_log_level(running_job)

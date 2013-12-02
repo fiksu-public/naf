@@ -31,7 +31,7 @@ module Logical::Naf
       end
 
       def parse_newest_log
-        "#{newest_log.scan(/\d{4}.*\.\d{3}/).first} #{newest_log.scan(/Process.*/).first.split('<br>').first}"
+        "#{newest_log.scan(/\d{4}.*\.\d{3}/).first} #{newest_log.scan(/Process.*/).first.try(:split, '<br>').try(:first)}"
       end
 
       def retrieve_log_files_from_s3

@@ -1,7 +1,7 @@
 module Logical
   module Naf
     class LogFile
-      LOG_MAX_SIZE = 10_000
+      LOG_MAX_SIZE = 50_000
 
       attr_reader :file_line_number,
                     :line_number,

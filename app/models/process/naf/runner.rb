@@ -3,8 +3,6 @@ require 'timeout'
 module Process::Naf
   class Runner < ::Af::Application
 
-    JOB_LOG_MAX_SIZE = 10_000
-
     attr_accessor :machine,
                   :current_invocation
 
@@ -322,7 +320,7 @@ module Process::Naf
     def check_dead_children_not_exited_properly
       dead_children = []
       @children.each do |pid, child|
-        unless is_job_process_alive?(child)
+        unless is_job_process_alive?(child.reload)
           dead_children << child
         end
       end
@@ -338,7 +336,7 @@ module Process::Naf
 
       if child_job.present?
         # Update job tags
-        child_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+        child_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
 
         if status.nil? || status.exited? || status.signaled?
           logger.info { escape_html("cleaning up dead child: #{child_job.reload}") }
@@ -479,15 +477,13 @@ module Process::Naf
     end
 
     def finish_job(running_job, updates = {})
-      running_job.historical_job.remove_all_tags
-      running_job.historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+      running_job.remove_all_tags
+      running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
 
       ::Naf::HistoricalJob.transaction do
         update_historical_job(updates.merge({ finished_at: Time.zone.now }), running_job.id)
         running_job.delete
       end
-
-      running_job.historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
     end
 
     # kill(0, pid) seems to fail during at_exit block

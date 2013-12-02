@@ -12,7 +12,8 @@ module Naf
                     :request_to_terminate,
                     :marked_dead_by_machine_id,
                     :log_level,
-                    :started_at
+                    :started_at,
+                    :tags
 
     #---------------------
     # *** Associations ***
@@ -80,6 +81,39 @@ module Naf
 
       job_weights
     end
+
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    def add_tags(tags_to_add)
+      tags_array = nil
+      if self.tags.present?
+        tags_array = self.tags.gsub(/[{}]/,'').split(',')
+        new_tags = '{' + (tags_array | tags_to_add).join(',') + '}'
+      else
+        new_tags = '{' + tags_to_add.join(',') + '}'
+      end
+
+      self.tags = new_tags
+      self.save!
+    end
+
+    def remove_tags(tags_to_remove)
+      if self.tags.present?
+        tags_array = self.tags.gsub(/[{}]/,'').split(',')
+        new_tags = '{' + (tags_array - tags_to_remove).join(',') + '}'
+
+        self.tags = new_tags
+        self.save!
+      end
+    end
+
+    def remove_all_tags
+      self.tags = '{}'
+      self.save!
+    end
+
 
   end
 end

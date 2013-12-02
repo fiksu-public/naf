@@ -43,7 +43,8 @@ jQuery(document).ready(function() {
       colorizationDeletedOrHidden(nRow, aData);
       checkTimeFormat(nRow, aData);
       return nRow;
-    }
+    },
+    "sDom": "Rlfrtip"
   };
 
   // Setup the datatable

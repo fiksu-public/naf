@@ -45,7 +45,8 @@ jQuery(document).ready(function() {
       colorizationStatus(nRow, aData);
       checkTimeFormat(nRow, aData);
       return nRow;
-    }
+    },
+    "sDom": "Rlfrtip"
   };
 
    // Setup the datatable.

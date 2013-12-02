@@ -16,7 +16,8 @@ module Naf
      :request_to_terminate,
      :marked_dead_by_machine_id,
      :log_level,
-     :started_at].each do |a|
+     :started_at,
+     :tags].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -118,6 +119,52 @@ module Naf
       end
     end
 
+    #-------------------------
+    # *** Instance Methods ***
+    #+++++++++++++++++++++++++
+
+    describe "#add_tags" do
+      before do
+        running_job.tags = "{$pre-work}"
+      end
+
+      it "insert unique tag" do
+        running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+        running_job.tags.should == "{$pre-work,$work}"
+      end
+
+      it "not insert non-unique tag" do
+        running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+        running_job.tags.should == "{$pre-work}"
+      end
+    end
+
+    describe "#remove_tags" do
+      before do
+        running_job.tags = "{$pre-work}"
+      end
+
+      it "remove existing tag" do
+        running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
+        running_job.tags.should == "{}"
+      end
+
+      it "not update tags when removing non-existing tag" do
+        running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
+        running_job.tags.should == "{$pre-work}"
+      end
+    end
+
+    describe "#remove_all_tags" do
+      before do
+        running_job.tags = "{$pre-work}"
+      end
+
+      it "remove any existing tags" do
+        running_job.remove_all_tags
+        running_job.tags.should == "{}"
+      end
+    end
 
   end
 end

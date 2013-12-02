@@ -30,7 +30,6 @@ module Naf
                     :request_to_terminate,
                     :marked_dead_by_machine_id,
                     :log_level,
-                    :tags,
                     :machine_runner_invocation_id
 
     JOB_STALE_TIME = 1.week
@@ -59,6 +58,12 @@ module Naf
       class_name: "::Naf::ApplicationRunGroupRestriction"
     belongs_to :machine_runner_invocation,
       class_name: "::Naf::MachineRunnerInvocation"
+    has_one :running_job,
+      class_name: "::Naf::RunningJob",
+      foreign_key: :id
+    has_one :queued_job,
+      class_name: "::Naf::QueuedJob",
+      foreign_key: :id
     # Must access instance methods job_prerequisites through helper methods so we can use partitioning sql
     has_many :historical_job_prerequisites,
       class_name: "::Naf::HistoricalJobPrerequisite",
@@ -303,34 +308,6 @@ module Naf
 
     def spawn
       application_type.spawn(self)
-    end
-
-    def add_tags(tags_to_add)
-      tags_array = nil
-      if self.tags.present?
-        tags_array = self.tags.gsub(/[{}]/,'').split(',')
-        new_tags = '{' + (tags_array | tags_to_add).join(',') + '}'
-      else
-        new_tags = '{' + tags_to_add.join(',') + '}'
-      end
-
-      self.tags = new_tags
-      self.save!
-    end
-
-    def remove_tags(tags_to_remove)
-      if self.tags.present?
-        tags_array = self.tags.gsub(/[{}]/,'').split(',')
-        new_tags = '{' + (tags_array - tags_to_remove).join(',') + '}'
-
-        self.tags = new_tags
-        self.save!
-      end
-    end
-
-    def remove_all_tags
-      self.tags = '{}'
-      self.save!
     end
 
   end

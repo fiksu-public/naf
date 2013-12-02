@@ -96,7 +96,7 @@
         </tr>
         <tr>
           <td>Tags</td>
-          <td><%= @historical_job.tags %></td>
+          <td><%= @historical_job.running_job.try(:tags) %></td>
         </tr>
         <tr>
           <td>Request To Terminate</td>

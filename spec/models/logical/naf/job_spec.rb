@@ -270,13 +270,18 @@ module Logical
       end
 
       describe "#tags" do
+        before do
+          running_job = FactoryGirl.create(:running_job_base, historical_job: historical_job)
+          historical_job.running_job = running_job
+        end
+
         it "show custom visible tags" do
-          historical_job.tags = '{test}'
+          historical_job.running_job.tags = '{test}'
           job.tags.should == 'test'
         end
 
         it "not show system or custom invisible tags" do
-          historical_job.tags = '{$test,_test}'
+          historical_job.running_job.tags = '{$test,_test}'
           job.tags.should == ''
         end
 

@@ -2,11 +2,6 @@
   <script type='text/javascript'>
 
     function initPageSelect() {
-      var pageSelect = jQuery('#page-select-container');
-      var refreshPage = jQuery('#refresh-page-container');
-      jQuery('#datatable_paginate').append(pageSelect).append(refreshPage);
-      pageSelect.show();
-      refreshPage.show();
     }
 
     function getDisplayLength() {
@@ -93,13 +88,6 @@
   </script>
 <% end %>
 
-<div id='refresh-page-container'>
-  <%= link_to "Refresh Table", "#", id: :refresh_datatable %>
-  &nbsp;&nbsp;
-  <%= label_tag :auto_refresh, 'Auto Refresh:' %>
-  <%= check_box_tag :auto_refresh, 1, false, id: :auto_refresh %>
-</div>
-
 <div id="page-select-container" class="ui-state-default ui-corner-all">
   <%= form_tag({ controller: params[:controller], action: params[:action], format: 'js' }, method: :get) do %>
     <%= label_tag :iDisplayLength, "Rows Per Page:", class: "label" %>
@@ -107,4 +95,11 @@
         options_for_select(::Naf.configuration.default_page_options, @rows_per_page),
         class: "page-select datatable_variable ui-state-default ui-corner-all" %>
   <% end %>
+</div>
+
+<div id='refresh-page-container'>
+  <%= link_to "Refresh Table", "#", id: :refresh_datatable %>
+  &nbsp;&nbsp;
+  <%= label_tag :auto_refresh, 'Auto Refresh:' %>
+  <%= check_box_tag :auto_refresh, 1, false, id: :auto_refresh %>
 </div>

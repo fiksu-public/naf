@@ -5,6 +5,7 @@ module Logical
     class Job
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
+      include ::Naf::TimeHelper
 
       COLUMNS = [:id,
                  :server,
@@ -147,7 +148,7 @@ module Logical
             if search[field].present?
               conditions << " AND "
               conditions << "lower(#{field}) ~ :#{field}"
-              values[field.to_sym] = search[field].downcase
+              values[field.to_sym] = Regexp.escape(search[field].downcase)
             end
           end
 
@@ -225,7 +226,7 @@ module Logical
           job_scope = job_scope.where(field => search[field]) if search[field].present?
         end
         SEARCH_FIELDS.each do |field|
-          job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
+          job_scope = job_scope.where(["lower(#{field}) ~ ?", Regexp.escape(search[field].downcase)]) if search[field].present?
         end
 
         job_scope
@@ -281,27 +282,6 @@ module Logical
         end
       end
 
-      def time_difference(value, time_format_on=true)
-        seconds = value % 60
-        value = (value - seconds) / 60
-        minutes = value % 60
-        value = (value - minutes) / 60
-        hours = value % 24
-        value = (value - hours) / 24
-        days = value % 7
-        more_hours = hours + days * 24 if days > 0
-
-        if time_format_on
-          "-#{hours.to_i + more_hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
-        else
-          if days < 2
-            "-#{hours.to_i + more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
-          else
-            "-#{days.to_i}d#{hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
-          end
-        end
-      end
-
       def has_started?
         @job.started_at.present?
       end
@@ -349,9 +329,9 @@ module Logical
       end
 
       def tags
-        if @job.tags.present?
+        if @job.running_job.try(:tags).present?
           # Only show custom visible tags
-          job_tags = @job.tags.gsub(/[{}]/,'').split(',')
+          job_tags = @job.running_job.tags.gsub(/[{}]/,'').split(',')
           (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
         else
           nil
