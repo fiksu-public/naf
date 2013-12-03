@@ -22,7 +22,10 @@ module Naf
       end
     end
 
-    def time_format(value)
+    def time_format(time)
+      return '' if time.nil?
+
+      value = Time.zone.now - time
       if value < 60
         return "#{value.to_i} seconds ago"
       else

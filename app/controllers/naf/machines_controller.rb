@@ -84,7 +84,7 @@ module Naf
 
     def last_checked_schedule_at
       render json: {
-        last_checked_schedule_at: time_format(Time.zone.now - ::Naf::Machine.last_time_schedules_were_checked)
+        last_checked_schedule_at: time_format(::Naf::Machine.last_time_schedules_were_checked)
       }
     end
 
