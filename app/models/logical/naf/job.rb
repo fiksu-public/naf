@@ -271,7 +271,7 @@ module Logical
           if value < 60
             "#{value.to_i} seconds ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           elsif value < 172_800
-            time_difference(value)
+            time_difference(value, @job.started_at)
           elsif value >= 172_800
             "#{time_ago_in_words(@job.started_at, true)} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           else
@@ -294,12 +294,12 @@ module Logical
         if @job.started_at.present?
           if @job.finished_at.present?
             if @job.started_at > @job.finished_at
-              time_difference(@job.started_at - @job.finished_at, false)[1..-1]
+              time_difference(@job.started_at - @job.finished_at)[1..-1]
             else
-              time_difference(@job.finished_at - @job.started_at, false)[1..-1]
+              time_difference(@job.finished_at - @job.started_at)[1..-1]
             end
           else
-            time_difference(Time.zone.now - @job.started_at, false)[1..-1]
+            time_difference(Time.zone.now - @job.started_at)[1..-1]
           end
         else
           ""

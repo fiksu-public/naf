@@ -1,6 +1,7 @@
 module Naf
   class HistoricalJobsController < Naf::ApplicationController
     include Naf::ApplicationHelper
+    helper Naf::TimeHelper
 
     before_filter :set_rows_per_page
     before_filter :set_search_status
@@ -115,6 +116,7 @@ module Naf
 
             if running_job = ::Naf::RunningJob.find_by_id(params[:id])
               running_job.update_attributes(request_to_terminate: true)
+              @historical_job.update_attributes(request_to_terminate: true)
             end
           end
 

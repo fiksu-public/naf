@@ -6,7 +6,7 @@
       </div>
     </td>
     <td>
-      <div class='last_checked_schedule_at'><%= ::Naf::Machine.last_time_schedules_were_checked %></div>
+      <div class='last_checked_schedule_at'><%= time_format(Time.zone.now - ::Naf::Machine.last_time_schedules_were_checked) %></div>
     </td>
  </tr>
 </table>

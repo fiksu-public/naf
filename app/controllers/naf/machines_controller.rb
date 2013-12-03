@@ -2,6 +2,7 @@ module Naf
   class MachinesController < Naf::ApplicationController
 
     include Naf::ApplicationHelper
+    include Naf::TimeHelper
 
     before_filter :set_rows_per_page
 
@@ -82,7 +83,9 @@ module Naf
     end
 
     def last_checked_schedule_at
-      render json: { last_checked_schedule_at: ::Naf::Machine.last_time_schedules_were_checked.try(:strftime, '%Y-%m-%d %H:%M:%S UTC') }
+      render json: {
+        last_checked_schedule_at: time_format(Time.zone.now - ::Naf::Machine.last_time_schedules_were_checked)
+      }
     end
 
 
