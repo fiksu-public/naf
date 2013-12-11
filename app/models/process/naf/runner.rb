@@ -477,8 +477,10 @@ module Process::Naf
     end
 
     def finish_job(running_job, updates = {})
-      running_job.remove_all_tags
-      running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+      if running_job.present?
+        running_job.remove_all_tags
+        running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:cleanup]])
+      end
 
       ::Naf::HistoricalJob.transaction do
         update_historical_job(updates.merge({ finished_at: Time.zone.now }), running_job.id)

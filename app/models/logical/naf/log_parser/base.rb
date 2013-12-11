@@ -112,7 +112,7 @@ module Logical::Naf
       end
 
       def update_last_file_checked(file)
-        if file.present? && last_file_checked.present?
+        if file.present? && last_file_checked.present? && last_file_checked != 'null'
           if Time.parse(file.scan(/\d{8}_\d{6}/).first) < Time.parse(last_file_checked.scan(/\d{8}_\d{6}/).first)
             @last_file_checked = file
           end
@@ -166,7 +166,7 @@ module Logical::Naf
         end
 
         if files.present?
-          if newest_file_checked.blank?
+          if newest_file_checked.blank? || newest_file_checked == 'null'
             @newest_file_checked = files[0].scan(/\d+_\d{8}_\d{6}.*/).first
           else
             if Time.parse(newest_file_checked.scan(DATE_REGEX)[0][0]) < Time.parse(files[0].scan(DATE_REGEX)[0][0])
