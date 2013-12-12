@@ -55,6 +55,10 @@ module Logical::Naf
         end
       end
 
+      def get_job_id(file)
+        file.scan(/\d+_\d{8}/).first.split('_').first
+      end
+
     end
   end
 end
