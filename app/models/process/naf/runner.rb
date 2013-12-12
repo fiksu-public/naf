@@ -112,7 +112,7 @@ module Process::Naf
 
     def cleanup_old_processes
       machine.machine_runners.each do |runner|
-        runner.machine_runner_invocations.where('dead_at IS NOT NULL').each do |invocation|
+        runner.machine_runner_invocations.recently_marked_dead(24.hours).each do |invocation|
           terminate_old_processes(invocation)
         end
       end

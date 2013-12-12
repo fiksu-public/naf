@@ -50,6 +50,13 @@ module Naf
       end
     end
 
+    def self.recently_marked_dead(time)
+      where("
+        #{::Naf.schema_name}.machine_runner_invocations.dead_at IS NOT NULL AND
+        #{::Naf.schema_name}.machine_runner_invocations.dead_at > ?", Time.zone.now - time
+      )
+    end
+
     #-------------------------
     # *** Instance Methods ***
     #+++++++++++++++++++++++++

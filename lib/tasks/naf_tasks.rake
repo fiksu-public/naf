@@ -64,6 +64,7 @@ namespace :naf do
   end
 
   namespace :logs do
+    desc "Archive logs (moves logs to a different directory)"
     task archive: :environment do
       # When installing Naf, check the filesystem for existence of naflogs.
       # If so, archive the logs before you start using the system.
