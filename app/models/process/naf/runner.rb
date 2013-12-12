@@ -299,7 +299,8 @@ module Process::Naf
             begin
               cleanup_dead_child(pid, status)
             rescue ActiveRecord::ActiveRecordError => are
-              raise
+              logger.error escape_html("Failure during cleaning up of dead child with pid: #{pid}, status: #{status}")
+              logger.error escape_html("#{are.message}")
             rescue StandardError => e
               # XXX just incase a job control failure -- more code here
               logger.error "some failure during child clean up"
