@@ -25,7 +25,7 @@ module Naf
     def runner_count
       running = ::Naf::MachineRunner.running.uniq.count
       winding_down = ::Naf::MachineRunner.winding_down.uniq.count
-      down = ::Naf::MachineRunner.dead.count
+      down = ::Naf::MachineRunner.dead_count
 
       render json: {
         running: running,

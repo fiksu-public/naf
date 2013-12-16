@@ -42,9 +42,10 @@ module Naf
         #{::Naf.schema_name}.machine_runner_invocations.wind_down_at IS NOT NULL")
     end
 
-    def self.dead
+    def self.dead_count
       (::Naf::MachineRunner.joins(:machine).where("#{::Naf.schema_name}.machines.enabled IS TRUE").pluck(:machine_id) -
-        ::Naf::MachineRunner.running.pluck(:machine_id)).uniq
+        ::Naf::MachineRunner.running.pluck(:machine_id) -
+        ::Naf::MachineRunner.winding_down.pluck(:machine_id)).uniq.count
     end
 
     #-------------------------
