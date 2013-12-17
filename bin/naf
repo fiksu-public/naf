@@ -4,9 +4,9 @@
 action, option = ARGV
 if action == 'runner'
   if option == 'up'
+    puts "Bringing up the runner(s)..."
     `screen -d -m bash -c 'source /root/.bash_profile && cd /root/current && a=\`uuidgen\` && script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
       script/rails runner ::Process::Naf::RunnerLog.run --invocation-uuid $a'`
-    puts "Brought up the runner with screen session: "
 
   elsif option == 'status'
     num_runners = Integer(`ps -ef | grep Process::Naf::Runner.run | grep -v grep | grep -v uuidgen | wc -l`.strip)
