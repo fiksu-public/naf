@@ -4,7 +4,7 @@
 action, option = ARGV
 if action == 'runner'
   if option == 'up'
-    `screen -d -m bash -c 'a=\`uuidgen\` && script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
+    `screen -d -m bash -c 'source /root/.bash_profile && cd /root/current && a=\`uuidgen\` && script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
       script/rails runner ::Process::Naf::RunnerLog.run --invocation-uuid $a'`
     puts "Brought up the runner with screen session: "
 
