@@ -8,20 +8,17 @@ module Logical::Naf::ConstructionZone
     end
 
     def enqueue(work_order)
-      limited = false
       unless work_order.enqueue_backlogs
         if limited_by_run_group?(work_order.application_run_group_restriction,
                                  work_order.application_run_group_name,
                                  work_order.application_run_group_limit)
-          limited = true
           logger.warn "work order limited by run queue limits #{work_order.inspect}"
+          return nil
         end
       end
-      unless limited
-        @proletariat.create_job(work_order.historical_job_parameters,
-                                work_order.historical_job_affinity_tab_parameters,
-                                work_order.historical_job_prerequisite_historical_jobs)
-      end
+      @proletariat.create_job(work_order.historical_job_parameters,
+                              work_order.historical_job_affinity_tab_parameters,
+                              work_order.historical_job_prerequisite_historical_jobs)
     end
 
     def limited_by_run_group?(application_run_group_restriction, application_run_group_name, application_run_group_limit)
