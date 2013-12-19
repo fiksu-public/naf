@@ -250,8 +250,8 @@ module Process::Naf
                 logger.warn "child pid: #{pid}, status: #{status.inspect}, not managed by this runner"
               end
             rescue ActiveRecord::ActiveRecordError => are
-              logger.error escape_html("Failure during cleaning up of dead child with pid: #{pid}")
-              logger.error escape_html("#{are.message}")
+              logger.error "Failure during cleaning up of dead child with pid: #{pid}"
+              logger.error "#{are.message}"
             rescue StandardError => e
               # XXX just incase a job control failure -- more code here
               logger.error "some failure during child clean up"
