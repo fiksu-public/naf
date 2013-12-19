@@ -10,7 +10,8 @@ module Naf
      :commit_information,
      :branch_name,
      :repository_name,
-     :deployment_tag].each do |a|
+     :deployment_tag,
+     :uuid].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -33,6 +34,21 @@ module Naf
 
     it { should validate_presence_of(:machine_runner_id) }
     it { should validate_presence_of(:pid) }
+
+    #----------------------
+    # *** Class Methods ***
+    #++++++++++++++++++++++
+
+    describe "#recently_marked_dead" do
+      let!(:invocation) { FactoryGirl.create(:machine_runner_invocation, dead_at: Time.zone.now - 1.hour) }
+      before do
+        FactoryGirl.create(:machine_runner_invocation, dead_at: Time.zone.now - 40.hours)
+      end
+
+      it "return the correct invocation" do
+        ::Naf::MachineRunnerInvocation.recently_marked_dead(24.hours).should == [invocation]
+      end
+    end
 
   end
 end

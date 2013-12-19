@@ -61,7 +61,11 @@ module Logical
       def affinities
         @machine.machine_affinity_slots.map do |slot|
           if slot.affinity_short_name
-            slot.affinity_short_name
+            if slot.affinity_parameter.present? && slot.affinity_parameter > 0
+              slot.affinity_short_name + "(#{slot.affinity_parameter})"
+            else
+              slot.affinity_short_name
+            end
           else
             name = slot.affinity_classification_name + '_' + slot.affinity_name
             name = name + '_required' if slot.required
@@ -77,6 +81,40 @@ module Logical
           @machine.server_name
         else
           @machine.server_address
+        end
+      end
+
+      def status
+        runner_down = true
+        @machine.machine_runners.each do |runner|
+          if runner.machine_runner_invocations.where(wind_down_at: nil, dead_at: nil).count > 0
+            runner_down = false
+            break;
+          end
+        end
+
+        status = 'Good'
+        if runner_down
+          notes = 'Runner down'
+          status = 'Bad'
+        else
+          notes = ''
+        end
+
+        { server_name: name,
+          status: status,
+          notes: notes }
+      end
+
+      def runner
+        if @machine.server_name.present?
+          @machine.server_name.to_s
+        else
+          if Rails.env == 'development'
+            "localhost:#{Rails::Server.new.options[:Port]}"
+          else
+            @machine.server_address
+          end
         end
       end
 

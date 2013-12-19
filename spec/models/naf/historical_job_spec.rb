@@ -26,7 +26,6 @@ module Naf
      :request_to_terminate,
      :marked_dead_by_machine_id,
      :log_level,
-     :tags,
      :machine_runner_invocation_id].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
@@ -47,6 +46,8 @@ module Naf
     it { should belong_to(:application) }
     it { should belong_to(:application_run_group_restriction) }
     it { should belong_to(:machine_runner_invocation) }
+    it { should have_one(:running_job) }
+    it { should have_one(:queued_job) }
     it { should have_many(:historical_job_prerequisites) }
     it { should have_many(:prerequisites) }
     it { should have_many(:historical_job_affinity_tabs) }
@@ -284,49 +285,6 @@ module Naf
 
       it "raise an error when job is in a prerequesite loop" do
         expect { historical_job.verify_prerequisites([historical_job]) }.to raise_error
-      end
-    end
-
-    describe "#add_tags" do
-      before do
-        historical_job.tags = "{$pre-work}"
-      end
-
-      it "insert unique tag" do
-        historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        historical_job.tags.should == "{$pre-work,$work}"
-      end
-
-      it "not insert non-unique tag" do
-        historical_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        historical_job.tags.should == "{$pre-work}"
-      end
-    end
-
-    describe "#remove_tags" do
-      before do
-        historical_job.tags = "{$pre-work}"
-      end
-
-      it "remove existing tag" do
-        historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        historical_job.tags.should == "{}"
-      end
-
-      it "not update tags when removing non-existing tag" do
-        historical_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        historical_job.tags.should == "{$pre-work}"
-      end
-    end
-
-    describe "#remove_all_tags" do
-      before do
-        historical_job.tags = "{$pre-work}"
-      end
-
-      it "remove any existing tags" do
-        historical_job.remove_all_tags
-        historical_job.tags.should == "{}"
       end
     end
 

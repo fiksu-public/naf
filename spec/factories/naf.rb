@@ -336,6 +336,10 @@ FactoryGirl.define do
     end
   end
 
+  factory :affinity_classification, class: ::Naf::AffinityClassification do
+    sequence(:affinity_classification_name) { |n| "affinity_classification_#{n}" }
+  end
+
   #############################################################
   #######   Affinity Tabs and Slots   #########################
   #############################################################

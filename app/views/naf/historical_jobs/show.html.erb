@@ -1,40 +1,13 @@
 <% content_for :body do %>
   <div id="flash_message">
-      <% unless notice.blank? %>
-        <script type='text/javascript'>
-          jQuery("<p id='notice'><%= notice %></p>")
-              .appendTo('#flash_message')
-              .slideDown().delay(5000).slideUp();
-        </script>
-      <% end %>
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
   </div>
-
-  <script type='text/javascript'>
-    jQuery(document).ready(function () {
-      jQuery(document).delegate('.terminate', "click", function(){
-        var answer = confirm("You are terminating this job. Are you sure you want to do this?");
-        if (!answer) {
-          return false;
-        }
-        var id = <%= @historical_job.id %>;
-        var url = '/job_system/historical_jobs/' + id;
-        jQuery.ajax({
-          url:url,
-          type:'POST',
-          dataType:'json',
-          data:{ "historical_job[request_to_terminate]":1, "historical_job_id":id, "_method":"put" },
-          success:function (data) {
-            if (data.success) {
-              var title = data.title ? data.title : data.command
-              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
-              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-              setTimeout('window.location.reload()', 5600);
-            }
-          }
-        });
-      });
-    });
-  </script>
 
   <div id="record">
     <h2>Historical Job</h2>
@@ -43,8 +16,6 @@
     <% end -%>
 
     <%= link_to 'Back to Jobs', historical_jobs_path %>
-    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-    <%= link_to 'Edit', edit_historical_job_path(@historical_job) %>
     &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <%= link_to "Add Affinity", new_historical_job_historical_job_affinity_tab_path(@historical_job) %>
     </br>
@@ -125,7 +96,7 @@
         </tr>
         <tr>
           <td>Tags</td>
-          <td><%= @historical_job.tags %></td>
+          <td><%= @historical_job.running_job.try(:tags) %></td>
         </tr>
         <tr>
           <td>Request To Terminate</td>
@@ -155,16 +126,18 @@
           <td><%= link_to "Historical Job Affinity Tabs",
                   historical_job_historical_job_affinity_tabs_path(@historical_job.id) %>
           </td>
-          <td><%= @historical_job.affinities.map(&:affinity_name).join(', ') %></td>
+          <td><%= @logical_job.affinities %></td>
         </tr>
-        <tr>
-          <td>Terminate Job</td>
-          <td><%= link_to image_tag('terminate.png',
-            class: 'action',
-            title: "Terminate job(id: #{@historical_job.id}, title: #{@historical_job.title})"),
-            "#", { class: "terminate" }
-          %></td>
-        </tr>
+        <% if ['Running', 'Waiting', 'Queued'].include?(@logical_job.status) -%>
+          <tr>
+            <td>Terminate Job</td>
+            <td><%= link_to image_tag('terminate.png',
+              class: 'action',
+              title: "Terminate job(id: #{@historical_job.id}, title: #{@historical_job.title})"),
+              "#", { class: "terminate" }
+            %></td>
+          </tr>
+        <% end %>
       </tbody>
     </table>
     </br>
@@ -190,12 +163,45 @@
       </tbody>
     </table>
     </br>
+    <%= render partial: 'naf/log_viewer/log_layout', locals: { record_id: @historical_job.id, record_type: 'job' } %>
 
-    <h2>Stdout</h2>
-    <iframe src="<%= naf_papertrail_link(@historical_job, true) %>" id="stdout" class="scrollable-output">
-      Your browser doesn't support iframe!
-    </iframe>
   </div>
 <% end %>
 
+
 <%= render partial: 'naf/shared/application' %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output' } %>
+<%= render partial: 'naf/log_viewer/log_display',
+           locals: { record_id: @historical_job.id,
+                     status: @logical_job.status,
+                     logs_url: "#{http_protocol}#{@logical_job.runner}#{naf.logs_log_parsers_path}",
+                     record_type: 'job' } %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    jQuery(document).ready(function () {
+      jQuery(document).delegate('.terminate', "click", function(){
+        var answer = confirm("You are terminating this job. Are you sure you want to do this?");
+        if (!answer) {
+          return false;
+        }
+        var id = <%= @historical_job.id %>;
+        var url = '/job_system/historical_jobs/' + id;
+        jQuery.ajax({
+          url: url,
+          type:'POST',
+          dataType:'json',
+          data:{ "historical_job[request_to_terminate]": 1, "historical_job_id": id, "_method": "put" },
+          success:function (data) {
+            if (data.success) {
+              var title = data.title ? data.title : data.command
+              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              setTimeout('window.location.reload()', 5600);
+            }
+          }
+        });
+      });
+    });
+  </script>
+<% end %>

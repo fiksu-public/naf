@@ -2,6 +2,7 @@ module Naf
   class MachinesController < Naf::ApplicationController
 
     include Naf::ApplicationHelper
+    include Naf::TimeHelper
 
     before_filter :set_rows_per_page
 
@@ -21,7 +22,7 @@ module Naf
           machine = []
           @total_records = Naf::Machine.count(:all)
           Logical::Naf::Machine.all(filter).map(&:to_hash).map do |hash|
-            add_urls(hash).map do |key, value|
+            hash.map do |key, value|
               value = '' if value.nil?
               machine << value
             end
@@ -36,7 +37,7 @@ module Naf
     end
 
     def show
-      @machine = Naf::Machine.find(params[:id])
+      @machine = Naf::Machine.includes(:machine_affinity_slots).find(params[:id])
     end
 
     def new
@@ -81,15 +82,12 @@ module Naf
       end
     end
 
-    private
-
-    def add_urls(hash)
-      machine = ::Naf::Machine.find(hash[:id])
-      hash[:papertrail_url] = naf_papertrail_link(machine)
-      hash[:papertrail_runner_url] = naf_papertrail_link(machine, true)
-
-      hash
+    def last_checked_schedule_at
+      render json: {
+        last_checked_schedule_at: time_format(::Naf::Machine.last_time_schedules_were_checked)
+      }
     end
+
 
   end
 end

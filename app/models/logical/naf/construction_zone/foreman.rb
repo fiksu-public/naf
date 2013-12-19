@@ -35,7 +35,7 @@ module Logical::Naf::ConstructionZone
         #(::Naf::QueuedJob.where(:application_run_group_name => application_run_group_name).count +
         #::Naf::RunningJob.where(:application_run_group_name => application_run_group_name,
         #:started_on_machine_id => @machine.id).count) >= application_run_group_limit
-        
+
         # XXX just returning false
         false
       elsif application_run_group_restriction.id == ::Naf::ApplicationRunGroupRestriction.limited_per_all_machines.id

@@ -51,6 +51,24 @@ module Naf
       where(selectable: true)
     end
 
+    def self.names_list
+      selectable.map do |a|
+        classification = a.affinity_classification
+        if classification.affinity_classification_name == 'machine'
+          if a.affinity_short_name.present?
+            [a.affinity_short_name, a.id]
+          elsif ::Naf::Machine.find_by_id(Integer(a.affinity_name)).present?
+            machine = ::Naf::Machine.find_by_id(Integer(a.affinity_name))
+            [machine.hostname, a.id]
+          else
+            ['Bad affinity: ' + classification.affinity_classification_name + ', ' + a.affinity_name, a.id]
+          end
+        else
+          [classification.affinity_classification_name + ', ' + a.affinity_name, a.id]
+        end
+      end
+    end
+
     def self.pre_unpickle(unpickler)
       unpickler.references.merge!(Hash[::Naf::Affinity.all.map do |m|
                                     [{ association_model_name: ::Naf::Affinity.name,

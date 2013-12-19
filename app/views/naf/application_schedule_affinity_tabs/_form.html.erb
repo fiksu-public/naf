@@ -10,11 +10,7 @@
 
   <div class="field">
     <%= f.label :affinity_id, "Affinity*" %></br>
-    <%= f.select(:affinity_id,
-                 ::Naf::Affinity.selectable.map{
-                    |a| [a.affinity_classification.affinity_classification_name + ', ' + a.affinity_name, a.id]
-                 },
-                 include_blank: true) %>
+    <%= f.select(:affinity_id, ::Naf::Affinity.names_list, include_blank: true) %>
   </div>
   </br>
 

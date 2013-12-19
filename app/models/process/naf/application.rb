@@ -7,7 +7,7 @@ module Process::Naf
       def initialize(job, reason)
         @job = job
         @reason = reason
-        super("Requested to terminate: #{reason}")
+        super("Requested to terminate by Naf: #{reason}")
       end
     end
 
@@ -93,7 +93,7 @@ module Process::Naf
     end
 
     def job_tag_block(*tags, &block)
-      job = fetch_naf_job
+      job = fetch_naf_job.try(:running_job)
       begin
         if job
           add_job_tags(*tags)
@@ -107,7 +107,7 @@ module Process::Naf
     end
 
     def update_job_tags(old_tags, new_tags)
-      job = fetch_naf_job
+      job = fetch_naf_job.try(:running_job)
       if job
         job.remove_tags(old_tags.map(&:to_s))
         job.add_tags(new_tags.map(&:to_s))

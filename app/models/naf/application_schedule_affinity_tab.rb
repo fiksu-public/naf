@@ -28,6 +28,7 @@ module Naf
     #++++++++++++++++++++
 
     delegate :affinity_name,
+             :affinity_short_name,
              :affinity_classification_name, to: :affinity
 
 

@@ -20,16 +20,17 @@ module Naf
     NAF_READ_ONLY_RESOURCES = []
     NAF_CREATE_BLOCKED_RESOURCES = []
     NAF_ALL_VISIBLE_RESOURCES = {
-                                  "historical_jobs" => "",
-                                  "applications" => "",
-                                  "machines" => "",
-                                  "runners" => ["machine_runners",
-                                                "machine_runner_invocations"],
-                                  "affinities" => "",
-                                  "loggers" => ["logger_styles", "logger_names"],
-                                  "janitorial_assignments" => ["janitorial_archive_assignments",
-                                                               "janitorial_create_assignments",
-                                                               "janitorial_drop_assignments"]
+                                  'historical_jobs' => '',
+                                  'applications' => '',
+                                  'machines' => '',
+                                  'runners' => ['machine_runners',
+                                                'machine_runner_invocations'],
+                                  'affinities' => '',
+                                  'loggers' => ['logger_styles', 'logger_names'],
+                                  'janitorial_assignments' => ['janitorial_archive_assignments',
+                                                               'janitorial_create_assignments',
+                                                               'janitorial_drop_assignments'],
+                                  'status' => ''
                                 }
 
     def naf_tabs
@@ -221,34 +222,6 @@ module Naf
       end
     end
 
-    def include_actions_in_table?
-      current_page?(naf.root_url) or
-      current_page?(controller: 'applications', action: 'index') or
-        current_page?(controller: 'historical_jobs', action: 'index')
-    end
-
-    def naf_papertrail_link(record, runner = false)
-      if group_id = Naf.papertrail_group_id
-        url = "http://www.papertrailapp.com/groups/#{group_id}/events"
-        if record.kind_of?(::Naf::HistoricalJob) || record.kind_of?(::Logical::Naf::Job)
-          if record.pid.present?
-            query = "jid(#{record.id})"
-            url << "?q=#{CGI.escape(query)}"
-          end
-        elsif record.kind_of?(::Naf::Machine) || record.kind_of?(::Logical::Naf::Machine)
-          query = record.server_name
-          unless query.nil?
-            query << " runner" if runner
-            url << "?q=#{CGI.escape(query)}"
-          end
-        end
-      else
-        url = "http://www.papertrailapp.com/dashboard"
-      end
-
-      return url
-    end
-
     def naf_link_to_remove_fields(name, f)
       f.hidden_field(:_destroy) + link_to_function(name, "remove_fields(this)")
     end
@@ -268,6 +241,14 @@ module Naf
         'queued'
       elsif status =~ /Terminat/ || status == 'Error' || status == 'Failed to Start'
         'dead'
+      end
+    end
+
+    def http_protocol
+      if ['staging', 'production'].include?(Rails.env)
+        'https://'
+      else
+        'http://'
       end
     end
 

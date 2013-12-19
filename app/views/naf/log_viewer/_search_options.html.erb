@@ -1,0 +1,36 @@
+<%= text_field_tag :log_search, nil, placeholder: 'Search query' %>
+&nbsp;/&nbsp;
+<%= text_field_tag :regex_options, nil, placeholder: 'Regex options' %>
+&nbsp;&nbsp;
+<%= button_tag 'Regex Help', id: "regex_help" %>
+<div class="description">
+  &nbsp;
+  <strong>Regex Options</strong>
+  <table cellpadding="5">
+    <thead>
+      <tr>
+        <td><b>Option</b></td>
+        <td><b>Notes</b></td>
+      </tr>
+      <tr>
+        <td>i</td>
+        <td>case insensitive</td>
+      </tr>
+      <tr>
+        <td>m</td>
+        <td>make dot match newlines</td>
+      </tr>
+      <tr>
+        <td>x</td>
+        <td>ignore whitespace in regex</td>
+      </tr>
+    </thead>
+  </table>
+</div>
+
+<%= link_to 'Auto Scroll (ON)', '#', id: :auto_scroll %>
+<div>
+  <%= label_tag :auto_update, 'Grep:' %>
+  <%= check_box_tag :grep, 1, false, id: :grep %>
+</div>
+</br>

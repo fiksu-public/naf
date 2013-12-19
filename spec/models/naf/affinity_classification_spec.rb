@@ -52,5 +52,25 @@ module Naf
       end
     end
 
+    describe "#weight" do
+      let!(:weight_affinity_classification) { FactoryGirl.create(:affinity_classification,
+                                                                 affinity_classification_name: 'weight',
+                                                                 id: 4) }
+
+      it "return the weight affinity classification" do
+        ::Naf::AffinityClassification.weight.should == weight_affinity_classification
+      end
+    end
+
+    describe "#machine" do
+      let!(:machine_affinity_classification) { FactoryGirl.create(:affinity_classification,
+                                                                  affinity_classification_name: 'machine',
+                                                                  id: 5) }
+
+      it "return the machine affinity classification" do
+        ::Naf::AffinityClassification.machine.should == machine_affinity_classification
+      end
+    end
+
   end
 end

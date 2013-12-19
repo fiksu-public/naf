@@ -1,39 +1,13 @@
 <% content_for :body do %>
   <div id="flash_message">
-      <% unless notice.blank? %>
-        <script type='text/javascript'>
-          jQuery("<p id='notice'><%= notice %></p>")
-              .appendTo('#flash_message')
-              .slideDown().delay(5000).slideUp();
-        </script>
-      <% end %>
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
   </div>
-
-  <script type='text/javascript'>
-    // Action: Wind Down Runner
-    jQuery(document).delegate('.wind_down', "click", function() {
-      var answer = confirm("You are winding down this runner. Are you sure you want to do this?");
-      if (!answer) {
-        return false;
-      }
-      var id = <%= @machine_runner.machine_runner_invocations.last.id %>;
-      var url = '/job_system/machine_runner_invocations/' + id;
-      jQuery.ajax({
-        url: url,
-        type: 'POST',
-        dataType: 'json',
-        data: { "machine_runner_invocation[request_to_wind_down]": 1, "machine_runner_invocation_id": id, "_method": "put" },
-        success:function (data) {
-          if (data.success) {
-            jQuery("<p id='notice'>The machine runner is winding down!</p>").
-            appendTo('#flash_message').slideDown().delay(5000).slideUp();
-            jQuery('#datatable').dataTable().fnDraw();
-            window.location.reload()
-          }
-        }
-      });
-    });
-  </script>
 
   <div id="record">
     <h2>Machine Runner</h2>
@@ -107,7 +81,43 @@
       </tbody>
     </table>
     </br>
-
+    <%= render partial: 'naf/log_viewer/log_layout', locals: { record_id: @machine_runner.id, record_type: 'runner' } %>
   </div>
 <% end %>
+
 <%= render partial: 'naf/shared/application' %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output' } %>
+<%= render partial: 'naf/log_viewer/log_display',
+           locals: {
+             logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@machine_runner.machine).runner}#{naf.logs_log_parsers_path}",
+             record_id: @machine_runner.id,
+             record_type: 'runner'
+           } %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    // Action: Wind Down Runner
+    jQuery(document).delegate('.wind_down', "click", function() {
+      var answer = confirm("You are winding down this runner. Are you sure you want to do this?");
+      if (!answer) {
+        return false;
+      }
+      var id = <%= @machine_runner.machine_runner_invocations.last.id %>;
+      var url = '/job_system/machine_runner_invocations/' + id;
+      jQuery.ajax({
+        url: url,
+        type: 'POST',
+        dataType: 'json',
+        data: { "machine_runner_invocation[request_to_wind_down]": 1, "machine_runner_invocation_id": id, "_method": "put" },
+        success:function (data) {
+          if (data.success) {
+            jQuery("<p id='notice'>The machine runner is winding down!</p>").
+            appendTo('#flash_message').slideDown().delay(5000).slideUp();
+            jQuery('#datatable').dataTable().fnDraw();
+            window.location.reload()
+          }
+        }
+      });
+    });
+  </script>
+<% end %>

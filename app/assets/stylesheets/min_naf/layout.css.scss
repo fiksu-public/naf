@@ -51,47 +51,47 @@
         }
       }
 
-      #page-select-container, #refresh-page-container {
-        display: none;
+      #page-select-container {
         float: right;
         margin-top: -1px;
         padding: 2px 2px;
-        width: 205px;
+        width: 240px;
+
+        label {
+          position: relative;
+          top: 4px;
+        }
+
+        #iDisplayLength {
+          background-color: #FFFFFF;
+        }
+
+        .page-select {
+          border: 1px solid #E1E1E1;
+          cursor: pointer;
+          float: right;
+          width: 95px;
+        }
+      }
+
+      #refresh-page-container {
+        float: right;
+        margin-top: -1px;
+        padding: 2px 2px;
+        width: 240px;
+        input {
+          width: 13px;
+        }
       }
 
       #datatable_wrapper {
         #datatable_processing {
           color: #45a113;
-          font-style: bold;
           font-size: 14px;
           margin: 0 0 6px 0;
           background-color: #e5f4e1;
           border: 1px solid #d5f1cd;
           padding: 4px 8px 4px 8px;
-        }
-
-        #datatable_paginate {
-          #page-select-container {
-            label {
-              position: relative;
-              top: 4px;
-            }
-          }
-          #refresh-page-container {
-            margin-right: 200px;
-            input {
-              width: 13px;
-            }
-          }
-          #iDisplayLength {
-            background-color: #FFFFFF;
-          }
-          .page-select {
-            border: 1px solid #E1E1E1;
-            cursor: pointer;
-            float: right;
-            width: 95px;
-          }
         }
 
         #datatable {
@@ -249,12 +249,45 @@
         }
 
         .scrollable-output {
-          border: 1px solid #E1E1E1;
           height: 500px;
           overflow-x:auto;
-          width: 98%;
-          background-color: #2d2d2d;
-          color: #ffffff;
+          width: 99%;
+          background-color: #F4F4F4;
+          color: #000000;
+          padding: 5px 10px 5px 0px;
+
+          #event_list {
+            word-wrap: break-word;
+            padding-left: 10px;
+            margin: 0;
+            list-style: none outside none;
+            li {
+              padding-left: 20px;
+              text-indent: -15px;
+            }
+          }
+
+          .msg {
+            background: none repeat scroll 0 0 #202020;
+            border: 1px solid #303030;
+            box-shadow: 0 0 5px #000000;
+            border-radius: 5px 5px 5px 5px;
+            margin: 20px auto;
+            min-width: 600px;
+            padding: 40px 25px;
+            position: relative;
+            text-align: center;
+            width: 65%;
+            font-size: 20px;
+          }
+        }
+
+        .scrollable-output-expanded {
+          height: 720px;
+          overflow-x:auto;
+          width: 99%;
+          background-color: #F4F4F4;
+          color: #000000;
           padding: 5px 10px 5px 0px;
 
           #event_list {
@@ -289,14 +322,6 @@
             width: 24em;
           }
 
-          #papertrail_search_submit {
-            width: 12em;
-          }
-
-          #papertrail_time {
-            display: none;
-          }
-
           #automatic_data_update {
             float:right;
             padding-top: 4px;
@@ -309,11 +334,37 @@
               width: 100px;
             }
           }
+
+          a {
+            float:right;
+          }
+
+          #log_search {
+            width: 50%;
+          }
+
+          #regex_options {
+            width: 10%;
+          }
+
+          .description {
+            display: none;
+            position: absolute;
+            background: #F4F4F4;
+            border: 1px solid #000;
+            width: 400px;
+            height: 125px;
+            margin: 0% 0% 0% 65%;
+          }
         }
 
         h4 {
           margin: 10px 0 5px 0;
           font-weight: bold;
+        }
+
+        .auto_scroll_off {
+          color: #CD0A0A;
         }
       }
 
@@ -326,15 +377,15 @@
       }
     }
 
-    .winding-down, .queued {
+    .winding-down, .queued, .winding-down-count {
       color: #f8a800;
     }
 
-    .running {
+    .running, .running-count {
       color: #45a113;
     }
 
-    .dead {
+    .dead, .error, .down-count {
       color: #CD0A0A;
     }
   }

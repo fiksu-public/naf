@@ -44,8 +44,11 @@ module Naf
 
     def create
       @application = Naf::Application.new(params[:application])
+      check_application_run_group_name
+      set_application_run_group_name
       if @application.save
         app_schedule = @application.application_schedule
+        @application.update_attributes(params[:application])
         if app_schedule.present?
           prerequisites =
           app_schedule.prerequisites.map do |prerequisite|

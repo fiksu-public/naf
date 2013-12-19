@@ -8,7 +8,8 @@ module Naf
                     :commit_information,
                     :branch_name,
                     :repository_name,
-                    :deployment_tag
+                    :deployment_tag,
+                    :uuid
 
     #---------------------
     # *** Associations ***
@@ -47,6 +48,13 @@ module Naf
       else
         return where({})
       end
+    end
+
+    def self.recently_marked_dead(time)
+      where("
+        #{::Naf.schema_name}.machine_runner_invocations.dead_at IS NOT NULL AND
+        #{::Naf.schema_name}.machine_runner_invocations.dead_at > ?", Time.zone.now - time
+      )
     end
 
     #-------------------------

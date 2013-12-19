@@ -244,6 +244,14 @@ module Naf
                                         ])
     end
 
+    def hostname
+      if server_name.present?
+        server_name
+      else
+        server_address
+      end
+    end
+
     private
 
     def check_blank_values

@@ -27,7 +27,9 @@ module Process::Naf
       if @update_machine
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
-          machine = ::Naf::Machine.create(server_address: @server_address)
+          server_name = (`hostname`).strip
+          machine = ::Naf::Machine.create(server_address: @server_address,
+                                          server_name: server_name)
           add_default_affinities(machine)
         end
 

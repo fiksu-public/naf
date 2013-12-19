@@ -1,6 +1,7 @@
 module Naf
   class HistoricalJobsController < Naf::ApplicationController
     include Naf::ApplicationHelper
+    helper Naf::TimeHelper
 
     before_filter :set_rows_per_page
     before_filter :set_search_status
@@ -102,10 +103,6 @@ module Naf
       end
     end
 
-    def edit
-      @historical_job = Naf::HistoricalJob.find(params[:id])
-    end
-
     def update
       respond_to do |format|
         @historical_job = Naf::HistoricalJob.find(params[:id])
@@ -119,6 +116,7 @@ module Naf
 
             if running_job = ::Naf::RunningJob.find_by_id(params[:id])
               running_job.update_attributes(request_to_terminate: true)
+              @historical_job.update_attributes(request_to_terminate: true)
             end
           end
 
@@ -150,7 +148,6 @@ module Naf
       else
         hash[:application_url] = nil
       end
-      hash[:papertrail_url] = naf_papertrail_link(job)
 
       return hash
     end

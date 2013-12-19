@@ -17,7 +17,7 @@ module Logical
                        :prerequisites,
                        :deleted,
                        :visible] }
-      let(:physical_app) { FactoryGirl.create(:application) }
+      let(:physical_app) { FactoryGirl.create(:application, application_schedule: FactoryGirl.create(:schedule_base)) }
       let!(:logical_app) { Application.new(physical_app) }
       let(:scheduled_physical_app) {
         FactoryGirl.create(:scheduled_application, application_schedule: FactoryGirl.create(:schedule_at_time))
@@ -25,9 +25,8 @@ module Logical
 
       context "Class Methods" do
         it "search method should return array of wrapper around physical application" do
-          app = logical_app
-          Application.search(params: nil).map(&:id).should include(app.id)
-          Application.search(params: nil).should have(1).items
+          Application.search(params: nil).map(&:id).should include(logical_app.id)
+          Application.search(params: nil).should have(2).items
           Application.search(params: nil).should be_a(Array)
         end
       end

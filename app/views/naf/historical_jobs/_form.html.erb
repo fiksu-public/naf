@@ -4,7 +4,7 @@
     <h2><%= pluralize(@historical_job.errors.count, "error") %> prohibited this application from being saved:</h2>
 
     <ul>
-      <% @historical_job.errors.full_messages.each do |msg| %> 
+      <% @historical_job.errors.full_messages.each do |msg| %>
         <li><%= msg %></li>
       <% end %>
     </ul>

@@ -203,10 +203,18 @@ module Logical
           job.run_time.should == '0h0m6s'
         end
 
-        it "show correct run time when job is running" do
-          historical_job.started_at = Time.zone.now - 3.seconds
-          historical_job.finished_at = nil
-          job.run_time.should == '0h0m3s'
+        describe "show correct run time when job is running" do
+          it "less than 2 days" do
+            historical_job.started_at = Time.zone.now - 3.hours
+            historical_job.finished_at = nil
+            job.run_time.should == '3h0m0s'
+          end
+
+          it "more than 2 days" do
+            historical_job.started_at = Time.zone.now - 3.days
+            historical_job.finished_at = nil
+            job.run_time.should == '3d0h0m0s'
+          end
         end
 
         it "show correct run time when job has not started" do
@@ -262,13 +270,18 @@ module Logical
       end
 
       describe "#tags" do
+        before do
+          running_job = FactoryGirl.create(:running_job_base, historical_job: historical_job)
+          historical_job.running_job = running_job
+        end
+
         it "show custom visible tags" do
-          historical_job.tags = '{test}'
+          historical_job.running_job.tags = '{test}'
           job.tags.should == 'test'
         end
 
         it "not show system or custom invisible tags" do
-          historical_job.tags = '{$test,_test}'
+          historical_job.running_job.tags = '{$test,_test}'
           job.tags.should == ''
         end
 

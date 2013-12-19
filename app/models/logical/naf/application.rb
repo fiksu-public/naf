@@ -54,9 +54,11 @@ module Logical
           if search.present? and search[field].present?
             application_scope =
             if field == :application_run_group_name
-              application_scope.where(["lower(#{::Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", search[field].downcase])
+              application_scope.where(
+                ["lower(#{::Naf.schema_name}.application_schedules.application_run_group_name) ~ ?", Regexp.escape(search[field].downcase)]
+              )
             else
-              application_scope.where(["lower(#{field}) ~ ?", search[field].downcase])
+              application_scope.where(["lower(#{field}) ~ ?", Regexp.escape(search[field].downcase)])
             end
           end
         end
@@ -157,25 +159,17 @@ module Logical
       end
 
       def affinities
-        affinity_tab_records = @app.application_schedule.try(:application_schedule_affinity_tabs)
-        return "" if affinity_tab_records.nil?
-
-        affinity_tabs = ""
-        affinity_tab_records.each do |tab|
-          if tab.affinity.affinity_short_name.present?
-            affinity_tabs << tab.affinity.affinity_short_name
+        @app.application_schedule.application_schedule_affinity_tabs.map do |tab|
+          if tab.affinity_short_name.present?
+            if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+              tab.affinity_short_name + "(#{tab.affinity_parameter})"
+            else
+              tab.affinity_short_name
+            end
           else
-            affinity_tabs << tab.affinity.affinity_name
+            tab.affinity_classification_name + '_' + tab.affinity_name
           end
-
-          if tab.affinity_parameter.present? && tab.affinity_parameter > 0
-            affinity_tabs << "(#{tab.affinity_parameter}), "
-          else
-            affinity_tabs << ", "
-          end
-        end
-
-        affinity_tabs[0..-3]
+        end.join(", \n")
       end
 
     end

@@ -5,6 +5,7 @@ module Logical
     class Job
       include ActionView::Helpers::DateHelper
       include ActionView::Helpers::TextHelper
+      include ::Naf::TimeHelper
 
       COLUMNS = [:id,
                  :server,
@@ -147,7 +148,7 @@ module Logical
             if search[field].present?
               conditions << " AND "
               conditions << "lower(#{field}) ~ :#{field}"
-              values[field.to_sym] = search[field].downcase
+              values[field.to_sym] = Regexp.escape(search[field].downcase)
             end
           end
 
@@ -178,7 +179,7 @@ module Logical
               JobStatuses::Terminated.all(conditions)
           end
           sql << "LIMIT :limit OFFSET :offset"
-          jobs = ::Naf::HistoricalJob.find_by_sql([sql, values])
+          jobs = ::Naf::HistoricalJob.find_by_sql([sql, values]).uniq
 
           jobs.map{ |physical_job| new(physical_job) }
         else
@@ -225,7 +226,7 @@ module Logical
           job_scope = job_scope.where(field => search[field]) if search[field].present?
         end
         SEARCH_FIELDS.each do |field|
-          job_scope = job_scope.where(["lower(#{field}) ~ ?", search[field].downcase]) if search[field].present?
+          job_scope = job_scope.where(["lower(#{field}) ~ ?", Regexp.escape(search[field].downcase)]) if search[field].present?
         end
 
         job_scope
@@ -270,7 +271,7 @@ module Logical
           if value < 60
             "#{value.to_i} seconds ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           elsif value < 172_800
-            time_difference(value)
+            time_difference(value, @job.started_at)
           elsif value >= 172_800
             "#{time_ago_in_words(@job.started_at, true)} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           else
@@ -278,27 +279,6 @@ module Logical
           end
         else
           ""
-        end
-      end
-
-      def time_difference(value, time_format_on=true)
-        seconds = value % 60
-        value = (value - seconds) / 60
-        minutes = value % 60
-        value = (value - minutes) / 60
-        hours = value % 24
-        value = (value - hours) / 24
-        days = value % 7
-        more_hours = hours + days * 24 if days > 0
-
-        if time_format_on
-          "-#{hours.to_i}h#{minutes.to_i}m, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
-        else
-          if days < 2
-            "-#{more_hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
-          else
-            "-#{days.to_i}d#{hours.to_i}h#{minutes.to_i}m#{seconds.to_i}s"
-          end
         end
       end
 
@@ -313,9 +293,13 @@ module Logical
       def run_time
         if @job.started_at.present?
           if @job.finished_at.present?
-            time_difference(@job.finished_at - @job.started_at, false)[1..-1]
+            if @job.started_at > @job.finished_at
+              time_difference(@job.started_at - @job.finished_at)[1..-1]
+            else
+              time_difference(@job.finished_at - @job.started_at)[1..-1]
+            end
           else
-            time_difference(Time.zone.now - @job.started_at, false)[1..-1]
+            time_difference(Time.zone.now - @job.started_at)[1..-1]
           end
         else
           ""
@@ -331,24 +315,45 @@ module Logical
       end
 
       def affinities
-        @job.job_affinities.map do |job_affinity|
-          if job_affinity.present?
-            if job_affinity.affinity_short_name.present?
-              job_affinity.affinity_short_name
+        @job.historical_job_affinity_tabs.map do |tab|
+          if tab.affinity_short_name.present?
+            if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+              tab.affinity_short_name + "(#{tab.affinity_parameter})"
             else
-              job_affinity.affinity_classification_name + '_' + job_affinity.affinity_name
+              tab.affinity_short_name
             end
+          else
+            tab.affinity_classification_name + '_' + tab.affinity_name
           end
         end.join(", \n")
       end
 
       def tags
-        if @job.tags.present?
+        if @job.running_job.try(:tags).present?
           # Only show custom visible tags
-          job_tags = @job.tags.gsub(/[{}]/,'').split(',')
+          job_tags = @job.running_job.tags.gsub(/[{}]/,'').split(',')
           (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
         else
           nil
+        end
+      end
+
+      def runner
+        if @job.machine_runner_invocation.present?
+          machine = @job.machine_runner_invocation.machine_runner.machine
+          if machine.present?
+            if machine.server_name.present?
+              machine.server_name.to_s
+            else
+              if Rails.env == 'development'
+                "localhost:#{Rails::Server.new.options[:Port]}"
+              else
+                machine.server_address
+              end
+            end
+          end
+        else
+          ''
         end
       end
 
