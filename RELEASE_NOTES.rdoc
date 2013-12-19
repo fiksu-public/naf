@@ -1,5 +1,14 @@
 = Release Notes
 
+=== Version 2.0.0
+
+Featurs/Changes:
+* New logging system
+* Removed compatibility with Papertrail
+* UI changes
+* Resizable table columns
+* Script handles runner commands
+
 === Version 1.0.0
 
 Features/Changes:
