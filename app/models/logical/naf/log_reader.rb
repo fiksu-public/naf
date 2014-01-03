@@ -20,9 +20,8 @@ module Logical
         return sort_files(files)
       end
 
-      def runner_log_files(runner_id)
-        @runner_id = runner_id
-        tree = bucket.objects.with_prefix(prefix).as_tree
+      def runner_log_files
+        tree = bucket.objects.with_prefix(prefix(true)).as_tree
         directories = tree.children.select(&:branch?).collect(&:prefix).uniq
 
         files = []
@@ -58,11 +57,11 @@ module Logical
         @bucket ||= s3.buckets[NAF_BUCKET]
       end
 
-      def prefix
-        if @runner_id.present?
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/runners/#{@runner_id}/invocations/"
+      def prefix(runner_logs = false)
+        if runner_logs
+          "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/runners/"
         else
-          "naf/#{project_name}/#{Rails.env}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/jobs/"
+          "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/jobs/"
         end
       end
 
