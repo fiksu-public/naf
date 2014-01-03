@@ -42,7 +42,7 @@ module Logical::Naf
 
         files = []
         s3_log_reader.runner_log_files.each do |file|
-          if uuids.include?(file.scan(/UUID_REGEX/).first)
+          if uuids.include?(file.scan(UUID_REGEX).first)
             files << file
           end
         end
