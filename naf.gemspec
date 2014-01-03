@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name        = "naf"
   s.version     = Naf::VERSION
   s.license     = 'New BSD License'
-  s.date        = '2013-12-20'
+  s.date        = '2014-01-03'
   s.summary     = "Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running"
   s.description = "A cloud based distributed cron, application framework and operations console. Naf works as a distributed script running " +
                   "system that provides scheduling, logging, alarming, machine redundancy, and the ability to set constraint during script execution"
