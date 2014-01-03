@@ -35,7 +35,19 @@ module Logical::Naf
       end
 
       def retrieve_log_files_from_s3
-        s3_log_reader.runner_log_files(record_id)
+        uuids = ::Naf::MachineRunner.
+          joins(:machine_runner_invocations).
+          where("#{Naf.schema_name}.machine_runners.id = ?", record_id).
+          pluck("#{Naf.schema_name}.machine_runner_invocations.uuid")
+
+        files = []
+        s3_log_reader.runner_log_files.each do |file|
+          if uuids.include?(file.scan(UUID_REGEX).first)
+            files << file
+          end
+        end
+
+        files
       end
 
       def get_invocation_id(uuid)
@@ -50,7 +62,7 @@ module Logical::Naf
         if log_type == 'old' && read_from_s3 == 'true'
           get_s3_files do
             @s3_log_reader = ::Logical::Naf::LogReader.new
-            return s3_log_reader.runner_log_files(record_id)
+            return retrieve_log_files_from_s3
           end
         else
           files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/*"]

@@ -21,7 +21,7 @@ module Process::Naf
       logger.info 'Starting to save files to s3...'
       files.each do |file|
         # Write file if not existent
-        object = bucket.objects["naf/#{project_name}/#{Rails.env}/#{creation_time}" + file[12..-1]]
+        object = bucket.objects["#{NAF_LOG_PATH}/#{creation_time}" + file[12..-1]]
         if !object.exists?
           # Write file to S3
           result = object.write(File.open(file).read)
