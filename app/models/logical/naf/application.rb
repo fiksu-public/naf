@@ -159,17 +159,19 @@ module Logical
       end
 
       def affinities
-        @app.application_schedule.application_schedule_affinity_tabs.map do |tab|
-          if tab.affinity_short_name.present?
-            if tab.affinity_parameter.present? && tab.affinity_parameter > 0
-              tab.affinity_short_name + "(#{tab.affinity_parameter})"
+        if @app.application_schedule.try(:application_schedule_affinity_tabs).present?
+          @app.application_schedule.application_schedule_affinity_tabs.map do |tab|
+            if tab.affinity_short_name.present?
+              if tab.affinity_parameter.present? && tab.affinity_parameter > 0
+                tab.affinity_short_name + "(#{tab.affinity_parameter})"
+              else
+                tab.affinity_short_name
+              end
             else
-              tab.affinity_short_name
+              tab.affinity_classification_name + '_' + tab.affinity_name
             end
-          else
-            tab.affinity_classification_name + '_' + tab.affinity_name
-          end
-        end.join(", \n")
+          end.join(", \n")
+        end
       end
 
     end
