@@ -107,26 +107,29 @@ module Naf
       respond_to do |format|
         @historical_job = Naf::HistoricalJob.find(params[:id])
         if @historical_job.update_attributes(params[:historical_job])
-          if params[:historical_job][:request_to_terminate].present?
-            if queued_job = ::Naf::QueuedJob.find_by_id(params[:id])
-              @historical_job.finished_at = Time.zone.now
-              @historical_job.save!
-              queued_job.delete
+
+          ::Naf::HistoricalJob.lock_for_job_queue do
+            if params[:historical_job][:request_to_terminate].present?
+              if queued_job = ::Naf::QueuedJob.find_by_id(params[:id])
+                @historical_job.finished_at = Time.zone.now
+                @historical_job.save!
+                queued_job.delete
+              end
+
+              if running_job = ::Naf::RunningJob.find_by_id(params[:id])
+                running_job.update_attributes(request_to_terminate: true)
+                @historical_job.update_attributes(request_to_terminate: true)
+              end
             end
 
-            if running_job = ::Naf::RunningJob.find_by_id(params[:id])
-              running_job.update_attributes(request_to_terminate: true)
-              @historical_job.update_attributes(request_to_terminate: true)
+            format.html do
+              redirect_to(@historical_job, notice: "Job '#{@historical_job.command}' was successfully updated.")
             end
-          end
-
-          format.html do
-            redirect_to(@historical_job, notice: "Job '#{@historical_job.command}' was successfully updated.")
-          end
-          format.json do
-            render json: { success: true,
-                           title: @historical_job.title,
-                           command: @historical_job.command }.to_json
+            format.json do
+              render json: { success: true,
+                             title: @historical_job.title,
+                             command: @historical_job.command }.to_json
+            end
           end
         else
           format.html do

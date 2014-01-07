@@ -76,6 +76,7 @@ module Process::Naf
       machine.lock_for_runner_use
       begin
         cleanup_old_processes
+        remove_invalid_running_jobs
         wind_down_runners
 
         # Create a machine runner, if it doesn't exist
@@ -97,6 +98,14 @@ module Process::Naf
         @current_invocation.dead_at = Time.zone.now
         @current_invocation.save!
         cleanup_old_processes
+      end
+    end
+
+    def remove_invalid_running_jobs
+      ::Naf::RunningJob.
+        joins("INNER JOIN #{Naf.schema_name}.historical_jobs AS hj ON hj.id = #{Naf.schema_name}.running_jobs.id").
+        where('finished_at IS NOT NULL AND hj.started_on_machine_id = ?', @machine.id).readonly(false).each do |job|
+          job.delete
       end
     end
 
@@ -589,7 +598,7 @@ module Process::Naf
 
     def assigned_jobs(record)
       if record.kind_of? ::Naf::MachineRunnerInvocation
-        return ::Naf::RunningJob.started_on_invocation(record.id).select do |job|
+        return ::Naf::RunningJob.started_on_invocation(record.id).readonly(false).select do |job|
           is_job_process_alive?(job)
         end
       else
