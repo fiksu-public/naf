@@ -45,7 +45,16 @@ module Process::Naf
       # Sort log files based on time
       files = files.sort { |x, y| Time.parse(y.scan(DATE_REGEX).first) <=> Time.parse(x.scan(DATE_REGEX).first) }
 
-      return files
+      today = Time.zone.now.to_date
+      old_files = []
+      files.each_with_index do |file, index|
+        if (today - Time.parse(file.scan(DATE_REGEX).first).to_date).to_i > LOG_RETENTION
+          old_files = files[index..-1]
+          break
+        end
+      end
+
+      return old_files
     end
 
     def creation_time
@@ -56,10 +65,8 @@ module Process::Naf
       copy_files
       today = Time.zone.now.to_date
       files.each do |file|
-        if (today - Time.parse(file.scan(DATE_REGEX).first).to_date).to_i > LOG_RETENTION
-          logger.info "Archived file: #{file}"
-          `rm #{file}`
-        end
+        logger.info "Archived file: #{file}"
+        `rm #{file}`
       end
     end
 
