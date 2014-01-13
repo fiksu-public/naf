@@ -13,7 +13,8 @@ module Naf
                     :run_start_minute,
                     :application_run_group_limit,
                     :application_schedule_prerequisites_attributes,
-                    :enqueue_backlogs
+                    :enqueue_backlogs,
+                    :run_interval_style_id
 
     SCHEDULES_LOCK_ID = 0
 
@@ -25,6 +26,8 @@ module Naf
       class_name: '::Naf::Application'
     belongs_to :application_run_group_restriction,
       class_name: '::Naf::ApplicationRunGroupRestriction'
+    belongs_to :run_interval_style,
+      class_name: '::Naf::RunIntervalStyle'
     has_many :application_schedule_affinity_tabs,
       class_name: '::Naf::ApplicationScheduleAffinityTab',
       dependent: :destroy
@@ -71,7 +74,6 @@ module Naf
 
     before_save :check_blank_values
     validate :visible_enabled_check
-    validate :run_interval_at_time_check
     validate :enabled_application_id_unique
     validate :prerequisite_application_schedule_id_uniqueness
 
@@ -94,17 +96,96 @@ module Naf
       unlock_record(SCHEDULES_LOCK_ID)
     end
 
-    def self.exact_schedules
-      where('run_start_minute is not null')
+    # find the run_start_minute based schedules
+    # select anything that
+    #  isn't currently running (or queued) AND
+    #  hasn't run since run_interval AND
+    #  should have been run by now
+    def self.exact_schedules(time, not_finished_applications, application_last_runs)
+      custom_current_time = time.to_date + time.strftime('%H').to_i.hours + time.strftime('%M').to_i.minutes
+      schedules = ::Naf::ApplicationSchedule.
+        joins(:run_interval_style).
+        where("#{Naf.schema_name}.run_interval_styles.name IN (?)", ['at beginning of hour', 'after previous run']).
+        enabled.select do |schedule|
+
+        interval_time = time.to_date
+        if schedule.run_interval_style.name == 'at beginning of day'
+          interval_time += schedule.run_interval.minutes
+        elsif schedule.run_interval_style.name == 'at beginning of hour'
+          interval_time += time.strftime('%H').to_i.hours + schedule.run_interval.minutes
+        end
+
+        (not_finished_applications[schedule.application_id].nil? &&
+          (application_last_runs[schedule.application_id].nil? ||
+            (interval_time >= application_last_runs[schedule.application_id].finished_at)
+          ) &&
+          (custom_current_time - interval_time) == 0.seconds
+        )
+      end
+
+      schedules
     end
 
-    def self.relative_schedules
-      where('run_interval >= 0')
+    # find the run_interval based schedules that should be queued
+    # select anything that isn't currently running and completed
+    # running more than run_interval minutes ago
+    def self.relative_schedules(time, not_finished_applications, application_last_runs)
+      schedules = ::Naf::ApplicationSchedule.
+        joins(:run_interval_style).
+        where("#{Naf.schema_name}.run_interval_styles.name = ?", 'after previous run').
+        enabled.select do |schedule|
+
+        (not_finished_applications[schedule.application_id].nil? &&
+          (application_last_runs[schedule.application_id].nil? ||
+            (time - application_last_runs[schedule.application_id].finished_at) > schedule.run_interval.minutes
+          )
+        )
+      end
+
+      schedules
     end
 
-    def self.pickables
+    def self.constant_schedules
+      ::Naf::ApplicationSchedule.
+        joins(:run_interval_style).
+        where("#{Naf.schema_name}.run_interval_styles.name = ?", 'keep running').
+        enabled
+    end
+
+    def self.enabled
+      where(enabled: true)
+    end
+
+    def self.should_be_queued
+      current_time = Time.zone.now
+      # Applications that are still running
+      not_finished_applications = ::Naf::HistoricalJob.
+        queued_between(current_time - Naf::HistoricalJob::JOB_STALE_TIME, current_time).
+        where("finished_at IS NULL AND request_to_terminate = false").
+        find_all{ |job| job.application_id.present? }.
+        index_by{ |job| job.application_id }
+
+      # Last ran job for each application
+      application_last_runs = ::Naf::HistoricalJob.application_last_runs.
+        index_by{ |job| job.application_id }
+
+      relative_schedules = ::Naf::ApplicationSchedule.
+        relative_schedules(current_time, not_finished_applications, application_last_runs)
+      exact_schedules = ::Naf::ApplicationSchedule.
+        exact_schedules(current_time, not_finished_applications, application_last_runs)
+      constant_schedules = ::Naf::ApplicationSchedule.constant_schedules
+
+      foreman = ::Logical::Naf::ConstructionZone::Foreman.new
+      return (relative_schedules + exact_schedules + constant_schedules).select do |schedule|
+        schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
+                                                                    schedule.application_run_group_name,
+                                                                    schedule.application_run_group_limit)
+      end
+    end
+
+    def self.pickleables
       # check the application is deleted
-      self.where(:deleted => false)
+      self.where(deleted: false)
     end
 
     #-------------------------
@@ -151,18 +232,6 @@ module Naf
 
       num_collisions = self.class.count(conditions: conditions)
       errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
-    end
-
-    def run_interval_at_time_check
-      unless (run_start_minute.blank? || run_interval.blank?)
-        errors.add(:run_interval, "or Run start minute must be nil")
-        errors.add(:run_start_minute, "or Run interval must be nil")
-      end
-    end
-
-    def self.pickleables(pickler)
-      self.joins(:application).
-        where("#{::Naf.schema_name}.applications.deleted IS FALSE")
     end
 
     private

@@ -15,7 +15,8 @@ module Naf
      :run_start_minute,
      :application_run_group_limit,
      :application_schedule_prerequisites_attributes,
-     :enqueue_backlogs].each do |a|
+     :enqueue_backlogs,
+     :run_interval_style_id].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -31,6 +32,7 @@ module Naf
 
     it { should belong_to(:application) }
     it { should belong_to(:application_run_group_restriction) }
+    it { should belong_to(:run_interval_style) }
     it { should have_many(:application_schedule_affinity_tabs) }
     it { should have_many(:affinities) }
     it { should have_many(:application_schedule_prerequisites) }
@@ -143,22 +145,6 @@ module Naf
         schedule2.enabled_application_id_unique
 
         schedule2.errors.messages.should == error_message
-      end
-    end
-
-    describe "#run_interval_at_time_check" do
-      let(:error_messages) { {
-        run_interval: ['or Run start minute must be nil'],
-        run_start_minute: ['or Run interval must be nil']
-      } }
-
-      before do
-        schedule.run_start_minute = 1
-        schedule.run_interval_at_time_check
-      end
-
-      it "add errors to schedule" do
-        schedule.errors.messages.should == error_messages
       end
     end
 

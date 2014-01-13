@@ -253,7 +253,7 @@ module Process::Naf
           ::Naf::ApplicationSchedule.unlock_schedules
 
           # check scheduled tasks
-          should_be_queued.each do |application_schedule|
+          ::Naf::ApplicationSchedule.should_be_queued.each do |application_schedule|
             logger.info escape_html("scheduled application: #{application_schedule}")
             begin
               naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
@@ -608,49 +608,8 @@ module Process::Naf
       end
     end
 
-    def should_be_queued
-      not_finished_applications = ::Naf::HistoricalJob.
-        queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-        where("finished_at IS NULL AND request_to_terminate = false").
-        find_all{ |job| job.application_id.present? }.
-        index_by{ |job| job.application_id }
-
-      application_last_runs = ::Naf::HistoricalJob.application_last_runs.
-        index_by{ |job| job.application_id }
-
-      # find the run_interval based schedules that should be queued
-      # select anything that isn't currently running and completed
-      # running more than run_interval minutes ago
-      relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).relative_schedules.select do |schedule|
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval.minutes)))
-      end
-
-      # find the run_start_minute based schedules
-      # select anything that
-      #  isn't currently running (or queued) AND
-      #  hasn't run since run_start_time AND
-      #  should have been run by now AND
-      #  that should have run within fudge period AND
-      exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).exact_schedules.select do |schedule|
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id].finished_at)) &&
-          (Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) >= 0.seconds &&
-          ((Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) <= (@check_schedules_period * @schedule_fudge_scale).minutes)
-        )
-      end
-
-      foreman = ::Logical::Naf::ConstructionZone::Foreman.new()
-      return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
-        schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
-                                                                    schedule.application_run_group_name,
-                                                                    schedule.application_run_group_limit)
-      end
-    end
-
     def memory_available_to_spawn?
+      return true
       Facter.clear
       memory_size = Facter.memorysize_mb.to_f
       memory_free = Facter.memoryfree_mb.to_f
