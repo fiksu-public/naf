@@ -24,9 +24,5 @@ module Naf
 
     it { should validate_presence_of(:name) }
 
-    #----------------------
-    # *** Class Methods ***
-    #++++++++++++++++++++++
-
   end
 end
