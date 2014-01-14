@@ -17,8 +17,7 @@ With a management console, providing:
 
 === Built on top of Af
 Naf is built on top of Af, which provides a supporting infrastructure through its Application class.
-* Command line option parsing sets instance and class variables. Options can either have default values, can
-provide their own value parser or select from a number of pre-defined parsers.
+* Command line option parsing sets instance and class variables. Options can either have default values, can provide their own value parser or select from a number of pre-defined parsers.
 * Logging is supported and done via log4r.
 * Tight integration with Postgres allows administrators to easily find which scripts are executing db queries.
 * Application components, such as ActiveRecord models, can add loggers and command line options.
@@ -27,27 +26,19 @@ provide their own value parser or select from a number of pre-defined parsers.
 Naf is simply a framework that we use to schedule, run, and monitor Af programs across a distributed network. It provides:
 * Machine node redundancy (i.e. if a machine runner goes down, the other machine runners in the naf cluster can still run jobs).
 * Script run dependencies allow applications to have prerequisites in order to prevent one application from running before another.
-* Run restrictions, which prevent competing applications from running at the same time (i.e. if you have a scraper which is only
-allowed to have a single login active at a time, you can ensure it is only run when no other versions of the script is currently executing).
+* Run restrictions, which prevent competing applications from running at the same time (i.e. if you have a scraper which is only allowed to have a single login active at a time, you can ensure it is only run when no other versions of the script is currently executing).
 * A nice UI, where you can control all these features.
 
 === Runners
-Runners will queue an application if the application schedule is ready and it will check the queue every 30 seconds
-to see if there are available jobs to be run. Administrators can be alarmed when scripts fail to run, and when runners
-are down. In order to ensure that applications run on specific machines, use affinities.
+Runners will queue an application if the application schedule is ready and it will check the queue every 30 seconds to see if there are available jobs to be run. Administrators can be alarmed when scripts fail to run, and when runners are down. In order to ensure that applications run on specific machines, use affinities.
 
 === Affinities
-Machines have affinity slots (which can be required) and applications have affinity tabs. For an application to be able
-to run on a machine, the machine’s affinity slots need to match all of the application's affinity tabs. And for a machine
-to be able to run an application, the application’s affinity tabs need to match all of the machine's required affinity slots.
+Machines have affinity slots (which can be required) and applications have affinity tabs. For an application to be able to run on a machine, the machine’s affinity slots need to match all of the application's affinity tabs. And for a machine to be able to run an application, the application’s affinity tabs need to match all of the machine's required affinity slots.
 
-Machines have an allocate-able number of slots of a specific affinity. Applications will allocate a number of these slots at
-run time, otherwise they will stay queued. This is a way to achieve load balancing, and prevent machines from running out of resources.
+Machines have an allocate-able number of slots of a specific affinity. Applications will allocate a number of these slots at run time, otherwise they will stay queued. This is a way to achieve load balancing, and prevent machines from running out of resources.
 
 === Tags
-Scripts have tags to describe the stage/progress of the process. They can be system or custom tags. All tags are visible
-by the user, so set tags at different stages of your script. This is a way of knowing what is happening in the script
-without having to take a look at the logs.
+Scripts have tags to describe the stage/progress of the process. They can be system or custom tags. All tags are visible by the user, so set tags at different stages of your script. This is a way of knowing what is happening in the script without having to take a look at the logs.
 
 
 === Please find up-to-date information on Naf here: {Naf Wiki}[http://www.github.com/fiksu/naf/wiki]
