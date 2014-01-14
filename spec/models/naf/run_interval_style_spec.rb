@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 module Naf
-  describe AffinityClassification do
+  describe RunIntervalStyle do
     # Mass-assignment
     [:name].each do |a|
       it { should allow_mass_assignment_of(a) }

@@ -20,7 +20,7 @@ module Logical
       let(:physical_app) { FactoryGirl.create(:application, application_schedule: FactoryGirl.create(:schedule_base)) }
       let!(:logical_app) { Application.new(physical_app) }
       let(:scheduled_physical_app) {
-        FactoryGirl.create(:scheduled_application, application_schedule: FactoryGirl.create(:schedule_at_time))
+        FactoryGirl.create(:scheduled_application, application_schedule: FactoryGirl.create(:schedule_base))
       }
 
       context "Class Methods" do
@@ -40,17 +40,9 @@ module Logical
         logical_app.to_hash.keys.should == columns
       end
 
-      it "should render run_start_minute" do
-        scheduled_physical_app.application_schedule.run_start_minute.should be_a(Fixnum)
-
-        Application.new(scheduled_physical_app).run_start_minute.should be_a(String)
-      end
-
       it "should delegate methods to its schedule" do
         methods = [:application_run_group_restriction_name,
-                   :run_interval,
-                   :application_run_group_name,
-                   :run_start_minute]
+                   :application_run_group_name]
         schedule = scheduled_physical_app.application_schedule
         logical_scheduled_app = Application.new(scheduled_physical_app)
 

@@ -12,7 +12,6 @@ module Naf
      :priority,
      :visible,
      :enabled,
-     :run_start_minute,
      :application_run_group_limit,
      :application_schedule_prerequisites_attributes,
      :enqueue_backlogs,
@@ -73,27 +72,49 @@ module Naf
     # *** Class Methods ***
     #++++++++++++++++++++++
 
+    let!(:time) { Time.zone.now.beginning_of_day }
+
     describe "#exact_schedules" do
-      it "return schedule when run_start_minute is set" do
-        schedule.update_attributes!(run_start_minute: 1, run_interval: nil)
-        ::Naf::ApplicationSchedule.exact_schedules.should == [schedule]
+      let!(:job) { FactoryGirl.create(:finished_job) }
+      it "return schedule when it is ready" do
+        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == [schedule]
       end
 
-      it "return no schedules when run_start_minute is not set" do
-        schedule.update_attributes!(run_start_minute: nil, run_interval: nil)
-        ::Naf::ApplicationSchedule.exact_schedules.should == []
+      it "return no schedules when application has not finished running" do
+        apps = { schedule.application_id => job }
+        ::Naf::ApplicationSchedule.exact_schedules(time, apps, {}).should == []
+      end
+
+      it "return no schedules when interval time has not passed" do
+        apps = { schedule.application_id => job }
+        schedule.run_interval = 20
+        ::Naf::ApplicationSchedule.exact_schedules(time, {}, apps).should == []
+      end
+
+      it "return no schedules when it is not time to run the application" do
+        time = Time.zone.now
+        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
       end
     end
 
     describe "#relative_schedules" do
-      it "return schedule when run_interval is set" do
-        schedule.update_attributes!(run_interval: 60)
-        ::Naf::ApplicationSchedule.relative_schedules.should == [schedule]
+      let!(:job) { FactoryGirl.create(:finished_job) }
+      it "return schedule when it is ready" do
+        schedule.run_interval_style.name = 'after previous run'
+        schedule.run_interval_style.save
+
+        ::Naf::ApplicationSchedule.relative_schedules(time, {}, {}).should == [schedule]
       end
 
-      it "return no schedules when run_interval is not set" do
-        schedule.update_attributes!(run_interval: nil)
-        ::Naf::ApplicationSchedule.relative_schedules.should == []
+      it "return no schedules when application has not finished running" do
+        apps = { schedule.application_id => job }
+        ::Naf::ApplicationSchedule.relative_schedules(time, apps, {}).should == []
+      end
+
+      it "return no schedules when interval time has not passed" do
+        apps = { schedule.application_id => job }
+        schedule.run_interval = 20
+        ::Naf::ApplicationSchedule.relative_schedules(time, {}, apps).should == []
       end
     end
 
@@ -109,7 +130,7 @@ module Naf
 
       it "return correct parsing of app" do
         schedule.to_s.should == "::Naf::ApplicationSchedule<ENABLED, id: #{schedule.id}, " +
-          "\"App1\", start every: 1 minutes>"
+          "\"App1\", start at: 00:00>"
       end
     end
 

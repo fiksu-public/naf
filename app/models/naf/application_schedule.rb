@@ -10,7 +10,6 @@ module Naf
                     :priority,
                     :visible,
                     :enabled,
-                    :run_start_minute,
                     :application_run_group_limit,
                     :application_schedule_prerequisites_attributes,
                     :enqueue_backlogs,
@@ -59,12 +58,6 @@ module Naf
                                               less_than: 2147483647,
                                               allow_blank: true
                                             }
-    validates :run_start_minute, numericality: {
-                                   only_integer: true,
-                                   greater_than_or_equal_to: 0,
-                                   less_than: 24*60,
-                                   allow_blank: true
-                                 }
     validates :run_interval, numericality: {
                                only_integer: true,
                                greater_than_or_equal_to: 0,
@@ -96,7 +89,7 @@ module Naf
       unlock_record(SCHEDULES_LOCK_ID)
     end
 
-    # find the run_start_minute based schedules
+    # find the exact based schedules that should be queued
     # select anything that
     #  isn't currently running (or queued) AND
     #  hasn't run since run_interval AND
@@ -105,7 +98,7 @@ module Naf
       custom_current_time = time.to_date + time.strftime('%H').to_i.hours + time.strftime('%M').to_i.minutes
       schedules = ::Naf::ApplicationSchedule.
         joins(:run_interval_style).
-        where("#{Naf.schema_name}.run_interval_styles.name IN (?)", ['at beginning of hour', 'after previous run']).
+        where("#{Naf.schema_name}.run_interval_styles.name IN (?)", ['at beginning of day', 'at beginning of hour']).
         enabled.select do |schedule|
 
         interval_time = time.to_date
@@ -126,7 +119,7 @@ module Naf
       schedules
     end
 
-    # find the run_interval based schedules that should be queued
+    # find the interval based schedules that should be queued
     # select anything that isn't currently running and completed
     # running more than run_interval minutes ago
     def self.relative_schedules(time, not_finished_applications, application_last_runs)
@@ -205,8 +198,10 @@ module Naf
       end
       components << "id: #{id}"
       components << "\"#{application.title}\""
-      if run_start_minute
-        components << "start at: #{"%02d" % (run_start_minute/60)}:#{"%02d" % (run_start_minute%60)}"
+      if run_interval_style.name == 'at beginning of day'
+        components << "start at: #{"%02d" % (run_interval / 60)}:#{"%02d" % (run_interval % 60)}"
+      elsif run_interval_style.name == 'keep running'
+        components << "run constantly"
       else
         components << "start every: #{run_interval} minutes"
       end

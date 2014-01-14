@@ -18,9 +18,6 @@ module Process::Naf
         "time between checking schedules",
         argument_note: "MINUTES",
         default: 1
-    opt :schedule_fudge_scale,
-        "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)",
-        default: 5
     opt :runner_stale_period,
         "amount of time to consider a machine out of touch if it hasn't updated its machine entry",
         argument_note: "MINUTES",

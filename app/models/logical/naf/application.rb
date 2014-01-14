@@ -74,11 +74,32 @@ module Logical
         @app.command
       end
 
-      def run_start_minute
+      def run_time
+        run_time = run_interval
+        run_time = "not scheduled" if run_time.blank?
+
+        run_time
+      end
+
+      def run_interval
+        output = ''
+        if schedule = @app.application_schedule
+          time = schedule.run_interval
+          if schedule.run_interval_style.name == 'at beginning of day'
+            output = exact_time_of_day(time)
+          else
+            output = interval_time(time)
+          end
+        end
+
+        output
+      end
+
+      def exact_time_of_day(time)
         output = ""
-        if schedule = @app.application_schedule and schedule.run_start_minute.present?
-          minutes = schedule.run_start_minute % 60
-          hours =   schedule.run_start_minute / 60
+        if schedule = @app.application_schedule
+          minutes = schedule.run_interval % 60
+          hours =   schedule.run_interval / 60
           output << hours.to_s + ":"
           output << "%02d" % minutes
           output = Time.parse(output).strftime("%I:%M %p")
@@ -87,34 +108,18 @@ module Logical
         return output
       end
 
-      def run_time
-        run_time = run_start_minute.blank? ? run_interval : run_start_minute
-        run_time = "not scheduled" if run_time.blank?
-
-        run_time
-      end
-
-      def run_interval
-        output = ""
-        if schedule = @app.application_schedule and schedule.run_interval.present?
-          time = schedule.run_interval
-          output =
-          if time == 0
-            "run constantly"
-          elsif time < 60
-            pluralize(time, "minute")
-          elsif time % 60 == 0
-            pluralize(time / 60, "hour")
-          else
-            pluralize(time / 60, "hour") + ', ' + pluralize(time % 60, "minute")
-          end
+      def interval_time(time)
+        if time < 60
+          pluralize(time, "minute")
+        elsif time % 60 == 0
+          pluralize(time / 60, "hour")
+        else
+          pluralize(time / 60, "hour") + ', ' + pluralize(time % 60, "minute")
         end
-
-        output
       end
 
       def prerequisites
-        if schedule = @app.application_schedule and schedule.application_schedule_prerequisites.present?
+        if schedule = @app.application_schedule && schedule.try(:application_schedule_prerequisites).present?
           schedule.prerequisites.map do |schedule_prerequisite|
             schedule_prerequisite.application.short_name_if_it_exist
           end.join(", \n")
@@ -135,7 +140,6 @@ module Logical
         case method_name
         when :application_run_group_restriction_name,
              :application_run_group_name,
-             :run_start_minute,
              :priority,
              :application_run_group_limit,
              :visible,

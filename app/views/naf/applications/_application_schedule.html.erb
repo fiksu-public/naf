@@ -32,6 +32,14 @@
 </br/>
 
 <div class="field">
+  <%= f.label :run_interval_style_id, "Run Interval Style*" %>
+  <%= f.select(:run_interval_style_id,
+               ::Naf::RunIntervalStyle.all.map { |s| [s.name, s.id] },
+               include_blank: true) %>
+</div>
+</br/>
+
+<div class="field">
   <%= f.label :priority %>
   <%= f.text_field :priority %>
 </div>

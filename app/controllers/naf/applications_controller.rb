@@ -107,7 +107,6 @@ module Naf
                          :application_run_group_name,
                          :application_run_group_restriction_name,
                          :run_interval,
-                         :run_start_minute,
                          :priority,
                          :application_run_group_limit,
                          :visible,
