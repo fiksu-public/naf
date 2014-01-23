@@ -52,9 +52,9 @@ module Naf
     end
 
     def update
-      application = Naf::Application.find(params[:id])
-      if application.update_attributes(params[:application])
-        redirect_to(application, notice: "Application #{application.title} was successfully updated.")
+      @application = Naf::Application.find(params[:id])
+      if @application.update_attributes(params[:application])
+        redirect_to(@application, notice: "Application #{@application.title} was successfully updated.")
       else
         render action: :edit
       end

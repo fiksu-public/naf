@@ -5,7 +5,7 @@
     </div>
   <% end %>
 
-  <%= f.hidden_field :application_id, value: params[:application_id] %>
+  <%= f.hidden_field :application_id, value: @application_schedule.application_id %>
 
   <div class="field">
     <%= f.label :application_run_group_restriction_id, "Application run group restriction*" %>

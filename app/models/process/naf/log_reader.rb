@@ -3,8 +3,9 @@ require 'yajl'
 module Process::Naf
   class LogReader < ::Process::Naf::Application
 
-  	opt :job_id, type: :int
-  	opt :runner_id, type: :int
+    opt :job_id, type: :int
+    opt :runner_id, type: :int
+    opt_select :job_id_or_runner_id, one_of: [:job_id, :runner_id]
 
     UUID_REGEX = /[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}/
 
@@ -33,7 +34,6 @@ module Process::Naf
         else
           puts 'No logs found'
         end
-
   		elsif @runner_id.present?
         runner_log_files.each do |file|
           # Use Yajl JSON library to parse the log files, as they contain multiple JSON blocks
@@ -54,7 +54,6 @@ module Process::Naf
         else
           puts 'No logs found'
         end
-
   		end
   	end
 

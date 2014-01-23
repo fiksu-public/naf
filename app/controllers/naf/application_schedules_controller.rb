@@ -31,7 +31,7 @@ module Naf
     end
 
     def new
-      @application_schedule = Naf::ApplicationSchedule.new
+      @application_schedule = Naf::ApplicationSchedule.new(application_id: params[:application_id])
     end
 
     def create
@@ -61,7 +61,7 @@ module Naf
       if @application_schedule.update_attributes(params[:application_schedule])
         redirect_to(@application_schedule, notice: "Application Schedule was successfully updated.")
       else
-        render action: :show
+        render action: :edit
       end
     end
 

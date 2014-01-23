@@ -50,7 +50,11 @@ module Naf
     # *** Validations ***
     #++++++++++++++++++++
 
-    validates :application_run_group_restriction_id, presence: true
+    validates :application_run_group_restriction_id,
+              :run_interval_style_id,
+              :application_id,
+              :run_interval,
+              :priority, presence: true
     validates :priority, numericality: {
                            only_integer: true,
                            greater_than: -2147483648,
@@ -207,13 +211,7 @@ module Naf
       end
       components << "id: #{id}"
       components << "\"#{application.title}\""
-      if run_interval_style.name == 'at beginning of day'
-        components << "start at: #{"%02d" % (run_interval / 60)}:#{"%02d" % (run_interval % 60)}"
-      elsif run_interval_style.name == 'keep running'
-        components << "run constantly"
-      else
-        components << "start every: #{run_interval} minutes"
-      end
+      components << ::Logical::Naf::ApplicationSchedule.new(self).display
 
       return "::Naf::ApplicationSchedule<#{components.join(', ')}>"
     end
