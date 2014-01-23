@@ -1,5 +1,13 @@
 = Release Notes
 
+=== Version 2.1.0
+
+Featurs/Changes:
+* Run interval styles determines the type schedule interval (daily, hourly, run, constant)
+* Application can have many schedules
+* Application run group quantum specifies the number of jobs queued during a schedule
+* UI changes
+
 === Version 2.0.0
 
 Featurs/Changes:

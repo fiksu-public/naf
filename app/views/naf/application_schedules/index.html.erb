@@ -1,7 +1,9 @@
 <% content_for :body do %>
-  <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
-  <%= render partial: 'search_container' %>
+  <div id='page-label'>
+    <h3 id="record_name">Application Schedules</h3>
+  </div>
   <%= render partial: 'naf/shared/select_per_page' %>
+  </br></br>
 
   <div id="flash_message">
     <% unless notice.blank? %>
@@ -17,12 +19,16 @@
     <thead>
       <tr>
         <th>Id</th>
-        <th>Title</th>
-        <th>Short Name</th>
-        <th>Type</th>
-        <th>Application Schedules</th>
-        <th>Last Queued At</th>
-        <th>Actions</th>
+        <th>Application</th>
+        <th>Run Group Name</th>
+        <th>Run Group Restriction</th>
+        <th>Run Interval Style</th>
+        <th>Run Interval</th>
+        <th>Run Group Quantum</th>
+        <th>Run Group Limit</th>
+        <th>Enqueue</th>
+        <th>Affinities</th>
+        <th>Prerequisites</th>
       </tr>
     </thead>
     <tbody>
@@ -31,10 +37,9 @@
   </table>
 
   <% content_for :javascripts do %>
-    <%= javascript_include_tag("dataTablesTemplates/applications.js") %>
+    <%= javascript_include_tag("dataTablesTemplates/application_schedules.js") %>
     <script type='text/javascript'>
-      var sAjaxSource = "<%= naf.applications_path(:json) %>";
-      var postSource = "<%= naf.historical_jobs_path(:json) %>";
+      var sAjaxSource = "<%= naf.application_schedules_path(:json) %>";
     </script>
   <% end %>
 <% end %>

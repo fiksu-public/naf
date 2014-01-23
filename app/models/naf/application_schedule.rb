@@ -11,9 +11,13 @@ module Naf
                     :visible,
                     :enabled,
                     :application_run_group_limit,
+                    :application_run_group_quantum,
                     :application_schedule_prerequisites_attributes,
                     :enqueue_backlogs,
-                    :run_interval_style_id
+                    :run_interval_style_id,
+                    :application,
+                    :run_interval_style,
+                    :application_run_group_restriction
 
     SCHEDULES_LOCK_ID = 0
 
@@ -67,7 +71,6 @@ module Naf
 
     before_save :check_blank_values
     validate :visible_enabled_check
-    validate :enabled_application_id_unique
     validate :prerequisite_application_schedule_id_uniqueness
 
     #--------------------
@@ -170,9 +173,15 @@ module Naf
 
       foreman = ::Logical::Naf::ConstructionZone::Foreman.new
       return (relative_schedules + exact_schedules + constant_schedules).select do |schedule|
+        affinities = []
+        schedule.affinities.each do |affinity|
+          affinities << { affinity_id: affinity.id }
+        end
+
         schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
                                                                     schedule.application_run_group_name,
-                                                                    schedule.application_run_group_limit)
+                                                                    schedule.application_run_group_limit,
+                                                                    affinities)
       end
     end
 
@@ -214,19 +223,6 @@ module Naf
         errors.add(:visible, "must be true, or set enabled to false")
         errors.add(:enabled, "must be false, if visible is set to false")
       end
-    end
-
-    def enabled_application_id_unique
-      return unless enabled
-
-      if id
-        conditions = ["id <> ? AND application_id = ? AND enabled = ?", id, application_id, true]
-      else
-        conditions = ["application_id = ? AND enabled = ?", application_id, true]
-      end
-
-      num_collisions = self.class.count(conditions: conditions)
-      errors.add(:application_id, "is enabled and has already been taken") if num_collisions > 0
     end
 
     private

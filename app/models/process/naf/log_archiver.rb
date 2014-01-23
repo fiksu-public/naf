@@ -4,7 +4,7 @@ module Process::Naf
   class LogArchiver < ::Process::Naf::Application
 
     NAF_JOBS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/"
-    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/*/*"
+    NAF_RUNNERS_LOG_PATH = "#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/runners/"
     DATE_REGEX = /\d{8}_\d{6}/
     LOG_RETENTION = 1
 

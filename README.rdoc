@@ -44,3 +44,4 @@ Scripts have tags to describe the stage/progress of the process. They can be sys
 === Please find up-to-date information on Naf here: {Naf Wiki}[http://www.github.com/fiksu/naf/wiki]
 === Instructions on upgrading to Naf v1.1.4: {Instructions}[https://github.com/fiksu/naf/wiki/Upgrading-to-Naf-v1.1.4]
 === Instructions on upgrading to Naf v2.0: {Instructions}[https://github.com/fiksu/naf/wiki/Upgrading-to-Naf-v2.0]
+=== Instructions on upgrading to Naf v2.1: {Instructions}[https://github.com/fiksu/naf/wiki/Upgrading-to-Naf-v2.1]

@@ -10,8 +10,8 @@ module Naf
      :log_level,
      :short_name,
      :deleted,
-     :application_schedule,
-     :application_schedule_attributes].each do |a|
+     :application_schedules,
+     :application_schedules_attributes].each do |a|
       it { should allow_mass_assignment_of(a) }
     end
 
@@ -26,7 +26,7 @@ module Naf
     #+++++++++++++++++++++
 
     it { should belong_to(:application_type) }
-    it { should have_one(:application_schedule) }
+    it { should have_many(:application_schedules) }
     it { should have_many(:historical_jobs) }
 
     #--------------------

@@ -3,10 +3,9 @@ Naf::Engine.routes.draw do
     resources :historical_job_affinity_tabs, except: [:destroy]
   end
 
-  resources :applications, except: [:destroy] do
-    resources :application_schedules, only: [] do
-      resources :application_schedule_affinity_tabs
-    end
+  resources :applications, except: [:destroy]
+  resources :application_schedules do
+    resources :application_schedule_affinity_tabs
   end
 
   resources :machines, except: [:destroy] do

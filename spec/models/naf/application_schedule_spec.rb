@@ -150,24 +150,5 @@ module Naf
       end
     end
 
-    describe "#enabled_application_id_unique" do
-      let(:error_message) { {
-        application_id: ['is enabled and has already been taken']
-      } }
-
-      it "return nil if enabled is false" do
-        schedule.enabled = false
-        schedule.enabled_application_id_unique.should == nil
-      end
-
-      it "return nil if enabled is false" do
-        schedule2 = FactoryGirl.create(:schedule)
-        schedule2.application_id = schedule.application_id
-        schedule2.enabled_application_id_unique
-
-        schedule2.errors.messages.should == error_message
-      end
-    end
-
   end
 end

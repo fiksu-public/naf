@@ -1,9 +1,8 @@
 <%= form_for(@machine) do |f| %>
-
   <% if @machine.errors.any? %>
-  <div id="errorExplanation">
-    <h2><%= pluralize(@machine.errors.count, "error") %> prohibited machine from being saved:</h2>
-  </div>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@machine.errors.count, "error") %> prohibited machine from being saved:</h2>
+    </div>
   <% end %>
   </br>
 

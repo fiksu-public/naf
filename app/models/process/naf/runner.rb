@@ -255,7 +255,7 @@ module Process::Naf
             begin
               naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
               # this doesn't work very well for run_group_limits in the thousands
-              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+              Range.new(0, application_schedule.application_run_group_quantum || 1, true).each do
                 naf_boss.enqueue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
@@ -612,10 +612,12 @@ module Process::Naf
       memory_free_percentage = (memory_free / memory_size) * 100.0
 
       if (memory_free_percentage >= @minimum_memory_free)
-        logger.detail "memory available: #{memory_free_percentage}% (free) >= #{@minimum_memory_free}% (min percent)"
+        logger.detail "memory available: #{memory_free_percentage}% (free) >= " +
+          "#{@minimum_memory_free}% (min percent)"
         return true
       end
-      logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
+      logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: " +
+        "#{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
 
       return false
     end

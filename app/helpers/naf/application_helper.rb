@@ -21,7 +21,8 @@ module Naf
     NAF_CREATE_BLOCKED_RESOURCES = []
     NAF_ALL_VISIBLE_RESOURCES = {
                                   'historical_jobs' => '',
-                                  'applications' => '',
+                                  'scripts' => ['applications',
+                                                'application_schedules'],
                                   'machines' => '',
                                   'runners' => ['machine_runners',
                                                 'machine_runner_invocations'],
@@ -39,7 +40,8 @@ module Naf
 
     def naf_last_queued_at_link(app)
       if historical_job = app.last_queued_job
-        link_to "#{time_ago_in_words(historical_job.created_at, true)} ago, #{historical_job.created_at.localtime.strftime("%Y-%m-%d %r")}",
+        link_to "#{time_ago_in_words(historical_job.created_at, true)} ago, " +
+          "#{historical_job.created_at.localtime.strftime("%Y-%m-%d %r")}",
           naf.historical_job_path(historical_job)
       else
         ""
@@ -49,15 +51,22 @@ module Naf
     def naf_highlight_tab?(tab)
       case tab
         when "machines"
-          [tab, "machine_affinity_slots"].include?(controller_name)
+          [tab,
+           "machine_affinity_slots"].include?(controller_name)
         when "runners"
-          ["machine_runners", "machine_runner_invocations"].include?(controller_name)
+          ["machine_runners",
+           "machine_runner_invocations"].include?(controller_name)
         when "historical_jobs"
-          [tab, "historical_job_affinity_tabs"].include?(controller_name)
-        when "applications"
-          [tab, "application_schedule_affinity_tabs"].include?(controller_name)
+          [tab,
+           "historical_job_affinity_tabs"].include?(controller_name)
+        when "scripts"
+          [tab,
+           "applications",
+           "application_schedules",
+           "application_schedule_affinity_tabs"].include?(controller_name)
         when "loggers"
-          ["logger_styles", "logger_names"].include?(controller_name)
+          ["logger_styles",
+           "logger_names"].include?(controller_name)
         when "janitorial_assignments"
           ["Naf::JanitorialArchiveAssignment",
            "Naf::JanitorialCreateAssignment",
@@ -81,10 +90,10 @@ module Naf
             action: 'show',
             id: params[:historical_job_id]
         when "application_schedule_affinity_tabs"
-          link_to "Back to Application",
-            controller: 'applications',
+          link_to "Back to Application Schedule",
+            controller: 'application_schedules',
             action: 'show',
-            id: params[:application_id]
+            id: params[:application_schedule_id]
         when "machine_affinity_slots"
           link_to "Back to Machine",
             controller: 'machines',
@@ -98,7 +107,8 @@ module Naf
     def naf_nested_resource_index?
       ["historical_job_affinity_tabs",
        "application_schedule_affinity_tabs",
-       "machine_affinity_slots"].include?(controller_name) and !params[:id]
+       "machine_affinity_slots",
+       "application_schedules"].include?(controller_name) and !params[:id]
     end
 
     def naf_table_title
@@ -112,8 +122,6 @@ module Naf
         "Jobs"
       else
         case controller_name
-          when "application_schedule_affinity_tabs"
-            Application.find(params[:application_id]).title + ", Affinity Tabs"
           when "machine_affinity_slots"
             machine = Machine.find(params[:machine_id])
             name = machine.server_name
@@ -159,6 +167,8 @@ module Naf
           link_to "Loggers", naf.logger_styles_path
         when "runners"
           link_to "Runners", naf.machine_runners_path
+        when "scripts"
+          link_to "Scripts", naf.applications_path
         when "janitorial_assignments"
           link_to "Janitorial Assignments", naf.janitorial_archive_assignments_path
         when "janitorial_archive_assignments"
@@ -173,9 +183,14 @@ module Naf
     end
 
     def naf_generate_create_link
-      return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name) or NAF_CREATE_BLOCKED_RESOURCES.include?(controller_name)
-      return link_to "Add a Job", naf.new_historical_job_path, { class: 'add_job' } if naf_display_job_search_link?
-      link_to "Create new #{naf_model_name}", { controller: controller_name, action: 'new' }
+      return '' if NAF_READ_ONLY_RESOURCES.include?(controller_name) ||
+        NAF_CREATE_BLOCKED_RESOURCES.include?(controller_name)
+
+      return link_to "Add a Job",
+        naf.new_historical_job_path,
+        { class: 'add_job' } if naf_display_job_search_link?
+
+      return link_to "Create new #{naf_model_name}", { controller: controller_name, action: 'new' }
     end
 
     def naf_display_job_search_link?
@@ -194,18 +209,25 @@ module Naf
 
     def naf_generate_edit_link
       return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name)
-      link_to "Edit", { controller: controller_name, action: 'edit', id: params[:id] }, class: 'edit'
+      link_to "Edit",
+        { controller: controller_name, action: 'edit', id: params[:id] },
+        class: 'edit'
     end
 
     def naf_generate_back_link
-      link_to "Back to #{naf_make_header(controller_name)}", { controller: controller_name, action: 'index' }, class: 'back'
+      link_to "Back to #{naf_make_header(controller_name)}",
+        { controller: controller_name, action: 'index' },
+        class: 'back'
     end
 
     def naf_generate_destroy_link
-      return "" if NAF_READ_ONLY_RESOURCES.include?(controller_name) or NAF_DESTROY_BLOCKED_RESOURCES.include?(controller_name)
+      return '' if NAF_READ_ONLY_RESOURCES.include?(controller_name) ||
+        NAF_DESTROY_BLOCKED_RESOURCES.include?(controller_name)
+
       case controller_name
         when "application_schedule_affinity_tabs"
-          link_to "Destroy", application_application_schedule_application_schedule_affinity_tab_url(@application, @application_schedule, @record),
+          link_to "Destroy",
+            application_schedule_application_schedule_affinity_tab_url(@application_schedule, @record),
             { confirm: "Are you sure you want to destroy this #{naf_model_name}?",
               method: :delete,
               class: 'destroy' }
@@ -231,7 +253,10 @@ module Naf
       fields = f.fields_for(association, new_object, child_index: "new_#{association}") do |builder|
         render(association.to_s, f: builder)
       end
-      link_to_function(name, "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", id: 'add_prerequisite')
+      link_to_function(
+        name,
+        "add_fields(this, \"#{association}\", \"#{escape_javascript(fields)}\")", id: 'add_prerequisite'
+      )
     end
 
     def add_color(status)

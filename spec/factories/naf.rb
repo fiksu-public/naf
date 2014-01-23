@@ -153,10 +153,12 @@ FactoryGirl.define do
   factory :application, parent: :application_base do
     sequence(:command) { |n| "::Naf::HistoricalJob.test hello_#{n}" }
     sequence(:title) { |n| "Test #{n}" }
-  end
 
-  factory :scheduled_application, parent: :application do
-    association :application_schedule, factory: :schedule
+    factory :scheduled_application do
+      after(:create) do |application|
+        create_list(:schedule, 1, application: application)
+      end
+    end
   end
 
   #############################################################
