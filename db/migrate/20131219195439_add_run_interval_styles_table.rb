@@ -19,11 +19,22 @@ class AddRunIntervalStylesTable < ActiveRecord::Migration
       DROP INDEX #{Naf.schema_name}.applications_have_one_schedule_udx ;
       ALTER TABLE #{Naf.schema_name}.application_schedules
         DROP CONSTRAINT application_schedules_application_id_key;
+
+      ALTER TABLE #{Naf.schema_name}.historical_jobs
+        ADD COLUMN application_schedule_id INTEGER NULL REFERENCES #{Naf.schema_name}.application_schedules;
+      ALTER TABLE #{Naf.schema_name}.running_jobs
+        ADD COLUMN application_schedule_id INTEGER NULL REFERENCES #{Naf.schema_name}.application_schedules;
+      ALTER TABLE #{Naf.schema_name}.queued_jobs
+        ADD COLUMN application_schedule_id INTEGER NULL REFERENCES #{Naf.schema_name}.application_schedules;
     SQL
   end
 
   def down
     execute <<-SQL
+      ALTER TABLE #{Naf.schema_name}.queued_jobs DROP COLUMN application_schedule_id;
+      ALTER TABLE #{Naf.schema_name}.running_jobs DROP COLUMN application_schedule_id;
+      ALTER TABLE #{Naf.schema_name}.historical_jobs DROP COLUMN application_schedule_id;
+
       ALTER TABLE #{Naf.schema_name}.application_schedules
         ADD CONSTRAINT application_schedules_application_id_key UNIQUE (application_id);
       CREATE UNIQUE INDEX applications_have_one_schedule_udx

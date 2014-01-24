@@ -92,10 +92,13 @@ module Logical
           output << 'always'
         end
 
-        if schedule.application_run_group_quantum == schedule.application_run_group_limit
+        if schedule.application_run_group_quantum.present?
           output << "-#{schedule.application_run_group_quantum}"
         else
-          output << "-#{schedule.application_run_group_quantum}/#{schedule.application_run_group_limit}"
+          output << "-1"
+        end
+        if schedule.application_run_group_limit.present?
+          output << "/#{schedule.application_run_group_limit}"
         end
 
         output

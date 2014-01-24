@@ -81,12 +81,12 @@ module Naf
       end
 
       it "return no schedules when application has not finished running" do
-        apps = { schedule.application_id => job }
+        apps = { schedule.id => job }
         ::Naf::ApplicationSchedule.exact_schedules(time, apps, {}).should == []
       end
 
       it "return no schedules when interval time has not passed" do
-        apps = { schedule.application_id => job }
+        apps = { schedule.id => job }
         schedule.run_interval = 20
         ::Naf::ApplicationSchedule.exact_schedules(time, {}, apps).should == []
       end
@@ -130,7 +130,7 @@ module Naf
 
       it "return correct parsing of app" do
         schedule.to_s.should == "::Naf::ApplicationSchedule<ENABLED, id: #{schedule.id}, " +
-          "\"App1\", start at: 00:00>"
+          "\"App1\", #{::Logical::Naf::ApplicationSchedule.new(schedule).display}>"
       end
     end
 

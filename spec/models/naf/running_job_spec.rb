@@ -6,6 +6,7 @@ module Naf
 
     # Mass-assignment
     [:application_id,
+     :application_schedule_id,
      :application_type_id,
      :command,
      :application_run_group_restriction_id,
@@ -33,6 +34,7 @@ module Naf
 
     it { should belong_to(:historical_job) }
     it { should belong_to(:application) }
+    it { should belong_to(:application_schedule) }
     it { should belong_to(:application_type) }
     it { should belong_to(:application_run_group_restriction) }
     it { should belong_to(:started_on_machine) }

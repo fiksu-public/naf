@@ -115,9 +115,9 @@ module Naf
           interval_time += time.strftime('%H').to_i.hours + schedule.run_interval.minutes
         end
 
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            (interval_time >= application_last_runs[schedule.application_id].finished_at)
+        (not_finished_applications[schedule.id].nil? &&
+          (application_last_runs[schedule.id].nil? ||
+            (interval_time >= application_last_runs[schedule.id].finished_at)
           ) &&
           (custom_current_time - interval_time) == 0.seconds
         )
@@ -135,9 +135,9 @@ module Naf
         where("#{Naf.schema_name}.run_interval_styles.name = ?", 'after previous run').
         enabled.select do |schedule|
 
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            (time - application_last_runs[schedule.application_id].finished_at) > schedule.run_interval.minutes
+        (not_finished_applications[schedule.id].nil? &&
+          (application_last_runs[schedule.id].nil? ||
+            (time - application_last_runs[schedule.id].finished_at) > schedule.run_interval.minutes
           )
         )
       end
@@ -162,12 +162,12 @@ module Naf
       not_finished_applications = ::Naf::HistoricalJob.
         queued_between(current_time - Naf::HistoricalJob::JOB_STALE_TIME, current_time).
         where("finished_at IS NULL AND request_to_terminate = false").
-        find_all{ |job| job.application_id.present? }.
-        index_by{ |job| job.application_id }
+        find_all{ |job| job.application_schedule_id.present? }.
+        index_by{ |job| job.application_schedule_id }
 
       # Last ran job for each application
       application_last_runs = ::Naf::HistoricalJob.application_last_runs.
-        index_by{ |job| job.application_id }
+        index_by{ |job| job.application_schedule_id }
 
       relative_schedules = ::Naf::ApplicationSchedule.
         relative_schedules(current_time, not_finished_applications, application_last_runs)
