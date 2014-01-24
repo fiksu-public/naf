@@ -53,7 +53,6 @@ module Naf
     validates :application_run_group_restriction_id,
               :run_interval_style_id,
               :application_id,
-              :run_interval,
               :priority, presence: true
     validates :priority, numericality: {
                            only_integer: true,
@@ -76,6 +75,7 @@ module Naf
     before_save :check_blank_values
     validate :visible_enabled_check
     validate :prerequisite_application_schedule_id_uniqueness
+    validate :run_interval_check
 
     #--------------------
     # *** Delegations ***
@@ -220,6 +220,22 @@ module Naf
       unless visible or !enabled
         errors.add(:visible, "must be true, or set enabled to false")
         errors.add(:enabled, "must be false, if visible is set to false")
+      end
+    end
+
+    # When rolling back from Naf v2.1 to v2.0, check whether run_interval
+    # or run_start_minute is nil. Otherwise, just check the presence of
+    # run_interval.
+    def run_interval_check
+      if self.attributes.keys.include?('run_start_minute')
+        if !run_start_minute.present? && !run_interval.present?
+          errors.add(:run_interval, "or run_start_minute must be nil")
+          errors.add(:run_start_minute, "or run_interval must be nil")
+        end
+      else
+        if !run_interval.present?
+          errors.add(:run_interval, "must be present")
+        end
       end
     end
 
