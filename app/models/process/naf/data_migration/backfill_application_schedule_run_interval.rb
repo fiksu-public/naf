@@ -13,13 +13,13 @@ module Process::Naf::DataMigration
       if @update.present?
         setup
         update_run_interval_styles_ids
+        logger.info 'Finished updating application schedules'
       elsif @rollback.present?
         if validate_applications
           rollback_changes
+          logger.info 'Finished updating application schedules'
         end
       end
-
-      logger.info 'Finished updating application schedules'
     end
 
     private
@@ -58,7 +58,7 @@ module Process::Naf::DataMigration
       end
 
       if applications.present?
-        logger.info "The following applications have more than one schedule: '#{applications.join(', ')}'. " +
+        logger.warn "The following applications have more than one schedule: #{applications.join(', ')}. " +
         "In order to rollback successfully, an application can have at most one schedule."
         return false
       else
