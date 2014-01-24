@@ -153,10 +153,12 @@ FactoryGirl.define do
   factory :application, parent: :application_base do
     sequence(:command) { |n| "::Naf::HistoricalJob.test hello_#{n}" }
     sequence(:title) { |n| "Test #{n}" }
-  end
 
-  factory :scheduled_application, parent: :application do
-    association :application_schedule, factory: :schedule
+    factory :scheduled_application do
+      after(:create) do |application|
+        create_list(:schedule, 1, application: application)
+      end
+    end
   end
 
   #############################################################
@@ -166,20 +168,24 @@ FactoryGirl.define do
   factory :schedule_base, class: ::Naf::ApplicationSchedule do
     association :application, factory: :application
     association :application_run_group_restriction, factory: :no_limit
+    association :run_interval_style, factory: :run_interval_style
+    run_interval 0
   end
 
   factory :schedule, parent: :schedule_base do
-    run_interval 1
     sequence(:application_run_group_name) { |n| "Run Group #{n}" }
   end
 
-  factory :schedule_at_time, parent: :schedule do
-    run_interval nil
-    run_start_minute 5
+  #############################################################
+  #######   Application Schedule Prerequisites ################
+  #############################################################
+
+  factory :run_interval_style, class: ::Naf::RunIntervalStyle do
+    name 'at beginning of day'
   end
 
   #############################################################
-  #######   Application Schedules ############ ################
+  #######   Application Schedules Prerequisite ################
   #############################################################
 
   factory :schedule_prerequisite, class: ::Naf::ApplicationSchedulePrerequisite do

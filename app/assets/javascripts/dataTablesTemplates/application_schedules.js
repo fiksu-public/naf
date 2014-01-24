@@ -8,18 +8,23 @@ jQuery(document).ready(function() {
       initPageSelect();
     },
     "bAutoWidth": false,
+    "bSort": true,
     "aoColumnDefs": [
-      { "sClass": "center", "aTargets": [ 6 ] }
+      { "bSortable": false, "aTargets": [9, 10] },  // turn off sorting
+      { "sClass": "center", "aTargets": [6, 7, 8] }
     ],
     "aoColumns": [
-        { "sWidth": "3%"},      // Id
-        null,                   // Title
-        { "sWidth": "15%"},     // Short Name
-        { "sWidth": "10%"},     // Script Type Name
-        { "sWidth": "15%"},     // Application Schedules
-        { "sWidth": "15%"},     // Last Queued At
-        { "sWidth": "5%"}       // Actions
-
+        { "sWidth": "2%"},      // Id
+        { "sWidth": "15%"},     // Application
+        { "sWidth": "15%"},     // Run Group Name
+        { "sWidth": "9%"},      // Run Group Restriction
+        { "sWidth": "10%"},     // Run Interval Style
+        { "sWidth": "4%"},      // Run Interval
+        { "sWidth": "5%"},      // Run Group Quantum
+        { "sWidth": "5%"},      // Run Group Limit
+        { "sWidth": "5%"},      // Enqueue Backlogs
+        { "sWidth": "10%"},     // Affinities
+        { "sWidth": "10%"}      // Prerequesites
     ],
     "fnServerData": function ( sSource, aoData, fnCallback ) {
       _.each(jQuery('.datatable_variable').serializeArray(), function(dv) { aoData.push(dv); });
@@ -30,9 +35,7 @@ jQuery(document).ready(function() {
       });
     },
     "fnRowCallback": function( nRow, aData, iDisplayIndex, iDisplayIndexFull ) {
-      addLinkToApplication(nRow, aData);
-      colorizationDeletedOrHidden(nRow, aData);
-      checkTimeFormat(nRow, aData);
+      colorizationDisabled(nRow, aData);
       return nRow;
     },
     "sDom": "Rlfrtip"
@@ -61,26 +64,9 @@ jQuery(document).ready(function() {
   });
 });
 
-function addLinkToApplication(nRow, aData) {
-  var id = aData[0];
-  var row = jQuery('<a href="/job_system/applications/' + id + '">' + id + '</a>' );
-  jQuery('td:nth-child(1)', nRow).empty().append(row);
-}
-
-function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[6] == 'true') {
+function colorizationDisabled(nRow, aData) {
+  if (aData[11] == false) {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
 
-function checkTimeFormat(nRow, aData) {
-  var l_q_a_array = jQuery(aData[5]).text().split(',');
-  var last_queued_at;
-  if(jQuery('#time_format').val() == 'lexically') {
-    last_queued_at = l_q_a_array[0];
-  } else {
-    last_queued_at = l_q_a_array[1];
-  }
-
-  jQuery('td:nth-child(6)', nRow).empty().append(jQuery(aData[5]).text(last_queued_at));
-}

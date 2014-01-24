@@ -1,0 +1,130 @@
+<% content_for :body do %>
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <div id="record">
+    <h2>Application</h2>
+    <%= link_to 'Back to Application Schedules', application_schedules_path %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to 'Edit', controller: 'application_schedules',
+                        action: 'edit',
+                        id: @application_schedule.id,
+                        application_id: @application_schedule.application.id %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to "Add Affinity", new_application_schedule_application_schedule_affinity_tab_path(@application_schedule.id) %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td><%= @application_schedule.id %></td>
+        </tr>
+        <tr>
+          <td>Created At</td>
+          <td><%= @application_schedule.created_at %></td>
+        </tr>
+        <tr>
+          <td>Updated At</td>
+          <td><%= @application_schedule.updated_at %></td>
+        </tr>
+        <tr>
+          <td>Application</td>
+          <td style="white-space: pre-wrap;"><%= @application_schedule.application.title %></td>
+        </tr>
+        <tr>
+          <td>Title</td>
+          <td><%= @application_schedule.title %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Name</td>
+          <td style="white-space: pre-wrap;"><%= @application_schedule.application_run_group_name %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Limit</td>
+          <td><%= @application_schedule.application_run_group_limit %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Quantum</td>
+          <td><%= @application_schedule.application_run_group_quantum %></td>
+        </tr>
+        <tr>
+          <td>Application Run Group Restriction Name</td>
+          <td><%= @application_schedule.application_run_group_restriction_name %></td>
+        </tr>
+        <tr>
+          <td>Run Interval</td>
+          <td><%= @application_schedule.run_interval %></td>
+        </tr>
+        <tr>
+          <td>Run Interval Style</td>
+          <td><%= @application_schedule.run_interval_style %></td>
+        </tr>
+        <tr>
+          <td>Priority</td>
+          <td><%= @application_schedule.priority %></td>
+        </tr>
+        <tr>
+          <td>Visible</td>
+          <td><%= @application_schedule.visible %></td>
+        </tr>
+        <tr>
+          <td>Enabled</td>
+          <td><%= @application_schedule.enabled %></td>
+        </tr>
+        <tr>
+          <td>Enqueue Backlogs</td>
+          <td><%= @application_schedule.enqueue_backlogs %></td>
+        </tr>
+        <tr>
+          <td><%= link_to "Application Schedule Affinity Tabs",
+                  application_schedule_application_schedule_affinity_tabs_path(@application_schedule.id) %>
+          </td>
+          <td><%= @application_schedule.affinities %></td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+    <%= link_to "Destroy", @application_schedule.schedule,
+        { confirm: "Are you sure you want to destroy this Application Schedule?",
+          method: :delete,
+          class: 'destroy' } %>
+
+    <h2>Prerequisites</h2>
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th width="10%">ID</th>
+          <th>Command</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @application_schedule.application_schedule_prerequisites.each do |prereq| -%>
+        <tr>
+          <td><%= link_to prereq.prerequisite_application_schedule.id, application_path(prereq.prerequisite_application_schedule.application) %></td>
+          <td style="white-space: pre-wrap;"><%= prereq.prerequisite_application_schedule.application.command %></td>
+        </tr>
+        <% end -%>
+      </tbody>
+    </table>
+    </br>
+
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

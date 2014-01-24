@@ -19,40 +19,40 @@
 </div>
 <div id="search_container">
   <%= form_tag(naf.applications_path, method: "get", id: 'application_search', class: 'search_select_input') do %>
-      <div style="width:30%;" class="display-inline-block">
-          <div class="field">
-            <%= label(:title, "Title:") %>
-            <%= text_field(:search, :title, { class: 'datatable_variable' }) %>
-          </div>
-          <br/>
+    <div style="width:30%;" class="display-inline-block">
+      <div class="field">
+        <%= label(:title, "Title:") %>
+        <%= text_field(:search, :title, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
 
-          <div class="field">
-            <%= label(:application_run_group_name, "Run Group:") %>
-            <%= text_field(:search, :application_run_group_name, { class: 'datatable_variable' }) %>
-          </div>
-          <br/>
+      <div class="field">
+        <%= label(:application_run_group_name, "Run Group:") %>
+        <%= text_field(:search, :application_run_group_name, { class: 'datatable_variable' }) %>
       </div>
-      <div style="width:30%; padding-left:40px;" class="display-inline-block">
-          <div class="field">
-            <%= label(:command, "Command:") %>
-            <%= text_field(:search, :command, { class: 'datatable_variable' }) %>
-          </div>
-          <br/>
+      <br/>
+    </div>
+    <div style="width:30%; padding-left:40px;" class="display-inline-block">
+      <div class="field">
+        <%= label(:command, "Command:") %>
+        <%= text_field(:search, :command, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
 
-          <div class="field">
-            <%= label(:short_name, "Short name:") %>
-            <%= text_field(:search, :short_name, { class: 'datatable_variable' }) %>
-          </div>
-          <br/>
+      <div class="field">
+        <%= label(:short_name, "Short name:") %>
+        <%= text_field(:search, :short_name, { class: 'datatable_variable' }) %>
       </div>
-      <div style="width:30%; padding-left:40px;" class="display-inline-block">
-          <div class="field">
-            <%= label(:enabled, "App schedules enabled:") %>
-            <%= select(:search, :enabled, [["Ignore", nil], ["True", true], ["False", false]], {}, { class: 'datatable_variable' }) %>
-          </div>
+      <br/>
+    </div>
+    <div style="width:30%; padding-left:40px;" class="display-inline-block">
+      <div class="field">
+        <%= label(:enabled, "App schedules enabled:") %>
+        <%= select(:search, :enabled, [["Ignore", nil], ["True", true], ["False", false]], {}, { class: 'datatable_variable' }) %>
       </div>
-      <br/><br/><br/>
-      <%= submit_tag("Search") %>
+    </div>
+    <br/><br/><br/>
+    <%= submit_tag("Search") %>
   <% end %>
 </div>
 

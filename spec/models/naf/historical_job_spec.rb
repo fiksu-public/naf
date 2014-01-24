@@ -11,6 +11,7 @@ module Naf
 
     # Mass-assignment
     [:application_id,
+     :application_schedule_id,
      :application_type_id,
      :command,
      :application_run_group_restriction_id,
@@ -40,6 +41,7 @@ module Naf
     # *** Associations ***
     #+++++++++++++++++++++
 
+    it { should belong_to(:application_schedule) }
     it { should belong_to(:application_type) }
     it { should belong_to(:started_on_machine) }
     it { should belong_to(:marked_dead_by_machine) }
@@ -103,13 +105,13 @@ module Naf
 
     describe "#application_last_runs" do
       before do
-        historical_job.update_attributes!(application_id: FactoryGirl.create(:application).id)
+        historical_job.update_attributes!(application_schedule_id: FactoryGirl.create(:scheduled_application).id)
       end
 
       it "return job when it finished running" do
         historical_job.finished_at = Time.zone.now
         historical_job.save!
-        ::Naf::HistoricalJob.application_last_runs.first.application.should == historical_job.application
+        ::Naf::HistoricalJob.application_last_runs.first.application_schedule.should == historical_job.application_schedule
       end
 
       it "return nil when job has not finished running" do

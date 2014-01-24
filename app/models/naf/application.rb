@@ -7,8 +7,8 @@ module Naf
                     :log_level,
                     :short_name,
                     :deleted,
-                    :application_schedule,
-                    :application_schedule_attributes
+                    :application_schedules,
+                    :application_schedules_attributes
 
     #---------------------
     # *** Associations ***
@@ -16,7 +16,7 @@ module Naf
 
     belongs_to :application_type,
       class_name: '::Naf::ApplicationType'
-    has_one :application_schedule,
+    has_many :application_schedules,
       class_name: '::Naf::ApplicationSchedule',
       dependent: :destroy
     has_many :historical_jobs,
@@ -35,12 +35,11 @@ module Naf
                            allow_nil: true,
                            format: {
                              with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
-                             message: "letters should be first"
+                             message: "short name consists of only letters/numbers/underscores, and it needs to start with a letter/underscore"
                            }
 
-    validate :check_references_with_application_schedule_prerequisites
     before_save :check_blank_values
-    accepts_nested_attributes_for :application_schedule, allow_destroy: true
+    accepts_nested_attributes_for :application_schedules, allow_destroy: true
 
     #--------------------
     # *** Delegations ***
@@ -85,16 +84,6 @@ module Naf
       self.log_level = nil if self.log_level.blank?
     end
 
-    def check_references_with_application_schedule_prerequisites
-      if application_schedule.try(:marked_for_destruction?)
-        prerequisites = Naf::ApplicationSchedulePrerequisite.
-          where(prerequisite_application_schedule_id: application_schedule.id).all
-        unless prerequisites.blank?
-          errors.add(:base, "Cannot delete scheduler, because the following applications are referenced to it: " +
-            "#{prerequisites.map{ |pre| pre.application_schedule.title }.join(', ') }")
-        end
-      end
-    end
 
   end
 end

@@ -41,23 +41,29 @@ module Naf
     end
 
     def new
+      @historical_job = Naf::HistoricalJob.new
     end
 
     def create
       @historical_job = Naf::HistoricalJob.new(params[:historical_job])
-      if params[:historical_job][:application_id] && app = Naf::Application.find(params[:historical_job][:application_id])
-        if schedule = app.application_schedule
-          @historical_job = Logical::Naf::JobCreator.new.queue_application_schedule(schedule)
+      if params[:historical_job][:application_id] &&
+        app = Naf::Application.find(params[:historical_job][:application_id])
+
+        if schedule = app.application_schedules.first
+          @historical_job = ::Logical::Naf::ConstructionZone::Boss.new.enqueue_application_schedule(schedule)
           if @historical_job.blank?
-            render json: { success: false,
-                           title: ::Naf::Application.find_by_id(params[:historical_job][:application_id]).title }.to_json
+            render json: {
+              success: false,
+              title: ::Naf::Application.find_by_id(params[:historical_job][:application_id]).title
+            }.to_json
 
             return
           end
         else
           @historical_job.command = app.command
           @historical_job.application_type_id = app.application_type_id
-          @historical_job.application_run_group_restriction_id = Naf::ApplicationRunGroupRestriction.no_limit.id
+          @historical_job.application_run_group_restriction_id =
+            Naf::ApplicationRunGroupRestriction.no_limit.id
           @queued_job = ::Naf::QueuedJob.new
         end
       else
@@ -67,7 +73,8 @@ module Naf
       if @queued_job.present?
         @queued_job.application_type_id = @historical_job.application_type_id
         @queued_job.command = @historical_job.command
-        @queued_job.application_run_group_restriction_id = @historical_job.application_run_group_restriction_id
+        @queued_job.application_run_group_restriction_id =
+          @historical_job.application_run_group_restriction_id
         @queued_job.application_run_group_name = @historical_job.application_run_group_name
         @queued_job.application_run_group_limit = @historical_job.application_run_group_limit
         @queued_job.priority = @historical_job.priority
@@ -123,7 +130,10 @@ module Naf
             end
 
             format.html do
-              redirect_to(@historical_job, notice: "Job '#{@historical_job.command}' was successfully updated.")
+              redirect_to(
+                @historical_job,
+                notice: "Job '#{@historical_job.command}' was successfully updated."
+              )
             end
             format.json do
               render json: { success: true,

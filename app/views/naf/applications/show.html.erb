@@ -1,37 +1,38 @@
 <% content_for :body do %>
   <div id="flash_message">
-      <% unless notice.blank? %>
-        <script type='text/javascript'>
-          jQuery("<p id='notice'><%= notice %></p>")
-              .appendTo('#flash_message')
-              .slideDown().delay(5000).slideUp();
-        </script>
-      <% end %>
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
   </div>
 
   <% content_for :javascripts do %>
     <script type='text/javascript'>
-        jQuery(document).ready(function () {
-            jQuery(document).delegate('.enqueue', "click", function(){
-                var postSource = "<%= naf.historical_jobs_path %>";
-                var answer = confirm("Adding application as a job on the queue?");
-                if (!answer) {
-                    return false;
-                }
-                jQuery.post(postSource, { "historical_job[application_id]":jQuery(this).attr('id') }, function (data) {
-                    if (data.success) {
-                        jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
-                        appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                        setTimeout('window.location.reload()', 5600);
-                    }
-                    else {
-                      jQuery("<div class='error'>Sorry, \'" +  data.title + "\' cannot add a Job to the queue right now!</div>").
-                              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-                      jQuery('#datatable').dataTable().fnDraw();
-                    }
-                });
-            });
+      jQuery(document).ready(function () {
+        jQuery(document).delegate('.enqueue', "click", function(){
+          var postSource = "<%= naf.historical_jobs_path %>";
+          var answer = confirm("Adding application as a job on the queue?");
+          if (!answer) {
+            return false;
+          }
+          jQuery.post(postSource, { "historical_job[application_id]":jQuery(this).attr('id') }, function (data) {
+            if (data.success) {
+              jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              setTimeout('window.location.reload()', 5600);
+            }
+            else {
+              jQuery("<div class='error'>Sorry, \'" +  data.title +
+                "\' cannot add a Job to the queue right now!</div>").
+                appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              jQuery('#datatable').dataTable().fnDraw();
+            }
+          });
         });
+      });
     </script>
   <% end %>
 
@@ -40,10 +41,10 @@
     <%= link_to 'Back to Applications', applications_path %>
     &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
     <%= link_to 'Edit', edit_application_path(@application) %>
-    <% if @application.application_schedule.present? -%>
-      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
-      <%= link_to "Add Affinity", new_application_application_schedule_application_schedule_affinity_tab_path(@application, @application.application_schedule) %>
-    <% end -%>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to "Add Schedule", controller: 'application_schedules',
+                                action: 'new',
+                                application_id: @application.id %>
     </br>
     </br>
 
@@ -95,83 +96,32 @@
           <td>Script Type Name</td>
           <td><%= @logical_application.script_type_name %></td>
         </tr>
-        <% if @application.application_schedule.present? %>
-          <tr>
-            <td>Application Run Group Name</td>
-            <td style="white-space: pre-wrap;"><%= @logical_application.application_run_group_name %></td>
-          </tr>
-          <tr>
-            <td>Application Run Group Limit</td>
-            <td><%= @application.application_schedule.application_run_group_limit %></td>
-          </tr>
-          <tr>
-            <td>Application Run Group Restriction Name</td>
-            <td><%= @logical_application.application_run_group_restriction_name %></td>
-          </tr>
-          <tr>
-            <td>Run Interval</td>
-            <td><%= @logical_application.run_interval %></td>
-          </tr>
-          <tr>
-            <td>Run Start Minute</td>
-            <td><%= @logical_application.run_start_minute %></td>
-          </tr>
-          <tr>
-            <td>Priority</td>
-            <td><%= @logical_application.priority %></td>
-          </tr>
-          <tr>
-            <td>Visible</td>
-            <td><%= @logical_application.visible %></td>
-          </tr>
-          <tr>
-            <td>Enabled</td>
-            <td><%= @logical_application.enabled %></td>
-          </tr>
-          <tr>
-            <td>Enqueue Backlogs</td>
-            <td><%= @logical_application.enqueue_backlogs %></td>
-          </tr>
-          <tr>
-            <td><%= link_to "Application Schedule Affinity Tabs",
-                    application_application_schedule_application_schedule_affinity_tabs_path(@application, @application.application_schedule) %>
-            </td>
-            <td><%= @logical_application.affinities %></td>
-          </tr>
-        <% end %>
+        <tr>
+          <td>Application Schedules</td>
+          <td>
+            <% output = '' %>
+            <% @logical_application.application_schedules.each do |schedule|
+                  logical_schedule = ::Logical::Naf::ApplicationSchedule.new(schedule)
+                  output << (link_to logical_schedule.display, naf.application_schedule_path(schedule.id))
+                  output << ', '
+                end
+                output = output[0..-3] %>
+            <%= output.html_safe %>
+          </td>
+        </tr>
         <tr>
           <td>Add Script to Jobs Queue</td>
           <td>
             <%= link_to image_tag('control_play_blue.png',
                   class: 'action',
-                  title: "Enqueue Application(\nid: #{@application.id},\ntitle: #{@application.title},\ncommand: #{@application.command})"),
+                  title: "Enqueue Application(\nid: #{@application.id},\n" +
+                    "title: #{@application.title},\ncommand: #{@application.command})"),
                   "#", { class: "enqueue", id: @application.id } %>
           </td>
         </tr>
       </tbody>
     </table>
     </br>
-
-    <% if @application.application_schedule.present? %>
-      <h2>Prerequisites</h2>
-      <table id="naf_table_show">
-        <thead>
-          <tr>
-            <th width="10%">ID</th>
-            <th>Command</th>
-          </tr>
-        </thead>
-        <tbody>
-          <% @application.application_schedule.application_schedule_prerequisites.each do |prereq| -%>
-          <tr>
-            <td><%= link_to prereq.prerequisite_application_schedule.id, application_path(prereq.prerequisite_application_schedule.application) %></td>
-            <td style="white-space: pre-wrap;"><%= prereq.prerequisite_application_schedule.application.command %></td>
-          </tr>
-          <% end -%>
-        </tbody>
-      </table>
-      </br>
-    <% end %>
 
     <h2>Last Queued Job</h2>
     <table id="naf_table_show">

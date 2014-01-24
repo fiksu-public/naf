@@ -1,8 +1,14 @@
 module Logical::Naf::ConstructionZone
   class WorkOrder
-    attr_reader :command, :application_type, :application_run_group_restriction, :application_run_group_name
-    attr_reader :application_run_group_limit, :priority, :enqueue_backlogs
-    attr_reader :application, :application_schedule
+    attr_reader :command,
+                :application_type,
+                :application_run_group_restriction,
+                :application_run_group_name,
+                :application_run_group_limit,
+                :priority,
+                :enqueue_backlogs,
+                :application,
+                :application_schedule
 
     def initialize(command,
                    application_type = ::Naf::ApplicationType.rails,
@@ -42,7 +48,8 @@ module Logical::Naf::ConstructionZone
         application_run_group_name: application_run_group_name,
         application_run_group_limit: application_run_group_limit,
         priority: priority,
-        application_id: application.try(:id)
+        application_id: application.try(:id),
+        application_schedule_id: application_schedule.try(:id)
       }
     end
 

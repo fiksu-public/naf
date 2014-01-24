@@ -2,6 +2,7 @@ module Naf
   class QueuedJob < NafBase
     # Protect from mass-assignment issue
     attr_accessible :application_id,
+                    :application_schedule_id,
                     :application_type_id,
                     :command,
                     :application_run_group_restriction_id,
@@ -19,6 +20,8 @@ module Naf
       foreign_key: :id
     belongs_to :application,
       class_name: "::Naf::Application"
+    belongs_to :application_schedule,
+      class_name: '::Naf::ApplicationSchedule'
     belongs_to :application_type,
       class_name: '::Naf::ApplicationType'
     belongs_to :application_run_group_restriction,

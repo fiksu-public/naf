@@ -1,109 +1,47 @@
 <%= form_for @application do |f| %>
-
-    <% if @application.errors.any? %>
-        <div id="errorExplanation">
-          <h2><%= pluralize(@application.errors.count, "error") %> prohibited this application from being saved:</h2>
-        </div>
-    <% end %>
-
-    <div class="field">
-      <%= f.label :title, "Title*" %>
-      <%= f.text_field :title %>
+  <% if @application.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@application.errors.count, "error") %> prohibited this application from being saved:</h2>
     </div>
+  <% end %>
 
-    <div class="field">
-      <%= f.label :short_name %>
-      <%= f.text_field :short_name %>
-    </div>
+  <div class="field">
+    <%= f.label :title, "Title*" %>
+    <%= f.text_field :title %>
+  </div>
 
-    <div class="field">
-      <%= f.label :command, "Command*" %>
-      <%= f.text_area :command, rows: 4, cols: 60 %>
-    </div>
+  <div class="field">
+    <%= f.label :short_name %>
+    <%= f.text_field :short_name %>
+  </div>
 
-    <div class="field">
-      <%= f.label :application_type_id, "Application type*" %>
-      <%= f.select(:application_type_id,
-                   ::Naf::ApplicationType.all.map { |a| [a.script_type_name, a.id] },
-                   { include_blank: true }) %>
-    </div>
+  <div class="field">
+    <%= f.label :command, "Command*" %>
+    <%= f.text_area :command, rows: 4, cols: 60 %>
+  </div>
 
-    <div class="field">
-      <%= f.label :log_level %>
-      <%= f.text_field :log_level %>
-    </div>
+  <div class="field">
+    <%= f.label :application_type_id, "Application type*" %>
+    <%= f.select(:application_type_id,
+                 ::Naf::ApplicationType.all.map { |a| [a.script_type_name, a.id] },
+                 { include_blank: true }) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :log_level %>
+    <%= f.text_field :log_level %>
+  </div>
+  <br/>
+
+  <div class="field">
+    <%= f.label :deleted %>
+    <%= f.check_box :deleted %>
+    <br/><br/>
+  </div>
+  <br/>
+
+  <div class="actions">
     <br/>
-
-    <div class="field">
-      <%= f.label :deleted %>
-      <%= f.check_box :deleted %>
-      <br/><br/>
-    </div>
-    <br/>
-
-    <div id="application_schedule">
-      <%= f.fields_for :application_schedule do |builder| %>
-        <%= render "application_schedule", :f => builder %>
-      <% end %>
-    </div>
-    <%= link_to "Add Application Schedule", "#" , :id => "add_application_schedule"%>
-
-    <div class="actions">
-      <br/>
-      <%= f.submit %>
-    </div>
-<% end %>
-
-<% content_for :javascripts do %>
-    <script type='text/javascript'>
-        jQuery(document).ready(function() {
-
-            <% if @show_app_schedule %>
-               addSchedule();
-            <% else %>
-               removeSchedule();
-            <% end %>
-
-            var run_group = jQuery("#application_application_schedule_attributes_application_run_group_name");
-
-            if(jQuery("#run_group_name_type").val() != 'custom') {
-                run_group.hide();
-                run_group.val(null);
-            }
-
-            jQuery("#run_group_name_type").change(function () {
-                var type = jQuery("#run_group_name_type").val();
-                if(type == 'command') {
-                    run_group.hide();
-                    run_group.val(null);
-                } else if(type == 'not set') {
-                    run_group.hide();
-                    run_group.val(null);
-                } else {
-                    run_group.slideToggle("slow");
-                }
-            });
-
-            jQuery("#add_application_schedule").click(function() {
-                addSchedule();
-            });
-
-            jQuery("#remove_application_schedule").click(function() {
-                removeSchedule();
-            });
-
-        });
-
-        function addSchedule(){
-            jQuery("#application_schedule").css("display", "block");
-            jQuery("#application_application_schedule_attributes__destroy").val("0");
-            jQuery("#add_application_schedule").hide();
-        }
-
-        function removeSchedule(){
-            jQuery("#application_schedule").hide();
-            jQuery("#application_application_schedule_attributes__destroy").val("1");
-            jQuery("#add_application_schedule").css("display", "block");
-        }
-    </script>
+    <%= f.submit %>
+  </div>
 <% end %>

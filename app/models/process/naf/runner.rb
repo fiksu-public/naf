@@ -18,9 +18,6 @@ module Process::Naf
         "time between checking schedules",
         argument_note: "MINUTES",
         default: 1
-    opt :schedule_fudge_scale,
-        "amount of time to look back in schedule for run_start_minute schedules (scaled to --check-schedule-period)",
-        default: 5
     opt :runner_stale_period,
         "amount of time to consider a machine out of touch if it hasn't updated its machine entry",
         argument_note: "MINUTES",
@@ -253,12 +250,12 @@ module Process::Naf
           ::Naf::ApplicationSchedule.unlock_schedules
 
           # check scheduled tasks
-          should_be_queued.each do |application_schedule|
+          ::Naf::ApplicationSchedule.should_be_queued.each do |application_schedule|
             logger.info escape_html("scheduled application: #{application_schedule}")
             begin
               naf_boss = ::Logical::Naf::ConstructionZone::Boss.new
               # this doesn't work very well for run_group_limits in the thousands
-              Range.new(0, application_schedule.application_run_group_limit || 1, true).each do
+              Range.new(0, application_schedule.application_run_group_quantum || 1, true).each do
                 naf_boss.enqueue_application_schedule(application_schedule)
               end
             rescue ::Naf::HistoricalJob::JobPrerequisiteLoop => jpl
@@ -608,48 +605,6 @@ module Process::Naf
       end
     end
 
-    def should_be_queued
-      not_finished_applications = ::Naf::HistoricalJob.
-        queued_between(Time.zone.now - Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-        where("finished_at IS NULL AND request_to_terminate = false").
-        find_all{ |job| job.application_id.present? }.
-        index_by{ |job| job.application_id }
-
-      application_last_runs = ::Naf::HistoricalJob.application_last_runs.
-        index_by{ |job| job.application_id }
-
-      # find the run_interval based schedules that should be queued
-      # select anything that isn't currently running and completed
-      # running more than run_interval minutes ago
-      relative_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).relative_schedules.select do |schedule|
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            (Time.zone.now - application_last_runs[schedule.application_id].finished_at) > (schedule.run_interval.minutes)))
-      end
-
-      # find the run_start_minute based schedules
-      # select anything that
-      #  isn't currently running (or queued) AND
-      #  hasn't run since run_start_time AND
-      #  should have been run by now AND
-      #  that should have run within fudge period AND
-      exact_schedules_what_need_queuin = ::Naf::ApplicationSchedule.where(enabled: true).exact_schedules.select do |schedule|
-        (not_finished_applications[schedule.application_id].nil? &&
-          (application_last_runs[schedule.application_id].nil? ||
-            ((Time.zone.now.to_date + schedule.run_start_minute.minutes) >= application_last_runs[schedule.application_id].finished_at)) &&
-          (Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) >= 0.seconds &&
-          ((Time.zone.now - (Time.zone.now.to_date + schedule.run_start_minute.minutes)) <= (@check_schedules_period * @schedule_fudge_scale).minutes)
-        )
-      end
-
-      foreman = ::Logical::Naf::ConstructionZone::Foreman.new()
-      return (relative_schedules_what_need_queuin + exact_schedules_what_need_queuin).select do |schedule|
-        schedule.enqueue_backlogs || !foreman.limited_by_run_group?(schedule.application_run_group_restriction,
-                                                                    schedule.application_run_group_name,
-                                                                    schedule.application_run_group_limit)
-      end
-    end
-
     def memory_available_to_spawn?
       Facter.clear
       memory_size = Facter.memorysize_mb.to_f
@@ -657,10 +612,12 @@ module Process::Naf
       memory_free_percentage = (memory_free / memory_size) * 100.0
 
       if (memory_free_percentage >= @minimum_memory_free)
-        logger.detail "memory available: #{memory_free_percentage}% (free) >= #{@minimum_memory_free}% (min percent)"
+        logger.detail "memory available: #{memory_free_percentage}% (free) >= " +
+          "#{@minimum_memory_free}% (min percent)"
         return true
       end
-      logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: #{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
+      logger.alarm "#{Facter.hostname}.#{Facter.domain}: not enough memory to spawn: " +
+        "#{memory_free_percentage}% (free) < #{@minimum_memory_free}% (min percent)"
 
       return false
     end

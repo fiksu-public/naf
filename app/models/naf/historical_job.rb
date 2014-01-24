@@ -15,6 +15,7 @@ module Naf
 
     # Protect from mass-assignment issue
     attr_accessible :application_id,
+                    :application_schedule_id,
                     :application_type_id,
                     :command,
                     :application_run_group_restriction_id,
@@ -44,6 +45,8 @@ module Naf
     # *** Associations ***
     #+++++++++++++++++++++
 
+    belongs_to :application_schedule,
+      class_name: '::Naf::ApplicationSchedule'
     belongs_to :application_type,
       class_name: '::Naf::ApplicationType'
     belongs_to :started_on_machine,
@@ -175,9 +178,9 @@ module Naf
     end
 
     def self.application_last_runs
-      where("application_id IS NOT NULL").
-        group("application_id").
-        select("application_id, MAX(finished_at) AS finished_at").
+      where("application_schedule_id IS NOT NULL").
+        group("application_schedule_id").
+        select("application_schedule_id, MAX(finished_at) AS finished_at").
         reject{ |job| job.finished_at.nil? }
     end
 

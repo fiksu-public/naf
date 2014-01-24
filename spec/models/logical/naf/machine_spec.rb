@@ -21,7 +21,7 @@ module Logical
 
       describe '#self.all' do
         it 'return an array of logical wrappers around machines' do
-          ::Logical::Naf::Machine.all.map(&:id).should == [physical_machine.id, physical_machine_two.id]
+          ::Logical::Naf::Machine.all.map(&:id).sort.should == [physical_machine.id, physical_machine_two.id]
         end
       end
 
