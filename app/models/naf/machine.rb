@@ -214,7 +214,7 @@ module Naf
 
     def mark_machine_down(by_machine)
       marking_at = Time.zone.now
-      machine_logger.alarm "#{by_machine.id} marking #{self} as down at #{marking_at}"
+      machine_logger.alarm "#{by_machine.try(:id)} marking #{self} as down at #{marking_at}"
       self.marked_down = true
       self.marked_down_by_machine_id = by_machine.id
       self.marked_down_at = marking_at
