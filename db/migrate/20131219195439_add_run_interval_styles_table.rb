@@ -26,6 +26,9 @@ class AddRunIntervalStylesTable < ActiveRecord::Migration
         ADD COLUMN application_schedule_id INTEGER NULL REFERENCES #{Naf.schema_name}.application_schedules;
       ALTER TABLE #{Naf.schema_name}.queued_jobs
         ADD COLUMN application_schedule_id INTEGER NULL REFERENCES #{Naf.schema_name}.application_schedules;
+
+      DELETE FROM #{Naf.schema_name}.application_schedules
+        WHERE application_run_group_name = '::Process::Naf::Janitor.run';
     SQL
   end
 
@@ -44,6 +47,18 @@ class AddRunIntervalStylesTable < ActiveRecord::Migration
       ALTER TABLE #{Naf.schema_name}.application_schedules DROP COLUMN application_run_group_quantum;
       ALTER TABLE #{Naf.schema_name}.application_schedules DROP COLUMN run_interval_style_id;
       DROP TABLE #{Naf.schema_name}.run_interval_styles;
+
+      INSERT INTO #{Naf.schema_name}.application_schedules (application_id, application_run_group_restriction_id,
+        application_run_group_name, application_run_group_limit, run_start_minute, run_interval) VALUES
+        (
+          (SELECT id FROM #{Naf.schema_name}.applications where command = '::Process::Naf::Janitor.run'),
+          (SELECT id FROM #{Naf.schema_name}.application_run_group_restrictions
+            WHERE application_run_group_restriction_name = 'limited per all machines'),
+          '::Process::Naf::Janitor.run',
+          1,
+          5,
+          NULL
+        );
     SQL
   end
 end
