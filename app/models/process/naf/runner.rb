@@ -452,8 +452,14 @@ module Process::Naf
                 r.read_nonblock(10240).split("\n").each do |log|
                   log_file << log.rstrip
                 end
-              rescue Errno::EAGAIN
-              rescue Errno::EINTR
+              rescue Errno::EAGAIN => e
+                logger.error 'EAGAIN'
+                logger.error "#{e.inspect}"
+                logger.error "#{e.message}"
+              rescue Errno::EWOULDBLOCK => ew
+                logger.error 'EWOULDBLOCK'
+                logger.error "#{ew.inspect}"
+                logger.error "#{ew.message}"
               rescue EOFError => eof
                 stdout = nil if r == stdout
                 stderr = nil if r == stderr
