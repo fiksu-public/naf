@@ -106,7 +106,7 @@ module Naf
 
     def self.pickleables(pickler)
       self.joins(:application).
-        where('naf.applications.deleted IS FALSE')
+        where("#{Naf.schema_name}.applications.deleted IS FALSE")
     end
 
     private
