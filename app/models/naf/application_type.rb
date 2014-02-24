@@ -7,6 +7,7 @@ module Naf
                     :invocation_method
 
     SCRIPT_RUNNER = "#{Gem.ruby} #{Rails.root}/script/rails runner"
+    JOB_LOGGER = "#{Rails.root}/script/rails runner ::Process::Naf::Logger::JobLog.run"
 
     #---------------------
     # *** Associations ***
@@ -32,8 +33,9 @@ module Naf
       self.send(invocation_method.to_sym, job)
     end
 
-    def invoke(job, command)
+    def invoke(job, job_command)
       ENV['NAF_JOB_ID'] = job.id.to_s
+      command = job_command + " 2>&1 | #{JOB_LOGGER} --job-id #{job.id}"
       Open4::popen4(command)
     end
 
