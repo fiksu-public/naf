@@ -34,9 +34,8 @@ module Naf
     end
 
     def invoke(job, job_command)
-      ENV['NAF_JOB_ID'] = job.id.to_s
       command = job_command + " 2>&1 | #{JOB_LOGGER} --job-id #{job.id} >> #{LOGGING_ROOT_DIRECTORY}/naf/crash.log 2>&1"
-      Open4::popen4(command)
+      Process.spawn({ 'NAF_JOB_ID' => job.id.to_s }, command)
     end
 
     def rails_invocator(job)

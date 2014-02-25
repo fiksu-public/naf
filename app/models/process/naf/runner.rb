@@ -376,12 +376,8 @@ module Process::Naf
 
           logger.info escape_html("starting new job : #{running_job.inspect}")
 
-          # fork and run
           pid = running_job.historical_job.spawn
-
-          # Reset NAF_JOB_ID
-          ENV.delete('NAF_JOB_ID')
-          if pid
+          if pid.present?
             @children[pid] = running_job
             running_job.pid = pid
             running_job.historical_job.pid = pid
