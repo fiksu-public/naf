@@ -52,7 +52,7 @@ module Logical::Naf
 
       def get_invocation_id(uuid)
         if invocations_ids[uuid].blank?
-          @invocations_ids[uuid] = ::Naf::MachineRunnerInvocation.find_by_uuid(uuid).id
+          @invocations_ids[uuid] = ::Naf::MachineRunnerInvocation.find_by_uuid(uuid).try(:id)
         end
 
         invocations_ids[uuid]
