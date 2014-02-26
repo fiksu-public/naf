@@ -49,7 +49,6 @@ module Logical::Naf::ConstructionZone
         application_run_group_limit: application_run_group_limit,
         priority: priority,
         application_id: application.try(:id),
-        application_schedule_id: application_schedule.try(:id)
       }
     end
 
