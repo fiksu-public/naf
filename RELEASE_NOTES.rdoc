@@ -1,5 +1,31 @@
 = Release Notes
 
+=== Version 2.1.5
+* Bug fix:
+The code to manually add jobs/applications/schedules to the queue had an unecessary parameter
+that got passed into a call to create a job, thus raising an exception.
+
+=== Version 2.1.4
+* Bug fix:
+The Runner was using ruby Threads to write the logs of each running script. There was a
+specific script that caused write blocks and raised an EPIPE exception. The code is no
+longer using ruby Threads.
+
+=== Version 2.1.3
+* Bug fix:
+Migrations would fail if run all at once, because it did not consider the existence of
+the Janitor's Application Schedule. It would then fail, because run_interval is null,
+run_start_minute is dropped, and a not null constraint is set on run_interval.
+
+=== Version 2.1.2
+* Bug fix:
+Rescue EAGAIN and EWOULDBLOCK exceptions and log them.
+
+=== Version 2.1.1
+* Bug fix:
+When marking a machine down, it logs the id of the machine doing the action. But
+if this machine does not have an associated row in naf.machines, it raises an exception.
+
 === Version 2.1.0
 
 Featurs/Changes:
