@@ -2,7 +2,7 @@
 
 === Version 2.1.5
 Bug fix:
-* The code to manually add jobs/applications/schedules to the queue had an unecessary parameter that got passed into a call to create a job, thus raising an exception.
+* The code to manually add jobs/applications/schedules to the queue (::Logical::Naf::ConstructionZone::Boss) had an unecessary parameter that got passed into a call to create a job, thus raising an exception.
 
 === Version 2.1.4
 Bug fix:
