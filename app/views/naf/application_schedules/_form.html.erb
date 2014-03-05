@@ -8,6 +8,11 @@
   <%= f.hidden_field :application_id, value: @application_schedule.application_id %>
 
   <div class="field">
+    <%= f.label "Application" %>
+    <p><%= @application_schedule.application.title %></p>
+  </div>
+
+  <div class="field">
     <%= f.label :application_run_group_restriction_id, "Application run group restriction*" %>
     <%= f.select(:application_run_group_restriction_id,
                  ::Naf::ApplicationRunGroupRestriction.all.map { |a| [a.application_run_group_restriction_name, a.id] },

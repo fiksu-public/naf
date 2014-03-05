@@ -1,5 +1,14 @@
 = Release Notes
 
+=== Version 2.1.6
+Bug fixes:
+* Historical jobs application_schedule_id was not getting set, causing the runner to constantly queue applications.
+* Pagination of application schedules on the index page was not properly working.
+* When mouse hovered over the application schedule on the applicaiton show page, it did not show a detailed information about the schedule.
+
+Changes:
+* Included application name when editing an application schedule
+
 === Version 2.1.5
 Bug fix:
 * The code to manually add jobs/applications/schedules to the queue (::Logical::Naf::ConstructionZone::Boss) had an unecessary parameter that got passed into a call to create a job, thus raising an exception.
@@ -31,7 +40,7 @@ Featurs/Changes:
 
 === Version 2.0.0
 
-Featurs/Changes:
+Features/Changes:
 * New logging system
 * Removed compatibility with Papertrail
 * UI changes

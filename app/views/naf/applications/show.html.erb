@@ -102,7 +102,9 @@
             <% output = '' %>
             <% @logical_application.application_schedules.each do |schedule|
                   logical_schedule = ::Logical::Naf::ApplicationSchedule.new(schedule)
-                  output << (link_to logical_schedule.display, naf.application_schedule_path(schedule.id))
+                  output << (link_to logical_schedule.display,
+                                     naf.application_schedule_path(schedule.id),
+                                     title: logical_schedule.help_title)
                   output << ', '
                 end
                 output = output[0..-3] %>

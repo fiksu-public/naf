@@ -130,7 +130,7 @@ module Logical
         if schedule.run_interval_style.name == 'at beginning of day'
           output = exact_time_of_day(time)
         else
-          output = interval_time2(time)
+          output = interval_time(time)
         end
 
         output
@@ -147,21 +147,11 @@ module Logical
         return output
       end
 
-      def interval_time2(time)
+      def interval_time(time)
         if time < 9
           ":0#{time}"
         else
           ":#{time}"
-        end
-      end
-
-      def interval_time(time)
-        if time < 60
-          pluralize(time, 'minute')
-        elsif time % 60 == 0
-          pluralize(time / 60, 'hour')
-        else
-          pluralize(time / 60, 'hour') + ', ' + pluralize(time % 60, 'minute')
         end
       end
 
