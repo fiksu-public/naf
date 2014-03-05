@@ -49,6 +49,7 @@ module Logical::Naf::ConstructionZone
         application_run_group_limit: application_run_group_limit,
         priority: priority,
         application_id: application.try(:id),
+        application_schedule_id: application_schedule.try(:id)
       }
     end
 
@@ -57,26 +58,25 @@ module Logical::Naf::ConstructionZone
         if affinity.is_a? Symbol
           # short_name of affinity
           affinity_object = {
-            :affinity_id => ::Naf::Affinity.find_by_affinity_short_name(affinity).try(:id)
+            affinity_id: ::Naf::Affinity.find_by_affinity_short_name(affinity).try(:id)
           }
           raise "no affinity provided" if affinity_object[:affinity_id].nil?
           affinity_object
         elsif affinity.is_a? ::Naf::Affinity
           {
-            :affinity_id => affinity.id
+            affinity_id: affinity.id
           }
         elsif affinity.is_a? ::Naf::Machine
           # affinity_for machine
           {
-            :affinity_id => affinity.affinity.id
+            affinity_id: affinity.affinity.id
           }
         elsif affinity.is_a? ::Naf::ApplicationScheduleAffinityTab
           # affinity_for application_schedule_affinity_tab
         elsif affinity.is_a? Hash
           # should have key: :affinity_id or :affinity_short_name or :affinity_name
           # may have key: :affinity_parameter
-          affinity_object = {
-          }
+          affinity_object = {}
           if affinity.has_key?(:affinity_id)
             affinity_object[:affinity_id] = affinity[:affinity_id]
           elsif affinity.has_key?(:affinity_name)

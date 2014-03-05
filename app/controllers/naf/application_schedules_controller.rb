@@ -1,10 +1,14 @@
 module Naf
   class ApplicationSchedulesController < Naf::ApplicationController
 
+    before_filter :set_rows_per_page
+
     def index
       respond_to do |format|
         format.html
         format.json do
+          set_page
+
           application_schedules = []
           application_schedule = []
           @total_records = Naf::ApplicationSchedule.count(:all)

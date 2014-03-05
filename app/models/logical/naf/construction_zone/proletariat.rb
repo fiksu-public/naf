@@ -27,6 +27,7 @@ module Logical::Naf::ConstructionZone
 
     def create_queued_job(historical_job)
       queued_job = ::Naf::QueuedJob.new(application_id: historical_job.application_id,
+                                        application_schedule_id: historical_job.application_schedule_id,
                                         application_type_id: historical_job.application_type_id,
                                         command: historical_job.command,
                                         application_run_group_restriction_id: historical_job.application_run_group_restriction_id,
