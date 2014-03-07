@@ -3,7 +3,8 @@ module Logical::Naf::ConstructionZone
     def create_job(parameters, affinities, prerequisites)
       ::Naf::HistoricalJob.transaction do
         historical_job = create_historical_job(parameters, affinities, prerequisites)
-        queued_job = create_queued_job(historical_job)
+        create_queued_job(historical_job)
+
         return historical_job
       end
     end
@@ -11,16 +12,20 @@ module Logical::Naf::ConstructionZone
     def create_historical_job(parameters, affinities, prerequisites)
       ::Naf::HistoricalJob.transaction do
         historical_job = ::Naf::HistoricalJob.create!(parameters)
+        # Create affinity tabs, if affinities are provided
         affinities.each do |affinity|
           ::Naf::HistoricalJobAffinityTab.create(affinity.merge(historical_job_id: historical_job.id))
         end
+        # Verify there is no loop found in prerequisites
         historical_job.verify_prerequisites(prerequisites)
+        # Create historical job prerequesites, if prerequisites are provided
         prerequisites.each do |prerequisite|
           ::Naf::HistoricalJobPrerequisite.create({
                                                     historical_job_id: historical_job.id,
                                                     prerequisite_historical_job_id: prerequisite.id
                                                   })
         end
+
         return historical_job
       end
     end
@@ -36,6 +41,9 @@ module Logical::Naf::ConstructionZone
                                         priority: historical_job.priority)
       queued_job.id = historical_job.id
       queued_job.save!
+
+      return queued_job
     end
+
   end
 end

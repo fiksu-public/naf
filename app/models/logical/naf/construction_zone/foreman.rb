@@ -32,7 +32,7 @@ module Logical::Naf::ConstructionZone
         machine_affinity = nil
         affinities.each do |affinity|
           machine_affinity = ::Naf::Affinity.find_by_id(affinity[:affinity_id])
-          if machine_affinity.affinity_classification_name == 'machine'
+          if machine_affinity.present? && machine_affinity.affinity_classification_name == 'machine'
             break
           end
         end
