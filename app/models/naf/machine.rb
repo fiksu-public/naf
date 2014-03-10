@@ -202,9 +202,9 @@ module Naf
         started_on(self).each do |job|
 
         marking_at = Time.zone.now
-        machine_logger.alarm "#{by_machine.id} marking #{job} as dead at #{marking_at}"
+        machine_logger.alarm "#{by_machine.try(:id)} marking #{job} as dead at #{marking_at}"
         job.request_to_terminate = job.historical_job.request_to_terminate = true
-        job.marked_dead_by_machine_id = job.historical_job.marked_dead_by_machine_id = by_machine.id
+        job.marked_dead_by_machine_id = job.historical_job.marked_dead_by_machine_id = by_machine.try(:id)
         job.marked_dead_at = job.historical_job.marked_dead_at = marking_at
         job.historical_job.finished_at = marking_at
         job.save!
@@ -216,7 +216,7 @@ module Naf
       marking_at = Time.zone.now
       machine_logger.alarm "#{by_machine.try(:id)} marking #{self} as down at #{marking_at}"
       self.marked_down = true
-      self.marked_down_by_machine_id = by_machine.id
+      self.marked_down_by_machine_id = by_machine.try(:id)
       self.marked_down_at = marking_at
       save!
       mark_processes_as_dead(by_machine)
@@ -224,7 +224,7 @@ module Naf
 
     def affinity
       return ::Naf::Affinity.
-        where(affinity_classification_id: ::Naf::AffinityClassification.location.id,
+        where(affinity_classification_id: ::Naf::AffinityClassification.machine.id,
               affinity_name: self.id.to_s).first
     end
 

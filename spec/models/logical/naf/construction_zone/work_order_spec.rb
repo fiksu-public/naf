@@ -21,6 +21,7 @@ module Logical::Naf::ConstructionZone
           application_schedule_id: nil
         }
       }
+
       it 'return correct values' do
         work_order.historical_job_parameters.should == params
       end

@@ -224,6 +224,11 @@ FactoryGirl.define do
     end
   end
 
+  factory :run_group_restriction, class: ::Naf::ApplicationRunGroupRestriction do
+    id 4
+    application_run_group_restriction_name "restriction"
+  end
+
   #############################################################
   #######   Application Types #################################
   #############################################################
@@ -307,6 +312,16 @@ FactoryGirl.define do
     end
   end
 
+  factory :machine_affinity, class: ::Naf::Affinity do
+    id 4
+    association :affinity_classification, factory: :machine_affinity_classification
+    affinity_name "machine"
+    # Ensure single creation
+    initialize_with do
+      ::Naf::Affinity.find_or_initialize_by_id(id)
+    end
+  end
+
   factory :affinity, class: ::Naf::Affinity do
     association :affinity_classification, factory: :purpose_affinity_classification
     sequence(:affinity_name) do |n|
@@ -342,6 +357,22 @@ FactoryGirl.define do
     end
   end
 
+  factory :weight_affinity_classification, class: ::Naf::AffinityClassification do
+    id 4
+    affinity_classification_name "weight"
+    initialize_with do
+      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+    end
+  end
+
+  factory :machine_affinity_classification, class: ::Naf::AffinityClassification do
+    id 5
+    affinity_classification_name "machine"
+    initialize_with do
+      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+    end
+  end
+
   factory :affinity_classification, class: ::Naf::AffinityClassification do
     sequence(:affinity_classification_name) { |n| "affinity_classification_#{n}" }
   end
@@ -366,6 +397,14 @@ FactoryGirl.define do
 
   factory :canary_job_affinity_tab, parent: :job_affinity_tab_base do
     association :affinity, factory: :canary_affinity
+  end
+
+  factory :weight_job_affinity_tab, parent: :job_affinity_tab_base do
+    association :affinity, factory: :weight_affinity
+  end
+
+  factory :machine_job_affinity_tab, parent: :job_affinity_tab_base do
+    association :affinity, factory: :machine_affinity
   end
 
   # Application Schedule Affinity Tabs
