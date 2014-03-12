@@ -1,5 +1,3 @@
-require 'open4'
-
 module Process::Naf::Logger
   class Base < ::Af::Application
 
