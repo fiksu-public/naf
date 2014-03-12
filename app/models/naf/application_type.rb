@@ -33,8 +33,14 @@ module Naf
       self.send(invocation_method.to_sym, job)
     end
 
+    # This method calls Process.spawn to excute a built command. The first part
+    # of the command is the execution of the job command, redirecting stderr to
+    # stdout. Stdout and stderr are then sent through a pipe to be used as input
+    # for the job logger. The job logger will also redirect stderr to stdout, and
+    # save any crash logs. At the end of the built command, there is a exit $PIPESTATUS
+    # command that will return the exit status of the whole command.
     def invoke(job, job_command)
-      command = job_command + " 2>&1 | #{JOB_LOGGER} >> #{LOGGING_ROOT_DIRECTORY}/naf/crash.log 2>&1"
+      command = job_command + " 2>&1 | #{JOB_LOGGER} >> #{LOGGING_ROOT_DIRECTORY}/naf/crash.log 2>&1; exit $PIPESTATUS"
       Process.spawn({ 'NAF_JOB_ID' => job.id.to_s }, command)
     end
 
