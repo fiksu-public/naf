@@ -34,7 +34,7 @@ module Naf
     end
 
     def invoke(job, job_command)
-      command = job_command + " 2>&1 | #{JOB_LOGGER} >> #{LOGGING_ROOT_DIRECTORY}/naf/crash.log 2>&1"
+      command = job_command + " 2>&1 | #{JOB_LOGGER} >> #{LOGGING_ROOT_DIRECTORY}/naf/crash.log 2>&1; exit $PIPESTATUS"
       Process.spawn({ 'NAF_JOB_ID' => job.id.to_s }, command)
     end
 
