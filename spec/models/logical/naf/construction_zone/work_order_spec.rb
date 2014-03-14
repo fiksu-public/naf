@@ -50,7 +50,7 @@ module Logical::Naf::ConstructionZone
 
       it 'return hash with the affinity_id when a Machine object is provided' do
         machine = FactoryGirl.create(:machine)
-        classification = FactoryGirl.create(:location_affinity_classification)
+        classification = FactoryGirl.create(:machine_affinity_classification)
         affinity = FactoryGirl.create(:affinity, id: 4,
                                                  affinity_name: machine.id.to_s,
                                                  affinity_classification: classification)
