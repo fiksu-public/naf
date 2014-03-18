@@ -398,9 +398,10 @@ module Naf
     describe "#affinity" do
       let!(:classification) { FactoryGirl.create(:machine_affinity_classification) }
       it "return affinity associated with machine's id" do
-        affinity = FactoryGirl.create(:affinity, id: 4,
-                                                 affinity_classification_id: classification.id,
-                                                 affinity_name: machine.id.to_s)
+        affinity = FactoryGirl.create(:affinity,
+                                      id: 4,
+                                      affinity_classification_id: FactoryGirl.create(:machine_affinity_classification).id,
+                                      affinity_name: machine.id.to_s)
         machine.affinity.should == affinity
       end
 

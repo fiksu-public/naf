@@ -106,7 +106,7 @@ module Naf
       schedules = ::Naf::ApplicationSchedule.
         joins(:run_interval_style).
         where("#{Naf.schema_name}.run_interval_styles.name IN (?)", ['at beginning of day', 'at beginning of hour']).
-        enabled.select do |schedule|
+        enabled.application_not_deleted.select do |schedule|
 
         interval_time = time.to_date
         if schedule.run_interval_style.name == 'at beginning of day'
@@ -133,7 +133,7 @@ module Naf
       schedules = ::Naf::ApplicationSchedule.
         joins(:run_interval_style).
         where("#{Naf.schema_name}.run_interval_styles.name = ?", 'after previous run').
-        enabled.select do |schedule|
+        enabled.application_not_deleted.select do |schedule|
 
         (not_finished_applications[schedule.id].nil? &&
           (application_last_runs[schedule.id].nil? ||
@@ -149,11 +149,22 @@ module Naf
       ::Naf::ApplicationSchedule.
         joins(:run_interval_style).
         where("#{Naf.schema_name}.run_interval_styles.name = ?", 'keep running').
-        enabled
+        enabled.application_not_deleted
     end
 
     def self.enabled
       where(enabled: true)
+    end
+
+    def self.application_not_deleted
+      where("
+        NOT EXISTS (
+          SELECT 1
+          FROM #{Naf.schema_name}.applications AS app
+          WHERE app.id = #{Naf.schema_name}.application_schedules.application_id AND
+            app.deleted = true
+        )
+      ")
     end
 
     def self.should_be_queued

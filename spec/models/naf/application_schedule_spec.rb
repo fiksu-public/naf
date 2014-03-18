@@ -95,6 +95,12 @@ module Naf
         time = Time.zone.now
         ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
       end
+
+      it "return no schedules when application is deleted" do
+        schedule.application.deleted = true
+        schedule.application.save!
+        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
+      end
     end
 
     describe "#relative_schedules" do
@@ -115,6 +121,61 @@ module Naf
         apps = { schedule.application_id => job }
         schedule.run_interval = 20
         ::Naf::ApplicationSchedule.relative_schedules(time, {}, apps).should == []
+      end
+
+      it "return no schedules when application is deleted" do
+        schedule.application.deleted = true
+        schedule.application.save!
+        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
+      end
+    end
+
+    describe "#constant_schedules" do
+      it "return schedule when it is ready" do
+        schedule.run_interval_style.name = 'keep running'
+        schedule.run_interval_style.save!
+
+        ::Naf::ApplicationSchedule.constant_schedules.should == [schedule]
+      end
+
+      it "return no schedules when application is deleted" do
+        schedule.application.deleted = true
+        schedule.application.save!
+        ::Naf::ApplicationSchedule.constant_schedules.should == []
+      end
+
+      it "return no schedules when schedule is disabled" do
+        schedule.enabled = false
+        schedule.save!
+        ::Naf::ApplicationSchedule.constant_schedules.should == []
+      end
+
+      it "return no schdules when run interval style is not keep running" do
+        ::Naf::ApplicationSchedule.constant_schedules.should == []
+      end
+    end
+
+    describe "#enabled" do
+      it "return empty array when schedule is disabled" do
+        schedule.enabled = false
+        schedule.save!
+        ::Naf::ApplicationSchedule.enabled.should == []
+      end
+
+      it "return array with schedule when schedule is enabled" do
+        ::Naf::ApplicationSchedule.enabled.should == [schedule]
+      end
+    end
+
+    describe "#application_not_deleted" do
+      it "return empty array when application is deleted" do
+        schedule.application.deleted = true
+        schedule.application.save!
+        ::Naf::ApplicationSchedule.application_not_deleted.should == []
+      end
+
+      it "return array with schedule when application is not deleted" do
+        ::Naf::ApplicationSchedule.application_not_deleted.should == [schedule]
       end
     end
 

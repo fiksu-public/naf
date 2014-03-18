@@ -66,7 +66,8 @@ module Process::Naf
       today = Time.zone.now.to_date
       files.each do |file|
         logger.info "Archived file: #{file}"
-        `rm #{file}`
+        directory = `dirname #{file}`
+        `rm -r #{directory}`
       end
     end
 
