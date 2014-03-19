@@ -45,10 +45,10 @@ module Naf
     private
 
     def check_naf_cookie_presence
-      user_session = ::Logical::Naf::UserSession.new(cookies[domain_cookie_name])
+      user_session = ::Logical::Naf::UserSession.new(session[domain_cookie_name])
       if !user_session.valid?
-        cookies.delete(domain_cookie_name)
-        cookies[domain_cookie_name] = user_session.token_cookie
+        session.delete(domain_cookie_name)
+        session[domain_cookie_name] = user_session.token_cookie
       end
     end
 

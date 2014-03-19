@@ -20,18 +20,8 @@ module Logical
 
       def self.build_token_cookie
         {
-          value: Time.zone.now,
-          expires: 1.week.from_now,
-          domain: self.host_domain
+          value: Time.zone.now
         }
-      end
-
-      def self.host_domain
-        if Rails.env == 'development'
-          "localhost:#{Rails::Server.new.options[:Port]}"
-        else
-          '*.' + Socket.gethostname.split('/')[0].split('.')[-2..-1].join('.')
-        end
       end
 
       # Sign the provided string using a MessageVerifier.
@@ -43,7 +33,7 @@ module Logical
       # string is composed of two sections separate by two dashes: the string base64 encoded
       # and a SHA1 hash digest of the string.
       def self.signed_message?(message)
-        !message.nil? && message =~ /^[a-zA-z0-9]+={0,2}--[a-zA-z0-9]{40}$/
+        !message.nil? && message =~ /^.{123}={1}-{2}[a-zA-Z0-9]{40}$/
       end
 
       # Unsign the provided string using a MessageVerifier.
