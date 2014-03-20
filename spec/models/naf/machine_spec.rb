@@ -396,6 +396,7 @@ module Naf
     end
 
     describe "#affinity" do
+      let!(:classification) { FactoryGirl.create(:machine_affinity_classification) }
       it "return affinity associated with machine's id" do
         affinity = FactoryGirl.create(:affinity,
                                       id: 4,

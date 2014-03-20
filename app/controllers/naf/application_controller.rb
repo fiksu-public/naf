@@ -1,10 +1,12 @@
 module Naf
-  class ApplicationController < Naf.controller_class
+  class ApplicationController < Naf.ui_controller_class
     layout Naf.layout
 
     require 'will_paginate/array'
 
     protect_from_forgery
+
+    before_filter :check_naf_cookie_presence
 
     protected
 
@@ -39,5 +41,20 @@ module Naf
       end
       cookies[:search_status] = @search_status
     end
+
+    private
+
+    def check_naf_cookie_presence
+      user_session = ::Logical::Naf::UserSession.new(session[domain_cookie_name])
+      if !user_session.valid?
+        session.delete(domain_cookie_name)
+        session[domain_cookie_name] = user_session.token_cookie
+      end
+    end
+
+    def domain_cookie_name
+      @domain_cookie_name ||= ::Naf.configuration.api_domain_cookie_name
+    end
+
   end
 end

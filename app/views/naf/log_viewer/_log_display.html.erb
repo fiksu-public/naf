@@ -165,7 +165,12 @@
           }
         },
         error: function(response) {
-          jQuery('#stdout').prepend('Something went wrong, retry your search.');
+          message = '&nbsp;&nbsp;<span>Failed to retrieve ' + '<%= record_type %>' + '(' +
+            '<%= record_id %>' + ') logs from ' + '<%= logs_url %>'.match(/^https?\:\/\/([^\/?#]+)/).pop() + '. Please refer to ' +
+            'Naf FAQs on the' + ' wiki'.link('https://github.com/fiksu/naf/wiki/Frequently-Asked-Questions') +
+            ' for further information.<br></span>';
+
+          jQuery('#stdout').prepend(message);
         }
       });
     }

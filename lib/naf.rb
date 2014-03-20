@@ -21,16 +21,28 @@ module Naf
       configuration.model_class.constantize
     end
 
-    def controller_class
-      configuration.controller_class.constantize
-    end
-
     def title
       configuration.title
     end
 
     def layout
       configuration.layout
+    end
+
+    def ui_controller_class
+      configuration.ui_controller_class.constantize
+    end
+
+    def api_controller_class
+      configuration.api_controller_class.constantize
+    end
+
+    def api_domain_cookie_name
+      configuration.api_domain_cookie_name
+    end
+
+    def simple_cluster_authenticator_cookie_expiration_time
+      configuration.simple_cluster_authenticator_cookie_expiration_time
     end
 
     def using_another_database?
