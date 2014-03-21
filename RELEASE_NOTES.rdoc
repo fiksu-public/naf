@@ -9,6 +9,7 @@ Bug fixes:
 * Job exit status always set to 0, even after the job errors
 * Unnecessary 'open4' require statements
 * Deleted application still runs if it has an enabled schedule
+* LogArchiver did not delete empty folders
 
 Changes:
 * Created a log archival queuer script
