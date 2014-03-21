@@ -33,7 +33,7 @@ module Logical
       # string is composed of two sections separate by two dashes: the string base64 encoded
       # and a SHA1 hash digest of the string.
       def self.signed_message?(message)
-        !message.nil? && message =~ /^.{123}={1}-{2}[a-zA-Z0-9]{40}$/
+        !message.nil?
       end
 
       # Unsign the provided string using a MessageVerifier.
