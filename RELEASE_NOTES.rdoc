@@ -1,5 +1,19 @@
 = Release Notes
 
+=== Version 2.1.7
+Bug fixes:
+* Boss#enqueue_command had the first two parameters switched
+* Boss#enqueue_n_commands referenced a machine object, but that object did not exist in the scope
+* Boss#enqueue_n_commands called job_affinity_tabs on a job when it should be calling historical_job_affinity_tabs
+* Foreman#limited_by_run_group? checked the affinity_classification_name of an affinity, but did not check if the affinity was null
+* Job exit status always set to 0, even after the job errors
+* Unnecessary 'open4' require statements
+* Deleted application still runs if it has an enabled schedule
+
+Changes:
+* Created a log archival queuer script
+* Created Api Authenticator for logs
+
 === Version 2.1.6
 Bug fixes:
 * Historical jobs application_schedule_id was not getting set, causing the runner to constantly queue applications.
