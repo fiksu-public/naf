@@ -29,16 +29,12 @@ module Logical
         self.message_verifier.generate(message) if !message.nil?
       end
 
-      # Returns true if the provided string is signed with MessageVerifier.  A signed
-      # string is composed of two sections separate by two dashes: the string base64 encoded
-      # and a SHA1 hash digest of the string.
-      def self.signed_message?(message)
-        !message.nil?
-      end
-
       # Unsign the provided string using a MessageVerifier.
       def self.unsign_message(message)
-        return nil unless self.signed_message?(message)
+        if message.nil?
+          return nil
+        end
+
         begin
           self.message_verifier.verify(message)
         rescue ActiveSupport::MessageVerifier::InvalidSignature

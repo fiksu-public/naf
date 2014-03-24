@@ -60,23 +60,14 @@ module Logical
         end
       end
 
-      describe '#signed_message?' do
-        it 'return false when message is nil' do
-          ::Logical::Naf::UserSession.signed_message?(nil).should be_false
-        end
-
-        it 'return true when message is signed' do
-          ::Logical::Naf::UserSession.signed_message?(user_session.token_cookie).should be_true
-        end
-      end
-
       describe '#unsign_message' do
         it 'return nil when message is not signed' do
           ::Logical::Naf::UserSession.unsign_message(nil).should be_nil
         end
 
         it 'return nil when InvalidSignature exception is raised' do
-          ::Logical::Naf::UserSession.should_receive(:signed_message?).and_return(0)
+          ::Logical::Naf::UserSession.stub(:message_verifier).
+            and_raise(ActiveSupport::MessageVerifier::InvalidSignature)
           ::Logical::Naf::UserSession.unsign_message(nil).should be_nil
         end
 
