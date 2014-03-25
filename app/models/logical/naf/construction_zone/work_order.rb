@@ -73,6 +73,10 @@ module Logical::Naf::ConstructionZone
           }
         elsif affinity.is_a? ::Naf::ApplicationScheduleAffinityTab
           # affinity_for application_schedule_affinity_tab
+          {
+            affinity_id: affinity.affinity_id,
+            affinity_parameter: affinity.affinity_parameter
+          }
         elsif affinity.is_a? Hash
           # should have key: :affinity_id or :affinity_short_name or :affinity_name
           # may have key: :affinity_parameter
