@@ -2,7 +2,7 @@
 
 === Version 2.1.9
 Bug fixes:
-* When jobs are added to the queue, the affinity_id for the historical job affinity tab is set, but not the affinity_parameter.
+* Logical::Naf::ConstructionZone doesn't properly propagate affinity parameters
 
 === Version 2.1.8
 Bug fixes:

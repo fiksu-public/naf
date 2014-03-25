@@ -59,7 +59,7 @@ module Logical::Naf::ConstructionZone
           should == [{ affinity_id: affinity.id }]
       end
 
-      it 'return nil when an ApplicationScheduleAffintyTab object is provided' do
+      it 'return hash when an ApplicationScheduleAffintyTab object is provided' do
         tab = FactoryGirl.build(:normal_app_schedule_affinity_tab, affinity_parameter: 1.0)
         work_order.instance_variable_set(:@affinities, [tab])
         work_order.historical_job_affinity_tab_parameters.
