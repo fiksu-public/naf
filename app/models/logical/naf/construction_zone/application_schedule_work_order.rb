@@ -6,7 +6,7 @@ module Logical::Naf::ConstructionZone
             application_schedule.application_run_group_name,
             application_schedule.application_run_group_limit,
             application_schedule.priority,
-            application_schedule.affinities,
+            application_schedule.application_schedule_affinity_tabs,
             application_schedule.prerequisites,
             application_schedule.enqueue_backlogs,
             application_schedule)
