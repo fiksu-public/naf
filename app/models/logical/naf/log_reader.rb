@@ -40,6 +40,7 @@ module Logical
       end
 
       def retrieve_job_files(job_id)
+        return [] unless job_id.present?
         tree = bucket.objects.with_prefix(prefix + "#{job_id}").as_tree
         sort_files(tree.children.select(&:leaf?).collect(&:key))
       end

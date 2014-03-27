@@ -234,10 +234,7 @@
 
     function setLogicalType(){
       logical_type = '::Logical::Naf::LogParser::';
-      if('<%= record_type %>' == 'machine'){
-        logical_type += 'Machine';
-      }
-      else if('<%= record_type %>' == 'runner'){
+      if('<%= record_type %>' == 'runner'){
         logical_type += 'Runner';
       }
       else if('<%= record_type %>' == 'job'){
