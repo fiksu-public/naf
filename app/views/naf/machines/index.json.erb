@@ -1,6 +1,6 @@
  <%
   rows = @machines.each do |machine|
-    machine[11] << (link_to image_tag('machine_runner.png',
+    machine[11] = (link_to image_tag('machine_runner.png',
                                       class: 'action',
                                       title: "View machine(id: #{machine[0]}, server:#{machine[1].blank? ? machine[2] : machine[1]}) runner log"),
                                       url_for({ controller: 'log_viewer',
