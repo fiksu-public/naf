@@ -1,0 +1,107 @@
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+
+    function initPageSelect() {
+      jQuery('#page-select-container').show();
+      jQuery('#refresh-page-container').show();
+    }
+
+    function getDisplayLength() {
+      return parseInt(jQuery('#iDisplayLength').val());
+    }
+
+    // Global to store the current timeout id value.
+    var timeout_id = null;
+
+    // Redraw datatable.
+    var redrawDatatable = function() {
+      jQuery("#datatable").dataTable().fnDraw(false);
+      checkRunnersAndSchedules();
+      if ( jQuery('#auto_refresh').is(':checked') ) {
+        timeout_id = setTimeout(redrawDatatable, 10000);
+      }
+    };
+
+    jQuery(document).ready(function() {
+      jQuery('#page-select-container form select').change(function() {
+        var ddTable = jQuery('#datatable');
+        ddTable.dataTableSettings[0]._iDisplayStart = 0;
+        ddTable.dataTableSettings[0]._iDisplayLength = parseInt(this.value);
+        jQuery('#datatable').dataTable().fnDraw();
+      });
+
+      <% if controller_name == 'historical_jobs' %>
+        timeout_id = setTimeout(redrawDatatable, 10000);
+        jQuery('#auto_refresh').prop('checked', true);
+      <% end %>
+
+      jQuery('#refresh_datatable').click(function(){
+        jQuery('#datatable').dataTable().fnDraw();
+        checkRunnersAndSchedules();
+      });
+
+      // Set change event to enabled/disable auto-refresh
+      jQuery('#auto_refresh').change(function() {
+        if ( jQuery(this).is(':checked') ) {
+          timeout_id = setTimeout(redrawDatatable, 10000);
+        } else {
+          clearTimeout(timeout_id);
+          timeout_id = null;
+        }
+      });
+    });
+
+    function checkRunnersAndSchedules() {
+      <% if controller_name == 'historical_jobs' %>
+        updateRunnerCount();
+        updateLastCheckedScheduleAt();
+      <% end %>
+    }
+
+    function updateRunnerCount() {
+      jQuery.ajax({
+        url: '/job_system/machine_runners/runner_count',
+        type: 'GET',
+        dataType: 'json',
+        success:function (data) {
+          jQuery('.running-count').text(data['running'] + ' running');
+          jQuery('.winding-down-count').text(data['winding_down'] + ' winding down');
+          jQuery('.down-count').text(data['down'] + ' down');
+        }
+      });
+    }
+
+    function updateLastCheckedScheduleAt() {
+      jQuery.ajax({
+        url: '/job_system/machines/last_checked_schedule_at',
+        type: 'GET',
+        dataType: 'json',
+        success:function (data) {
+          if(data['last_checked_schedule_at'] == null){
+            jQuery('.last_checked_schedule_at').text('');
+          }
+          else{
+            jQuery('.last_checked_schedule_at').text(data['last_checked_schedule_at']);
+          }
+        }
+      });
+    }
+
+  </script>
+<% end %>
+
+<div id="page-select-container" class="ui-state-default ui-corner-all">
+  <%= form_tag({ controller: params[:controller], action: params[:action], format: 'js' }, method: :get) do %>
+    <%= label_tag :iDisplayLength, "Rows Per Page:", class: "label" %>
+    <%= select_tag :iDisplayLength,
+        options_for_select(::Naf.configuration.default_page_options, @rows_per_page),
+        class: "page-select datatable_variable ui-state-default ui-corner-all" %>
+  <% end %>
+</div>
+
+<div id='refresh-page-container'>
+  <%= link_to "Refresh Table", "#", id: :refresh_datatable %>
+  &nbsp;&nbsp;
+  <%= label_tag :auto_refresh, 'Auto Refresh:' %>
+  <%= check_box_tag :auto_refresh, 1, false, id: :auto_refresh %>
+</div>

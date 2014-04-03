@@ -1,0 +1,8 @@
+<%
+  rows = @application_schedules.each do |schedule|
+		app = Naf::ApplicationSchedule.find(schedule.first)
+		schedule[0] = link_to schedule[0], naf.application_schedule_path(schedule[0])
+		schedule[1] = link_to schedule[1].title, naf.application_path(schedule[1])
+  end
+%>
+<%= raw rows %>

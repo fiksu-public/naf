@@ -1,0 +1,65 @@
+<div id='naf'>
+  <div id="fluid">
+    <div id='bd'>
+      <div id="record">
+        <FONT FACE= "Courier New">
+        <div id="stdout" class="scrollable-output-expanded"></div>
+        </br>
+        <FONT FACE= "Arial">
+
+        <div id="stdout_header">
+          <div>
+            <%= render partial: 'search_options' %>
+            <div style="width: 100%; display: table;">
+              <div style="display: table-row">
+                <div style="width: 600px; display: table-cell;">
+                  <%= label_tag 'From:' %>
+                  <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_from', dropdown_width: 'width: 15%;' } %>
+                  </br>
+                  <%= label_tag 'To:' %>&nbsp;&nbsp;&nbsp;&nbsp;
+                  <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_to', dropdown_width: 'width: 15%;' } %>
+                </div>
+                <div style="display: table-cell;">
+                  <strong style="margin-left: 10%; size: 10%">Job Information</strong>
+                  <table id='naf_table_show' style="margin-left: 10%; width: 92.5%">
+                    <thead>
+                      <tr>
+                        <td width="7%">ID</td>
+                        <td>Command</td>
+                        <td width="30%">Server</td>
+                        <td width="8%">Pid</td>
+                        <td width="15%">Status</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><%= @job.id %></td>
+                        <td style="white-space: pre-wrap;"><%= @job.command %></td>
+                        <% logical_job = ::Logical::Naf::Job.new(@job) %>
+                        <td><%= logical_job.runner %></td>
+                        <td><%= @job.pid %></td>
+                        <td class="<%= add_color(logical_job.status) %>"><%= logical_job.status %></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            </br>
+
+            <%= submit_tag("Search the logs", id: 'log_search_submit') %>
+            &nbsp;&nbsp;&nbsp;
+            <%= link_to 'Back to Job', { controller: 'historical_jobs', action: 'show', id: @job.id } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'update_page_title', locals: { title: "Job(#{@job.id}) Logs" } %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output-expanded' } %>
+<%= render partial: 'log_display', locals: { record_id: @job.id,
+                                             status: logical_job.status,
+                                             logs_url: "#{http_protocol}#{logical_job.runner}#{naf.logs_log_parsers_path}",
+                                             record_type: 'job' } %>

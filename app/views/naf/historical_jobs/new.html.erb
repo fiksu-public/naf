@@ -1,0 +1,61 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', naf.historical_jobs_path %>
+
+    <h3 id="record_name">Create a Job</h3>
+
+    <%= form_tag(naf.historical_jobs_path, id: 'job_add') do %>
+
+        <% if defined?(@historical_job) && @historical_job.errors.any? %>
+            <div id="errorExplanation">
+              <h2><%= pluralize(@historical_job.errors.count, "error") %> prohibited job from being saved:</h2>
+
+              <ul>
+                <% @historical_job.errors.full_messages.each do |msg| %>
+                    <li><%= msg %></li>
+                <% end %>
+              </ul>
+            </div>
+        <% end %>
+
+        <div class="field">
+          <%= label :script_type, "Script Type*" %>
+          <%= select(:historical_job, :application_type_id,
+                     Naf::ApplicationType.all.collect { |type| [type.script_type_name, type.id] },
+                     { include_blank: true }) %>
+        </div>
+        <br/>
+
+        <div class="field">
+          <%= label :command, "Command*" %>
+          <%= text_area :historical_job, :command, rows: 4, cols: 60 %>
+        </div>
+        <br/>
+
+        <div class="field">
+          <%= label :run_group_restriction, "Run Group Restriction*" %>
+          <%= select(:historical_job, :application_run_group_restriction_id,
+                     Naf::ApplicationRunGroupRestriction.all.collect { |a| [a.application_run_group_restriction_name, a.id] },
+                     { include_blank: true }) %>
+        </div>
+        <br/>
+
+        <div class="field">
+          <%= label :run_group_name, "Run Group Name" %>
+          <%= text_field(:historical_job, :application_run_group_name) %> <br/>
+        </div>
+        <br/>
+
+        <div class="field">
+          <%= label :application_run_group_limit, "Application Run Group Limit" %>
+          <%= text_field(:historical_job, :application_run_group_limit) %>
+        </div>
+        <br/>
+        <br/>
+
+        <%= submit_tag("Create Job") %>
+    <% end %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

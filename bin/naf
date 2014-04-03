@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+# This command will automatically be run when you run "bundle exec naf" from the root of your application.
+
+action, option = ARGV
+if action == 'runner'
+  if option == 'up'
+    puts "Bringing up the runner(s)..."
+    `screen -d -m bash -c 'source /root/.bash_profile && cd /root/current && a=\`uuidgen\` && script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
+      script/rails runner ::Process::Naf::Logger::RunnerLog.run --invocation-uuid $a'`
+
+  elsif option == 'status'
+    num_runners = Integer(`ps -ef | grep Process::Naf::Runner.run | grep -v grep | grep -v uuidgen | wc -l`.strip)
+    hostname = `hostname`.strip
+    if num_runners == 0
+      puts "down: #{hostname}"
+    elsif num_runners == 1
+      puts "up: #{hostname}"
+    else
+      puts "up/w: #{hostname} (#{num_runners})"
+    end
+
+  elsif option == 'down'
+    puts 'Bringing down runner(s)...'
+    `kill $(ps -ef | grep Process::Naf::Runner.run | grep -v grep | grep -v uuidgen | awk '{ print $2 }') | cat`
+  end
+end

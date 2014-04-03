@@ -1,0 +1,47 @@
+<%= form_for @application do |f| %>
+  <% if @application.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@application.errors.count, "error") %> prohibited this application from being saved:</h2>
+    </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :title, "Title*" %>
+    <%= f.text_field :title %>
+  </div>
+
+  <div class="field">
+    <%= f.label :short_name %>
+    <%= f.text_field :short_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :command, "Command*" %>
+    <%= f.text_area :command, rows: 4, cols: 60 %>
+  </div>
+
+  <div class="field">
+    <%= f.label :application_type_id, "Application type*" %>
+    <%= f.select(:application_type_id,
+                 ::Naf::ApplicationType.all.map { |a| [a.script_type_name, a.id] },
+                 { include_blank: true }) %>
+  </div>
+
+  <div class="field">
+    <%= f.label :log_level %>
+    <%= f.text_field :log_level %>
+  </div>
+  <br/>
+
+  <div class="field">
+    <%= f.label :deleted %>
+    <%= f.check_box :deleted %>
+    <br/><br/>
+  </div>
+  <br/>
+
+  <div class="actions">
+    <br/>
+    <%= f.submit %>
+  </div>
+<% end %>

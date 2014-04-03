@@ -1,0 +1,51 @@
+<% content_for :body do %>
+    <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
+    <%= render partial: 'filter' %>
+    <%= render partial: 'naf/shared/select_per_page' %>
+    <div id="flash_message">
+        <% unless notice.blank? %>
+          <script type='text/javascript'>
+            jQuery("<p id='notice'><%= notice %></p>")
+                .appendTo('#flash_message')
+                .slideDown().delay(5000).slideUp();
+          </script>
+        <% end %>
+    </div>
+
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Server Name</th>
+          <th>Server Address</th>
+          <th>Server Note</th>
+          <th>Enabled</th>
+          <th>Process Pool Size</th>
+          <th>Last Checked Schedules At</th>
+          <th>Last Seen Alive At</th>
+          <th>Log Level</th>
+          <th>Affinities</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr></tr>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <%= javascript_include_tag("dataTablesTemplates/machines.js") %>
+      <script type='text/javascript'>
+        var sAjaxSource = "<%= naf.machines_path(:json) %>";
+        jQuery(document).ready(function() {
+            jQuery("#time_format").change(function () {
+                SetFirstPage();
+                return false;
+            });
+        });
+      </script>
+    <% end %>
+
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

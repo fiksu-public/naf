@@ -1,0 +1,155 @@
+<% content_for :body do %>
+  <div id="flash_message">
+    <% unless notice.blank? %>
+      <script type='text/javascript'>
+        jQuery("<p id='notice'><%= notice %></p>")
+          .appendTo('#flash_message')
+          .slideDown().delay(5000).slideUp();
+      </script>
+    <% end %>
+  </div>
+
+  <% content_for :javascripts do %>
+    <script type='text/javascript'>
+      jQuery(document).ready(function () {
+        jQuery(document).delegate('.enqueue', "click", function(){
+          var postSource = "<%= naf.historical_jobs_path %>";
+          var answer = confirm("Adding application as a job on the queue?");
+          if (!answer) {
+            return false;
+          }
+          jQuery.post(postSource, { "historical_job[application_id]":jQuery(this).attr('id') }, function (data) {
+            if (data.success) {
+              jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
+              appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              setTimeout('window.location.reload()', 5600);
+            }
+            else {
+              jQuery("<div class='error'>Sorry, \'" +  data.title +
+                "\' cannot add a Job to the queue right now!</div>").
+                appendTo('#flash_message').slideDown().delay(5000).slideUp();
+              jQuery('#datatable').dataTable().fnDraw();
+            }
+          });
+        });
+      });
+    </script>
+  <% end %>
+
+  <div id="record">
+    <h2>Application</h2>
+    <%= link_to 'Back to Applications', applications_path %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to 'Edit', edit_application_path(@application) %>
+    &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <%= link_to "Add Schedule", controller: 'application_schedules',
+                                action: 'new',
+                                application_id: @application.id %>
+    </br>
+    </br>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Attribute</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>ID</td>
+          <td><%= @application.id %></td>
+        </tr>
+        <tr>
+          <td>Created At</td>
+          <td><%= @application.created_at %></td>
+        </tr>
+        <tr>
+          <td>Updated At</td>
+          <td><%= @application.updated_at %></td>
+        </tr>
+        <tr>
+          <td>Deleted</td>
+          <td><%= @application.deleted %></td>
+        </tr>
+        <tr>
+          <td>Application Type</td>
+          <td><%= @application.application_type.script_type_name %></td>
+        </tr>
+        <tr>
+          <td>Command</td>
+          <td style="white-space: pre-wrap;"><%= @application.command %></td>
+        </tr>
+        <tr>
+          <td>Title</td>
+          <td><%= @application.title %></td>
+        </tr>
+        <tr>
+          <td>Short Name</td>
+          <td><%= @application.short_name %></td>
+        </tr>
+        <tr>
+          <td>Log Level</td>
+          <td><%= @application.log_level %></td>
+        </tr>
+        <tr>
+          <td>Script Type Name</td>
+          <td><%= @logical_application.script_type_name %></td>
+        </tr>
+        <tr>
+          <td>Application Schedules</td>
+          <td>
+            <% output = '' %>
+            <% @logical_application.application_schedules.each do |schedule|
+                  logical_schedule = ::Logical::Naf::ApplicationSchedule.new(schedule)
+                  output << (link_to logical_schedule.display,
+                                     naf.application_schedule_path(schedule.id),
+                                     title: logical_schedule.help_title)
+                  output << ', '
+                end
+                output = output[0..-3] %>
+            <%= output.html_safe %>
+          </td>
+        </tr>
+        <tr>
+          <td>Add Script to Jobs Queue</td>
+          <td>
+            <%= link_to image_tag('control_play_blue.png',
+                  class: 'action',
+                  title: "Enqueue Application(\nid: #{@application.id},\n" +
+                    "title: #{@application.title},\ncommand: #{@application.command})"),
+                  "#", { class: "enqueue", id: @application.id } %>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </br>
+
+    <h2>Last Queued Job</h2>
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th width="10%">ID</th>
+          <th width="20%">Last Queued At</th>
+          <th>Command</th>
+          <th width="15%">Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @application.historical_jobs.order('created_at desc').limit(10).each do |job| -%>
+          <tr>
+            <td><%= link_to job.id, historical_job_path(job) %></td>
+            <td><%= "#{time_ago_in_words(job.created_at, true)} ago" %></td>
+            <td style="white-space: pre-wrap;"><%= job.command %></td>
+            <% job = ::Logical::Naf::Job.new(job) %>
+            <td class="<%= add_color(job.status) %>"><%= job.status %></td>
+          </tr>
+        <% end -%>
+      </tbody>
+    </table>
+    </br>
+
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

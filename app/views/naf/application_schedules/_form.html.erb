@@ -1,0 +1,125 @@
+<%= form_for @application_schedule do |f| %>
+  <% if @application_schedule.errors.any? %>
+    <div id='errorExplanation'>
+      <h2><%= pluralize(@application_schedule.errors.count, 'error') %> prohibited this application schedule from being saved:</h2>
+    </div>
+  <% end %>
+
+  <%= f.hidden_field :application_id, value: @application_schedule.application_id %>
+
+  <div class="field">
+    <%= f.label "Application" %>
+    <p><%= @application_schedule.application.title %></p>
+  </div>
+
+  <div class="field">
+    <%= f.label :application_run_group_restriction_id, "Application run group restriction*" %>
+    <%= f.select(:application_run_group_restriction_id,
+                 ::Naf::ApplicationRunGroupRestriction.all.map { |a| [a.application_run_group_restriction_name, a.id] },
+                 include_blank: true) %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :application_run_group_name %>
+    <%= select_tag(:run_group_name_type, options_for_select([["custom", "custom"],
+                                                             ["command", "command"],
+                                                             ["not set", "not set"]],
+                                                             @run_group_name_type)) %><br/>
+    <%= f.text_area :application_run_group_name, rows: 4, cols: 32, placeholder: "Please input Application Run Group Name" %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :run_interval, "Run Interval (minutes)" %>
+    <%= f.text_field :run_interval %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :run_interval_style_id, "Run Interval Style*" %>
+    <%= f.select(:run_interval_style_id,
+                 ::Naf::RunIntervalStyle.all.map { |s| [s.name, s.id] },
+                 include_blank: true) %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :priority %>
+    <%= f.text_field :priority %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :application_run_group_limit %>
+    <%= f.text_field :application_run_group_limit %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :application_run_group_quantum%>
+    <%= f.text_field :application_run_group_quantum %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :enabled %>
+    <%= f.check_box :enabled %>
+  </div>
+  </br/>
+
+  <div class="field">
+    <%= f.label :visible %>
+    <%= f.check_box :visible %>
+  </div>
+  <br/>
+
+  <div class="field">
+    <%= f.label :enqueue_backlogs %>
+    <%= f.check_box :enqueue_backlogs %>
+  </div>
+  <br/>
+
+  <% if @show_prerequisite %>
+    <%= f.fields_for :application_schedule_prerequisites do |builder| %>
+      <%= render "application_schedule_prerequisites", f: builder %>
+    <% end %>
+  <% else %>
+    <% f.fields_for :application_schedule_prerequisites do |builder| %>
+      <%= render "application_schedule_prerequisites", f: builder %>
+    <% end %>
+  <% end %>
+
+  <%= naf_link_to_add_fields "Add Schedule Prerequisite", f, :application_schedule_prerequisites %>
+
+  <div class='actions'>
+    <br/>
+    <%= f.submit %>
+  </div>
+<% end %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    jQuery(document).ready(function() {
+      var run_group = jQuery("#application_schedule_application_run_group_name");
+
+      if(jQuery("#run_group_name_type").val() != 'custom') {
+        run_group.hide();
+        run_group.val(null);
+      }
+
+      jQuery("#run_group_name_type").change(function () {
+        var type = jQuery("#run_group_name_type").val();
+        if(type == 'command') {
+          run_group.hide();
+          run_group.val(null);
+        } else if(type == 'not set') {
+          run_group.hide();
+          run_group.val(null);
+        } else {
+          run_group.slideToggle("slow");
+        }
+      });
+    });
+  </script>
+<% end %>

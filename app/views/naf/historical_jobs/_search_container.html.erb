@@ -1,0 +1,139 @@
+<div class="display-inline-block search_select_input">
+  <%= label(:status, "Status:") %>
+  <%= select_tag("search[status]",
+                  options_for_select([["All", nil],
+                                      ["Queued", :queued],
+                                      ["Running", :running],
+                                      ["Waiting", :waiting],
+                                      ["Finished", :finished],
+                                      ["Errored", :errored]], @search_status),
+                  { class: 'datatable_variable' }) %>
+</div>
+&nbsp;&nbsp;
+
+<div class="display-inline-block search_select_input">
+  <%= label(:started_on_machine_id, "Machine:") %>
+  <%= select(:search, :started_on_machine_id,
+              Naf::Machine.all.collect {
+                |m| [m.short_name_if_it_exist.blank? ? m.server_address : m.short_name_if_it_exist, m.id]
+              }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable' }) %>
+</div>
+&nbsp;&nbsp;
+
+<div class="display-inline-block search_select_input">
+  <%= label(:time_format, "Time format:") %>
+  <%= select_tag(:time_format, options_for_select([["Lexically", :lexically], ["Timestamp", :timestamp]])) %>
+</div>
+&nbsp;&nbsp;
+
+<div id='show_search_container_link' class="display-inline-block">
+  <%= link_to 'Show additional search parameters', '#', id: 'search_container_link' %>
+</div>
+<div id="search_container">
+  <%= form_tag(naf.historical_jobs_path, method: "get", id: 'job_search', class: 'search_select_input') do %>
+    <div style="width:30%;" class="display-inline-block">
+      <div class="field">
+        <%= label(:command, "Command:") %>
+        <%= text_field(:search, :command, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:application_run_group_name, "Run Group:") %>
+        <%= text_field(:search, :application_run_group_name, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:pid, "Pid:") %>
+        <%= text_field(:search, :pid, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
+    </div>
+    <div style="width:30%; padding-left:40px;" class="display-inline-block">
+      <div class="field">
+        <%= label(:application_type_id, "Script Type:") %>
+        <%= select(:search, :application_type_id,
+                    Naf::ApplicationType.all.collect {
+                      |type| [type.script_type_name, type.id]
+                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable', style: "width:170px" }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:application_run_group_restriction_id, "Run Group Restriction:") %>
+        <%= select(:search, :application_run_group_restriction_id,
+                    Naf::ApplicationRunGroupRestriction.all.collect {
+                      |a| [a.application_run_group_restriction_name, a.id]
+                    }.sort.unshift(["All", nil]), {}, { class: 'datatable_variable', style: "width:170px" }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:failed_to_start, "Failed to Start:") %>
+        <%= select(:search, :failed_to_start,
+                            [["Ignore", nil], ["True", true], ["False", nil]],
+                            { }, { class: 'datatable_variable', style: "width:170px" }) %>
+      </div>
+      <br/>
+    </div>
+    <div style="width:30%; padding-left:40px;" class="display-inline-block">
+      <div class="field">
+        <%= label(:request_to_terminate, "Request to Terminate:") %>
+        <%= select(:search, :request_to_terminate,
+                            [["Ignore", nil], ["True", true], ["False", false]],
+                            {}, { class: 'datatable_variable', style: "width:170px" }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:exit_status, "Exit Status:") %>
+        <%= text_field(:search, :exit_status, { class: 'datatable_variable' }) %>
+      </div>
+      <br/>
+
+      <div class="field">
+        <%= label(:priority, "Priority:") %>
+        <%= text_field(:search, :priority, { class: 'datatable_variable' }) %>
+      </div>
+    </div>
+    <br/><br/><br/>
+    <%= submit_tag("Search") %>
+  <% end %>
+</div>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    jQuery(document).ready(function() {
+      jQuery("#search_container").hide();
+      jQuery("#search_container_link").click(function () {
+        if (jQuery("#search_container").css('display') == 'none') {
+          jQuery("#search_container_link").text("Hide additional search parameters");
+        }else {
+          jQuery("#search_container_link").text("Show additional search parameters");
+        }
+        jQuery("#search_container").slideToggle("slow");
+      });
+      jQuery("#job_search").submit(function () {
+        setPageOrder();
+        SetFirstPage();
+        return false;
+      });
+      jQuery("#search_status").change(function () {
+        setPageOrder();
+        SetFirstPage();
+        return false;
+      });
+      jQuery("#search_started_on_machine_id").change(function () {
+        setPageOrder();
+        SetFirstPage();
+        return false;
+      });
+      jQuery("#time_format").change(function () {
+        setPageOrder();
+        SetFirstPage();
+        return false;
+      });
+    });
+  </script>
+<% end %>

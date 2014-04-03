@@ -1,0 +1,16 @@
+common: &common
+  adapter: postgresql
+  username: postgres
+  encoding: UTF8
+
+development:
+  <<: *common
+  database: primary_development
+
+test:
+  <<: *common
+  database: primary_test
+
+production:
+  <<: *common
+  database: primary_development

@@ -1,0 +1,61 @@
+<%= form_for(@machine) do |f| %>
+  <% if @machine.errors.any? %>
+    <div id="errorExplanation">
+      <h2><%= pluralize(@machine.errors.count, "error") %> prohibited machine from being saved:</h2>
+    </div>
+  <% end %>
+  </br>
+
+  <div class="field">
+    <%= f.label :server_address, "Server address*" %>
+    <%= f.text_field :server_address %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :server_name %>
+    <%= f.text_field :server_name %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :short_name %>
+    <%= f.text_field :short_name %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :server_note %>
+    <%= f.text_field :server_note %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label 'Process pool size*' %>
+    <%= f.text_field :thread_pool_size %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :log_level %>
+    <%= f.text_field :log_level %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :enabled %>
+    <%= f.check_box :enabled %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :deleted %>
+    <%= f.check_box :deleted %>
+  </div>
+  </br>
+  </br>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

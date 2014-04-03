@@ -1,0 +1,11 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', @machine %>
+
+    <h3 id="record_name">Editing a Machine</h3>
+
+    <%= render 'form' %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

@@ -1,0 +1,46 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_model_name } %>
+
+    <%= naf_generate_back_link %>
+    <% if !naf_generate_edit_link.blank? && !naf_generate_back_link.blank? %>
+      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <% end %>
+    <%= naf_generate_edit_link %>
+
+    <div id="flash_message">
+        <% unless notice.blank? %>
+          <script type='text/javascript'>
+            jQuery("<p id='notice'><%= notice %></p>")
+                .appendTo('#flash_message')
+                .slideDown().delay(5000).slideUp();
+          </script>
+        <% end %>
+    </div>
+
+    <br/>
+    <table id="naf_table_show">
+      <tr>
+        <th>Attribute</th>
+        <th>Value</th>
+      </tr>
+      <tbody>
+        <% @attributes.each do |a| %>
+          <tr>
+            <td scope="row"><%= naf_make_header(a.to_s) %></td>
+            <td> <%= @record.send(a) %></td>
+          </tr>
+        <% end %>
+      </tbody>
+    </table>
+    <br/>
+
+    <%= naf_generate_child_resources_link %>
+    <% if !naf_generate_destroy_link.blank? && !naf_generate_child_resources_link.blank? %>
+      &nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;
+    <% end %>
+    <%= naf_generate_destroy_link %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

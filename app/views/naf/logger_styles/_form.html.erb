@@ -1,0 +1,27 @@
+<%= form_for @logger_style do |f| %>
+  <% if @logger_style.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@logger_style.errors.count, "error") %> prohibited Logger Style from being saved:</h2>
+  </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :name, "Name*" %><br />
+    <%= f.text_field :name %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :note %><br />
+    <%= f.text_field :note %>
+  </div>
+  </br>
+
+  <%= naf_link_to_add_fields "Add the following pair of Name - Level", f, :logger_style_names %>
+
+  <br>
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

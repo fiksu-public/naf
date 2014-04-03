@@ -1,0 +1,49 @@
+<% content_for :body do %>
+  <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
+
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+  <br>
+
+  <table id='datatable'>
+    <thead>
+      <tr>
+        <% @cols.each do |col| %>
+          <th id="<%= col %>"><%= naf_make_header(col) %></th>
+        <% end %>
+      </tr>
+    </thead>
+    <tbody>
+      <% @rows.each do |row| %>
+        <tr>
+          <% @cols.each do |col| %>
+            <td>
+              <% if col == :id %>
+                <%= link_to row.id, { action: 'show', id: row.id, controller: controller_name } %>
+              <% else %>
+                <%= row.send(col) %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+
+  <% content_for :javascripts do %>
+    <script type='text/javascript'>
+      jQuery(document).ready(function() {
+        jQuery('#datatable').addDataTable({});
+      });
+    </script>
+  <% end %>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

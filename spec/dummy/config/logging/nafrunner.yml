@@ -1,0 +1,7 @@
+log4r_config:
+  outputters:
+    - type     : StdoutOutputter
+      name     : stdout
+      formatter:
+        pattern     : '%C %l %M'
+        type        : PatternFormatter

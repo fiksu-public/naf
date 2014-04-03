@@ -1,0 +1,50 @@
+<div id='naf'>
+  <div id="fluid">
+    <div id='hd'>
+      <div id="header">
+        <h3><%= link_to Naf.title.html_safe, naf.root_url %></h3>
+      </div>
+    </div>
+    <div id="navigation">
+      <ul id="tabs">
+        <% naf_tabs.each_key do |tab| %>
+            <% if naf_highlight_tab?(tab) %>
+                <li id="on">
+            <% else %>
+                <li>
+            <% end %>
+            <%= naf_generate_index_link(tab) %>
+            </li>
+        <% end %>
+      </ul>
+      <div class="clear"></div>
+    </div>
+    <div id='bd'>
+      <% naf_tabs.each do |tab, child_tabs| %>
+          <% if naf_highlight_tab?(tab) && !child_tabs.blank? %>
+            <div id="child_navigation">
+                <ul id="child_tabs">
+                  <% child_tabs.each do |child_tab| %>
+                    <% if naf_highlight_tab?(child_tab) %>
+                      <li id="on">
+                    <% else %>
+                      <li>
+                  <% end %>
+                  <%= naf_generate_index_link(child_tab) %>
+                  </li>
+                  <% end %>
+                </ul>
+                <div class="clear"></div>
+            </div>
+            <div id='child_bd'>
+              <% @naf_render_body = true %>
+              <%= yield :body %>
+            </div>
+          <% end %>
+      <% end %>
+      <% unless @naf_render_body %>
+        <%= yield :body %>
+      <% end %>
+    </div>
+  </div>
+</div>

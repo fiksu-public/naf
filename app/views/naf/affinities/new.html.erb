@@ -1,0 +1,15 @@
+<% content_for :body do %>
+  <div id="record">
+    <%= link_to 'Back', { controller: 'affinities', action: 'index' } %>
+
+		<% if flash[:error] -%>
+		  <div class="error"><%= flash[:error] %></div></br>
+		<% end -%>
+
+    <h3 id="record_name">Create an Affinity</h3>
+
+    <%= render 'form' %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

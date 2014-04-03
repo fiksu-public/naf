@@ -1,0 +1,17 @@
+<% @rows.each do |row| %>
+  <% if row.deleted %>
+    <tr class="deleted_or_hidden">
+  <% else %>
+    <tr>
+  <% end %>
+    <% @cols.each do |col| %>
+      <td>
+        <% if col == :id %>
+          <%= link_to row.id, { action: 'show', id: row.id, controller: controller_name } %>
+        <% else %>
+          <%= row.send(col) %>
+        <% end %>
+      </td>
+    <% end %>
+    </tr>
+<% end %>

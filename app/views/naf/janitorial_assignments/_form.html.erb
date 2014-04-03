@@ -1,0 +1,38 @@
+<%= form_for(@janitorial_assignment) do |f| %>
+
+  <% if @janitorial_assignment.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@janitorial_assignment.errors.count, "error") %> prohibited Janitorial Assignment from being saved:</h2>
+  </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :type %><br />
+    <%= f.text_field :type, disabled: true %>
+  </div>
+
+  <div class="field">
+    <%= f.label :model_name, "Model name*" %><br />
+    <%= f.text_field :model_name %>
+  </div>
+
+  <div class="field">
+    <%= f.label :assignment_order %><br />
+    <%= f.text_field :assignment_order %>
+  </div>
+
+  <div class="field">
+    <%= f.label :enabled %></br />
+    <%= f.check_box :enabled, class: 'check_box_input' %>
+  </div>
+
+  <div class="field">
+    <%= f.label :deleted %></br />
+    <%= f.check_box :deleted, class: 'check_box_input' %>
+  </div>
+
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

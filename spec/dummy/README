@@ -1,0 +1,19 @@
+Dummy project for Naf: Network Application Framework
+=================================
+
+This example shows how the gem works.
+
+Installation
+============
+
+Go to the "project_path/spec/dummy" in your console:
+
+1) Edit 'config/database.yml'
+
+2) Run "rake db:create"
+
+3) Run "rake db:migrate"
+
+4) Run "rails server"
+
+5) Paste this line "localhost:3000/job_system/"

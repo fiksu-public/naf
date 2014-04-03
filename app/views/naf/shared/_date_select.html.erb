@@ -1,0 +1,65 @@
+<%= select_tag(
+  (prefix + '_year').to_sym,
+  options_for_select([['year', ''], ["2013", 2013], ["2014", 2014]
+  ]),
+  { style: dropdown_width })
+%>
+<%= select_tag(
+  (prefix + '_month').to_sym,
+  options_for_select([
+    ['month', ''], ["January", 1], ["February", 2], ["March", 3], ["April", 4],
+    ["May", 5], ["June", 6], ["July", 7], ["August", 8], ["September", 9],
+    ["October", 10], ["November", 11], ["December", 12]
+  ]),
+  { style: dropdown_width })
+%>
+<%= select_tag(
+  (prefix + '_day').to_sym,
+  options_for_select([
+    ['day', ''], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8],
+    [9, 9], [10, 10], [11, 11], [12, 12], [13, 13], [14, 14], [15, 15], [16, 16],
+    [17, 17], [18, 18], [19, 19], [20, 20], [21, 21], [22, 22], [23, 23], [24, 24],
+    [25, 25], [26, 26], [27, 27], [28, 28], [29, 29], [30, 30], [31, 31]
+  ]),
+  { style: dropdown_width })
+%>
+<%= select_tag(
+  (prefix + '_hour').to_sym,
+  options_for_select([
+    ['hour', ''], ["1am", 1], ["2am", 2], ["3am", 3], ["4am",4 ], ["5am", 5], ["6am", 6],
+    ["7am", 7], ["8am", 8], ["9am", 9], ["10am", 10], ["11am", 11], ["12pm", 12],
+    ["1pm", 13], ["2pm", 14], ["3pm", 15], ["4pm", 16], ["5pm", 17], ["6pm", 18],
+    ["7pm", 19], ["8pm", 20], ["9pm", 21], ["10pm", 22], ["11pm", 23], ["12am", 24]
+  ]),
+  { style: dropdown_width })
+%>
+<%= select_tag(
+  (prefix + '_minute').to_sym,
+  options_for_select([
+    ['minute', ''], [1, 1], [2, 2], [3, 3], [4, 4], [5, 5], [6, 6], [7, 7], [8, 8],
+    [9, 9], [10, 10], [11, 11], [12, 12], [13, 13], [14, 14], [15, 15], [16, 16],
+    [17, 17], [18, 18], [19, 19], [20, 20], [21, 21], [22, 22], [23, 23], [24, 24],
+    [25, 25], [26, 26], [27, 27], [28, 28], [29, 29], [30, 30], [31, 31], [32, 32],
+    [33, 33], [34, 34], [35, 35], [36, 36], [37, 37], [38, 38], [39, 39], [40, 40],
+    [41, 41], [42, 42], [43, 43], [44, 44], [45, 45], [46, 46], [47, 47], [48, 48],
+    [49, 49], [50, 50], [51, 51], [52, 52], [53, 53], [54, 54], [55, 55], [56, 56],
+    [57, 57], [58, 58], [59, 59], [60, 60]
+  ]),
+  { style: dropdown_width })
+%>
+&nbsp;&nbsp;&nbsp;
+<%= button_tag 'clear', id: "#{prefix}_class_button" %>
+
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    jQuery(document).ready(function () {
+      jQuery("#<%= prefix %>_class_button").click(function () {
+      	jQuery('#<%= prefix %>_year').val('');
+      	jQuery('#<%= prefix %>_month').val('');
+      	jQuery('#<%= prefix %>_day').val('');
+      	jQuery('#<%= prefix %>_hour').val('');
+      	jQuery('#<%= prefix %>_minute').val('');
+      });
+    });
+  </script>
+<% end %>

@@ -1,0 +1,50 @@
+<%= form_for(@affinity) do |f| %>
+
+  <% if @affinity.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@affinity.errors.count, "error") %> prohibited Affinity from being saved:</h2>
+
+    <ul>
+      <% @affinity.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+
+  <div class="field">
+    <%= f.label :affinity_name, "Name*" %><br />
+    <%= f.text_field :affinity_name %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_short_name %><br />
+    <%= f.text_field :affinity_short_name %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_classification_id, "Classification*" %><br />
+    <%= f.select(:affinity_classification_id, Naf::AffinityClassification.all.map{ |a|
+          [a.affinity_classification_name, a.id]
+        }, { include_blank: true }) %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_note %><br />
+    <%= f.text_field :affinity_note %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :selectable %></br />
+    <%= f.check_box :selectable %>
+  </div>
+  </br>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

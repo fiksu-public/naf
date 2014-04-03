@@ -1,0 +1,32 @@
+<%= form_for([@job, @tab]) do |f| %>
+
+  <% if @tab.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@tab.errors.count, "error") %> prohibited this job affinity tab from being saved:</h2>
+
+    <ul>
+      <% @tab.errors.full_messages.each do |msg| %>
+        <li><%= msg %></li>
+      <% end %>
+    </ul>
+  </div>
+  <% end %>
+
+  <%= f.hidden_field :historical_job_id, value: @job.id %>
+
+  <div class="field">
+    <%= f.label :affinity %><br />
+    <%= f.select(:affinity_id, ::Naf::Affinity.names_list, include_blank: true) %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_parameter %></br>
+    <%= f.text_field :affinity_parameter %>
+  </div>
+  </br>
+
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>

@@ -1,0 +1,27 @@
+<%
+  rows = @applications.each do |application|
+    app = Naf::Application.find(application.first)
+    schedules = application[4]
+    application[4] = ''
+    schedules.each do |schedule|
+      logical_schedule = ::Logical::Naf::ApplicationSchedule.new(schedule)
+      if application[4].present?
+				application[4] << (link_to logical_schedule.display,
+                                   application_schedule_path(schedule.id),
+                                   title: logical_schedule.help_title)
+      else
+				application[4] = (link_to logical_schedule.display,
+                                  application_schedule_path(schedule.id),
+                                  title: logical_schedule.help_title)
+      end
+      application[4] << ", ".html_safe
+    end
+    application[4] = application[4][0..-3]
+    application.insert(5, naf_last_queued_at_link(app))
+    application.insert(6,(link_to image_tag('control_play_blue.png',
+                                             class: 'action',
+                                             title: "Enqueue Application(\nid: #{app.id},\ntitle: #{app.title},\ncommand: #{app.command})"),
+                                             "#", { class: "enqueue", id: application[0] }))
+  end
+%>
+<%= raw rows %>

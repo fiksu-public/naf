@@ -1,0 +1,31 @@
+<table id="runner">
+  <tr>
+    <td>
+      <div id='page-label'>
+        <h3 id="record_name">Runners: </h3>
+      </div>
+    </td>
+    <td width='5%'>
+      <div class="running-count"><%= ::Naf::MachineRunner.running.uniq.count %> running</div>
+    </td>
+    <td width='7%'>
+      <div class="winding-down-count"><%= ::Naf::MachineRunner.winding_down.uniq.count %> winding down</div>
+    </td>
+    <td width='5%'>
+      <div class="down-count"><%= ::Naf::MachineRunner.dead_count %> down</div>
+    </td>
+    <td width='15%'>
+      <div id='page-label'>
+        <h3 id='record_name'>Schedules last checked at: </h3>
+      </div>
+    </td>
+    <td width='15%'>
+      <div class='last_checked_schedule_at'><%= time_format(::Naf::Machine.last_time_schedules_were_checked) %></div>
+    </td>
+    <td width='65%'>
+      <div id='create_links' style='position: relative; float:right;'>
+        <span id='create'><%= naf_generate_create_link %></span>
+      </div>
+    </td>
+ </tr>
+</table>

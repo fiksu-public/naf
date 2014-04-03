@@ -1,0 +1,62 @@
+<div id='naf'>
+  <div id="fluid">
+    <div id='bd'>
+      <div id="record">
+        <FONT FACE= "Courier New">
+        <div id="stdout" class="scrollable-output-expanded"></div>
+        </br>
+        <FONT FACE= "Arial">
+
+        <div id="stdout_header">
+          <div>
+            <%= render partial: 'search_options' %>
+            <div style="width: 100%; display: table;">
+              <div style="display: table-row">
+                <div style="width: 600px; display: table-cell;">
+                  <%= label_tag 'From:' %>
+                  <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_from', dropdown_width: 'width: 15%;' } %>
+                  </br>
+                  <%= label_tag 'To:' %>&nbsp;&nbsp;&nbsp;&nbsp;
+                  <%= render partial: 'naf/shared/date_select', locals: { prefix: 'date_select_to', dropdown_width: 'width: 15%;' } %>
+                </div>
+                <div style="display: table-cell;">
+                  <strong style="margin-left: 10%; size: 10%">Machine Information</strong>
+                  <table id='naf_table_show' style="margin-left: 10%; width: 75%">
+                    <thead>
+                      <tr>
+                        <td width="7%">ID</td>
+                        <td>Server</td>
+                        <td>Last Seen Alive At</td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td><%= @machine.id %></td>
+                        <td><%= @machine.hostname %></td>
+                        <td><%= @machine.last_seen_alive_at %></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            </br>
+
+            <%= submit_tag("Search the logs", id: 'log_search_submit') %>
+            &nbsp;&nbsp;&nbsp;
+            <%= link_to 'Back to Machine', { controller: 'machines', action: 'show', id: @machine.id } %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%= render partial: 'update_page_title', locals: { title: "Machine(#{@machine.id}) Logs" } %>
+<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output-expanded' } %>
+<%= render partial: 'log_display',
+           locals: {
+             logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@machine).runner}#{naf.logs_log_parsers_path}",
+             record_id: @machine.id,
+             record_type: 'machine'
+           } %>

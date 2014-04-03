@@ -1,0 +1,264 @@
+<% content_for :javascripts do %>
+  <script type='text/javascript'>
+    var record_id = "<%= record_id %>";
+    var logical_type = null;
+    setLogicalType();
+    var logs_url = "<%= logs_url %>";
+    var search_params = null;
+    var regex_options = null;
+    var search_command = false;
+    var grep = false;
+    var search_date_from_year = '';
+    var search_date_from_month = '';
+    var search_date_from_day = '';
+    var search_date_from_hour = '';
+    var search_date_from_minute = '';
+    var search_date_to_year = '';
+    var search_date_to_month = '';
+    var search_date_to_day = '';
+    var search_date_to_hour = '';
+    var search_date_to_minute = '';
+    var show_help_window = false;
+    var logs = null;
+    var old_height = null;
+    var new_height = null;
+    var log_type = 'new';
+    var newest_log = null;
+    var read_from_s3 = false;
+    var last_file_checked = null;
+    var newest_file_checked = null;
+
+    jQuery(document).ready(function () {
+      jQuery(".description").hide();
+      getLog();
+      jQuery('#stdout').css('width', jQuery('#stdout').width());
+
+      jQuery('#log_search_submit').click(function () {
+        initializeVariables();
+
+        if(checkSearchDate(search_date_from_year, search_date_from_month, search_date_from_day,
+          search_date_from_hour, search_date_from_minute)){
+          log_type = 'old';
+          callAjax();
+        }
+        else{
+          resetDateFilters();
+          jQuery('#stdout').empty();
+          jQuery('#stdout').append('If specifying a date search, select a value for each dropdown (year/month/day/hour/minute)');
+        }
+      });
+
+      jQuery('#stdout').scroll(function (){
+        if(jQuery('#stdout').scrollTop() == 0 && jQuery('#stdout').text() != 'No logs were found for this search query! '){
+          log_type = 'old'
+          callAjax();
+        }
+        else if(jQuery('#stdout')[0].scrollHeight - jQuery('#stdout').scrollTop() == jQuery('#stdout').innerHeight()){
+          log_type = 'new'
+          newest_log = jQuery('#stdout')[0].children.item(jQuery('#stdout')[0].children.length - 1).textContent;
+
+          if(jQuery('#auto_scroll').text() == 'Auto Scroll (OFF)'){
+            jQuery('#auto_scroll').click();
+          }
+        }
+        else{
+          if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+            setAutoScrollOff();
+          }
+        }
+      });
+
+      jQuery("#regex_help").click(function() {
+        if(show_help_window == false){
+          jQuery(".description").show();
+          show_help_window = true;
+        }
+        else{
+          jQuery(".description").hide();
+          show_help_window = false;
+        }
+      });
+
+      jQuery('#auto_scroll').click(function(){
+        if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+          setAutoScrollOff();
+        }
+        else{
+          setAutoScrollOn();
+          jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+          getLog();
+        }
+      });
+    });
+
+    function callAjax(){
+      jQuery.ajax({
+        url: logs_url,
+        dataType: 'jsonp',
+        jsonpCallback: 'convertToJsonCallback',
+        xhrFields: {
+          withCredentials: true
+        },
+        data: {
+                'record_id': record_id,
+                'logical_type': logical_type,
+                'log_type': log_type,
+                'newest_log': newest_log,
+                'read_from_s3': read_from_s3,
+                'last_file_checked': last_file_checked,
+                'newest_file_checked': newest_file_checked,
+                'search_params': jQuery('#log_search').val(),
+                'regex_options': jQuery('#regex_options').val(),
+                'grep': grep,
+                'from_time': [search_date_from_year,
+                              search_date_from_month,
+                              search_date_from_day,
+                              search_date_from_hour,
+                              search_date_from_minute],
+                'to_time': [search_date_to_year,
+                            search_date_to_month,
+                            search_date_to_day,
+                            search_date_to_hour,
+                            search_date_to_minute]
+              },
+        success: function(response) {
+          logs = response['logs'];
+          updateVariables(response);
+
+          if(search_command == true){
+            jQuery('#stdout').text('')
+            jQuery('#stdout').append(logs);
+            if(jQuery('#stdout').text() == '') {
+              logs = "No logs were found for this search query!<br>";
+              setAutoScrollOff();
+            }
+            jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+
+            search_command = false;
+          }
+          else{
+            if(logs == '' && jQuery('#stdout')[0].children.length == 0) {
+              logs = "&nbsp;&nbsp;<span>No logs were found!<br></span>";
+              setAutoScrollOff();
+            }
+
+            if(logs != ''){
+              if(log_type == 'new'){
+                jQuery('#stdout').append(logs);
+                jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
+              }
+              else{
+                jQuery('#stdout').prepend(logs);
+                log_type = 'new';
+                if(old_height == null && new_height == null){
+                  old_height = jQuery('#stdout')[0].scrollHeight;
+                  new_height = jQuery('#stdout')[0].scrollHeight;
+                  jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight - new_height + 1);
+                }
+                else{
+                  old_height = new_height;
+                  new_height = jQuery('#stdout')[0].scrollHeight;
+                  jQuery("#stdout").scrollTop(new_height - old_height);
+                }
+              }
+            }
+          }
+        },
+        error: function(response) {
+          message = '&nbsp;&nbsp;<span>Failed to retrieve ' + '<%= record_type %>' + '(' +
+            '<%= record_id %>' + ') logs from ' + '<%= logs_url %>'.match(/^https?\:\/\/([^\/?#]+)/).pop() + '. Please refer to ' +
+            'Naf FAQs on the' + ' wiki'.link('https://github.com/fiksu/naf/wiki/Frequently-Asked-Questions') +
+            ' for further information.<br></span>';
+
+          jQuery('#stdout').prepend(message);
+        }
+      });
+    }
+
+    function getLog() {
+      if(jQuery('#auto_scroll').text() == 'Auto Scroll (ON)'){
+        callAjax();
+        setTimeout(getLog, 5000);
+      }
+    }
+
+    function initializeVariables(){
+      newest_log = null;
+      logs = null;
+      last_file_checked = null;
+      newest_file_checked = null;
+      show_help_window = false;
+      search_command = true;
+      grep = jQuery('#grep').is(':checked');
+      search_params = jQuery('#log_search').val();
+      regex_options = jQuery('#regex_options').val();
+      search_date_from_year = jQuery('#date_select_from_year').val();
+      search_date_from_month = jQuery('#date_select_from_month').val();
+      search_date_from_day = jQuery('#date_select_from_day').val();
+      search_date_from_hour = jQuery('#date_select_from_hour').val();
+      search_date_from_minute = jQuery('#date_select_from_minute').val();
+      search_date_to_year = jQuery('#date_select_to_year').val();
+      search_date_to_month = jQuery('#date_select_to_month').val();
+      search_date_to_day = jQuery('#date_select_to_day').val();
+      search_date_to_hour = jQuery('#date_select_to_hour').val();
+      search_date_to_minute = jQuery('#date_select_to_minute').val();
+    }
+
+    function resetDateFilters(){
+      search_date_from_year = '';
+      search_date_from_month = '';
+      search_date_from_day = '';
+      search_date_from_hour = '';
+      search_date_from_minute = '';
+      search_date_to_year = '';
+      search_date_to_month = '';
+      search_date_to_day = '';
+      search_date_to_hour = '';
+      search_date_to_minute = '';
+    }
+
+    function updateVariables(response){
+      if(response['read_from_s3'] != ''){
+        read_from_s3 = response['read_from_s3'];
+      }
+      if(response['last_file_checked'] != ''){
+        last_file_checked = response['last_file_checked'];
+      }
+      if(response['newest_file_checked'] != ''){
+        newest_file_checked = response['newest_file_checked'];
+      }
+      if(response['newest_log'] != ''){
+        newest_log = response['newest_log'];
+      }
+    }
+
+    function checkSearchDate(year, month, day, hour, minute){
+      return (year == '' && month == '' && day == '' && hour == '' && minute == '') ||
+      (year != '' && month != '' && day != '' && hour != '' && minute != '')
+    }
+
+    function setLogicalType(){
+      logical_type = '::Logical::Naf::LogParser::';
+      if('<%= record_type %>' == 'machine'){
+        logical_type += 'Machine';
+      }
+      else if('<%= record_type %>' == 'runner'){
+        logical_type += 'Runner';
+      }
+      else if('<%= record_type %>' == 'job'){
+        logical_type += 'Job';
+      }
+    }
+
+    function setAutoScrollOn(){
+      jQuery('#auto_scroll').text('Auto Scroll (ON)');
+      jQuery('#auto_scroll').removeClass('auto_scroll_off');
+    }
+
+    function setAutoScrollOff(){
+      jQuery('#auto_scroll').text('Auto Scroll (OFF)');
+      jQuery('#auto_scroll').addClass('auto_scroll_off');
+    }
+
+  </script>
+<% end %>

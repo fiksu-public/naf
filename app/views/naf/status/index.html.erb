@@ -1,0 +1,27 @@
+<% content_for :body do %>
+  <div id="record">
+    <h2>Status</h2>
+
+    <table id="naf_table_show">
+      <thead>
+        <tr>
+          <th>Server</th>
+          <th>Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+      	<% @machines.each do |machine| -%>
+	        <tr>
+	          <td><%= machine[:server_name] %></td>
+	          <td><%= machine[:status] %></td>
+	          <td><%= machine[:notes] %></td>
+	        </tr>
+        <% end %>
+      </tbody>
+    </table>
+    </br>
+
+  </div>
+<% end %>
+<%= render partial: 'naf/shared/application' %>

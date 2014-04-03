@@ -1,0 +1,57 @@
+<% content_for :body do %>
+  <%= render partial: 'naf/shared/information_container', locals: { record_name: naf_table_title } %>
+  </br>
+  </br>
+
+  <div id="flash_message">
+      <% unless notice.blank? %>
+        <script type='text/javascript'>
+          jQuery("<p id='notice'><%= notice %></p>")
+              .appendTo('#flash_message')
+              .slideDown().delay(5000).slideUp();
+        </script>
+      <% end %>
+  </div>
+
+  <div id="record">
+    <table id='datatable'>
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Affinity Classification Name</th>
+          <th>Affinity Name</th>
+          <th>Affinity Short Name</th>
+          <th>Affinity Note</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% @affinities.each do |affinity| -%>
+        <tr>
+          <td><%= link_to affinity.id, affinity_path(affinity) %></td>
+          <td><%= affinity.affinity_classification.affinity_classification_name %></td>
+          <td>
+            <% if affinity.affinity_classification.affinity_classification_name == 'machine' -%>
+              <% affinity_name = ::Naf::Machine.find_by_id(affinity.affinity_name) %>
+              <%= link_to affinity.affinity_name, machine_path(affinity_name) if affinity_name %>
+            <% else -%>
+              <%= affinity.affinity_name %>
+            <% end -%>
+          </td>
+          <td><%= affinity.affinity_short_name %></td>
+          <td><%= affinity.affinity_note %></td>
+        </tr>
+        <% end -%>
+      </tbody>
+    </table>
+
+    <% content_for :javascripts do %>
+      <script type='text/javascript'>
+        jQuery(document).ready(function() {
+          jQuery('#datatable').addDataTable({});
+        });
+      </script>
+    <% end %>
+  </div>
+<% end %>
+
+<%= render partial: 'naf/shared/application' %>

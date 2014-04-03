@@ -1,0 +1,8 @@
+log4r_config:
+  outputters:
+    - type     : StdoutOutputter
+      name     : stdout
+      formatter:
+        date_pattern: '%y%m%d %H:%M:%S.%L'
+        pattern     : '%d pid=%p jid=%g %C %l %M'
+        type        : PatternFormatter

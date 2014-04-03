@@ -1,0 +1,27 @@
+<%= form_for([@application_schedule, @tab]) do |f| %>
+
+  <% if @tab.errors.any? %>
+  <div id="errorExplanation">
+    <h2><%= pluralize(@tab.errors.count, "error") %> prohibited this application schedule affinity tab from being saved:</h2>
+  </div>
+  <% end %>
+
+  <%= f.hidden_field :application_schedule_id, value: @application_schedule.id %>
+
+  <div class="field">
+    <%= f.label :affinity_id, "Affinity*" %></br>
+    <%= f.select(:affinity_id, ::Naf::Affinity.names_list, include_blank: true) %>
+  </div>
+  </br>
+
+  <div class="field">
+    <%= f.label :affinity_parameter %></br>
+    <%= f.text_field :affinity_parameter %>
+  </div>
+  </br>
+
+  <br />
+  <div class="actions">
+    <%= f.submit %>
+  </div>
+<% end %>
