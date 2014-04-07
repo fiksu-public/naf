@@ -8,14 +8,14 @@ module Process::Naf
     DATE_REGEX = /\d{8}_\d{6}/
     LOG_RETENTION = 1
 
-  	def work
-  		# Use AWS credentials to access S3
-			s3 = AWS::S3.new(access_key_id: AWS_ID,
+    def work
+      # Use AWS credentials to access S3
+      s3 = AWS::S3.new(access_key_id: AWS_ID,
                        secret_access_key: AWS_KEY,
                        ssl_verify_peer: false)
 
-			# Each project will have a specific bucket
-			bucket = s3.buckets[NAF_BUCKET]
+      # Each project will have a specific bucket
+      bucket = s3.buckets[NAF_BUCKET]
       files = log_files
 
       logger.info 'Starting to save files to s3...'
@@ -31,13 +31,13 @@ module Process::Naf
 
       logger.info 'Starting to archive files...'
       archive_old_files(files)
-  	end
+    end
 
-  	private
+    private
 
-  	def project_name
-  		(`git remote -v`).slice(/\/\S+/).sub('.git','')[1..-1]
-  	end
+    def project_name
+      (`git remote -v`).slice(/\/\S+/).sub('.git','')[1..-1]
+    end
 
     def log_files
       files = Dir[NAF_JOBS_LOG_PATH + "*/*"]
@@ -66,9 +66,20 @@ module Process::Naf
       today = Time.zone.now.to_date
       files.each do |file|
         logger.info "Archived file: #{file}"
-        directory = `dirname #{file}`
-        `rm -r #{directory}`
+        `rm #{file}`
       end
+
+      cleanup(NAF_JOBS_LOG_PATH + '*')
+      cleanup(NAF_RUNNERS_LOG_PATH + '*')
+    end
+
+    def cleanup(path)
+      Dir[path].select { |d| File.directory? d }.               # select only directories
+        select { |d| (Dir.entries(d) - %w[ . .. ]).empty? }.    # check if directory is empty
+        each do |d|
+          logger.info "Removing directory #{d}"
+          Dir.rmdir d
+        end
     end
 
     def copy_files

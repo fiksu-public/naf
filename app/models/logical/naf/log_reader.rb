@@ -7,8 +7,8 @@ module Logical
       DATE_REGEX = /((\d){4}-(\d){2}-(\d){2} (\d){2}:(\d){2}:(\d){2} UTC)/
 
       def log_files
-        tree = bucket.objects.with_prefix(prefix).as_tree
-        directories = tree.children.select(&:branch?).collect(&:prefix).uniq
+        tree = bucket.objects.with_prefix(job_log_prefix).as_tree
+        directories = tree.children.select(&:branch?).collect(&:job_log_prefix).uniq
 
         files = []
         directories.each do |directory|
@@ -21,8 +21,8 @@ module Logical
       end
 
       def runner_log_files
-        tree = bucket.objects.with_prefix(prefix(true)).as_tree
-        directories = tree.children.select(&:branch?).collect(&:prefix).uniq
+        tree = bucket.objects.with_prefix(runner_log_prefix).as_tree
+        directories = tree.children.select(&:branch?).collect(&:runner_log_prefix).uniq
 
         files = []
         directories.each do |directory|
@@ -40,7 +40,8 @@ module Logical
       end
 
       def retrieve_job_files(job_id)
-        tree = bucket.objects.with_prefix(prefix + "#{job_id}").as_tree
+        return [] unless job_id.present?
+        tree = bucket.objects.with_prefix(job_log_prefix + "#{job_id}").as_tree
         sort_files(tree.children.select(&:leaf?).collect(&:key))
       end
 
@@ -57,12 +58,12 @@ module Logical
         @bucket ||= s3.buckets[NAF_BUCKET]
       end
 
-      def prefix(runner_logs = false)
-        if runner_logs
-          "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/runners/"
-        else
-          "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/jobs/"
-        end
+      def runner_log_prefix
+        @runner_log_prefix ||= "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/runners/"
+      end
+
+      def job_log_prefix
+        @job_log_prefix ||= "#{NAF_LOG_PATH}/#{creation_time}/#{::Naf::NAF_DATABASE_HOSTNAME}/#{::Naf::NAF_DATABASE}/#{::Naf.schema_name}/jobs/"
       end
 
       def sort_files(files)

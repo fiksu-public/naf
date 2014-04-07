@@ -35,6 +35,8 @@ module Logical::Naf
       end
 
       def retrieve_log_files_from_s3
+        return [] unless record_id.present?
+
         uuids = ::Naf::MachineRunner.
           joins(:machine_runner_invocations).
           where("#{Naf.schema_name}.machine_runners.id = ?", record_id).
