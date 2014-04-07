@@ -68,7 +68,7 @@ function addLinkToApplication(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[6] == 'true') {
+  if (aData[7] == true) {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }

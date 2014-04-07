@@ -71,7 +71,7 @@ function addLinkToMachines(nRow, aData) {
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[5] == 'true') {
+  if (aData[4] == false) {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }
