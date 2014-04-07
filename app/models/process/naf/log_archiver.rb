@@ -63,11 +63,10 @@ module Process::Naf
 
     def archive_old_files(files)
       copy_files
-      today = Time.zone.now.to_date
       files.each do |file|
         logger.info "Archived file: #{file}"
-        `rm #{file}`
       end
+      File.delete(*files)
 
       cleanup(NAF_JOBS_LOG_PATH + '*')
       cleanup(NAF_RUNNERS_LOG_PATH + '*')

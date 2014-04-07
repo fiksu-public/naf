@@ -10,7 +10,7 @@ end
 gem 'jquery-ui-rails'
 gem 'awesome_print'
 gem 'will_paginate'
-gem 'facter'
+gem 'facter', '1.7.5'
 gem 'shoulda-matchers', '2.0.0'
 gem 'timecop', '0.4.5'
 gem 'yajl-ruby'
