@@ -43,6 +43,7 @@ module Naf
                                    greater_than: -2147483648,
                                    less_than: 2147483647
                                  }
+    before_save :check_presence_of_enabled_and_deleted
     before_save :check_blank_values
 
     #---------------------
@@ -259,6 +260,15 @@ module Naf
       self.server_name = nil if self.server_name.blank?
       self.server_note = nil if self.server_note.blank?
       self.log_level = nil if self.log_level.blank?
+    end
+
+    def check_presence_of_enabled_and_deleted
+      if self.enabled && self.deleted
+        self.errors.add(:enabled, 'should not be true when deleted is true')
+        return false
+      end
+
+      return true
     end
 
   end

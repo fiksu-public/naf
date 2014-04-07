@@ -119,6 +119,19 @@ module Naf
       end
     end
 
+    context "when updating the machine" do
+      it "should not save when enabled and deleted are true" do
+        bad_machine = FactoryGirl.build(:machine, enabled: true, deleted: true)
+        bad_machine.save.should_not be_true
+        bad_machine.errors.messages[:enabled].should_not be_nil
+      end
+
+      it "should save when enabled is true and deleted is false" do
+        machine = FactoryGirl.build(:machine, enabled: true, deleted: false)
+        machine.save.should be_true
+      end
+    end
+
     #----------------------
     # *** Class Methods ***
     #++++++++++++++++++++++
@@ -126,7 +139,7 @@ module Naf
     describe "#enabled" do
       before do
         machine.update_attributes!(enabled: true)
-        FactoryGirl.create(:machine_two, enabled: false)
+        FactoryGirl.create(:machine_two, enabled: false, deleted: true)
       end
 
       it "return the correct machine" do
