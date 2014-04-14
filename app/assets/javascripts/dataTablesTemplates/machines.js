@@ -47,18 +47,18 @@ jQuery(document).ready(function() {
       return false;
     }
     var id = jQuery(this).attr('id');
-    var url = '/job_system/machines/' + id;
+    var url = 'machines/' + id;
     jQuery.ajax({
       url: url,
       type: 'POST',
       dataType: 'json',
       data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },
       success:function (data) {
-          if (data.success) {
-              jQuery("<p id='notice'>Machine was marked down!</p>").
-                  appendTo('#flash_message').slideDown().delay(5000).slideUp();
-              jQuery('#datatable').dataTable().fnDraw();
-          }
+        if (data.success) {
+          jQuery("<p id='notice'>Machine was marked down!</p>").
+            appendTo('#flash_message').slideDown().delay(5000).slideUp();
+          jQuery('#datatable').dataTable().fnDraw();
+        }
       }
     });
   });
@@ -66,7 +66,7 @@ jQuery(document).ready(function() {
 
 function addLinkToMachines(nRow, aData) {
   var id = aData[0];
-  var row = jQuery('<a href="/job_system/machines/' + id + '">' + id + '</a>' );
+  var row = jQuery('<a href="machines/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
 }
 

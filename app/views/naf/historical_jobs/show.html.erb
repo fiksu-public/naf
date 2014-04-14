@@ -186,9 +186,8 @@
           return false;
         }
         var id = <%= @historical_job.id %>;
-        var url = '/job_system/historical_jobs/' + id;
         jQuery.ajax({
-          url: url,
+          url: id,
           type:'POST',
           dataType:'json',
           data:{ "historical_job[request_to_terminate]": 1, "historical_job_id": id, "_method": "put" },

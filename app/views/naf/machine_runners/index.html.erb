@@ -29,7 +29,9 @@
       if (!answer) {
         return false;
       }
-      var url = '/job_system/machine_runner_invocations/';
+      var str = window.location.pathname;
+      var sub_path = str.substring(0, str.indexOf("job_system"));
+      var url = sub_path + 'job_system/machine_runner_invocations/';
       jQuery.ajax({
         url: url,
         type: 'POST',
