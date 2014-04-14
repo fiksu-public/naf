@@ -49,7 +49,7 @@ jQuery(document).ready(function() {
       return false;
     }
     var id = jQuery(this).attr('id');
-    var url = '/job_system/machine_runner_invocations/' + id;
+    var url = 'machine_runner_invocations/' + id;
     jQuery.ajax({
       url: url,
       type: 'POST',

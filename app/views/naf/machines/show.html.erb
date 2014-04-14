@@ -68,9 +68,8 @@
                   return false;
               }
               var id = <%= @machine.id %>;
-              var url = '/job_system/machines/' + id;
               jQuery.ajax({
-                  url: url,
+                  url: id,
                   type: 'POST',
                   dataType: 'json',
                   data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },

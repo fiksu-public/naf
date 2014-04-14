@@ -22,7 +22,7 @@ module Logical::Naf
       end
 
       def invocation_link(id)
-        "<a href=\"\/job_system\/machine_runner_invocations\/#{id}\" style=\"font-weight:bold; color: #333399\">invocation(#{id})</a>"
+        "<a href=\"machine_runner_invocations\/#{id}\" style=\"font-weight:bold; color: #333399\">invocation(#{id})</a>"
       end
 
       def sort_jsons

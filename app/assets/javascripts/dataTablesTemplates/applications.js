@@ -63,7 +63,7 @@ jQuery(document).ready(function() {
 
 function addLinkToApplication(nRow, aData) {
   var id = aData[0];
-  var row = jQuery('<a href="/job_system/applications/' + id + '">' + id + '</a>' );
+  var row = jQuery('<a href="applications/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
 }
 

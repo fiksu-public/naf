@@ -241,6 +241,7 @@ module Process::Naf
     end
 
     def check_schedules
+      logger.debug escape_html("last time schedules were checked: #{::Naf::Machine.last_time_schedules_were_checked}")
       if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
         logger.debug "it's time to check schedules"
         if ::Naf::ApplicationSchedule.try_lock_schedules

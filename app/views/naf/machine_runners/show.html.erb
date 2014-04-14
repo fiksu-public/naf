@@ -103,8 +103,9 @@
         return false;
       }
       var id = <%= @machine_runner.machine_runner_invocations.last.id %>;
-      var url = '/job_system/machine_runner_invocations/' + id;
-      jQuery.ajax({
+      var str = window.location.pathname;
+      var sub_path = str.substring(0, str.indexOf("job_system"));
+      var url = sub_path + 'job_system/machine_runner_invocations/' + id;      jQuery.ajax({
         url: url,
         type: 'POST',
         dataType: 'json',

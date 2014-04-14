@@ -36,7 +36,7 @@
               jQuery('#deleted').removeAttr('checked');
               jQuery('#datatable').addDataTable({ "bProcessing": true });
               jQuery('.datatable_variable').click(function () {
-                  var url = '/job_system/<%= @params_name.to_s + 's' %>';
+                  var url = '<%= @params_name.to_s + 's' %>';
                   jQuery.ajax({
                       url:url,
                       type:'GET',
