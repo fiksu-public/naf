@@ -1,5 +1,16 @@
 = Release Notes
 
+=== Version 2.1.10
+Bug fixes:
+* LogArchiver correctly removes files and directories
+* Disabled machine is highlighted in red
+* Custom validation for machine marked as enabled and deleted
+* UI links behave correctly if the engine's mount path is different than '/job_system'
+
+Changes:
+* Improved memory management
+* Removed machine log display
+
 === Version 2.1.9
 Bug fixes:
 * Logical::Naf::ConstructionZone doesn't properly propagate affinity parameters
