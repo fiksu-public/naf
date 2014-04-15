@@ -63,12 +63,12 @@ jQuery(document).ready(function() {
 
 function addLinkToApplication(nRow, aData) {
   var id = aData[0];
-  var row = jQuery('<a href="/job_system/applications/' + id + '">' + id + '</a>' );
+  var row = jQuery('<a href="applications/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
 }
 
 function colorizationDeletedOrHidden(nRow, aData) {
-  if (aData[6] == 'true') {
+  if (aData[7] == true) {
     jQuery(nRow).addClass('deleted_or_hidden');
   }
 }

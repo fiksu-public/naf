@@ -241,6 +241,7 @@ module Process::Naf
     end
 
     def check_schedules
+      logger.debug escape_html("last time schedules were checked: #{::Naf::Machine.last_time_schedules_were_checked}")
       if ::Naf::Machine.is_it_time_to_check_schedules?(@check_schedules_period.minutes)
         logger.debug "it's time to check schedules"
         if ::Naf::ApplicationSchedule.try_lock_schedules
@@ -544,7 +545,23 @@ module Process::Naf
       Facter.clear
       memory_size = Facter.memorysize_mb.to_f
       memory_free = Facter.memoryfree_mb.to_f
-      memory_free_percentage = (memory_free / memory_size) * 100.0
+
+      # Linux breaks out kernel cache-use memory into an SReclaimable stat
+      # in /proc/meminfo which should be counted as free, but facter does not.
+      sreclaimable = 0.0
+      begin
+        File.readlines('/proc/meminfo').each do |l|
+          if l =~ /^(?:SReclaimable):\s+(\d+)\s+\S+/
+            # Convert the memory from Kilobytes to Gigabytes and
+            # store it into sreclaimable
+            sreclaimable = ('%.2f' % [$1.to_f / 1024.0]).to_f
+            break
+          end
+        end
+      rescue
+      end
+
+      memory_free_percentage = ((memory_free + sreclaimable) / memory_size) * 100.0
 
       if (memory_free_percentage >= @minimum_memory_free)
         logger.detail "memory available: #{memory_free_percentage}% (free) >= " +

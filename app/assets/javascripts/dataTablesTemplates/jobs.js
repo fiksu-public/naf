@@ -59,19 +59,19 @@ jQuery(document).ready(function() {
       return false;
     }
     var id = jQuery(this).attr('id');
-    var url = '/job_system/historical_jobs/' + id;
+    var url = 'job_system/historical_jobs/' + id;
     jQuery.ajax({
       url: url,
       type: 'POST',
       dataType: 'json',
       data: { "historical_job[request_to_terminate]": 1, "historical_job_id": id, "_method": "put" },
       success:function (data) {
-          if (data.success) {
-              var title = data.title ? data.title : data.command
-              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
-              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-              jQuery('#datatable').dataTable().fnDraw();
-          }
+        if (data.success) {
+          var title = data.title ? data.title : data.command
+          jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
+          appendTo('#flash_message').slideDown().delay(5000).slideUp();
+          jQuery('#datatable').dataTable().fnDraw();
+        }
       }
     });
   });
@@ -79,7 +79,7 @@ jQuery(document).ready(function() {
 
 function addLinkToJob(nRow, aData) {
   var id = aData[0];
-  var row = jQuery('<a href="/job_system/historical_jobs/' + id + '">' + id + '</a>' );
+  var row = jQuery('<a href="job_system/historical_jobs/' + id + '">' + id + '</a>' );
   jQuery('td:nth-child(1)', nRow).empty().append(row);
 }
 

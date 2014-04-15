@@ -54,18 +54,10 @@
       </tbody>
     </table>
     </br>
-    <%= render partial: 'naf/log_viewer/log_layout', locals: { record_id: @machine.id, record_type: 'machine' } %>
   </div>
 <% end %>
 
 <%= render partial: 'naf/shared/application' %>
-<%= render partial: 'naf/shared/auto_resize_width', locals: { div_class: '.scrollable-output' } %>
-<%= render partial: 'naf/log_viewer/log_display',
-           locals: {
-             logs_url: "#{http_protocol}#{::Logical::Naf::Machine.new(@machine).runner}#{naf.logs_log_parsers_path}",
-             record_id: @machine.id,
-             record_type: 'machine'
-           } %>
 
 <% content_for :javascripts do %>
   <script type='text/javascript'>
@@ -76,9 +68,8 @@
                   return false;
               }
               var id = <%= @machine.id %>;
-              var url = '/job_system/machines/' + id;
               jQuery.ajax({
-                  url: url,
+                  url: id,
                   type: 'POST',
                   dataType: 'json',
                   data: { "machine[marked_down]": 1, "terminate": true, "_method": "put" },

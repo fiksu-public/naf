@@ -22,7 +22,7 @@ module Logical::Naf
       end
 
       def invocation_link(id)
-        "<a href=\"\/job_system\/machine_runner_invocations\/#{id}\" style=\"font-weight:bold; color: #333399\">invocation(#{id})</a>"
+        "<a href=\"machine_runner_invocations\/#{id}\" style=\"font-weight:bold; color: #333399\">invocation(#{id})</a>"
       end
 
       def sort_jsons
@@ -35,6 +35,8 @@ module Logical::Naf
       end
 
       def retrieve_log_files_from_s3
+        return [] unless record_id.present?
+
         uuids = ::Naf::MachineRunner.
           joins(:machine_runner_invocations).
           where("#{Naf.schema_name}.machine_runners.id = ?", record_id).

@@ -60,7 +60,7 @@
 
     function updateRunnerCount() {
       jQuery.ajax({
-        url: '/job_system/machine_runners/runner_count',
+        url: 'job_system/machine_runners/runner_count',
         type: 'GET',
         dataType: 'json',
         success:function (data) {
@@ -73,7 +73,7 @@
 
     function updateLastCheckedScheduleAt() {
       jQuery.ajax({
-        url: '/job_system/machines/last_checked_schedule_at',
+        url: 'job_system/machines/last_checked_schedule_at',
         type: 'GET',
         dataType: 'json',
         success:function (data) {
