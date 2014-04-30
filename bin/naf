@@ -5,22 +5,36 @@ action, option = ARGV
 if action == 'runner'
   if option == 'up'
     puts "Bringing up the runner(s)..."
-    `screen -d -m bash -c 'source /root/.bash_profile && cd /root/current && a=\`uuidgen\` && script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
+    `screen -d -m bash -c 'source /root/.bash_profile && cd /root/current && a=\`uuidgen\` &&
+      script/rails runner ::Process::Naf::Runner.run --invocation-uuid $a 2>&1 |
       script/rails runner ::Process::Naf::Logger::RunnerLog.run --invocation-uuid $a'`
 
   elsif option == 'status'
     num_runners = Integer(`ps -ef | grep Process::Naf::Runner.run | grep -v grep | grep -v uuidgen | wc -l`.strip)
     hostname = `hostname`.strip
     if num_runners == 0
-      puts "down: #{hostname}"
+      puts "Runner down on host: #{hostname}"
     elsif num_runners == 1
-      puts "up: #{hostname}"
+      puts "Runner up on host: #{hostname}"
     else
-      puts "up/w: #{hostname} (#{num_runners})"
+      puts "1 runner up, #{num_runners - 1} runner(s) winding down on host: #{hostname}"
     end
 
   elsif option == 'down'
     puts 'Bringing down runner(s)...'
     `kill $(ps -ef | grep Process::Naf::Runner.run | grep -v grep | grep -v uuidgen | awk '{ print $2 }') | cat`
+
+  elsif option == '--?' || option == '--help'
+    puts "DESCRIPTION\n\tThe following options are available:\n\n" +
+      "\tup\t->\tBrings up new Runner and RunnerLog processes on the host.\n\n" +
+      "\tstatus\t->\tLists the status of the runner based on unix process status. The runner can be down, up, or up/winding down.\n\n" +
+      "\tdown\t->\tTakes down the runner by sending a kill signal to the processes specified by the pid operand."
+  else
+    puts "Sorry, option \'#{option}\' is not available. Available options: up, status, down, --?, --help"
   end
+elsif action == '--?' || action == '--help'
+  puts "DESCRIPTION\n\tThe following actions are available:\n\n" +
+    "\trunner\t->\tControls the Naf runner."
+else
+  puts "Sorry, action \'#{action}\' is not available. Available actions: runner, --?, --help"
 end

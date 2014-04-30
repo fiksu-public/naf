@@ -176,9 +176,9 @@ FactoryGirl.define do
     sequence(:application_run_group_name) { |n| "Run Group #{n}" }
   end
 
-  #############################################################
-  #######   Application Schedule Prerequisites ################
-  #############################################################
+  #############################################
+  #######   Run Interval Style ################
+  #############################################
 
   factory :run_interval_style, class: ::Naf::RunIntervalStyle do
     name 'at beginning of day'

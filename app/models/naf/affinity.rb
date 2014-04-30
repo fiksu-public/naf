@@ -51,8 +51,17 @@ module Naf
       where(selectable: true)
     end
 
+    def self.deleted_machine_affinities
+      joins(:affinity_classification).
+      joins("INNER JOIN #{Naf.schema_name}.machines AS m
+        ON CAST (m.id AS TEXT) = #{Naf.schema_name}.affinities.affinity_name").
+      where("#{Naf.schema_name}.affinity_classifications.affinity_classification_name = 'machine' AND
+        m.deleted IS TRUE")
+    end
+
     def self.names_list
-      selectable.map do |a|
+      # Don't include affinity that is associated with a deleted machine
+      (selectable - deleted_machine_affinities).map do |a|
         classification = a.affinity_classification
         if classification.affinity_classification_name == 'machine'
           if a.affinity_short_name.present?

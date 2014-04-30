@@ -28,9 +28,15 @@ module Process::Naf
         machine = ::Naf::Machine.find_by_server_address(@server_address)
         if machine.blank?
           server_name = (`hostname`).strip
-          machine = ::Naf::Machine.create(server_address: @server_address,
-                                          server_name: server_name)
-          add_default_affinities(machine)
+          machine = ::Naf::Machine.find_by_server_name(server_name)
+          if machine.blank?
+            machine = ::Naf::Machine.create(server_address: @server_address,
+                                            server_name: server_name)
+            add_default_affinities(machine)
+          else
+            machine.server_address = @server_address
+            machine.save!
+          end
         end
 
         machine.server_note = @server_note unless @server_note.nil?

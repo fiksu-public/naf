@@ -5,6 +5,14 @@ module Naf
     let!(:normal) { FactoryGirl.create(:normal_affinity) }
     let(:canary) { FactoryGirl.create(:canary_affinity) }
     let(:perennial) { FactoryGirl.create(:perennial_affinity) }
+    let!(:machine) { FactoryGirl.create(:machine) }
+    let!(:machine_classification) { FactoryGirl.create(:machine_affinity_classification) }
+    let!(:machine_affinity) {
+      FactoryGirl.create(:affinity, id: 5,
+                                    affinity_classification_id: machine_classification.id,
+                                    affinity_name: machine.id.to_s)
+    }
+
 
     # Mass-assignment
     [:affinity_classification_id,
@@ -94,9 +102,7 @@ module Naf
 
       it 'return proper message when pair value (affinity_classification_id, affinity_name) already exists' do
         normal.affinity_name = FactoryGirl.create(:machine).id.to_s
-        normal.affinity_classification.affinity_classification_name = 'machine'
-        normal.save
-        normal.affinity_classification.save
+        normal.affinity_classification = machine_classification
 
         normal.validate_affinity_name.should == 'An affinity with the pair value (affinity_classification_id, affinity_name) already exists!'
       end
@@ -110,10 +116,43 @@ module Naf
       before do
         canary.update_attributes!(selectable: false)
         perennial.update_attributes!(selectable: false)
+        machine_affinity.update_attributes!(selectable: false)
       end
 
       it "return only selectable affinities" do
         ::Naf::Affinity.selectable.should == [normal]
+      end
+    end
+
+    describe "#deleted_machine_affinities" do
+      it "return only affinities that are associated with deleted machines" do
+        machine.update_attributes!(deleted: true, enabled: false)
+        ::Naf::Affinity.deleted_machine_affinities.should == [machine_affinity]
+      end
+    end
+
+    describe "#names_list" do
+      before do
+        canary.update_attributes!(selectable: false)
+        perennial.update_attributes!(selectable: false)
+      end
+
+      it "return affinities not related to machine classification correctly" do
+        ::Naf::Affinity.names_list.should == [['purpose, normal', 1], ['0.0.0.1', 5]]
+      end
+
+      it "return affinities related to machine classification correctly when short name is present" do
+        machine_affinity.update_attributes!(affinity_short_name: 'machine_1')
+        ::Naf::Affinity.names_list.should == [['purpose, normal', 1], ['machine_1', 5]]
+      end
+
+      it "return affinities related to machine classification correctly when affinity_name is used" do
+        ::Naf::Affinity.names_list.should == [['purpose, normal', 1], ['0.0.0.1', 5]]
+      end
+
+      it "return affinities related to machine classification correctly when it is invalid" do
+        machine_affinity.update_attributes!(affinity_name: '100')
+        ::Naf::Affinity.names_list.should == [['purpose, normal', 1], ['Bad affinity: machine, 100', 5]]
       end
     end
 

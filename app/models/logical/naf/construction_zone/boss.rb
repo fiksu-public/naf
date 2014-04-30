@@ -18,17 +18,43 @@ module Logical::Naf::ConstructionZone
       work_order = ApplicationWorkOrder.new(application,
                                             application_run_group_restriction,
                                             application_run_group_name,
-                                            application_run_group_limit = 1,
-                                            priority = 0,
-                                            affinities = [],
-                                            prerequisites = [],
-                                            enqueue_backlogs = false)
+                                            application_run_group_limit,
+                                            priority,
+                                            affinities,
+                                            prerequisites,
+                                            enqueue_backlogs)
       @foreman.enqueue(work_order)
     end
 
-    def enqueue_application_schedule(application_schedule)
-      work_order = ApplicationScheduleWorkOrder.new(application_schedule)
-      @foreman.enqueue(work_order)
+    def enqueue_application_schedule(application_schedule, schedules_queued_already = [])
+      prerequisite_jobs = []
+
+      # Check if schedule has been queued
+      if schedules_queued_already.include? application_schedule.id
+        raise ::Naf::HistoricalJob::JobPrerequisiteLoop.new(application_schedule)
+      end
+
+      # Keep track of queued schedules
+      schedules_queued_already << application_schedule.id
+      # Queue application schedule prerequisites
+      application_schedule.prerequisites.each do |application_schedule_prerequisite|
+        job = enqueue_application_schedule(application_schedule_prerequisite, schedules_queued_already)
+        if job.present?
+          prerequisite_jobs << job
+        else
+          return
+        end
+      end
+
+      # Queue the application
+      return enqueue_application(application_schedule.application,
+                                 application_schedule.application_run_group_restriction,
+                                 application_schedule.application_run_group_name,
+                                 application_schedule.application_run_group_limit,
+                                 application_schedule.priority,
+                                 application_schedule.affinities,
+                                 prerequisite_jobs,
+                                 application_schedule.enqueue_backlogs)
     end
 
     def enqueue_rails_command(command,

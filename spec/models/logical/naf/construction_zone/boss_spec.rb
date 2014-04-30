@@ -34,19 +34,61 @@ module Logical::Naf::ConstructionZone
 
     describe '#enqueue_application' do
       let(:application) { FactoryGirl.create(:application) }
+      let(:prereq) { FactoryGirl.create(:job) }
       let!(:job) {
         boss.enqueue_application(application,
                                  ::Naf::ApplicationRunGroupRestriction.no_limit,
-                                 application.command)
+                                 application.command,
+                                 5,
+                                 1,
+                                 [::Naf::Affinity.first],
+                                 [prereq],
+                                 true)
       }
 
-      it_should_behave_like 'create one historical job', 1
+      it_should_behave_like 'create one historical job', 2
+
+      it 'assign run group restriction correctly' do
+        job.application_run_group_restriction_id.should == ::Naf::ApplicationRunGroupRestriction.no_limit.id
+      end
+
+      it 'assign run group name correctly' do
+        job.application_run_group_name.should == application.command
+      end
+
+      it 'assign run group limit correctly' do
+        job.application_run_group_limit.should == 5
+      end
+
+      it 'assign priority correctly' do
+        job.priority.should == 1
+      end
+
+      it 'assign affinities correctly' do
+        job.historical_job_affinity_tabs.map(&:affinity_id).should == [::Naf::Affinity.first.id]
+      end
+
+      it 'assign prerequisites correctly' do
+        job.historical_job_prerequisites.map(&:prerequisite_historical_job_id).should == [prereq.id]
+      end
+
+      it 'assign enqueue_backlogs correctly' do
+        job.application_run_group_name.should == application.command
+      end
     end
 
     describe '#enqueue_application_schedule' do
       let!(:job) { boss.enqueue_application_schedule(FactoryGirl.create(:schedule)) }
 
       it_should_behave_like 'create one historical job', 1
+
+      it 'create two historical jobs when schedule has a prerequisite' do
+        schedule = FactoryGirl.create(:schedule)
+        FactoryGirl.create(:schedule_prerequisite, application_schedule: schedule)
+        boss.enqueue_application_schedule(schedule)
+
+        ::Naf::HistoricalJob.should have(3).records
+      end
     end
 
     describe '#enqueue_rails_command' do
@@ -82,7 +124,7 @@ module Logical::Naf::ConstructionZone
 
       it 'create two historical jobs when a machine is present' do
         machine = FactoryGirl.create(:machine)
-        classification = FactoryGirl.create(:location_affinity_classification)
+        classification = FactoryGirl.create(:machine_affinity_classification)
         FactoryGirl.create(:affinity, id: 5,
                                       affinity_name: machine.id.to_s,
                                       affinity_classification: classification)

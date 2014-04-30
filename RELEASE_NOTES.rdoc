@@ -1,5 +1,17 @@
 = Release Notes
 
+=== Version 2.1.11
+Bug fixes:
+* Runner behaves correctly when it tries to delete a non-existing running job
+* Adding application schedule prerequisites works correctly
+* Log display outputs custom message when record id is not present
+
+Changes:
+* Only show affinities associated with machines that are not deleted
+* Runner will cleanup other runners after they are dead
+* Machine manager updates machines row if server address or server name match
+* Improvements on naf runner script
+
 === Version 2.1.10
 Bug fixes:
 * LogArchiver correctly removes files and directories

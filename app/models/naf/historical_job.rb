@@ -313,5 +313,13 @@ module Naf
       application_type.spawn(self)
     end
 
+    def lock_for_runner_use(&block)
+      advisory_lock(&block)
+    end
+
+    def unlock_for_runner_use
+      advisory_unlock
+    end
+
   end
 end

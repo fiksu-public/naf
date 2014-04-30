@@ -3,10 +3,18 @@ module Naf
 
     def logs
       if naf_cookie_valid?
-        response = params['logical_type'].constantize.new(params).logs
-        if response.present?
-          success = true
+        if params['record_id'].present?
+          response = params['logical_type'].constantize.new(params).logs
+
+          if response.present?
+            success = true
+          else
+            success = false
+          end
         else
+          response = {
+            logs: '&nbsp;&nbsp;<span>Record id is not present</br></span>'
+          }
           success = false
         end
 

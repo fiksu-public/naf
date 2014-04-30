@@ -46,6 +46,8 @@ module Logical::Naf
             return retrieve_log_files_from_s3
           end
         else
+          return [] unless record_id.present?
+
           files = Dir["#{::Naf::PREFIX_PATH}/#{::Naf.schema_name}/jobs/#{record_id}/*"]
           if files.present?
             # Sort log files based on time
