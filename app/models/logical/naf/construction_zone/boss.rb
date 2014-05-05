@@ -14,7 +14,8 @@ module Logical::Naf::ConstructionZone
                             priority = 0,
                             affinities = [],
                             prerequisites = [],
-                            enqueue_backlogs = false)
+                            enqueue_backlogs = false,
+                            application_schedule = nil)
       work_order = ApplicationWorkOrder.new(application,
                                             application_run_group_restriction,
                                             application_run_group_name,
@@ -22,7 +23,8 @@ module Logical::Naf::ConstructionZone
                                             priority,
                                             affinities,
                                             prerequisites,
-                                            enqueue_backlogs)
+                                            enqueue_backlogs,
+                                            application_schedule)
       @foreman.enqueue(work_order)
     end
 
@@ -54,7 +56,8 @@ module Logical::Naf::ConstructionZone
                                  application_schedule.priority,
                                  application_schedule.affinities,
                                  prerequisite_jobs,
-                                 application_schedule.enqueue_backlogs)
+                                 application_schedule.enqueue_backlogs,
+                                 application_schedule)
     end
 
     def enqueue_rails_command(command,

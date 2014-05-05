@@ -1,5 +1,9 @@
 = Release Notes
 
+=== Version 2.1.12
+Bug fixes:
+* Logical::Naf::ConstructionZone#enqueue_application missing application_schedule parameter
+
 === Version 2.1.11
 Bug fixes:
 * Runner behaves correctly when it tries to delete a non-existing running job

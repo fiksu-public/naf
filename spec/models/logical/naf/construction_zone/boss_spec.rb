@@ -78,7 +78,8 @@ module Logical::Naf::ConstructionZone
     end
 
     describe '#enqueue_application_schedule' do
-      let!(:job) { boss.enqueue_application_schedule(FactoryGirl.create(:schedule)) }
+      let!(:schedule) { FactoryGirl.create(:schedule) }
+      let!(:job) { boss.enqueue_application_schedule(schedule) }
 
       it_should_behave_like 'create one historical job', 1
 
@@ -88,6 +89,10 @@ module Logical::Naf::ConstructionZone
         boss.enqueue_application_schedule(schedule)
 
         ::Naf::HistoricalJob.should have(3).records
+      end
+
+      it 'assign application_schedule_id correctly' do
+        job.application_schedule_id.should == schedule.id
       end
     end
 
