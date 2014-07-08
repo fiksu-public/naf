@@ -128,7 +128,7 @@ module Logical
         output = ''
         time = schedule.run_interval
         if schedule.run_interval_style.name == 'at beginning of day'
-          output = exact_time_of_day(time)
+          output = exact_time_of_day
         else
           output = interval_time(time)
         end
@@ -136,11 +136,15 @@ module Logical
         output
       end
 
-      def exact_time_of_day(time)
+      def exact_time_of_day
         output = ''
         minutes = schedule.run_interval % 60
         hours =   schedule.run_interval / 60
-        output << hours.to_s + ':'
+        if hours >= 24
+          output << (hours % 24).to_s + ':'
+        else
+          output << hours.to_s + ':'
+        end
         output << '%02d' % minutes
         output = Time.parse(output).strftime('%I:%M %p')
 

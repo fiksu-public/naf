@@ -1,5 +1,3 @@
-require 'yajl'
-
 module Logical::Naf
   module LogParser
     class Runner < Base
@@ -18,7 +16,10 @@ module Logical::Naf
       private
 
       def insert_log_line(elem)
-        "&nbsp;&nbsp;<span>#{elem['output_time']} #{invocation_link(elem['id'])}: #{elem['message']}</br></span>"
+        output_line = "<span><pre style='display: inline; word-wrap: break-word;'>"
+        output_line += CGI::unescapeHTML("#{elem['output_time']} #{invocation_link(elem['id'])}:")
+        output_line += " #{elem['message']}</pre></br></span>"
+        output_line
       end
 
       def invocation_link(id)

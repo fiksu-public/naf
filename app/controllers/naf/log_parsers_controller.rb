@@ -24,5 +24,14 @@ module Naf
       end
     end
 
+    def download
+      job_log_downloader = Logical::Naf::LogParser::JobDownloader.new({ 
+        'record_id' => params[:record_id]
+      })
+      logs = job_log_downloader.logs_for_download + "\n"
+      send_data logs, filename: "job_#{params[:record_id]}_log.txt",
+        type: "text/plain", disposition: 'attachment'
+    end
+
   end
 end

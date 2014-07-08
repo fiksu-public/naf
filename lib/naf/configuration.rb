@@ -8,7 +8,9 @@ module Naf
                   :layout,
                   :default_page_options,
                   :api_domain_cookie_name,
-                  :simple_cluster_authenticator_cookie_expiration_time
+                  :simple_cluster_authenticator_cookie_expiration_time,
+                  :metric_tags,
+                  :metric_send_delay
 
     def initialize
       @model_class = "::ActiveRecord::Base"
@@ -19,6 +21,8 @@ module Naf
       @api_controller_class = "Naf::ApiSimpleClusterAuthenticatorApplicationController"
       @simple_cluster_authenticator_cookie_expiration_time = 1.week
       @api_domain_cookie_name = "naf_#{Rails.application.class.parent.name.underscore}"
+      @metric_tags = ["#{Rails.env}"]
+      @metric_send_delay = 120
     end
 
   end

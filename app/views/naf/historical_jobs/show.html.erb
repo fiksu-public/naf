@@ -137,6 +137,18 @@
               "#", { class: "terminate" }
             %></td>
           </tr>
+        <% elsif !['Terminating'].include?(@logical_job.status) -%>
+          <tr>
+            <td>Enqueue Application</td>
+            <td><% params = { class: "re-enqueue", content: "#{naf.historical_jobs_path}/reenqueue", id: @historical_job.id } %>
+              <% if @historical_job.application_id.present? -%>
+                <% params[:app_id] = @historical_job.application.id %>
+              <% end %>
+              <%= link_to image_tag('control_play_blue.png',
+              class: 'action',
+              title: "Re-enqueue one instance of job #{@historical_job.id}"),
+              "#", params %>
+            </td>
         <% end %>
       </tbody>
     </table>
@@ -163,8 +175,12 @@
       </tbody>
     </table>
     </br>
-    <%= render partial: 'naf/log_viewer/log_layout', locals: { record_id: @historical_job.id, record_type: 'job' } %>
-
+    <%= render partial: 'naf/log_viewer/log_layout', locals: { 
+      record_id: @historical_job.id,
+      record_type: 'job',
+      runner_name: @logical_job.runner,
+      server: @logical_job.started_on_machine.try(:server_name),
+      status: @logical_job.status } %>
   </div>
 <% end %>
 
@@ -177,30 +193,5 @@
                      logs_url: "#{http_protocol}#{@logical_job.runner}#{naf.logs_log_parsers_path}",
                      record_type: 'job' } %>
 
-<% content_for :javascripts do %>
-  <script type='text/javascript'>
-    jQuery(document).ready(function () {
-      jQuery(document).delegate('.terminate', "click", function(){
-        var answer = confirm("You are terminating this job. Are you sure you want to do this?");
-        if (!answer) {
-          return false;
-        }
-        var id = <%= @historical_job.id %>;
-        jQuery.ajax({
-          url: id,
-          type:'POST',
-          dataType:'json',
-          data:{ "historical_job[request_to_terminate]": 1, "historical_job_id": id, "_method": "put" },
-          success:function (data) {
-            if (data.success) {
-              var title = data.title ? data.title : data.command
-              jQuery("<p id='notice'>A Job " + title + " was terminated!</p>").
-              appendTo('#flash_message').slideDown().delay(5000).slideUp();
-              setTimeout('window.location.reload()', 5600);
-            }
-          }
-        });
-      });
-    });
-  </script>
-<% end %>
+<!-- This partial controls terminate and re-enqueue links -->
+<% render partial: 'button_control', locals: { historical_job_id: @historical_job.id } %>

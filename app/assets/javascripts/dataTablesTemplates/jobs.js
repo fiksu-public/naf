@@ -75,6 +75,43 @@ jQuery(document).ready(function() {
       }
     });
   });
+
+  jQuery(document).delegate('.re-enqueue', "click", function(){
+    var url = jQuery(this).attr('content');
+    var new_params = { data: jQuery(this).attr('data') };
+    new_params['job_id'] = jQuery(this).attr('id');
+
+    if (jQuery(this).attr('app_id')) {
+      new_params['app_id'] = jQuery(this).attr('app_id');
+    }
+    
+    if (jQuery(this).attr('link')) {
+      new_params['link'] = jQuery(this).attr('link');
+    }
+    
+    if (jQuery(this).attr('title_name')) {
+      new_params['title_name'] = jQuery(this).attr('title_name');
+    }
+    
+    var answer = confirm("Would you like to enqueue this job?");
+    
+    if (!answer) {
+      return false;
+    }
+    jQuery.post(url, new_params, function (data) {
+      if (data.success) {
+        jQuery("<p id='notice'>Congratulations, a Job " + data.title + " was added!</p>").
+        appendTo('#flash_message').slideDown().delay(5000).slideUp();
+        setTimeout('window.location.reload()', 5600);
+      }
+      else {
+        jQuery("<div class='error'>Sorry, \'" +  data.title +
+          "\' cannot add a Job to the queue right now!</div>").
+          appendTo('#flash_message').slideDown().delay(5000).slideUp();
+        jQuery('#datatable').dataTable().fnDraw();
+      }
+    });
+  });
 });
 
 function addLinkToJob(nRow, aData) {

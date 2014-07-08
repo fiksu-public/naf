@@ -168,7 +168,7 @@ module Naf
         when "runners"
           link_to "Runners", naf.machine_runners_path
         when "scripts"
-          link_to "Scripts", naf.applications_path
+          link_to "Applications", naf.applications_path
         when "janitorial_assignments"
           link_to "Janitorial Assignments", naf.janitorial_archive_assignments_path
         when "janitorial_archive_assignments"

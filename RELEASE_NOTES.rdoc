@@ -1,5 +1,18 @@
 = Release Notes
 
+=== Version 2.1.13
+Bug fixes:
+* Large run interval for application schedule causes argument out of range error
+
+Features/Changes:
+* Cleanup script to remove data from the Naf schema
+* aws-sdk and yajl-ruby gems added in naf.gemspec
+* Html escape characters in log display instead of log files
+* Scripts tab renamed to Applications
+* Ability to download job logs
+* Ability to re-enqueue finished/errored/terminated job
+* Send Datadog metrics on runners
+
 === Version 2.1.12
 Bug fixes:
 * Logical::Naf::ConstructionZone#enqueue_application missing application_schedule parameter
@@ -10,7 +23,7 @@ Bug fixes:
 * Adding application schedule prerequisites works correctly
 * Log display outputs custom message when record id is not present
 
-Changes:
+Features/Changes:
 * Only show affinities associated with machines that are not deleted
 * Runner will cleanup other runners after they are dead
 * Machine manager updates machines row if server address or server name match
@@ -23,7 +36,7 @@ Bug fixes:
 * Custom validation for machine marked as enabled and deleted
 * UI links behave correctly if the engine's mount path is different than '/job_system'
 
-Changes:
+Features/Changes:
 * Improved memory management
 * Removed machine log display
 
@@ -46,7 +59,7 @@ Bug fixes:
 * Deleted application still runs if it has an enabled schedule
 * LogArchiver did not delete empty folders
 
-Changes:
+Features/Changes:
 * Created a log archival queuer script
 * Created Api Authenticator for logs
 
@@ -56,7 +69,7 @@ Bug fixes:
 * Pagination of application schedules on the index page was not properly working.
 * When mouse hovered over the application schedule on the applicaiton show page, it did not show a detailed information about the schedule.
 
-Changes:
+Features/Changes:
 * Included application name when editing an application schedule
 
 === Version 2.1.5

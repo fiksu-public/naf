@@ -44,13 +44,16 @@ module Logical::Naf::ConstructionZone
       describe 'run group restriction is set to limited per machine' do
         let!(:machine) { FactoryGirl.create(:machine) }
         let(:historical_job) { FactoryGirl.create(:job, application_run_group_name: 'test') }
-        let(:tab) { FactoryGirl.create(:machine_job_affinity_tab, historical_job_id: historical_job.id) }
+        let!(:tab) { FactoryGirl.create(:machine_job_affinity_tab, historical_job_id: historical_job.id) }
 
         before do
-          FactoryGirl.create(:queued_job, application_run_group_name: 'test', id: historical_job.id)
+          FactoryGirl.create(:queued_job, application_run_group_name: 'test',
+                                          id: historical_job.id,
+                                          historical_job: historical_job)
           FactoryGirl.create(:running_job_base, application_run_group_name: 'test',
                                                 started_on_machine_id: machine.id,
-                                                application_run_group_name: 'test')
+                                                historical_job: historical_job,
+                                                id: historical_job.id)
         end
 
         it 'return false when application does not have affinity associated with machine' do

@@ -8,7 +8,7 @@ Gem::Specification.new do |s|
   s.name        = 'naf'
   s.version     = Naf::VERSION
   s.license     = 'New BSD License'
-  s.date        = '2014-05-05'
+  s.date        = '2014-07-08'
   s.summary     = 'Creates infrastructure for a customizable and robust Postgres-backed script scheduling/running'
   s.description = 'A cloud based distributed cron, application framework and operations console. Naf works as a distributed script running ' +
                   'system that provides scheduling, logging, alarming, machine redundancy, and the ability to set constraint during script execution'
@@ -24,8 +24,11 @@ Gem::Specification.new do |s|
   s.add_dependency 'jquery-rails'
   s.add_dependency 'will_paginate'
   s.add_dependency 'facter', '~> 1.7.5'
+  s.add_dependency 'aws-sdk', '>= 1.1.0'
+  s.add_dependency 'yajl-ruby', '>= 1.1.0'
+  s.add_dependency 'dogstatsd-ruby', '>= 1.2.0'
   s.add_development_dependency 'pg'
-  s.add_development_dependency 'rspec-rails'
+  s.add_development_dependency 'rspec-rails', '~> 2.14.0'
   s.add_development_dependency 'factory_girl_rails', '~> 4.0.0'
   s.add_development_dependency 'awesome_print'
 

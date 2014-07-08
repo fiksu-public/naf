@@ -47,6 +47,11 @@
     <%= link_to 'Auto Scroll (ON)', '#', id: :auto_scroll %>
     </br></br>
     <%= submit_tag("Search the logs", id: 'log_search_submit') %>
+    <% if record_type == 'job' %>
+    <%= render partial: 'naf/log_viewer/job_log_download_button', locals: { 
+        server: server, status: status,
+        link_path: "#{http_protocol}#{runner_name}#{naf.download_log_parsers_path}?record_id=#{record_id}&record_type=job" } %>
+    <% end %>
     <%= link_to 'Full Screen',
                 { controller: 'log_viewer', action: 'index', record_id: record_id, record_type: record_type },
                 { class: 'full_screen' } %>

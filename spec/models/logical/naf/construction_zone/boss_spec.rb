@@ -32,6 +32,11 @@ module Logical::Naf::ConstructionZone
       end
     end
 
+    before do
+      ::Naf::HistoricalJob.delete_all
+      ::Naf::ApplicationType.all
+    end
+
     describe '#enqueue_application' do
       let(:application) { FactoryGirl.create(:application) }
       let(:prereq) { FactoryGirl.create(:job) }

@@ -129,7 +129,7 @@
             jQuery('#stdout').text('')
             jQuery('#stdout').append(logs);
             if(jQuery('#stdout').text() == '') {
-              logs = "No logs were found for this search query!<br>";
+              logs = "<pre style='display: inline; word-wrap: break-word;'>No logs were found for this search query!</pre><br>";
               setAutoScrollOff();
             }
             jQuery("#stdout").scrollTop(jQuery('#stdout')[0].scrollHeight);
@@ -138,7 +138,7 @@
           }
           else{
             if(logs == '' && jQuery('#stdout')[0].children.length == 0) {
-              logs = "&nbsp;&nbsp;<span>No logs were found!<br></span>";
+              logs = "<span><pre style='display: inline; word-wrap: break-word;'>No logs were found!</pre><br></span>";
               setAutoScrollOff();
             }
 
@@ -165,10 +165,10 @@
           }
         },
         error: function(response) {
-          message = '&nbsp;&nbsp;<span>Failed to retrieve ' + '<%= record_type %>' + '(' +
+          message = '<span><pre style="display: inline; word-wrap: break-word;">Failed to retrieve ' + '<%= record_type %>' + '(' +
             '<%= record_id %>' + ') logs from ' + '<%= logs_url %>'.match(/^https?\:\/\/([^\/?#]+)/).pop() + '. Please refer to ' +
             'Naf FAQs on the' + ' wiki'.link('https://github.com/fiksu/naf/wiki/Frequently-Asked-Questions') +
-            ' for further information.<br></span>';
+            ' for further information.</pre><br></span>';
 
           jQuery('#stdout').prepend(message);
         }

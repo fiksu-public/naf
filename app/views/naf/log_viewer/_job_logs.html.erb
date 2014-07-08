@@ -48,6 +48,9 @@
             </br>
 
             <%= submit_tag("Search the logs", id: 'log_search_submit') %>
+            <%= render partial: 'job_log_download_button', locals: {  server: @job.started_on_machine.try(:server_name),
+                status: logical_job.status,
+                link_path: "#{http_protocol}#{logical_job.runner}#{naf.download_log_parsers_path}?record_id=#{@job.id}&record_type=job" } %>
             &nbsp;&nbsp;&nbsp;
             <%= link_to 'Back to Job', { controller: 'historical_jobs', action: 'show', id: @job.id } %>
           </div>

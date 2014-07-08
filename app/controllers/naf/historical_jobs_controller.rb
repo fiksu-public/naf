@@ -44,6 +44,36 @@ module Naf
       @historical_job = Naf::HistoricalJob.new
     end
 
+    # If there is an application id specified, then the controller enqueues that application
+    def reenqueue
+      job = Naf::HistoricalJob.find(params[:job_id].to_i)
+      success = false
+      if params[:app_id].present?
+        app = Naf::Application.find(params[:app_id].to_i)
+        title = app.title
+        @historical_job = ::Logical::Naf::ConstructionZone::Boss.new.enqueue_application(
+          app,
+          job.application_run_group_restriction,
+          job.application_run_group_name,
+          job.application_run_group_limit,
+          job.priority,
+          job.job_affinities,
+          job.prerequisites,
+          false,
+          job.application_schedule)
+        if @historical_job.present?
+          success = true
+        end
+      else
+        title = job.command
+        @historical_job = ::Logical::Naf::ConstructionZone::Boss.new.reenqueue(job)
+        if @historical_job.present?
+          success = true
+        end
+      end
+      render json: { success: success, title: title }.to_json
+    end
+
     def create
       @historical_job = Naf::HistoricalJob.new(params[:historical_job])
       if params[:historical_job][:application_id] &&

@@ -1,0 +1,11 @@
+<% style_text = "vertical-align: bottom;" %>
+<% if status == 'Queued' || server.blank?
+  style_text << " display: none;"
+end %>
+<%= button_tag(style: "#{style_text}") do
+  link_to 'Download',
+    link_path,
+    style: "color: black;"
+  end
+%>
+</button>

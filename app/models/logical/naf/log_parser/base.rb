@@ -95,6 +95,7 @@ module Logical::Naf
             if self.class.to_s == 'Logical::Naf::LogParser::Runner'
               log['id'] = get_invocation_id(file.scan(UUID_REGEX).first)
             end
+            log['message'] = CGI::escapeHTML(log['message'])
             filter_log_messages(log)
           end
 

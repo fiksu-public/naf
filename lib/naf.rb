@@ -45,6 +45,14 @@ module Naf
       configuration.simple_cluster_authenticator_cookie_expiration_time
     end
 
+    def metric_tags
+      configuration.metric_tags
+    end
+
+    def metric_send_delay
+      configuration.metric_send_delay
+    end
+
     def using_another_database?
       model_class != ActiveRecord::Base
     end

@@ -1,5 +1,3 @@
-require 'yajl'
-
 module Logical::Naf
   module LogParser
     class Job < Base
@@ -15,7 +13,10 @@ module Logical::Naf
       private
 
       def insert_log_line(elem)
-        "&nbsp;&nbsp;<span>#{elem['line_number']} #{elem['output_time']}: #{elem['message']}</br></span>"
+        output_line = "<span><pre style='display: inline; word-wrap: break-word;'>"
+        output_line += "#{elem['line_number']} #{elem['output_time']}: #{elem['message']}"
+        output_line += "</pre></br></span>"
+        output_line
       end
 
       def sort_jsons
