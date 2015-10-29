@@ -3,6 +3,10 @@ require 'spec_helper'
 module Logical::Naf::ConstructionZone
   describe Foreman do
 
+    before do
+      FactoryGirl.create(:rails_app_type)
+    end
+
     let!(:foreman) { Logical::Naf::ConstructionZone::Foreman.new }
     let!(:work_order) {
       Logical::Naf::ConstructionZone::WorkOrder.new('::Process::Naf::Janitor.run')

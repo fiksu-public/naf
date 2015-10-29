@@ -35,6 +35,7 @@ module Logical::Naf::ConstructionZone
     before do
       ::Naf::HistoricalJob.delete_all
       ::Naf::ApplicationType.all
+      FactoryGirl.create(:rails_app_type)
     end
 
     describe '#enqueue_application' do
