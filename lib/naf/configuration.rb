@@ -23,6 +23,7 @@ module Naf
       @api_domain_cookie_name = "naf_#{Rails.application.class.parent.name.underscore}"
       @metric_tags = ["#{Rails.env}"]
       @metric_send_delay = 120
+      @schema_name = "naf"
     end
 
   end

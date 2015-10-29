@@ -1,0 +1,15 @@
+sudo: false
+
+language: ruby
+bundler_args: --without debug
+cache: bundler
+
+rvm:
+  - 1.9.3
+  - 2.0.0
+  - 2.1.7
+  - 2.2.2
+
+before_script: travis/before.sh
+
+script: bundle exec rspec
