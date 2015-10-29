@@ -74,8 +74,7 @@ module Logical::Naf::ConstructionZone
 
         it 'return true when limit is less than number of running/queued jobs' do
           FactoryGirl.create(:running_job_base, application_run_group_name: 'test',
-                                                started_on_machine_id: machine.id,
-                                                application_run_group_name: 'test')
+                                                started_on_machine_id: machine.id)
           foreman.limited_by_run_group?(
             limited_per_machine, 'test', 1, [{ affinity_id: tab.affinity.id }]
           ).should be_true

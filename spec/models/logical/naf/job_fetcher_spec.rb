@@ -41,7 +41,7 @@ module Logical
 
         it "insert row correctly into historical_jobs" do
           ::Naf::HistoricalJob.queued_between(Time.zone.now - ::Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-            where(started_at: nil).first.should == first_job
+            where(started_at: nil).order(:id).first.should == first_job
         end
 
         it "return correctly next fetched job" do
