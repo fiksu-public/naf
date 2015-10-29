@@ -16,7 +16,8 @@ module Process::Naf
       end
 
       it 'return true when there is available memory' do
-        Facter.should_receive(:memoryfree_mb).and_return(0.1)
+        Facter.should_receive(:memoryfree_mb).and_return(10.0)
+        runner.should_receive(:sreclaimable_memory).and_return(0.0)
         runner.memory_available_to_spawn?.should be_false
       end
     end
