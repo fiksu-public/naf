@@ -32,7 +32,7 @@ module Logical
 
     	describe '#to_array' do
     		it 'return invocation information in correct order' do
-    			::Logical::Naf::MachineRunnerInvocation.to_array(0, 'asc', nil).should == invocations
+    			expect(::Logical::Naf::MachineRunnerInvocation.to_array(0, 'asc', nil)).to eq(invocations)
     		end
     	end
 

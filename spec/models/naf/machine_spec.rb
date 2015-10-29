@@ -14,44 +14,44 @@ module Naf
      :marked_down,
      :short_name,
      :deleted].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should have_many(:machine_affinity_slots) }
-    it { should have_many(:affinities) }
-    it { should have_many(:machine_runners) }
+    it { is_expected.to have_many(:machine_affinity_slots) }
+    it { is_expected.to have_many(:affinities) }
+    it { is_expected.to have_many(:machine_runners) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:server_address) }
-    it { should validate_uniqueness_of(:short_name) }
+    it { is_expected.to validate_presence_of(:server_address) }
+    it { is_expected.to validate_uniqueness_of(:short_name) }
 
     ['', 'aa', 'aA', 'Aa', 'AA', '_a', 'a1', 'A1', '_9'].each do |v|
-      it { should allow_value(v).for(:short_name) }
+      it { is_expected.to allow_value(v).for(:short_name) }
     end
 
     ['1_', '3A', '9a'].each do |v|
-      it { should_not allow_value(v).for(:short_name) }
+      it { is_expected.not_to allow_value(v).for(:short_name) }
     end
 
     [-2147483647, 2147483646, 0, 1].each do |v|
-      it { should allow_value(v).for(:thread_pool_size) }
+      it { is_expected.to allow_value(v).for(:thread_pool_size) }
     end
 
     [-2147483648, 2147483647, 1.0].each do |v|
-      it { should_not allow_value(v).for(:thread_pool_size) }
+      it { is_expected.not_to allow_value(v).for(:thread_pool_size) }
     end
 
     context "with regard to checking the schedules" do
@@ -61,27 +61,27 @@ module Naf
 
       it "should be time to check the schedules if it's been longer than the check period" do
         check_period = Time.now - Machine.last_time_schedules_were_checked
-        Machine.is_it_time_to_check_schedules?(check_period).should be_true
+        expect(Machine.is_it_time_to_check_schedules?(check_period)).to be_truthy
       end
 
       it "should not be time to check the schedules if it's been shorter than the check period" do
-        Machine.is_it_time_to_check_schedules?(1.minute).should be_false
+        expect(Machine.is_it_time_to_check_schedules?(1.minute)).to be_falsey
       end
     end
 
     context "when created" do
       it "should not save with a bad address" do
         bad_machine = FactoryGirl.build(:machine, server_address: "21312")
-        bad_machine.save.should_not be_true
-        bad_machine.should have(1).error_on(:server_address)
+        expect(bad_machine.save).not_to be_truthy
+        expect(bad_machine.errors[:server_address].size).to eq 1
       end
 
       it "should be found by the enabled scope" do
-        Machine.enabled.should include(machine)
+        expect(Machine.enabled).to include(machine)
       end
 
       it "should be not be stale" do
-        machine.is_stale?(1).should be_false
+        expect(machine.is_stale?(1)).to be_falsey
       end
     end
 
@@ -90,45 +90,45 @@ module Naf
 
       it "should mark schedules as checked" do
         machine.mark_checked_schedule
-        machine.last_checked_schedules_at.should be > time_before_update
-        machine.last_checked_schedules_at.should be < Time.zone.now
+        expect(machine.last_checked_schedules_at).to be > time_before_update
+        expect(machine.last_checked_schedules_at).to be < Time.zone.now
       end
 
       it "should mark itself as alive" do
         machine.mark_alive
-        machine.last_seen_alive_at.should be > time_before_update
-        machine.last_seen_alive_at.should be < Time.zone.now
+        expect(machine.last_seen_alive_at).to be > time_before_update
+        expect(machine.last_seen_alive_at).to be < Time.zone.now
       end
 
       it "should become stale" do
         machine.mark_alive
         sleep(2.0)
-        machine.is_stale?(1).should be_true
+        expect(machine.is_stale?(1)).to be_truthy
       end
     end
 
     context "when marking itself as dead" do
       it "should un-enable itself, and mark child proceses as dead" do
         mock_machine_logger = double('machine_logger')
-        mock_machine_logger.should_receive(:alarm).and_return(nil)
+        expect(mock_machine_logger).to receive(:alarm).and_return(nil)
         dying_machine = machine
-        dying_machine.should_receive(:machine_logger).and_return(mock_machine_logger)
-        dying_machine.should_receive(:mark_processes_as_dead).and_return(nil)
+        expect(dying_machine).to receive(:machine_logger).and_return(mock_machine_logger)
+        expect(dying_machine).to receive(:mark_processes_as_dead).and_return(nil)
         dying_machine.mark_machine_down(dying_machine)
-        dying_machine.marked_down.should be_true
+        expect(dying_machine.marked_down).to be_truthy
       end
     end
 
     context "when updating the machine" do
       it "should not save when enabled and deleted are true" do
         bad_machine = FactoryGirl.build(:machine, enabled: true, deleted: true)
-        bad_machine.save.should_not be_true
-        bad_machine.errors.messages[:enabled].should_not be_nil
+        expect(bad_machine.save).not_to be_truthy
+        expect(bad_machine.errors.messages[:enabled]).not_to be_nil
       end
 
       it "should save when enabled is true and deleted is false" do
         machine = FactoryGirl.build(:machine, enabled: true, deleted: false)
-        machine.save.should be_true
+        expect(machine.save).to be_truthy
       end
     end
 
@@ -143,70 +143,70 @@ module Naf
       end
 
       it "return the correct machine" do
-        ::Naf::Machine.enabled.all.should == [machine]
+        expect(::Naf::Machine.enabled.all).to eq([machine])
       end
     end
 
     describe "#up" do
       it "return the correct status" do
         FactoryGirl.create(:machine, marked_down: true)
-        ::Naf::Machine.down.all.should == [machine]
+        expect(::Naf::Machine.down.all).to eq([machine])
       end
     end
 
     describe "#down" do
       it "return the correct status" do
         machine2 = FactoryGirl.create(:machine, marked_down: true)
-        ::Naf::Machine.down.all.should == [machine2]
+        expect(::Naf::Machine.down.all).to eq([machine2])
       end
     end
 
     describe "#machine_ip_address" do
       it "return the correct ip address" do
-        ::Naf::Machine.stub(:hostname).and_raise(StandardError)
-        ::Naf::Machine.machine_ip_address.should == '127.0.0.1'
+        allow(::Naf::Machine).to receive(:hostname).and_raise(StandardError)
+        expect(::Naf::Machine.machine_ip_address).to eq('127.0.0.1')
       end
 
       it "return the correct ip address" do
-        ::Naf::Machine.stub(:hostname).and_return('1.1.1.1')
-        ::Naf::Machine.machine_ip_address.should == '1.1.1.1'
+        allow(::Naf::Machine).to receive(:hostname).and_return('1.1.1.1')
+        expect(::Naf::Machine.machine_ip_address).to eq('1.1.1.1')
       end
     end
 
     describe "#hostname" do
       it "return the correct ip address" do
-        Socket.stub(:gethostname).and_raise(StandardError)
-        ::Naf::Machine.hostname.should == 'local'
+        allow(Socket).to receive(:gethostname).and_raise(StandardError)
+        expect(::Naf::Machine.hostname).to eq('local')
       end
 
       it "return the correct ip address" do
-        Socket.stub(:gethostname).and_return('test.local')
-        ::Naf::Machine.hostname.should == 'test.local'
+        allow(Socket).to receive(:gethostname).and_return('test.local')
+        expect(::Naf::Machine.hostname).to eq('test.local')
       end
     end
 
     describe "#local_machine" do
       before do
-        ::Naf::Machine.stub(:machine_ip_address).and_return('1.1.1.1')
+        allow(::Naf::Machine).to receive(:machine_ip_address).and_return('1.1.1.1')
       end
 
       it "return the correct machine" do
         machine.update_attributes!(server_address: '1.1.1.1')
-        ::Naf::Machine.local_machine.should == machine
+        expect(::Naf::Machine.local_machine).to eq(machine)
       end
 
       it "return no machines" do
-        ::Naf::Machine.local_machine.should == nil
+        expect(::Naf::Machine.local_machine).to eq(nil)
       end
     end
 
     describe "#current" do
       before do
-        ::Naf::Machine.stub(:local_machine).and_return(machine)
+        allow(::Naf::Machine).to receive(:local_machine).and_return(machine)
       end
 
       it "return the correct machine" do
-        ::Naf::Machine.current.should == machine
+        expect(::Naf::Machine.current).to eq(machine)
       end
     end
 
@@ -218,7 +218,7 @@ module Naf
       end
 
       it "return the correct machine" do
-        ::Naf::Machine.last_time_schedules_were_checked.to_i.should == machine.last_checked_schedules_at.to_i
+        expect(::Naf::Machine.last_time_schedules_were_checked.to_i).to eq(machine.last_checked_schedules_at.to_i)
       end
     end
 
@@ -226,13 +226,13 @@ module Naf
       let!(:time) { Time.zone.now }
 
       it "return the correct ip address" do
-        ::Naf::Machine.stub(:last_time_schedules_were_checked).and_return(time)
-        ::Naf::Machine.is_it_time_to_check_schedules?(1.minute).should == false
+        allow(::Naf::Machine).to receive(:last_time_schedules_were_checked).and_return(time)
+        expect(::Naf::Machine.is_it_time_to_check_schedules?(1.minute)).to eq(false)
       end
 
       it "return true when last checked is nil" do
-        ::Naf::Machine.stub(:last_time_schedules_were_checked).and_return(nil)
-        ::Naf::Machine.is_it_time_to_check_schedules?(time).should == true
+        allow(::Naf::Machine).to receive(:last_time_schedules_were_checked).and_return(nil)
+        expect(::Naf::Machine.is_it_time_to_check_schedules?(time)).to eq(true)
       end
     end
 
@@ -242,19 +242,19 @@ module Naf
 
     describe "#to_s" do
       it "parse the machine correctly" do
-        machine.to_s.should == "::Naf::Machine<ENABLED, id: #{machine.id}, address: 0.0.0.1, " +
-          "pool size: 5, last checked schedules: , last seen: >"
+        expect(machine.to_s).to eq("::Naf::Machine<ENABLED, id: #{machine.id}, address: 0.0.0.1, " +
+          "pool size: 5, last checked schedules: , last seen: >")
       end
     end
 
     describe "#correct_server_address?" do
       it "return 0 for valid ip address" do
-        machine.correct_server_address?.should == 0
+        expect(machine.correct_server_address?).to eq(0)
       end
 
       it "return nil for invalid ip address" do
         machine.server_address = '1.1'
-        machine.correct_server_address?.should == nil
+        expect(machine.correct_server_address?).to eq(nil)
       end
     end
 
@@ -268,9 +268,9 @@ module Naf
       end
 
       it "change last_checked_schedules_at" do
-        lambda {
+        expect {
           machine.mark_checked_schedule
-        }.should change(machine, :last_checked_schedules_at).
+        }.to change(machine, :last_checked_schedules_at).
         from(nil).to(Time.zone.now)
       end
     end
@@ -285,9 +285,9 @@ module Naf
       end
 
       it "change last_seen_alive_at" do
-        lambda {
+        expect {
           machine.mark_alive
-        }.should change(machine, :last_seen_alive_at).
+        }.to change(machine, :last_seen_alive_at).
         from(nil).to(Time.zone.now)
       end
     end
@@ -303,9 +303,9 @@ module Naf
       end
 
       it "change marked_down" do
-        lambda {
+        expect {
           machine.mark_up
-        }.should change(machine, :marked_down).
+        }.to change(machine, :marked_down).
         from(true).to(false)
       end
     end
@@ -317,32 +317,32 @@ module Naf
       end
 
       it "set marked_down to true" do
-        machine.marked_down.should == true
+        expect(machine.marked_down).to eq(true)
       end
 
       it "set marked_down_by_machine_id" do
-        machine.marked_down_by_machine_id.should == machine2.id
+        expect(machine.marked_down_by_machine_id).to eq(machine2.id)
       end
 
       it "change marked_down_at to timestamp" do
-        machine.marked_down_at.should be_within(3.seconds).of(Time.zone.now)
+        expect(machine.marked_down_at).to be_within(3.seconds).of(Time.zone.now)
       end
     end
 
     describe "#is_stale?" do
       it "return true when machine is stale" do
         machine.last_seen_alive_at = Time.zone.now - 1.minute
-        machine.is_stale?(1.second).should == true
+        expect(machine.is_stale?(1.second)).to eq(true)
       end
 
       it "return false when machine is not stale" do
         machine.last_seen_alive_at = Time.zone.now
-        machine.is_stale?(1.minute).should == false
+        expect(machine.is_stale?(1.minute)).to eq(false)
       end
 
       it "return false when the runner hasn't been started" do
         machine.last_seen_alive_at = nil
-        machine.is_stale?(1.second).should == false
+        expect(machine.is_stale?(1.second)).to eq(false)
       end
     end
 
@@ -366,19 +366,19 @@ module Naf
       end
 
       it "set request_to_terminate to true" do
-        running_job.request_to_terminate.should == true
+        expect(running_job.request_to_terminate).to eq(true)
       end
 
       it "set marked_dead_by_machine_id to the machine's id" do
-        running_job.marked_dead_by_machine_id.should == machine.id
+        expect(running_job.marked_dead_by_machine_id).to eq(machine.id)
       end
 
       it "set marked_dead_at to the current time" do
-        running_job.marked_dead_at.should be_within(3.seconds).of(Time.zone.now)
+        expect(running_job.marked_dead_at).to be_within(3.seconds).of(Time.zone.now)
       end
 
       it "mark the job as finished" do
-        running_job.historical_job.finished_at.should be_within(3.seconds).of(Time.zone.now)
+        expect(running_job.historical_job.finished_at).to be_within(3.seconds).of(Time.zone.now)
       end
     end
 
@@ -396,15 +396,15 @@ module Naf
       end
 
       it "set marked_down to true" do
-        machine.marked_down.should == true
+        expect(machine.marked_down).to eq(true)
       end
 
       it "set marked_down_by_machine_id to the machine's id" do
-        machine.marked_down_by_machine_id.should == machine.id
+        expect(machine.marked_down_by_machine_id).to eq(machine.id)
       end
 
       it "set marked_down_at to the current time" do
-        machine.marked_down_at.should be_within(3.seconds).of(Time.zone.now)
+        expect(machine.marked_down_at).to be_within(3.seconds).of(Time.zone.now)
       end
     end
 
@@ -415,24 +415,24 @@ module Naf
                                       id: 4,
                                       affinity_classification_id: FactoryGirl.create(:machine_affinity_classification).id,
                                       affinity_name: machine.id.to_s)
-        machine.affinity.should == affinity
+        expect(machine.affinity).to eq(affinity)
       end
 
       it "nil when there's no affinity associated with machine's id" do
-        machine.affinity.should == nil
+        expect(machine.affinity).to eq(nil)
       end
     end
 
     describe "#short_name_if_it_exist" do
       it "return short name" do
         machine.short_name = 'Machine1'
-        machine.short_name_if_it_exist.should == 'Machine1'
+        expect(machine.short_name_if_it_exist).to eq('Machine1')
       end
 
       it "return server name" do
         machine.short_name = nil
         machine.server_name = 'machine.example.com'
-        machine.short_name_if_it_exist.should == 'machine.example.com'
+        expect(machine.short_name_if_it_exist).to eq('machine.example.com')
       end
     end
 

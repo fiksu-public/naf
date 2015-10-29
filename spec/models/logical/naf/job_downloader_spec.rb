@@ -63,7 +63,7 @@ module Logical
 
         it "returns the correct log" do
           job_log_downloader = JobDownloader.new({ 'record_id' => test_record_id })
-          job_log_downloader.logs_for_download.should eql(test_file_output)
+          expect(job_log_downloader.logs_for_download).to eql(test_file_output)
         end
 
       end

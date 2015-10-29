@@ -6,40 +6,40 @@ module Naf
     let(:model_class) { ApplicationScheduleAffinityTab }
 
     it "should respond with index action nested under application schedule" do
-      model_class.should_receive(:where).with({ application_schedule_id: '1' }).and_return([])
+      expect(model_class).to receive(:where).with({ application_schedule_id: '1' }).and_return([])
       get :index, application_schedule_id: 1
-      response.should render_template('naf/datatable')
-      response.should be_success
+      expect(response).to render_template('naf/datatable')
+      expect(response).to be_success
     end
 
     it "should respond with the show action" do
-      model_class.should_receive(:find).with('5').and_return(nil)
+      expect(model_class).to receive(:find).with('5').and_return(nil)
       schedule = double('schedule')
-      schedule.should_receive(:application).and_return(nil)
-      ApplicationSchedule.should_receive(:find).with('1').and_return(schedule)
+      expect(schedule).to receive(:application).and_return(nil)
+      expect(ApplicationSchedule).to receive(:find).with('1').and_return(schedule)
       get :show, id: 5, application_schedule_id: 1
-      response.should render_template('naf/record')
-      response.should be_success
+      expect(response).to render_template('naf/record')
+      expect(response).to be_success
     end
 
     it "should respond with the edit action" do
-      model_class.should_receive(:find).with('5').and_return(nil)
+      expect(model_class).to receive(:find).with('5').and_return(nil)
       schedule = double('schedule')
-      schedule.should_receive(:application).and_return(nil)
-      ApplicationSchedule.should_receive(:find).with('1').and_return(schedule)
+      expect(schedule).to receive(:application).and_return(nil)
+      expect(ApplicationSchedule).to receive(:find).with('1').and_return(schedule)
       get :edit, id: 5, application_schedule_id: 1
-      response.should render_template('naf/application_schedule_affinity_tabs/edit')
-      response.should be_success
+      expect(response).to render_template('naf/application_schedule_affinity_tabs/edit')
+      expect(response).to be_success
     end
 
     it "should respond with the new action" do
-      model_class.should_receive(:new).and_return(nil)
+      expect(model_class).to receive(:new).and_return(nil)
       schedule = double('schedule')
-      schedule.should_receive(:application).and_return(nil)
-      ApplicationSchedule.should_receive(:find).with('1').and_return(schedule)
+      expect(schedule).to receive(:application).and_return(nil)
+      expect(ApplicationSchedule).to receive(:find).with('1').and_return(schedule)
       get :new, id: 5, application_schedule_id: 1
-      response.should render_template('naf/application_schedule_affinity_tabs/new')
-      response.should be_success
+      expect(response).to render_template('naf/application_schedule_affinity_tabs/new')
+      expect(response).to be_success
     end
 
     context "on the create action" do
@@ -56,18 +56,18 @@ module Naf
       end
 
       before do
-        ApplicationSchedule.should_receive(:find).with('1').and_return(schedule)
+        expect(ApplicationSchedule).to receive(:find).with('1').and_return(schedule)
       end
 
       it "should redirect to show when valid" do
-        model_class.should_receive(:new).and_return(valid_tab)
-        valid_tab.stub(:affinity_name).and_return('Test Name')
+        expect(model_class).to receive(:new).and_return(valid_tab)
+        allow(valid_tab).to receive(:affinity_name).and_return('Test Name')
         path = application_schedule_application_schedule_affinity_tab_path(schedule, valid_tab)
-        subject.should redirect_to(path)
+        expect(subject).to redirect_to(path)
       end
       it "should re-render to new when invalid" do
-        model_class.should_receive(:new).and_return(invalid_tab)
-        subject.should render_template('naf/application_schedule_affinity_tabs/new')
+        expect(model_class).to receive(:new).and_return(invalid_tab)
+        expect(subject).to render_template('naf/application_schedule_affinity_tabs/new')
       end
     end
 
@@ -87,19 +87,19 @@ module Naf
       end
 
       before do
-        ApplicationSchedule.should_receive(:find).with('1').and_return(schedule)
+        expect(ApplicationSchedule).to receive(:find).with('1').and_return(schedule)
       end
 
       it "should redirect to show when valid" do
-        model_class.should_receive(:find).and_return(valid_tab)
-        valid_tab.stub(:affinity_name).and_return('Test Name')
+        expect(model_class).to receive(:find).and_return(valid_tab)
+        allow(valid_tab).to receive(:affinity_name).and_return('Test Name')
         path = application_schedule_application_schedule_affinity_tab_path(schedule, valid_tab)
-        subject.should redirect_to(path)
+        expect(subject).to redirect_to(path)
       end
 
       it "should re-render to edit  when invalid" do
-        model_class.should_receive(:find).and_return(invalid_tab)
-        subject.should render_template('naf/application_schedule_affinity_tabs/edit')
+        expect(model_class).to receive(:find).and_return(invalid_tab)
+        expect(subject).to render_template('naf/application_schedule_affinity_tabs/edit')
       end
     end
 

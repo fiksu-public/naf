@@ -5,30 +5,30 @@ module Naf
 
     it "should respond with the index action" do
       get :index
-      response.should render_template("naf/machines/index")
-      response.should be_success
+      expect(response).to render_template("naf/machines/index")
+      expect(response).to be_success
     end
 
     it "should respond with the show action" do
       machine = FactoryGirl.create(:machine, id: 5, server_address: '127.0.0.2')
       id = 5
       get :show, id: id
-      response.should be_success
+      expect(response).to be_success
     end
 
     it "should respond with the edit action" do
       id = 5
-      Machine.should_receive(:find).with("5").and_return(nil)
+      expect(Machine).to receive(:find).with("5").and_return(nil)
       get :edit, id: id
-      response.should render_template("naf/machines/edit")
-      response.should be_success
+      expect(response).to render_template("naf/machines/edit")
+      expect(response).to be_success
     end
 
     it "should respond with affinity new" do
-      Machine.should_receive(:new).and_return(nil)
+      expect(Machine).to receive(:new).and_return(nil)
       get :new
-      response.should render_template("naf/machines/new")
-      response.should be_success
+      expect(response).to render_template("naf/machines/new")
+      expect(response).to be_success
     end
 
     context "on the create action" do
@@ -36,14 +36,14 @@ module Naf
       let(:invalid_machine) { mock_model(Machine, save: false) }
 
       it "should redirect to show when valid" do
-        Machine.should_receive(:new).and_return(valid_machine)
+        expect(Machine).to receive(:new).and_return(valid_machine)
         post :create, machine: {}
-        response.should redirect_to(machine_path(valid_machine.id))
+        expect(response).to redirect_to(machine_path(valid_machine.id))
       end
       it "should re-render to new when invalid" do
-        Machine.should_receive(:new).and_return(invalid_machine)
+        expect(Machine).to receive(:new).and_return(invalid_machine)
         post :create, machine: {}
-        response.should render_template("naf/machines/new")
+        expect(response).to render_template("naf/machines/new")
       end
     end
 
@@ -52,14 +52,14 @@ module Naf
       let(:invalid_machine) { mock_model(Machine, update_attributes: false, id: 5) }
 
       it "should redirect to show when valid" do
-        Machine.should_receive(:find).with("5").and_return(valid_machine)
+        expect(Machine).to receive(:find).with("5").and_return(valid_machine)
         post :update, id: 5, machine: {}
-        response.should redirect_to(machine_path(valid_machine.id))
+        expect(response).to redirect_to(machine_path(valid_machine.id))
       end
       it "should re-render to new when invalid" do
-        Machine.should_receive(:find).and_return(invalid_machine)
+        expect(Machine).to receive(:find).and_return(invalid_machine)
         post :update, id: 5, machine: {}
-        response.should render_template("naf/machines/edit")
+        expect(response).to render_template("naf/machines/edit")
       end
     end
 
