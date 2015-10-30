@@ -30,23 +30,23 @@ module Logical
       #++++++++++++++++++++++++++++
 
       shared_examples "inserts machine affinity slots correctly" do
-        it { required_perennial_slot.required.should be_true }
-        it { normal_slot.required.should be_false }
+        it { expect(required_perennial_slot.required).to be_truthy }
+        it { expect(normal_slot.required).to be_falsey }
       end
 
       shared_examples "fetches next job correctly" do
         it "asserts next job is not equal to first job" do
-          first_job.should_not == second_job
+          expect(first_job).not_to eq(second_job)
         end
 
         it "insert row correctly into historical_jobs" do
-          ::Naf::HistoricalJob.queued_between(Time.zone.now - ::Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
-            where(started_at: nil).first.should == first_job
+          expect(::Naf::HistoricalJob.queued_between(Time.zone.now - ::Naf::HistoricalJob::JOB_STALE_TIME, Time.zone.now).
+            where(started_at: nil).order(:id).first).to eq(first_job)
         end
 
         it "return correctly next fetched job" do
           FactoryGirl.create(:queued_job, historical_job: second_job)
-          fetcher.fetch_next_job.historical_job.should == second_job
+          expect(fetcher.fetch_next_job.historical_job).to eq(second_job)
         end
       end
 
@@ -58,7 +58,7 @@ module Logical
           end
 
           it "return 0 affinity tabs for first job" do
-            job.historical_job_affinity_tabs.should be_empty
+            expect(job.historical_job_affinity_tabs).to be_empty
           end
 
           it_should_behave_like "inserts machine affinity slots correctly"

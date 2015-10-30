@@ -5,7 +5,7 @@ module Naf
   describe LogParsersController do
 
     before do
-      Logical::Naf::LogParser::JobDownloader.any_instance.stub(:logs_for_download).and_return("Test Log String")
+      allow_any_instance_of(Logical::Naf::LogParser::JobDownloader).to receive(:logs_for_download).and_return("Test Log String")
     end
 
     it "raises no exceptions" do
@@ -27,7 +27,7 @@ module Naf
     it "has the right disposition of attachment" do
       get :download, {'record_id' => 3}
       disposition = response.header["Content-Disposition"]
-      expect(disposition.include?("attachment")).to be_true
+      expect(disposition.include?("attachment")).to be_truthy
     end
 
   end

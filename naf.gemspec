@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.homepage    = 'http://github.com/fiksu/naf'
 
   s.add_dependency 'rails', '>= 3.2'
-  s.add_dependency 'partitioned'
+  s.add_dependency 'partitioned', '~> 1.3.5'
   s.add_dependency 'log4r_remote_syslog_outputter', '>= 0.0.1'
   s.add_dependency 'jquery-rails'
   s.add_dependency 'will_paginate'
@@ -28,7 +28,7 @@ Gem::Specification.new do |s|
   s.add_dependency 'yajl-ruby', '>= 1.1.0'
   s.add_dependency 'dogstatsd-ruby', '>= 1.2.0'
   s.add_development_dependency 'pg'
-  s.add_development_dependency 'rspec-rails', '~> 2.14.0'
+  s.add_development_dependency 'rspec-rails', '~> 3.0'
   s.add_development_dependency 'factory_girl_rails', '~> 4.0.0'
   s.add_development_dependency 'awesome_print'
 

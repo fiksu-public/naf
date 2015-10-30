@@ -8,27 +8,27 @@ module Naf
     [:application_schedule_id,
      :affinity_id,
      :affinity_parameter].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should belong_to(:application_schedule) }
-    it { should belong_to(:affinity) }
+    it { is_expected.to belong_to(:application_schedule) }
+    it { is_expected.to belong_to(:affinity) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:application_schedule_id) }
-    it { should validate_presence_of(:affinity_id) }
+    it { is_expected.to validate_presence_of(:application_schedule_id) }
+    it { is_expected.to validate_presence_of(:affinity_id) }
 
     #--------------------
     # *** Delegations ***
@@ -39,12 +39,12 @@ module Naf
         let!(:affinity) { tab.affinity }
 
         it "should delegate affinity name" do
-          affinity.should_receive(:affinity_name)
+          expect(affinity).to receive(:affinity_name)
           tab.affinity_name
         end
 
         it "should delegate affinity_classification_name" do
-          affinity.should_receive(:affinity_classification_name)
+          expect(affinity).to receive(:affinity_classification_name)
           tab.affinity_classification_name
         end
       end
@@ -53,7 +53,7 @@ module Naf
         let(:schedule) { tab.application_schedule }
 
         it "should call the title method" do
-          schedule.should_receive(:title)
+          expect(schedule).to receive(:title)
           tab.script_title
         end
       end
@@ -66,18 +66,18 @@ module Naf
     describe "#script_title" do
       it "return the application schedule title" do
         tab.application_schedule.application.title = 'App Schedule 1'
-        tab.script_title.should == 'App Schedule 1'
+        expect(tab.script_title).to eq('App Schedule 1')
       end
     end
 
     describe "#application" do
       it "return the application when present" do
-        tab.application.should == tab.application_schedule.application
+        expect(tab.application).to eq(tab.application_schedule.application)
       end
 
       it "return nil when application not present" do
         tab.application_schedule.application = nil
-        tab.application.should == nil
+        expect(tab.application).to eq(nil)
       end
     end
 

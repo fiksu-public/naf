@@ -7,43 +7,43 @@ module Naf
 
     it "should respond with index action nested under machine" do
       get :index, machine_id: 1
-      response.should render_template("naf/datatable")
-      response.should be_success
+      expect(response).to render_template("naf/datatable")
+      expect(response).to be_success
     end
 
     it "should respond with the show action" do
-      Machine.should_receive(:find).with("1").and_return(nil)
-      model_class.should_receive(:find).with("5").and_return(nil)
+      expect(Machine).to receive(:find).with("1").and_return(nil)
+      expect(model_class).to receive(:find).with("5").and_return(nil)
       get :show, id: 5, machine_id: 1
-      response.should render_template("naf/record")
-      response.should be_success
+      expect(response).to render_template("naf/record")
+      expect(response).to be_success
     end
 
     it "should respond with the destroy action and redirect to nested index" do
       slot = mock_model(model_class, machine_id: 1, id: 5)
       machine = mock_model(Machine, id: 1)
-      Machine.should_receive(:find).with("1").and_return(machine)
-      model_class.should_receive(:find).with("5").and_return(slot)
-      slot.stub(:affinity_name).and_return("Test Name")
+      expect(Machine).to receive(:find).with("1").and_return(machine)
+      expect(model_class).to receive(:find).with("5").and_return(slot)
+      allow(slot).to receive(:affinity_name).and_return("Test Name")
       delete :destroy, id: 5, machine_id: 1
       index_path = machine_machine_affinity_slots_path(machine)
-      response.should redirect_to(index_path)
+      expect(response).to redirect_to(index_path)
     end
 
     it "should respond with the edit action" do
-      Machine.should_receive(:find).with("1").and_return(nil)
-      model_class.should_receive(:find).with("5").and_return(nil)
+      expect(Machine).to receive(:find).with("1").and_return(nil)
+      expect(model_class).to receive(:find).with("5").and_return(nil)
       get :edit, id: 5, machine_id: 1
-      response.should render_template("naf/machine_affinity_slots/edit")
-      response.should be_success
+      expect(response).to render_template("naf/machine_affinity_slots/edit")
+      expect(response).to be_success
     end
 
     it "should respond with the new action" do
-      Machine.should_receive(:find).with("1").and_return(nil)
-      model_class.should_receive(:new).and_return(nil)
+      expect(Machine).to receive(:find).with("1").and_return(nil)
+      expect(model_class).to receive(:new).and_return(nil)
       get :new, machine_id: 1
-      response.should render_template("naf/machine_affinity_slots/new")
-      response.should be_success
+      expect(response).to render_template("naf/machine_affinity_slots/new")
+      expect(response).to be_success
     end
 
     context "on the create action" do
@@ -56,18 +56,18 @@ module Naf
       end
 
       before(:each) do
-        Machine.should_receive(:find).with("1").and_return(machine)
+        expect(Machine).to receive(:find).with("1").and_return(machine)
       end
 
       it "should redirect to show when valid" do
-        model_class.should_receive(:new).and_return(valid_slot)
-        valid_slot.stub(:affinity_name).and_return("Test Name")
+        expect(model_class).to receive(:new).and_return(valid_slot)
+        allow(valid_slot).to receive(:affinity_name).and_return("Test Name")
         path = machine_machine_affinity_slot_path(machine, valid_slot)
-        subject.should redirect_to(path)
+        expect(subject).to redirect_to(path)
       end
       it "should re-render to new when invalid" do
-        model_class.should_receive(:new).and_return(invalid_slot)
-        subject.should render_template("naf/machine_affinity_slots/new")
+        expect(model_class).to receive(:new).and_return(invalid_slot)
+        expect(subject).to render_template("naf/machine_affinity_slots/new")
       end
     end
 
@@ -81,19 +81,19 @@ module Naf
       end
 
       before(:each) do
-        Machine.should_receive(:find).with(1).and_return(machine)
+        expect(Machine).to receive(:find).with(1).and_return(machine)
       end
 
       it "should redirect to show when valid" do
-        model_class.should_receive(:find).and_return(valid_slot)
-        valid_slot.stub(:affinity_name).and_return("Test Name")
+        expect(model_class).to receive(:find).and_return(valid_slot)
+        allow(valid_slot).to receive(:affinity_name).and_return("Test Name")
         path = machine_machine_affinity_slot_path(machine, valid_slot)
-        subject.should redirect_to(path)
+        expect(subject).to redirect_to(path)
       end
 
       it "should re-render to edit  when invalid" do
-        model_class.should_receive(:find).and_return(invalid_slot)
-        subject.should render_template("naf/machine_affinity_slots/edit")
+        expect(model_class).to receive(:find).and_return(invalid_slot)
+        expect(subject).to render_template("naf/machine_affinity_slots/edit")
       end
 
     end
