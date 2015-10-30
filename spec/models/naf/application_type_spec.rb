@@ -58,10 +58,6 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        expect(bash_command.id).to eq(2)
-      end
-
       it "should invoke the bash_command_invocator" do
         expect(bash_command).to receive(:bash_command_invocator).and_return(nil)
         job.spawn
@@ -74,10 +70,6 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        expect(bash_script.id).to eq(3)
-      end
-
       it "should invoke the bash_script_invocator" do
         expect(bash_script).to receive(:bash_script_invocator).and_return(nil)
         job.spawn
@@ -88,10 +80,6 @@ module Naf
       before do
         job.application_type = ruby
         job.save!
-      end
-
-      it "has the starting id" do
-        expect(ruby.id).to eq(4)
       end
 
       it "should invoke the ruby_script_invocator" do

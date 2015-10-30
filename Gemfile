@@ -3,8 +3,8 @@ source 'https://rubygems.org'
 gemspec
 
 group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
+  gem 'sass-rails',   '~> 4.0.5'
+  gem 'coffee-rails', '~> 4.0.0'
   gem 'uglifier', '>= 1.0.3'
 end
 
@@ -19,5 +19,4 @@ gem 'fiksu-af'
 gem 'dogstatsd-ruby', '>= 1.2.0'
 gem 'rspec-activemodel-mocks'
 
-gem 'minitest-rails'
-gem 'test-unit'
+gem 'protected_attributes'

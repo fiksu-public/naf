@@ -128,7 +128,7 @@ module Naf
       end
 
       it "return correct application id" do
-        expect(::Naf::HistoricalJob.application_last_queued.first).to eq(historical_job2)
+        expect(::Naf::HistoricalJob.application_last_queued.order("id ASC").first).to eq(historical_job2)
       end
     end
 

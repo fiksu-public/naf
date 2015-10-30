@@ -63,11 +63,12 @@ module Naf
     end
 
     describe "#machine" do
-      let!(:machine_affinity_classification) { FactoryGirl.create(:affinity_classification,
-                                                                  affinity_classification_name: 'machine',
-                                                                  id: 5) }
-
       it "return the machine affinity classification" do
+        machine_affinity_classification = Naf::AffinityClassification.where(:affinity_classification_name => 'machine').first
+        if machine_affinity_classification.nil?
+          machine_affinity_classification = FactoryGirl.create(:affinity_classification,
+                                                               affinity_classification_name: 'machine')
+        end
         expect(::Naf::AffinityClassification.machine).to eq(machine_affinity_classification)
       end
     end

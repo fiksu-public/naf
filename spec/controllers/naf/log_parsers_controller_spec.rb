@@ -9,9 +9,7 @@ module Naf
     end
 
     it "raises no exceptions" do
-      assert_nothing_raised do
-        get :download, {'record_id' => 3}
-      end
+      expect { get :download, {'record_id' => 3} }.not_to raise_error
     end
 
     it "has a successful response" do

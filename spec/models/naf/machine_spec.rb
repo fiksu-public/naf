@@ -143,21 +143,21 @@ module Naf
       end
 
       it "return the correct machine" do
-        expect(::Naf::Machine.enabled.all).to eq([machine])
+        expect(::Naf::Machine.enabled.to_a).to eq([machine])
       end
     end
 
     describe "#up" do
       it "return the correct status" do
         FactoryGirl.create(:machine, marked_down: true)
-        expect(::Naf::Machine.down.all).to eq([machine])
+        expect(::Naf::Machine.down.to_a).to eq([machine])
       end
     end
 
     describe "#down" do
       it "return the correct status" do
         machine2 = FactoryGirl.create(:machine, marked_down: true)
-        expect(::Naf::Machine.down.all).to eq([machine2])
+        expect(::Naf::Machine.down.to_a).to eq([machine2])
       end
     end
 
@@ -254,7 +254,7 @@ module Naf
 
       it "return nil for invalid ip address" do
         machine.server_address = '1.1'
-        expect(machine.correct_server_address?).to eq(nil)
+        expect(machine.correct_server_address?).to be false
       end
     end
 
@@ -413,7 +413,7 @@ module Naf
       it "return affinity associated with machine's id" do
         affinity = FactoryGirl.create(:affinity,
                                       id: 4,
-                                      affinity_classification_id: FactoryGirl.create(:machine_affinity_classification).id,
+                                      affinity_classification_id: classification.id,
                                       affinity_name: machine.id.to_s)
         expect(machine.affinity).to eq(affinity)
       end

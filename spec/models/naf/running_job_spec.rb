@@ -132,12 +132,12 @@ module Naf
 
       it "insert unique tag" do
         running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        expect(running_job.tags).to eq("{$pre-work,$work}")
+        expect(running_job.tags).to match_array(["$pre-work","$work"])
       end
 
       it "not insert non-unique tag" do
         running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        expect(running_job.tags).to eq("{$pre-work}")
+        expect(running_job.tags).to match_array(["$pre-work"])
       end
     end
 
@@ -148,12 +148,12 @@ module Naf
 
       it "remove existing tag" do
         running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        expect(running_job.tags).to eq("{}")
+        expect(running_job.tags).to eq([])
       end
 
       it "not update tags when removing non-existing tag" do
         running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        expect(running_job.tags).to eq("{$pre-work}")
+        expect(running_job.tags).to match_array(["$pre-work"])
       end
     end
 
@@ -164,7 +164,7 @@ module Naf
 
       it "remove any existing tags" do
         running_job.remove_all_tags
-        expect(running_job.tags).to eq("{}")
+        expect(running_job.tags).to eq([])
       end
     end
 

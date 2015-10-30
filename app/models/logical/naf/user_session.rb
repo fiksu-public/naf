@@ -26,7 +26,7 @@ module Logical
 
       # Sign the provided string using a MessageVerifier.
       def self.sign_message(message)
-        self.message_verifier.generate(message) if !message.nil?
+        self.message_verifier.generate(message) unless message.nil?
       end
 
       # Unsign the provided string using a MessageVerifier.

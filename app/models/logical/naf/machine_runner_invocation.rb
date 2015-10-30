@@ -24,7 +24,7 @@ module Logical
           order_by = "dead_at #{order}, wind_down_at #{order}"
         end
 
-        ::Naf::MachineRunnerInvocation.joins(machine_runner: :machine).choose(filter).order(order_by).all.each do |invocation|
+        ::Naf::MachineRunnerInvocation.joins(machine_runner: :machine).choose(filter).order(order_by).to_a.each do |invocation|
           values = []
           invocation_hash = invocation.attributes
           COLUMNS.each do |key|

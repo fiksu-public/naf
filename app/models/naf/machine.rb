@@ -16,7 +16,7 @@ module Naf
                     :short_name,
                     :deleted
 
-    IP_REGEX =  /^([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])$/
+    IP_REGEX =  /\A([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\.([01]?\d\d?|2[0-4]\d|25[0-5])\z/
 
     #--------------------
     # *** Validations ***
@@ -28,7 +28,7 @@ module Naf
                            allow_blank: true,
                            allow_nil: true,
                            format: {
-                             with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                             with: /\A[a-zA-Z_][a-zA-Z0-9_]*\z/,
                              message: "letters should be first (use only letters and numbers)"
                            }
     validates :server_address, format: {
@@ -166,7 +166,7 @@ module Naf
     end
 
     def correct_server_address?
-      server_address.present? and IP_REGEX =~ server_address
+      server_address.present? && IP_REGEX =~ server_address.to_s
     end
 
     def mark_checked_schedule
