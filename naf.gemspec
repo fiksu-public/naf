@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.homepage    = 'http://github.com/fiksu/naf'
 
-  s.add_dependency 'rails', '~> 4.0.1'
-  s.add_dependency 'partitioned', '~> 2.0.0'
+  s.add_dependency 'rails', '~> 4.1.0'
+  s.add_dependency 'partitioned', '~> 2.1.0'
   s.add_dependency 'log4r_remote_syslog_outputter', '>= 0.0.1'
   s.add_dependency 'jquery-rails'
   s.add_dependency 'will_paginate'
