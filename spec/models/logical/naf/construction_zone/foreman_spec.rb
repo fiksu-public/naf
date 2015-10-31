@@ -2,11 +2,6 @@ require 'spec_helper'
 
 module Logical::Naf::ConstructionZone
   describe Foreman do
-
-    before do
-      FactoryGirl.create(:rails_app_type)
-    end
-
     let!(:foreman) { Logical::Naf::ConstructionZone::Foreman.new }
     let!(:work_order) {
       Logical::Naf::ConstructionZone::WorkOrder.new('::Process::Naf::Janitor.run')
@@ -46,7 +41,7 @@ module Logical::Naf::ConstructionZone
       end
 
       describe 'run group restriction is set to limited per machine' do
-        let!(:machine) { FactoryGirl.create(:machine) }
+        let!(:machine) { factory_girl_machine() }
         let(:historical_job) { FactoryGirl.create(:job, application_run_group_name: 'test') }
         let!(:tab) { FactoryGirl.create(:machine_job_affinity_tab, historical_job_id: historical_job.id) }
 

@@ -28,15 +28,31 @@ RSpec.configure do |config|
   #       # Equivalent to being in spec/controllers
   #     end
   config.infer_spec_type_from_file_location!
-end
 
-FactoryGirl.find_definitions
+  FactoryGirl.find_definitions
 
-# Create the DB Seed Records via Factories
-affinities = [:normal_affinity, :canary_affinity, :perennial_affinity]
-classifications = [:location_affinity_classification, :purpose_affinity_classification, :application_affinity_classification]
-restrictions = [:no_limit, :limited_per_machine, :limited_per_all_machines]
+  # NOTE(hofer): Custom methods to ensure these are only created once, then reused.
+  rails_app_type()
+  factory_girl_machine()
+  machine_affinity_classification()
+  purpose_affinity_classification()
 
-(affinities + classifications + restrictions).each do |seed|
-  FactoryGirl.create(seed)
+  classifications = [
+    :location_affinity_classification,
+    :application_affinity_classification,
+  ]
+  classifications.each do |seed|
+    FactoryGirl.create(seed)
+  end
+
+  # Create the DB Seed Records via Factories
+  affinities = [:normal_affinity, :canary_affinity, :perennial_affinity]
+  affinities.each do |seed|
+    FactoryGirl.create(seed)
+  end
+
+  restrictions = [:no_limit, :limited_per_machine, :limited_per_all_machines]
+  restrictions.each do |seed|
+    FactoryGirl.create(seed)
+  end
 end

@@ -4,7 +4,7 @@ module Logical
   module Naf
 
     describe Machine do
-      let!(:physical_machine) { FactoryGirl.create(:machine, server_name: 'example.com')  }
+      let!(:physical_machine) { m = factory_girl_machine(); m.server_name = 'example.com'; m.save!; m }
       let!(:physical_machine_two) { FactoryGirl.create(:machine_two) }
       let!(:logical_machine) { ::Logical::Naf::Machine.new(physical_machine) }
       let(:columns) { [:id,

@@ -4,7 +4,7 @@ module Logical
   module Naf
     describe JobFetcher do
       let(:job) { FactoryGirl.create(:job) }
-      let(:normal_slot) { FactoryGirl.create(:normal_machine_affinity_slot, machine: FactoryGirl.create(:machine)) }
+      let(:normal_slot) { FactoryGirl.create(:normal_machine_affinity_slot, machine: factory_girl_machine()) }
       let(:required_perennial_slot) { FactoryGirl.create(:required_perennial_slot, machine: FactoryGirl.create(:machine_two)) }
       let(:normal_machine) { normal_slot.machine }
       let(:perennial_machine) { required_perennial_slot.machine }
@@ -20,7 +20,6 @@ module Logical
       end
 
       before do
-        ::Naf::MachineAffinitySlot.delete_all
         FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus')
         FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory')
       end
@@ -86,7 +85,7 @@ module Logical
 
       describe "multiple affinities" do
         let(:canary_machine) {
-          slot = FactoryGirl.create(:canary_slot, machine: FactoryGirl.create(:machine))
+          slot = FactoryGirl.create(:canary_slot, machine: FactoryGirl.create(:machine_two))
           slot.machine
         }
         let(:canary_job) {

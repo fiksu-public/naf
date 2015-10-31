@@ -49,15 +49,12 @@ module Logical::Naf::ConstructionZone
       end
 
       it 'return hash with the affinity_id when a Machine object is provided' do
-        machine = FactoryGirl.create(:machine)
-        classification = Naf::AffinityClassification.where(:affinity_classification_name => "machine").first
-        if classification.nil?
-          classification = FactoryGirl.create(:machine_affinity_classification)
-        end
+        machine = factory_girl_machine()
+        classification = machine_affinity_classification()
         affinity = FactoryGirl.create(:affinity,
                                       affinity_name: machine.id.to_s,
                                       affinity_classification: classification)
-        work_order.instance_variable_set(:@affinities, [machine])
+        work_order.instance_variable_set(:@affinities, [affinity])
         expect(work_order.historical_job_affinity_tab_parameters).
           to eq([{ affinity_id: affinity.id }])
       end

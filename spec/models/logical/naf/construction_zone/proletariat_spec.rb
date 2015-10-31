@@ -6,7 +6,7 @@ module Logical::Naf::ConstructionZone
 
   	let!(:proletariat) { ::Logical::Naf::ConstructionZone::Proletariat.new }
   	let(:application) { FactoryGirl.create(:scheduled_application) }
-  	let(:application_type) { FactoryGirl.create(:rails_app_type) }
+  	let(:application_type) { rails_app_type() }
   	let(:restriction) { FactoryGirl.create(:no_limit) }
   	let!(:params) {
       {

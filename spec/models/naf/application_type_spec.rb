@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe ApplicationType do
-    let(:rails) { FactoryGirl.create(:rails_app_type) }
+    let(:rails) { rails_app_type() }
     let(:bash_command) { FactoryGirl.create(:bash_command_app_type) }
     let(:bash_script) { FactoryGirl.create(:bash_script_app_type) }
     let(:ruby) { FactoryGirl.create(:ruby_script_app_type) }
@@ -40,10 +40,6 @@ module Naf
       before do
         job.application_type = rails
         job.save!
-      end
-
-      it "has the starting id" do
-        expect(rails.id).to eq(1)
       end
 
       it "should invoke the rails_invocator" do

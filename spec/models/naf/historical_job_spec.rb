@@ -219,7 +219,7 @@ module Naf
 
     describe "#machine_started_on_server_name" do
       it "return correct machine server name when present" do
-        historical_job.started_on_machine = FactoryGirl.create(:machine, server_name: 'Machine1')
+        historical_job.started_on_machine = FactoryGirl.create(:machine_two, server_name: 'Machine1')
         expect(historical_job.machine_started_on_server_name).to eq('Machine1')
       end
 
@@ -230,7 +230,7 @@ module Naf
 
     describe "#machine_started_on_server_address" do
       it "return correct machine server name when present" do
-        historical_job.started_on_machine = FactoryGirl.create(:machine)
+        historical_job.started_on_machine = factory_girl_machine()
         expect(historical_job.machine_started_on_server_address).to eq('0.0.0.1')
       end
 

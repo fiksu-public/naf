@@ -10,7 +10,7 @@ module Naf
     end
 
     it "should respond with the show action" do
-      machine = FactoryGirl.create(:machine, server_address: '127.0.0.2')
+      machine = factory_girl_machine()
       get :show, id: machine.id
       expect(response).to be_success
     end

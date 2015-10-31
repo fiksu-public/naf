@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe Machine do
-    let!(:machine) { FactoryGirl.create(:machine) }
+    let!(:machine) { factory_girl_machine() }
 
     # Mass-assignment
     [:server_address,
@@ -121,13 +121,14 @@ module Naf
 
     context "when updating the machine" do
       it "should not save when enabled and deleted are true" do
-        bad_machine = FactoryGirl.build(:machine, enabled: true, deleted: true)
+        bad_machine = FactoryGirl.build(:machine_two, enabled: true, deleted: true)
         expect(bad_machine.save).not_to be_truthy
+        puts bad_machine.errors.inspect
         expect(bad_machine.errors.messages[:enabled]).not_to be_nil
       end
 
       it "should save when enabled is true and deleted is false" do
-        machine = FactoryGirl.build(:machine, enabled: true, deleted: false)
+        machine = FactoryGirl.build(:machine_two, enabled: true, deleted: false)
         expect(machine.save).to be_truthy
       end
     end
@@ -149,15 +150,15 @@ module Naf
 
     describe "#up" do
       it "return the correct status" do
-        FactoryGirl.create(:machine, marked_down: true)
-        expect(::Naf::Machine.down.to_a).to eq([machine])
+        expect(::Naf::Machine.up.to_a).to eq([machine])
       end
     end
 
     describe "#down" do
       it "return the correct status" do
-        machine2 = FactoryGirl.create(:machine, marked_down: true)
-        expect(::Naf::Machine.down.to_a).to eq([machine2])
+        machine.marked_down = true
+        machine.save!
+        expect(::Naf::Machine.down.to_a).to eq([machine])
       end
     end
 
@@ -311,7 +312,7 @@ module Naf
     end
 
     describe "#mark_down" do
-      let!(:machine2) { FactoryGirl.create(:machine) }
+      let!(:machine2) { factory_girl_machine() }
       before do
         machine.mark_down(machine2)
       end
@@ -409,7 +410,7 @@ module Naf
     end
 
     describe "#affinity" do
-      let!(:classification) { FactoryGirl.create(:machine_affinity_classification) }
+      let!(:classification) { machine_affinity_classification() }
       it "return affinity associated with machine's id" do
         affinity = FactoryGirl.create(:affinity,
                                       id: 4,

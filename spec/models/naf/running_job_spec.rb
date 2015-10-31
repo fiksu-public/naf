@@ -97,7 +97,7 @@ module Naf
     end
 
     describe "#affinity_weights" do
-      let(:machine) { FactoryGirl.create(:machine) }
+      let(:machine) { factory_girl_machine() }
       before do
         cpu_affinity = FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus')
         memory_affinity = FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory')

@@ -29,10 +29,10 @@ module Naf
     #++++++++++++++++++++++
 
     describe "#purpose" do
-      let!(:purpose_affinity_classification) { FactoryGirl.create(:purpose_affinity_classification) }
+      let!(:our_purpose_affinity_classification) { purpose_affinity_classification() }
 
       it "return the purpose affinity classification" do
-        expect(::Naf::AffinityClassification.purpose).to eq(purpose_affinity_classification)
+        expect(::Naf::AffinityClassification.purpose).to eq(our_purpose_affinity_classification)
       end
     end
 
@@ -54,8 +54,7 @@ module Naf
 
     describe "#weight" do
       let!(:weight_affinity_classification) { FactoryGirl.create(:affinity_classification,
-                                                                 affinity_classification_name: 'weight',
-                                                                 id: 4) }
+                                                                 affinity_classification_name: 'weight') }
 
       it "return the weight affinity classification" do
         expect(::Naf::AffinityClassification.weight).to eq(weight_affinity_classification)
@@ -64,12 +63,8 @@ module Naf
 
     describe "#machine" do
       it "return the machine affinity classification" do
-        machine_affinity_classification = Naf::AffinityClassification.where(:affinity_classification_name => 'machine').first
-        if machine_affinity_classification.nil?
-          machine_affinity_classification = FactoryGirl.create(:affinity_classification,
-                                                               affinity_classification_name: 'machine')
-        end
-        expect(::Naf::AffinityClassification.machine).to eq(machine_affinity_classification)
+        our_machine_affinity_classification = machine_affinity_classification()
+        expect(::Naf::AffinityClassification.machine).to eq(our_machine_affinity_classification)
       end
     end
 

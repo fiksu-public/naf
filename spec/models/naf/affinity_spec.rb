@@ -5,8 +5,8 @@ module Naf
     let!(:normal) { FactoryGirl.create(:normal_affinity) }
     let(:canary) { FactoryGirl.create(:canary_affinity) }
     let(:perennial) { FactoryGirl.create(:perennial_affinity) }
-    let!(:machine) { FactoryGirl.create(:machine) }
-    let!(:machine_classification) { FactoryGirl.create(:machine_affinity_classification) }
+    let!(:machine) { factory_girl_machine() }
+    let!(:machine_classification) { machine_affinity_classification() }
     let!(:machine_affinity) {
       FactoryGirl.create(:affinity, id: 5,
                                     affinity_classification_id: machine_classification.id,
@@ -101,7 +101,7 @@ module Naf
       end
 
       it 'return proper message when pair value (affinity_classification_id, affinity_name) already exists' do
-        normal.affinity_name = FactoryGirl.create(:machine).id.to_s
+        normal.affinity_name = factory_girl_machine().id.to_s
         normal.affinity_classification = machine_classification
 
         expect(normal.validate_affinity_name).to eq('An affinity with the pair value (affinity_classification_id, affinity_name) already exists!')

@@ -35,7 +35,6 @@ module Logical::Naf::ConstructionZone
     before do
       ::Naf::HistoricalJob.delete_all
       ::Naf::ApplicationType.all
-      FactoryGirl.create(:rails_app_type)
     end
 
     describe '#enqueue_application' do
@@ -134,8 +133,8 @@ module Logical::Naf::ConstructionZone
       end
 
       it 'create two historical jobs when a machine is present' do
-        machine = FactoryGirl.create(:machine)
-        classification = FactoryGirl.create(:machine_affinity_classification)
+        machine = factory_girl_machine()
+        classification = machine_affinity_classification()
         FactoryGirl.create(:affinity, id: 5,
                                       affinity_name: machine.id.to_s,
                                       affinity_classification: classification)
