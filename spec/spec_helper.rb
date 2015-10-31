@@ -31,28 +31,45 @@ RSpec.configure do |config|
 
   FactoryGirl.find_definitions
 
-  # NOTE(hofer): Custom methods to ensure these are only created once, then reused.
-  rails_app_type()
-  factory_girl_machine()
-  machine_affinity_classification()
-  purpose_affinity_classification()
+  config.before(:suite) do
+    # NOTE(hofer): Custom methods to ensure these are only created once, then reused.
+    rails_app_type()
+    factory_girl_machine()
 
-  classifications = [
-    :location_affinity_classification,
-    :application_affinity_classification,
-  ]
-  classifications.each do |seed|
-    FactoryGirl.create(seed)
+    # NOTE(hofer): Yup, definitely bogus, but prevents problems when
+    # running specs multiple times.  The real issue is that certain
+    # factorygirl definitions specify id values for their objects,
+    # which makes things brittle in general.
+    ::Naf::AffinityClassification.find_by_sql("ALTER SEQUENCE naf.affinity_classifications_id_seq RESTART WITH 1;")
+    ::Naf::AffinityClassification.find_by_sql("ALTER SEQUENCE naf.affinities_id_seq RESTART WITH 1;")
+    ::Naf::AffinityClassification.find_by_sql("ALTER SEQUENCE naf.application_run_group_restrictions_id_seq RESTART WITH 1;")
+
+    classifications = [
+      :location_affinity_classification,
+      :application_affinity_classification,
+    ]
+    classifications.each do |seed|
+      FactoryGirl.create(seed)
+    end
+    # NOTE(hofer): Custom methods to ensure these are only created once, then reused.
+    purpose_affinity_classification()
+    machine_affinity_classification()
+
+    # Create the DB Seed Records via Factories
+    affinities = [:normal_affinity, :canary_affinity, :perennial_affinity]
+    affinities.each do |seed|
+      FactoryGirl.create(seed)
+    end
+
+    restrictions = [:no_limit, :limited_per_machine, :limited_per_all_machines]
+    restrictions.each do |seed|
+      FactoryGirl.create(seed)
+    end
   end
 
-  # Create the DB Seed Records via Factories
-  affinities = [:normal_affinity, :canary_affinity, :perennial_affinity]
-  affinities.each do |seed|
-    FactoryGirl.create(seed)
-  end
-
-  restrictions = [:no_limit, :limited_per_machine, :limited_per_all_machines]
-  restrictions.each do |seed|
-    FactoryGirl.create(seed)
+  config.after(:suite) do
+    ::Naf::Affinity.delete_all
+    ::Naf::AffinityClassification.delete_all
+    ::Naf::ApplicationRunGroupRestriction.delete_all
   end
 end

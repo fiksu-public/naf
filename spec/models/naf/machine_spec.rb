@@ -123,7 +123,6 @@ module Naf
       it "should not save when enabled and deleted are true" do
         bad_machine = FactoryGirl.build(:machine_two, enabled: true, deleted: true)
         expect(bad_machine.save).not_to be_truthy
-        puts bad_machine.errors.inspect
         expect(bad_machine.errors.messages[:enabled]).not_to be_nil
       end
 
