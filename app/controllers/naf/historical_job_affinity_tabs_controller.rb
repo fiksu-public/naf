@@ -31,7 +31,7 @@ module Naf
       @job = Naf::HistoricalJob.find(params[:historical_job_id])
       @tab = Naf::HistoricalJobAffinityTab.new(params[:historical_job_affinity_tab])
       if @tab.save
-        redirect_to(naf.historical_job_historical_job_affinity_tab_path(@job, @tab),
+        redirect_to(historical_job_historical_job_affinity_tab_path(@job, @tab),
                     notice: "Historical Job Affinity Tab '#{@tab.affinity_name}' was successfully created.")
       else
         render action: "new", historical_job_id: @job.id
@@ -47,7 +47,7 @@ module Naf
       @job = Naf::HistoricalJob.find(params[:historical_job_id])
       @tab = Naf::HistoricalJobAffinityTab.find(params[:id])
       if @tab.update_attributes(params[:historical_job_affinity_tab])
-        redirect_to(naf.historical_job_historical_job_affinity_tab_path(@job, @tab),
+        redirect_to(historical_job_historical_job_affinity_tab_path(@job, @tab),
                     notice: "Historical Job Affinity Tab '#{@tab.affinity_name}' was successfully updated.")
       else
         render action: "edit", historical_job_id: @job.id

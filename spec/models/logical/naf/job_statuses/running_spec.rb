@@ -21,7 +21,7 @@ module Logical
           let!(:conditions) { "TEST STRING" }
 
           it "adds conditions to returned sql string" do
-            expect(Running.all(conditions).include?(conditions)).to be_true
+            expect(Running.all(conditions).include?(conditions)).to be_truthy
           end
 
           it "accepts a status argument as well" do

@@ -23,7 +23,7 @@ module Logical::Naf::ConstructionZone
       }
 
       it 'return correct values' do
-        work_order.historical_job_parameters.should == params
+        expect(work_order.historical_job_parameters).to eq(params)
       end
     end
 
@@ -31,8 +31,8 @@ module Logical::Naf::ConstructionZone
       it 'return hash with the affinity_id when a symbol is provided' do
         affinity = FactoryGirl.create(:affinity, id: 4, affinity_short_name: :small)
         work_order.instance_variable_set(:@affinities, [:small])
-        work_order.historical_job_affinity_tab_parameters.
-          should == [{ affinity_id: affinity.id }]
+        expect(work_order.historical_job_affinity_tab_parameters).
+          to eq([{ affinity_id: affinity.id }])
       end
 
       it 'raise an exception when there is not an object associated with the symbol' do
@@ -44,32 +44,32 @@ module Logical::Naf::ConstructionZone
       it 'return hash with the affinity_id when an Affinity object is provided' do
         affinity = ::Naf::Affinity.first
         work_order.instance_variable_set(:@affinities, [affinity])
-        work_order.historical_job_affinity_tab_parameters.
-          should == [{ affinity_id: affinity.id }]
+        expect(work_order.historical_job_affinity_tab_parameters).
+          to eq([{ affinity_id: affinity.id }])
       end
 
       it 'return hash with the affinity_id when a Machine object is provided' do
-        machine = FactoryGirl.create(:machine)
-        classification = FactoryGirl.create(:machine_affinity_classification)
-        affinity = FactoryGirl.create(:affinity, id: 4,
-                                                 affinity_name: machine.id.to_s,
-                                                 affinity_classification: classification)
-        work_order.instance_variable_set(:@affinities, [machine])
-        work_order.historical_job_affinity_tab_parameters.
-          should == [{ affinity_id: affinity.id }]
+        machine = factory_girl_machine()
+        classification = machine_affinity_classification()
+        affinity = FactoryGirl.create(:affinity,
+                                      affinity_name: machine.id.to_s,
+                                      affinity_classification: classification)
+        work_order.instance_variable_set(:@affinities, [affinity])
+        expect(work_order.historical_job_affinity_tab_parameters).
+          to eq([{ affinity_id: affinity.id }])
       end
 
       it 'return hash when an ApplicationScheduleAffintyTab object is provided' do
         tab = FactoryGirl.build(:normal_app_schedule_affinity_tab, affinity_parameter: 1.0)
         work_order.instance_variable_set(:@affinities, [tab])
-        work_order.historical_job_affinity_tab_parameters.
-          should == [{ affinity_id: tab.affinity_id, affinity_parameter: tab.affinity_parameter }]
+        expect(work_order.historical_job_affinity_tab_parameters).
+          to eq([{ affinity_id: tab.affinity_id, affinity_parameter: tab.affinity_parameter }])
       end
 
       it 'return hash with the affinity_id when a Hash object is provided' do
         affinity = { affinity_id: 1 }
         work_order.instance_variable_set(:@affinities, [affinity])
-        work_order.historical_job_affinity_tab_parameters.should == [affinity]
+        expect(work_order.historical_job_affinity_tab_parameters).to eq([affinity])
       end
 
       it 'raise an exception when a empty Hash object is provided' do
@@ -95,11 +95,11 @@ module Logical::Naf::ConstructionZone
       it 'not raise an exception when a historical job is in prerequisites' do
         historical_job = FactoryGirl.build(:job_base)
         work_order.instance_variable_set(:@prerequisites, [historical_job])
-        work_order.historical_job_prerequisite_historical_jobs.should == [historical_job]
+        expect(work_order.historical_job_prerequisite_historical_jobs).to eq([historical_job])
       end
 
       it 'not raise an exception when prerequisites is empty' do
-        work_order.historical_job_prerequisite_historical_jobs.should == []
+        expect(work_order.historical_job_prerequisite_historical_jobs).to eq([])
       end
     end
 

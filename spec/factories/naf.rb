@@ -1,5 +1,21 @@
 require 'factory_girl'
 
+def machine_affinity_classification
+  Naf::AffinityClassification.where(:affinity_classification_name => "machine").first || FactoryGirl.create(:machine_affinity_classification)
+end
+
+def purpose_affinity_classification
+  Naf::AffinityClassification.where(:affinity_classification_name => "purpose").first || FactoryGirl.create(:purpose_affinity_classification)
+end
+
+def rails_app_type
+  Naf::ApplicationType.where(:script_type_name => "rails").first || FactoryGirl.create(:rails_app_type)
+end
+
+def factory_girl_machine
+  Naf::Machine.where(:server_address => "0.0.0.1").first || FactoryGirl.create(:machine)
+end
+
 FactoryGirl.define do
 
   #############################################################
@@ -7,7 +23,7 @@ FactoryGirl.define do
   #############################################################
 
   factory :job_base, class: ::Naf::HistoricalJob do
-    association :application_type, factory: :rails_app_type
+    application_type { rails_app_type() }
     association :application_run_group_restriction, factory: :no_limit
   end
 
@@ -18,15 +34,15 @@ FactoryGirl.define do
 
   factory :queued_job, class: ::Naf::QueuedJob do
     association :historical_job, factory: :job
-    association :application_type, factory: :rails_app_type
+    application_type { rails_app_type() }
     association :application_run_group_restriction, factory: :no_limit
     command "::Naf::QueuedJob.test hello world"
   end
 
   factory :running_job_base, class: ::Naf::RunningJob do
     association :historical_job, factory: :job
-    association :started_on_machine, factory: :machine
-    association :application_type, factory: :rails_app_type
+    started_on_machine { factory_girl_machine() }
+    application_type { rails_app_type() }
     association :application_run_group_restriction, factory: :no_limit
     command "::Naf::RunningJob.test hello world"
   end
@@ -36,7 +52,7 @@ FactoryGirl.define do
   end
 
   factory :job_picked_by_machine, parent: :job do
-    association :started_on_machine, factory: :machine
+    started_on_machine { factory_girl_machine() }
   end
 
   factory :failed_to_start_job, parent: :job_picked_by_machine do
@@ -105,18 +121,13 @@ FactoryGirl.define do
 
   factory :machine, parent: :machine_base do
     id 1
+    short_name "machine1"
     server_address "0.0.0.1"
-    initialize_with do
-      ::Naf::Machine.find_or_initialize_by_id(id)
-    end
   end
 
   factory :machine_two, parent: :machine_base do
-    id 2
-    server_address "0.0.0.2"
-    initialize_with do
-      ::Naf::Machine.find_or_initialize_by_id(id)
-    end
+    sequence(:id) { |n| n + 2 }
+    sequence(:server_address) { |n| "0.0.0.#{n + 2 % 256}" }
   end
 
   #############################################################
@@ -124,7 +135,7 @@ FactoryGirl.define do
   #############################################################
 
   factory :machine_runner, class: ::Naf::MachineRunner do
-    association :machine, factory: :machine
+    machine { factory_girl_machine }
     sequence(:runner_cwd) { |n| "/proc/1/#{n}" }
   end
 
@@ -146,7 +157,7 @@ FactoryGirl.define do
   #############################################################
 
   factory :application_base, class: ::Naf::Application  do
-    association :application_type, factory: :rails_app_type
+    application_type { rails_app_type() }
     sequence(:short_name) { |n| "short_name#{n}" }
   end
 
@@ -202,7 +213,7 @@ FactoryGirl.define do
     application_run_group_restriction_name "no limit"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
+      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by(:id => id)
     end
   end
 
@@ -211,7 +222,7 @@ FactoryGirl.define do
     application_run_group_restriction_name "limited per machine"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
+      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by(:id => id)
     end
   end
 
@@ -220,7 +231,7 @@ FactoryGirl.define do
     application_run_group_restriction_name "limited per all machines"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by_id(id)
+      ::Naf::ApplicationRunGroupRestriction.find_or_initialize_by(:id => id)
     end
   end
 
@@ -240,7 +251,7 @@ FactoryGirl.define do
     invocation_method "rails_invocator"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationType.find_or_initialize_by_id(id)
+      ::Naf::ApplicationType.find_or_initialize_by(:id => id)
     end
   end
 
@@ -251,7 +262,7 @@ FactoryGirl.define do
     invocation_method "bash_command_invocator"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationType.find_or_initialize_by_id(id)
+      ::Naf::ApplicationType.find_or_initialize_by(:id => id)
     end
   end
 
@@ -262,7 +273,7 @@ FactoryGirl.define do
     invocation_method "bash_script_invocator"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationType.find_or_initialize_by_id(id)
+      ::Naf::ApplicationType.find_or_initialize_by(:id => id)
     end
   end
 
@@ -273,7 +284,7 @@ FactoryGirl.define do
     invocation_method "ruby_script_invocator"
     # Ensure single creation
     initialize_with do
-      ::Naf::ApplicationType.find_or_initialize_by_id(id)
+      ::Naf::ApplicationType.find_or_initialize_by(:id => id)
     end
   end
 
@@ -283,47 +294,47 @@ FactoryGirl.define do
 
   factory :normal_affinity, class: ::Naf::Affinity do
     id 1
-    association :affinity_classification, factory: :purpose_affinity_classification
+    affinity_classification { purpose_affinity_classification() }
     affinity_name "normal"
     affinity_short_name "short_name"
     # Ensure single creation
     initialize_with do
-      ::Naf::Affinity.find_or_initialize_by_id(id)
+      ::Naf::Affinity.find_or_initialize_by(:id => id)
     end
   end
 
   factory :canary_affinity, class: ::Naf::Affinity do
     id 2
-    association :affinity_classification, factory: :purpose_affinity_classification
+    affinity_classification { purpose_affinity_classification() }
     affinity_name "canary"
     # Ensure single creation
     initialize_with do
-      ::Naf::Affinity.find_or_initialize_by_id(id)
+      ::Naf::Affinity.find_or_initialize_by(:id => id)
     end
   end
 
   factory :perennial_affinity, class: ::Naf::Affinity do
     id 3
-    association :affinity_classification, factory: :purpose_affinity_classification
+    affinity_classification { purpose_affinity_classification() }
     affinity_name "perennial"
     # Ensure single creation
     initialize_with do
-      ::Naf::Affinity.find_or_initialize_by_id(id)
+      ::Naf::Affinity.find_or_initialize_by(:id => id)
     end
   end
 
   factory :machine_affinity, class: ::Naf::Affinity do
     id 4
-    association :affinity_classification, factory: :machine_affinity_classification
+    affinity_classification { machine_affinity_classification() }
     affinity_name "machine"
     # Ensure single creation
     initialize_with do
-      ::Naf::Affinity.find_or_initialize_by_id(id)
+      ::Naf::Affinity.find_or_initialize_by(:id => id)
     end
   end
 
   factory :affinity, class: ::Naf::Affinity do
-    association :affinity_classification, factory: :purpose_affinity_classification
+    affinity_classification { purpose_affinity_classification() }
     sequence(:affinity_name) do |n|
       "Affinity #{n}"
     end
@@ -337,7 +348,7 @@ FactoryGirl.define do
     id 1
     affinity_classification_name "location"
     initialize_with do
-      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+      ::Naf::AffinityClassification.find_or_initialize_by(:id => id)
     end
   end
 
@@ -345,7 +356,7 @@ FactoryGirl.define do
     id 2
     affinity_classification_name "purpose"
     initialize_with do
-      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+      ::Naf::AffinityClassification.find_or_initialize_by(:id => id)
     end
   end
 
@@ -353,7 +364,7 @@ FactoryGirl.define do
     id 3
     affinity_classification_name "application"
     initialize_with do
-      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+      ::Naf::AffinityClassification.find_or_initialize_by(:id => id)
     end
   end
 
@@ -361,16 +372,12 @@ FactoryGirl.define do
     id 4
     affinity_classification_name "weight"
     initialize_with do
-      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
+      ::Naf::AffinityClassification.find_or_initialize_by(:id => id)
     end
   end
 
   factory :machine_affinity_classification, class: ::Naf::AffinityClassification do
-    id 5
     affinity_classification_name "machine"
-    initialize_with do
-      ::Naf::AffinityClassification.find_or_initialize_by_id(id)
-    end
   end
 
   factory :affinity_classification, class: ::Naf::AffinityClassification do
@@ -424,7 +431,7 @@ FactoryGirl.define do
   # Machine Affinity Slots
 
   factory :machine_affinity_slot_base, class: ::Naf::MachineAffinitySlot do
-    association :machine, factory: :machine
+    machine { factory_girl_machine() }
   end
 
   factory :normal_machine_affinity_slot, parent: :machine_affinity_slot_base do

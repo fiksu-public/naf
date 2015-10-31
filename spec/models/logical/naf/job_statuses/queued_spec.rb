@@ -22,7 +22,7 @@ module Logical
 
           it "adds conditions to returned query" do
             sql = Queued.all(conditions)
-            expect(sql.include?(conditions)).to be_true
+            expect(sql.include?(conditions)).to be_truthy
           end
 
         end

@@ -23,7 +23,7 @@ module Logical
       it "should return the correct statuses" do
         STATUS_MAP.each do |job_type, expected_status|
           logical_job = Job.new(FactoryGirl.create(job_type))
-          logical_job.status.should eql(expected_status)
+          expect(logical_job.status).to eql(expected_status)
         end
       end
 
@@ -32,32 +32,32 @@ module Logical
 
         context "for a job scheduled from an application" do
           it "should get the title from the application_schedule" do
-            scheduled_job.title.should eql(scheduled_job.application.title)
+            expect(scheduled_job.title).to eql(scheduled_job.application.title)
           end
         end
 
         context "for an ad hoc job" do
           it "should get the title, formed from its command" do
             job = Job.new(FactoryGirl.create(:job, command: "Yo"*30))
-            job.title.should eql(job.command)
+            expect(job.title).to eql(job.command)
           end
         end
       end
 
       context "with regard to the timestamps" do
         it "should display started_at nicely" do
-          job.started_at.should be_a(String)
-          job.started_at.should =~ /-0h3m/
+          expect(job.started_at).to be_a(String)
+          expect(job.started_at).to match(/-0h3m/)
         end
 
         it "should display finished_at nicely" do
-          job.finished_at.should be_a(String)
-          job.finished_at.split(',').first.should =~ /ago$/
+          expect(job.finished_at).to be_a(String)
+          expect(job.finished_at.split(',').first).to match(/ago$/)
         end
 
         it "should display queued time explicitly as string" do
-          job.queued_time.should be_a(String)
-          job.queued_time.should =~ TIME_DISPLAY_REGEX
+          expect(job.queued_time).to be_a(String)
+          expect(job.queued_time).to match(TIME_DISPLAY_REGEX)
         end
       end
 
@@ -66,8 +66,8 @@ module Logical
 
         it "should display started_at, and finished_at explicitly as a string" do
           [:started_at, :finished_at].each do |timestamp|
-            detailed_hash[timestamp].should be_a String
-            detailed_hash[timestamp].should =~ TIME_DISPLAY_REGEX
+            expect(detailed_hash[timestamp]).to be_a String
+            expect(detailed_hash[timestamp]).to match(TIME_DISPLAY_REGEX)
           end
         end
       end
@@ -87,7 +87,7 @@ module Logical
            :status] }
 
         it "should have the following columns" do
-          job.to_hash.keys.should. == columns
+          expect(job.to_hash.keys).to match_array(columns)
         end
       end
 
@@ -102,7 +102,7 @@ module Logical
 
         it "should filter by status correctly" do
           @job_status_type_map.each do |status, logical_job|
-            Job.search(status: status, limit: 10).map(&:id).should include(logical_job.id)
+            expect(Job.search(status: status, limit: 10).map(&:id)).to include(logical_job.id)
           end
         end
 
@@ -110,7 +110,7 @@ module Logical
           job_ids = @job_status_type_map.values.map(&:id)
           result_ids = Job.search(status: 'all', limit: 10).map(&:id)
           job_ids.each do |job_id|
-            result_ids.should include job_id
+            expect(result_ids).to include job_id
           end
         end
 
@@ -130,44 +130,44 @@ module Logical
             ::Naf::HistoricalJob.delete_all
             job_one
             job_two
-            ::Naf::HistoricalJob.all.should have(2).items
+            expect(::Naf::HistoricalJob.all.size).to eq(2)
           end
 
           it "should filter by application type" do
             id_one = job_one.application_type_id
-            Job.search(application_type_id: id_one, limit: 10).map(&:id).should == [job_one.id]
+            expect(Job.search(application_type_id: id_one, limit: 10).map(&:id)).to eq([job_one.id])
             id_two = job_two.application_type_id
-            Job.search(application_type_id: id_two, limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(application_type_id: id_two, limit: 10).map(&:id)).to eq([job_two.id])
           end
 
           it "should filter by run_group_restriction" do
             id_one = job_one.application_run_group_restriction_id
-            Job.search(application_run_group_restriction_id: id_one, limit: 10).map(&:id).should == [job_one.id]
+            expect(Job.search(application_run_group_restriction_id: id_one, limit: 10).map(&:id)).to eq([job_one.id])
             id_two = job_two.application_run_group_restriction_id
-            Job.search(application_run_group_restriction_id: id_two, limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(application_run_group_restriction_id: id_two, limit: 10).map(&:id)).to eq([job_two.id])
           end
 
           it "should filter by priority" do
             priority_one = job_one.priority
-            Job.search(priority: priority_one, limit: 10).map(&:id).should == [job_one.id]
+            expect(Job.search(priority: priority_one, limit: 10).map(&:id)).to eq([job_one.id])
             priority_two = job_two.priority
-            Job.search(priority: priority_two, limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(priority: priority_two, limit: 10).map(&:id)).to eq([job_two.id])
           end
 
           it "should filter by pid" do
             pid_one = job_one.pid
-            Job.search(pid: pid_one, limit: 10).map(&:id).should == [job_one.id]
+            expect(Job.search(pid: pid_one, limit: 10).map(&:id)).to eq([job_one.id])
             pid_two = job_two.pid
-            Job.search(pid: pid_two, limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(pid: pid_two, limit: 10).map(&:id)).to eq([job_two.id])
           end
 
           it "should find jobs where the command is like the query" do
-            Job.search(command: "friend", limit: 10).map(&:id).should == [job_one.id]
-            Job.search(command: "ssh", limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(command: "friend", limit: 10).map(&:id)).to eq([job_one.id])
+            expect(Job.search(command: "ssh", limit: 10).map(&:id)).to eq([job_two.id])
           end
 
           it "should find jobs where the application_run_group_name is like the query" do
-            Job.search(application_run_group_name: "crazy", limit: 10).map(&:id).should == [job_two.id]
+            expect(Job.search(application_run_group_name: "crazy", limit: 10).map(&:id)).to eq([job_two.id])
           end
         end
       end
@@ -179,12 +179,12 @@ module Logical
         let!(:finished_job) { FactoryGirl.create(:finished_job) }
 
         it "return correct job when scope is specified" do
-          ::Logical::Naf::Job.get_job_scope({ status: :finished }).should == [finished_job]
+          expect(::Logical::Naf::Job.get_job_scope({ status: :finished })).to eq([finished_job])
         end
 
         it "return correct jobs when scope is not specified" do
           historical_job = FactoryGirl.create(:job)
-          ::Logical::Naf::Job.get_job_scope({}).should == [finished_job, historical_job]
+          expect(::Logical::Naf::Job.get_job_scope({})).to eq([finished_job, historical_job])
         end
       end
 
@@ -200,27 +200,27 @@ module Logical
         it "show correct run time when job has finished" do
           historical_job.started_at = Time.zone.now - 6.seconds
           historical_job.finished_at = Time.zone.now
-          job.run_time.should == '0h0m6s'
+          expect(job.run_time).to eq('0h0m6s')
         end
 
         describe "show correct run time when job is running" do
           it "less than 2 days" do
             historical_job.started_at = Time.zone.now - 3.hours
             historical_job.finished_at = nil
-            job.run_time.should == '3h0m0s'
+            expect(job.run_time).to eq('3h0m0s')
           end
 
           it "more than 2 days" do
             historical_job.started_at = Time.zone.now - 3.days
             historical_job.finished_at = nil
-            job.run_time.should == '3d0h0m0s'
+            expect(job.run_time).to eq('3d0h0m0s')
           end
         end
 
         it "show correct run time when job has not started" do
           historical_job.started_at = nil
           historical_job.finished_at = nil
-          job.run_time.should == ''
+          expect(job.run_time).to eq('')
         end
       end
 
@@ -235,17 +235,17 @@ module Logical
 
         it "show correct run time when job has started < 60 seconds ago" do
           historical_job.started_at = Time.zone.now - 10.seconds
-          job.started_at.should =~ /10 seconds ago/
+          expect(job.started_at).to match(/10 seconds ago/)
         end
 
         it "show correct run time when job has started >= 60 seconds and < 2 days ago" do
           historical_job.started_at = Time.zone.now - 6.hours
-          job.started_at.should =~ /-6h0m/
+          expect(job.started_at).to match(/-6h0m/)
         end
 
         it "show correct run time when job has started <= 2 days ago" do
           historical_job.started_at = Time.zone.now - 3.days
-          job.started_at.should =~ /3 days ago/
+          expect(job.started_at).to match(/3 days ago/)
         end
       end
 
@@ -260,12 +260,12 @@ module Logical
 
         it "show correct run time when job has finished" do
           historical_job.finished_at = Time.zone.now - 3.seconds
-          job.finished_at.should =~ /less than 5 seconds ago/
+          expect(job.finished_at).to match(/less than 5 seconds ago/)
         end
 
         it "show correct run time when job has not finished" do
           historical_job.finished_at = nil
-          job.finished_at.should == ''
+          expect(job.finished_at).to eq('')
         end
       end
 
@@ -277,16 +277,16 @@ module Logical
 
         it "show custom visible tags" do
           historical_job.running_job.tags = '{test}'
-          job.tags.should == 'test'
+          expect(job.tags).to eq('test')
         end
 
         it "not show system or custom invisible tags" do
           historical_job.running_job.tags = '{$test,_test}'
-          job.tags.should == ''
+          expect(job.tags).to eq('')
         end
 
         it "return nil when tags is not present" do
-           job.tags.should == nil
+           expect(job.tags).to eq(nil)
         end
       end
 

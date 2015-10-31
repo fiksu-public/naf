@@ -29,11 +29,11 @@ module Logical
         end
 
         it 'encapsulate the message in JSON format' do
-          log_file.lines_cache.should == log_line
+          expect(log_file.lines_cache).to eq(log_line)
         end
 
         it 'increment the line_number' do
-          log_file.line_number.should == 2
+          expect(log_file.line_number).to eq(2)
         end
     	end
 
@@ -45,11 +45,11 @@ module Logical
         end
 
         it 'clear the lines_cache' do
-          log_file.lines_cache.should == ''
+          expect(log_file.lines_cache).to eq('')
         end
 
         it 'save the logs to the file' do
-          File.open(log_file.file.path, 'r').read.should == log_line
+          expect(File.open(log_file.file.path, 'r').read).to eq(log_line)
         end
     	end
 
@@ -61,7 +61,7 @@ module Logical
         end
 
         it 'update the file with content written' do
-          File.open(log_file.file.path, 'r').read.should == 'test message'
+          expect(File.open(log_file.file.path, 'r').read).to eq('test message')
         end
     	end
 
@@ -71,7 +71,7 @@ module Logical
         end
 
         it 'create the file path' do
-          log_file.file.path.should == "log_spec/1_#{time.strftime('%Y%m%d_%H%M%S')}.json"
+          expect(log_file.file.path).to eq("log_spec/1_#{time.strftime('%Y%m%d_%H%M%S')}.json")
         end
     	end
 
@@ -82,7 +82,7 @@ module Logical
         end
 
         it 'close the file stream' do
-          log_file.file.should == nil
+          expect(log_file.file).to eq(nil)
         end
     	end
 
@@ -96,7 +96,7 @@ module Logical
         end
 
         it 'create a new file when size > LOG_MAX_SIZE' do
-          log_file.file.path.should == "log_spec/2_#{time.strftime('%Y%m%d_%H%M%S')}.json"
+          expect(log_file.file.path).to eq("log_spec/2_#{time.strftime('%Y%m%d_%H%M%S')}.json")
         end
     	end
 

@@ -2,7 +2,7 @@ require 'spec_helper'
 
 module Naf
   describe ApplicationType do
-    let(:rails) { FactoryGirl.create(:rails_app_type) }
+    let(:rails) { rails_app_type() }
     let(:bash_command) { FactoryGirl.create(:bash_command_app_type) }
     let(:bash_script) { FactoryGirl.create(:bash_script_app_type) }
     let(:ruby) { FactoryGirl.create(:ruby_script_app_type) }
@@ -13,28 +13,28 @@ module Naf
      :script_type_name,
      :description,
      :invocation_method].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should have_many(:applications) }
-    it { should have_many(:historical_jobs) }
+    it { is_expected.to have_many(:applications) }
+    it { is_expected.to have_many(:historical_jobs) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:script_type_name) }
-    it { should validate_presence_of(:invocation_method) }
+    it { is_expected.to validate_presence_of(:script_type_name) }
+    it { is_expected.to validate_presence_of(:invocation_method) }
 
     context "For a Rails Application" do
       before do
@@ -42,12 +42,8 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        rails.id.should == 1
-      end
-
       it "should invoke the rails_invocator" do
-        rails.should_receive(:rails_invocator).and_return(nil)
+        expect(rails).to receive(:rails_invocator).and_return(nil)
         job.spawn
       end
     end
@@ -58,12 +54,8 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        bash_command.id.should == 2
-      end
-
       it "should invoke the bash_command_invocator" do
-        bash_command.should_receive(:bash_command_invocator).and_return(nil)
+        expect(bash_command).to receive(:bash_command_invocator).and_return(nil)
         job.spawn
       end
     end
@@ -74,12 +66,8 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        bash_script.id.should == 3
-      end
-
       it "should invoke the bash_script_invocator" do
-        bash_script.should_receive(:bash_script_invocator).and_return(nil)
+        expect(bash_script).to receive(:bash_script_invocator).and_return(nil)
         job.spawn
       end
     end
@@ -90,12 +78,8 @@ module Naf
         job.save!
       end
 
-      it "has the starting id" do
-        ruby.id.should == 4
-      end
-
       it "should invoke the ruby_script_invocator" do
-        ruby.should_receive(:ruby_script_invocator).and_return(nil)
+        expect(ruby).to receive(:ruby_script_invocator).and_return(nil)
         job.spawn
       end
     end

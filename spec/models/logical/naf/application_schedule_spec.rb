@@ -23,7 +23,7 @@ module Logical
         #++++++++++++++++++++++++
 
         shared_examples 'displays the hour correctly' do |run_interval, time|
-          it { update_schedule(run_interval).exact_time_of_day.should == time }
+          it { expect(update_schedule(run_interval).exact_time_of_day).to eq(time) }
         end
 
         let!(:schedule) { FactoryGirl.create(:schedule_base) }

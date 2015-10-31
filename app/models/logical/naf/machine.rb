@@ -31,7 +31,7 @@ module Logical
       end
 
       def self.all(filter = false)
-        ::Naf::Machine.include_deleted(filter).all.map{ |machine| new(machine) }
+        ::Naf::Machine.include_deleted(filter).to_a.map{ |machine| new(machine) }
       end
 
       def process_pool_size

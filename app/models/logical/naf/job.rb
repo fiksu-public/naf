@@ -219,7 +219,7 @@ module Logical
           when :errored
             job_scope = ::Naf::HistoricalJob.errored
           else
-            job_scope = ::Naf::HistoricalJob.scoped
+            job_scope = ::Naf::HistoricalJob.all
         end
 
         FILTER_FIELDS.each do |field|
@@ -273,7 +273,7 @@ module Logical
           elsif value < 172_800
             time_difference(value, @job.started_at)
           elsif value >= 172_800
-            "#{time_ago_in_words(@job.started_at, true)} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
+            "#{time_ago_in_words(@job.started_at, { :include_seconds => true })} ago, #{@job.started_at.localtime.strftime("%Y-%m-%d %r")}"
           else
             ""
           end
@@ -308,7 +308,7 @@ module Logical
 
       def finished_at
         if value = @job.finished_at
-          "#{time_ago_in_words(value, true)} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
+          "#{time_ago_in_words(value, { :include_seconds => true })} ago, #{value.localtime.strftime("%Y-%m-%d %r")}"
         else
           ""
         end
@@ -331,7 +331,7 @@ module Logical
       def tags
         if @job.running_job.try(:tags).present?
           # Only show custom visible tags
-          job_tags = @job.running_job.tags.gsub(/[{}]/,'').split(',')
+          job_tags = @job.running_job.tags.map { |tag| tag.gsub(/[{}]/,'') }
           (job_tags.select { |elem| !['$', '_'].include?elem[0] }).join(', ')
         else
           nil

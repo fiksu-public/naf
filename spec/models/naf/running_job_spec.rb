@@ -19,34 +19,34 @@ module Naf
      :log_level,
      :started_at,
      :tags].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should belong_to(:historical_job) }
-    it { should belong_to(:application) }
-    it { should belong_to(:application_schedule) }
-    it { should belong_to(:application_type) }
-    it { should belong_to(:application_run_group_restriction) }
-    it { should belong_to(:started_on_machine) }
-    it { should belong_to(:marked_dead_by_machine) }
+    it { is_expected.to belong_to(:historical_job) }
+    it { is_expected.to belong_to(:application) }
+    it { is_expected.to belong_to(:application_schedule) }
+    it { is_expected.to belong_to(:application_type) }
+    it { is_expected.to belong_to(:application_run_group_restriction) }
+    it { is_expected.to belong_to(:started_on_machine) }
+    it { is_expected.to belong_to(:marked_dead_by_machine) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:application_type_id) }
-    it { should validate_presence_of(:command) }
-    it { should validate_presence_of(:application_run_group_restriction_id) }
+    it { is_expected.to validate_presence_of(:application_type_id) }
+    it { is_expected.to validate_presence_of(:command) }
+    it { is_expected.to validate_presence_of(:application_run_group_restriction_id) }
 
     #----------------------
     # *** Class Methods ***
@@ -59,8 +59,8 @@ module Naf
       end
 
       it "return the correct job record" do
-        ::Naf::RunningJob.should_receive(:where).and_return([running_job])
-        ::Naf::RunningJob.started_on(machine).should == [running_job]
+        expect(::Naf::RunningJob).to receive(:where).and_return([running_job])
+        expect(::Naf::RunningJob.started_on(machine)).to eq([running_job])
       end
     end
 
@@ -72,18 +72,18 @@ module Naf
       end
 
       it "return the correct job record" do
-        ::Naf::RunningJob.started_on_invocation(invocation.id).should == [running_job]
+        expect(::Naf::RunningJob.started_on_invocation(invocation.id)).to eq([running_job])
       end
 
       it "return nothing when no running jobs are associated invocation" do
-        ::Naf::RunningJob.started_on_invocation(invocation.id + 1).should == []
+        expect(::Naf::RunningJob.started_on_invocation(invocation.id + 1)).to eq([])
       end
     end
 
     describe "#in_run_group" do
       it "return the correct job record" do
-        ::Naf::RunningJob.should_receive(:where).and_return([running_job])
-        ::Naf::RunningJob.in_run_group('test').should == [running_job]
+        expect(::Naf::RunningJob).to receive(:where).and_return([running_job])
+        expect(::Naf::RunningJob.in_run_group('test')).to eq([running_job])
       end
     end
 
@@ -91,13 +91,13 @@ module Naf
       let(:machine) { mock_model(Machine) }
 
       it "return the correct job record" do
-        ::Naf::RunningJob.stub(:started_on).and_return([running_job])
-        ::Naf::RunningJob.assigned_jobs(machine).should == [running_job]
+        allow(::Naf::RunningJob).to receive(:started_on).and_return([running_job])
+        expect(::Naf::RunningJob.assigned_jobs(machine)).to eq([running_job])
       end
     end
 
     describe "#affinity_weights" do
-      let(:machine) { FactoryGirl.create(:machine) }
+      let(:machine) { factory_girl_machine() }
       before do
         cpu_affinity = FactoryGirl.create(:affinity, id: 4, affinity_name: 'cpus')
         memory_affinity = FactoryGirl.create(:affinity, id: 5, affinity_name: 'memory')
@@ -113,11 +113,11 @@ module Naf
       end
 
       it "return the correct sum of affinity parameters for each affinity" do
-        ::Naf::RunningJob.affinity_weights(machine).should == { 1 => 0.0,
+        expect(::Naf::RunningJob.affinity_weights(machine)).to eq({ 1 => 0.0,
                                                                 2 => 0.0,
                                                                 3 => 0.0,
                                                                 4 => 1.0,
-                                                                5 => 1.0 }
+                                                                5 => 1.0 })
       end
     end
 
@@ -132,12 +132,12 @@ module Naf
 
       it "insert unique tag" do
         running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        running_job.tags.should == "{$pre-work,$work}"
+        expect(running_job.tags).to match_array(["$pre-work","$work"])
       end
 
       it "not insert non-unique tag" do
         running_job.add_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        running_job.tags.should == "{$pre-work}"
+        expect(running_job.tags).to match_array(["$pre-work"])
       end
     end
 
@@ -148,12 +148,12 @@ module Naf
 
       it "remove existing tag" do
         running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:pre_work]])
-        running_job.tags.should == "{}"
+        expect(running_job.tags).to eq([])
       end
 
       it "not update tags when removing non-existing tag" do
         running_job.remove_tags([::Naf::HistoricalJob::SYSTEM_TAGS[:work]])
-        running_job.tags.should == "{$pre-work}"
+        expect(running_job.tags).to match_array(["$pre-work"])
       end
     end
 
@@ -164,7 +164,7 @@ module Naf
 
       it "remove any existing tags" do
         running_job.remove_all_tags
-        running_job.tags.should == "{}"
+        expect(running_job.tags).to eq([])
       end
     end
 

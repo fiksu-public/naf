@@ -32,12 +32,16 @@ namespace :db do
         ActiveRecord::Base.establish_connection(abcs[Rails.env])
         File.open(filename, "w:utf-8") { |f| f << ActiveRecord::Base.connection.structure_dump }
       when /postgresql/
-        set_psql_env(abcs[Rails.env])
-        search_path = abcs[Rails.env]['schema_search_path']
+        configuration = abcs[Rails.env]
+        ENV['PGHOST']     = configuration['host']          if configuration['host']
+        ENV['PGPORT']     = configuration['port'].to_s     if configuration['port']
+        ENV['PGPASSWORD'] = configuration['password'].to_s if configuration['password']
+        ENV['PGUSER']     = configuration['username'].to_s if configuration['username']
+        search_path = configuration['schema_search_path']
         unless search_path.blank?
           search_path = search_path.split(",").map{|search_path_part| "--schema=#{search_path_part.strip}" }.join(" ")
         end
-        `pg_dump -i -s -x -O -f #{filename} #{search_path} #{abcs[Rails.env]['database']}`
+        `pg_dump -i -s -x -O -f #{filename} #{search_path} #{configuration['database']}`
         raise 'Error dumping database' if $?.exitstatus == 1
       File.open(filename, "a") { |f| f << "SET search_path TO #{ActiveRecord::Base.connection.schema_search_path};\n\n" }
       when /sqlite/

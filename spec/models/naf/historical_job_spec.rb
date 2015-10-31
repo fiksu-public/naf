@@ -28,47 +28,47 @@ module Naf
      :marked_dead_by_machine_id,
      :log_level,
      :machine_runner_invocation_id].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should belong_to(:application_schedule) }
-    it { should belong_to(:application_type) }
-    it { should belong_to(:started_on_machine) }
-    it { should belong_to(:marked_dead_by_machine) }
-    it { should belong_to(:application) }
-    it { should belong_to(:application_run_group_restriction) }
-    it { should belong_to(:machine_runner_invocation) }
-    it { should have_one(:running_job) }
-    it { should have_one(:queued_job) }
-    it { should have_many(:historical_job_prerequisites) }
-    it { should have_many(:prerequisites) }
-    it { should have_many(:historical_job_affinity_tabs) }
-    it { should have_many(:affinities) }
+    it { is_expected.to belong_to(:application_schedule) }
+    it { is_expected.to belong_to(:application_type) }
+    it { is_expected.to belong_to(:started_on_machine) }
+    it { is_expected.to belong_to(:marked_dead_by_machine) }
+    it { is_expected.to belong_to(:application) }
+    it { is_expected.to belong_to(:application_run_group_restriction) }
+    it { is_expected.to belong_to(:machine_runner_invocation) }
+    it { is_expected.to have_one(:running_job) }
+    it { is_expected.to have_one(:queued_job) }
+    it { is_expected.to have_many(:historical_job_prerequisites) }
+    it { is_expected.to have_many(:prerequisites) }
+    it { is_expected.to have_many(:historical_job_affinity_tabs) }
+    it { is_expected.to have_many(:affinities) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:application_type_id) }
-    it { should validate_presence_of(:command) }
-    it { should validate_presence_of(:application_run_group_restriction_id) }
+    it { is_expected.to validate_presence_of(:application_type_id) }
+    it { is_expected.to validate_presence_of(:command) }
+    it { is_expected.to validate_presence_of(:application_run_group_restriction_id) }
 
     [1, 100, 2147483646, ''].each do |v|
-      it { should allow_value(v).for(:application_run_group_limit) }
+      it { is_expected.to allow_value(v).for(:application_run_group_limit) }
     end
 
     [0, 2147483647, 1.1].each do |v|
-      it { should_not allow_value(v).for(:application_run_group_limit) }
+      it { is_expected.not_to allow_value(v).for(:application_run_group_limit) }
     end
 
     #----------------------
@@ -77,7 +77,7 @@ module Naf
 
     describe "#full_table_name_prefix" do
       it "return the correct string" do
-        ::Naf::HistoricalJob.full_table_name_prefix.should == 'naf.'
+        expect(::Naf::HistoricalJob.full_table_name_prefix).to eq('naf.')
       end
     end
 
@@ -87,19 +87,19 @@ module Naf
       end
 
       it "return the correct queued job" do
-        ::Naf::HistoricalJob.queued_between(Time.zone.now - 1.minutes, Time.zone.now).
-          should == [historical_job]
+        expect(::Naf::HistoricalJob.queued_between(Time.zone.now - 1.minutes, Time.zone.now)).
+          to eq([historical_job])
       end
     end
 
     describe "#canceled" do
       it "return jobs requested to terminate" do
         historical_job.update_attributes!(request_to_terminate: true)
-        ::Naf::HistoricalJob.canceled.should == [historical_job]
+        expect(::Naf::HistoricalJob.canceled).to eq([historical_job])
       end
 
       it "return nil when no jobs have been requested to terminate" do
-        ::Naf::HistoricalJob.canceled.should == []
+        expect(::Naf::HistoricalJob.canceled).to eq([])
       end
     end
 
@@ -111,11 +111,11 @@ module Naf
       it "return job when it finished running" do
         historical_job.finished_at = Time.zone.now
         historical_job.save!
-        ::Naf::HistoricalJob.application_last_runs.first.application_schedule.should == historical_job.application_schedule
+        expect(::Naf::HistoricalJob.application_last_runs.first.application_schedule).to eq(historical_job.application_schedule)
       end
 
       it "return nil when job has not finished running" do
-        ::Naf::HistoricalJob.application_last_runs.should == []
+        expect(::Naf::HistoricalJob.application_last_runs).to eq([])
       end
     end
 
@@ -128,7 +128,7 @@ module Naf
       end
 
       it "return correct application id" do
-        ::Naf::HistoricalJob.application_last_queued.first.should == historical_job2
+        expect(::Naf::HistoricalJob.application_last_queued.order("id ASC").first).to eq(historical_job2)
       end
     end
 
@@ -136,16 +136,16 @@ module Naf
       it "return jobs that have finished running" do
         historical_job.finished_at = Time.zone.now
         historical_job.save!
-        ::Naf::HistoricalJob.finished.should == [historical_job]
+        expect(::Naf::HistoricalJob.finished).to eq([historical_job])
       end
 
       it "return jobs requested to terminate" do
         historical_job.update_attributes!(request_to_terminate: true)
-        ::Naf::HistoricalJob.finished.should == [historical_job]
+        expect(::Naf::HistoricalJob.finished).to eq([historical_job])
       end
 
       it "return nil when no jobs have been requested to terminate or have finished running" do
-        ::Naf::HistoricalJob.finished.should == []
+        expect(::Naf::HistoricalJob.finished).to eq([])
       end
     end
 
@@ -155,8 +155,8 @@ module Naf
 
       it "return correct jobs" do
         FactoryGirl.create(:job, request_to_terminate: true)
-        ::Naf::HistoricalJob.queued_status.
-          order(:id).should == [historical_job, historical_job2, historical_job3]
+        expect(::Naf::HistoricalJob.queued_status.
+          order(:id)).to eq([historical_job, historical_job2, historical_job3])
       end
     end
 
@@ -168,16 +168,16 @@ module Naf
         historical_job.save!
         FactoryGirl.create(:job, request_to_terminate: true)
 
-        ::Naf::HistoricalJob.running_status.
-          order(:id).should == [historical_job, historical_job2]
+        expect(::Naf::HistoricalJob.running_status.
+          order(:id)).to eq([historical_job, historical_job2])
       end
     end
 
     describe "#queued_with_waiting" do
       it "return correct jobs" do
         FactoryGirl.create(:job, request_to_terminate: true)
-        ::Naf::HistoricalJob.queued_with_waiting.
-          order(:id).should == [historical_job]
+        expect(::Naf::HistoricalJob.queued_with_waiting.
+          order(:id)).to eq([historical_job])
       end
     end
 
@@ -187,8 +187,8 @@ module Naf
                                                        exit_status: 1) }
 
       it "return correct jobs" do
-        ::Naf::HistoricalJob.errored.
-          order(:id).should == [historical_job2, historical_job3]
+        expect(::Naf::HistoricalJob.errored.
+          order(:id)).to eq([historical_job2, historical_job3])
       end
     end
 
@@ -202,61 +202,61 @@ module Naf
       end
 
       it "return correct parsing of app" do
-        historical_job.to_s.should == "::Naf::HistoricalJob<QUEUED, id: #{historical_job.id}, \"puts \'hi\'\">"
+        expect(historical_job.to_s).to eq("::Naf::HistoricalJob<QUEUED, id: #{historical_job.id}, \"puts \'hi\'\">")
       end
     end
 
     describe "#title" do
       it "return correct application title when present" do
         historical_job.application = FactoryGirl.create(:application, title: 'App1')
-        historical_job.title.should == 'App1'
+        expect(historical_job.title).to eq('App1')
       end
 
       it "return nil when application not present" do
-        historical_job.title.should == nil
+        expect(historical_job.title).to eq(nil)
       end
     end
 
     describe "#machine_started_on_server_name" do
       it "return correct machine server name when present" do
-        historical_job.started_on_machine = FactoryGirl.create(:machine, server_name: 'Machine1')
-        historical_job.machine_started_on_server_name.should == 'Machine1'
+        historical_job.started_on_machine = FactoryGirl.create(:machine_two, server_name: 'Machine1')
+        expect(historical_job.machine_started_on_server_name).to eq('Machine1')
       end
 
       it "return nil when machine not present" do
-        historical_job.machine_started_on_server_name.should == nil
+        expect(historical_job.machine_started_on_server_name).to eq(nil)
       end
     end
 
     describe "#machine_started_on_server_address" do
       it "return correct machine server name when present" do
-        historical_job.started_on_machine = FactoryGirl.create(:machine)
-        historical_job.machine_started_on_server_address.should == '0.0.0.1'
+        historical_job.started_on_machine = factory_girl_machine()
+        expect(historical_job.machine_started_on_server_address).to eq('0.0.0.1')
       end
 
       it "return nil when machine not present" do
-        historical_job.machine_started_on_server_address.should == nil
+        expect(historical_job.machine_started_on_server_address).to eq(nil)
       end
     end
 
     describe "#historical_job_affinity_tabs" do
       it "return affinity tabs associated with historical_job" do
         affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
-        historical_job.historical_job_affinity_tabs.should == [affinity_tab]
+        expect(historical_job.historical_job_affinity_tabs).to eq([affinity_tab])
       end
     end
 
     describe "#job_affinities" do
       it "return affinities associated with historical_job" do
         affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
-        historical_job.job_affinities.should == [affinity_tab.affinity]
+        expect(historical_job.job_affinities).to eq([affinity_tab.affinity])
       end
     end
 
     describe "#affinity_ids" do
       it "return affinities associated with historical_job" do
         affinity_tab = FactoryGirl.create(:normal_job_affinity_tab, historical_job: historical_job)
-        historical_job.affinity_ids.should == [affinity_tab.affinity.id]
+        expect(historical_job.affinity_ids).to eq([affinity_tab.affinity.id])
       end
     end
 
@@ -265,7 +265,7 @@ module Naf
         historical_job_prerequesite = FactoryGirl.
           create(:historical_job_prerequesite, historical_job: historical_job,
                                                prerequisite_historical_job: FactoryGirl.create(:job))
-        historical_job.historical_job_prerequisites.should == [historical_job_prerequesite]
+        expect(historical_job.historical_job_prerequisites).to eq([historical_job_prerequesite])
       end
     end
 
@@ -275,7 +275,7 @@ module Naf
         historical_job_prerequesite = FactoryGirl.
           create(:historical_job_prerequesite, historical_job: historical_job,
                                                prerequisite_historical_job: prerequisite)
-        historical_job.prerequisites.should == [prerequisite]
+        expect(historical_job.prerequisites).to eq([prerequisite])
       end
     end
 
@@ -286,7 +286,7 @@ module Naf
       end
 
       it "raise an error when job is in a prerequesite loop" do
-        expect { historical_job.verify_prerequisites([historical_job]) }.to raise_error
+        expect { historical_job.verify_prerequisites([historical_job]) }.to raise_error(Naf::HistoricalJob::JobPrerequisiteLoop)
       end
     end
 

@@ -61,7 +61,7 @@ module Logical
               FROM #{::Naf.schema_name}.machine_affinity_slots
               WHERE machine_id = #{machine.id} AND required = true
               ORDER BY affinity_id) AS required_affinities").
-            group("required_affinities").
+            group("required_affinities").to_a.
             first.required_affinities
 
           # Choose queued jobs that can be run by the machine
@@ -79,7 +79,7 @@ module Logical
                select affinity_id
                from #{::Naf.schema_name}.machine_affinity_slots
                where machine_id = #{machine.id} and required = true)
-              order by affinity_id) = '#{required_machine_affinities}'").
+              order by affinity_id) = '{#{required_machine_affinities.join(',')}}'").
             order_by_priority.
             limit(100)
         elsif machine.machine_affinity_slots.present?
