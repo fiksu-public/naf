@@ -16,39 +16,39 @@ module Naf
      :application_schedule_prerequisites_attributes,
      :enqueue_backlogs,
      :run_interval_style_id].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should belong_to(:application) }
-    it { should belong_to(:application_run_group_restriction) }
-    it { should belong_to(:run_interval_style) }
-    it { should have_many(:application_schedule_affinity_tabs) }
-    it { should have_many(:affinities) }
-    it { should have_many(:application_schedule_prerequisites) }
-    it { should have_many(:prerequisites) }
+    it { is_expected.to belong_to(:application) }
+    it { is_expected.to belong_to(:application_run_group_restriction) }
+    it { is_expected.to belong_to(:run_interval_style) }
+    it { is_expected.to have_many(:application_schedule_affinity_tabs) }
+    it { is_expected.to have_many(:affinities) }
+    it { is_expected.to have_many(:application_schedule_prerequisites) }
+    it { is_expected.to have_many(:prerequisites) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:application_run_group_restriction_id) }
+    it { is_expected.to validate_presence_of(:application_run_group_restriction_id) }
 
     [-2147483647, 2147483646, 0].each do |v|
-      it { should allow_value(v).for(:priority) }
+      it { is_expected.to allow_value(v).for(:priority) }
     end
 
     [-2147483648, 2147483647, 1.0, nil].each do |v|
-      it { should_not allow_value(v).for(:priority) }
+      it { is_expected.not_to allow_value(v).for(:priority) }
     end
 
     #--------------------
@@ -57,13 +57,13 @@ module Naf
 
     context "with regards to delegation" do
       it "should delegate the title method" do
-        schedule.application.should_receive(:title)
+        expect(schedule.application).to receive(:title)
         schedule.title
       end
 
       it "should delegate the application_run_group_restriction_name method" do
-        schedule.application_run_group_restriction.
-          should_receive(:application_run_group_restriction_name)
+        expect(schedule.application_run_group_restriction).
+          to receive(:application_run_group_restriction_name)
         schedule.application_run_group_restriction_name
       end
     end
@@ -77,29 +77,29 @@ module Naf
     describe "#exact_schedules" do
       let!(:job) { FactoryGirl.create(:finished_job) }
       it "return schedule when it is ready" do
-        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == [schedule]
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, {}, {})).to eq([schedule])
       end
 
       it "return no schedules when application has not finished running" do
         apps = { schedule.id => job }
-        ::Naf::ApplicationSchedule.exact_schedules(time, apps, {}).should == []
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, apps, {})).to eq([])
       end
 
       it "return no schedules when interval time has not passed" do
         apps = { schedule.id => job }
         schedule.run_interval = 20
-        ::Naf::ApplicationSchedule.exact_schedules(time, {}, apps).should == []
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, {}, apps)).to eq([])
       end
 
       it "return no schedules when it is not time to run the application" do
         time = Time.zone.now
-        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, {}, {})).to eq([])
       end
 
       it "return no schedules when application is deleted" do
         schedule.application.deleted = true
         schedule.application.save!
-        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, {}, {})).to eq([])
       end
     end
 
@@ -109,24 +109,24 @@ module Naf
         schedule.run_interval_style.name = 'after previous run'
         schedule.run_interval_style.save
 
-        ::Naf::ApplicationSchedule.relative_schedules(time, {}, {}).should == [schedule]
+        expect(::Naf::ApplicationSchedule.relative_schedules(time, {}, {})).to eq([schedule])
       end
 
       it "return no schedules when application has not finished running" do
         apps = { schedule.application_id => job }
-        ::Naf::ApplicationSchedule.relative_schedules(time, apps, {}).should == []
+        expect(::Naf::ApplicationSchedule.relative_schedules(time, apps, {})).to eq([])
       end
 
       it "return no schedules when interval time has not passed" do
         apps = { schedule.application_id => job }
         schedule.run_interval = 20
-        ::Naf::ApplicationSchedule.relative_schedules(time, {}, apps).should == []
+        expect(::Naf::ApplicationSchedule.relative_schedules(time, {}, apps)).to eq([])
       end
 
       it "return no schedules when application is deleted" do
         schedule.application.deleted = true
         schedule.application.save!
-        ::Naf::ApplicationSchedule.exact_schedules(time, {}, {}).should == []
+        expect(::Naf::ApplicationSchedule.exact_schedules(time, {}, {})).to eq([])
       end
     end
 
@@ -135,23 +135,23 @@ module Naf
         schedule.run_interval_style.name = 'keep running'
         schedule.run_interval_style.save!
 
-        ::Naf::ApplicationSchedule.constant_schedules.should == [schedule]
+        expect(::Naf::ApplicationSchedule.constant_schedules).to eq([schedule])
       end
 
       it "return no schedules when application is deleted" do
         schedule.application.deleted = true
         schedule.application.save!
-        ::Naf::ApplicationSchedule.constant_schedules.should == []
+        expect(::Naf::ApplicationSchedule.constant_schedules).to eq([])
       end
 
       it "return no schedules when schedule is disabled" do
         schedule.enabled = false
         schedule.save!
-        ::Naf::ApplicationSchedule.constant_schedules.should == []
+        expect(::Naf::ApplicationSchedule.constant_schedules).to eq([])
       end
 
       it "return no schdules when run interval style is not keep running" do
-        ::Naf::ApplicationSchedule.constant_schedules.should == []
+        expect(::Naf::ApplicationSchedule.constant_schedules).to eq([])
       end
     end
 
@@ -159,11 +159,11 @@ module Naf
       it "return empty array when schedule is disabled" do
         schedule.enabled = false
         schedule.save!
-        ::Naf::ApplicationSchedule.enabled.should == []
+        expect(::Naf::ApplicationSchedule.enabled).to eq([])
       end
 
       it "return array with schedule when schedule is enabled" do
-        ::Naf::ApplicationSchedule.enabled.should == [schedule]
+        expect(::Naf::ApplicationSchedule.enabled).to eq([schedule])
       end
     end
 
@@ -171,11 +171,11 @@ module Naf
       it "return empty array when application is deleted" do
         schedule.application.deleted = true
         schedule.application.save!
-        ::Naf::ApplicationSchedule.application_not_deleted.should == []
+        expect(::Naf::ApplicationSchedule.application_not_deleted).to eq([])
       end
 
       it "return array with schedule when application is not deleted" do
-        ::Naf::ApplicationSchedule.application_not_deleted.should == [schedule]
+        expect(::Naf::ApplicationSchedule.application_not_deleted).to eq([schedule])
       end
     end
 
@@ -190,8 +190,8 @@ module Naf
       end
 
       it "return correct parsing of app" do
-        schedule.to_s.should == "::Naf::ApplicationSchedule<ENABLED, id: #{schedule.id}, " +
-          "\"App1\", #{::Logical::Naf::ApplicationSchedule.new(schedule).display}>"
+        expect(schedule.to_s).to eq("::Naf::ApplicationSchedule<ENABLED, id: #{schedule.id}, " +
+          "\"App1\", #{::Logical::Naf::ApplicationSchedule.new(schedule).display}>")
       end
     end
 
@@ -207,7 +207,7 @@ module Naf
       end
 
       it "add errors to schedule" do
-        schedule.errors.messages.should == error_messages
+        expect(schedule.errors.messages).to eq(error_messages)
       end
     end
 

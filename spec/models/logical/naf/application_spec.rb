@@ -20,19 +20,19 @@ module Logical
 
       context "Class Methods" do
         it "search method should return array of wrapper around physical application" do
-          Application.search(params: nil).map(&:id).should include(logical_app.id)
-          Application.search(params: nil).should have(2).items
-          Application.search(params: nil).should be_a(Array)
+          expect(Application.search(params: nil).map(&:id)).to include(logical_app.id)
+          expect(Application.search(params: nil).size).to eq(2)
+          expect(Application.search(params: nil)).to be_a(Array)
         end
       end
 
       it "should delegate command to the physical app" do
-        logical_app.should_receive(:command).and_return("")
+        expect(logical_app).to receive(:command).and_return("")
         logical_app.command
       end
 
       it "to_hash should have the specified columns" do
-        logical_app.to_hash.keys.should == columns
+        expect(logical_app.to_hash.keys).to eq(columns)
       end
     end
 

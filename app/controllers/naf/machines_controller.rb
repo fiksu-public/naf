@@ -37,7 +37,7 @@ module Naf
     end
 
     def show
-      @machine = Naf::Machine.includes(:machine_affinity_slots).find(params[:id])
+      @machine = Naf::Machine.includes(:machine_affinity_slots).references(:machine_affinity_slots).find(params[:id])
     end
 
     def new

@@ -31,7 +31,7 @@ module Naf
                                     allow_blank: true,
                                     allow_nil: true,
                                     format: {
-                                      with: /^[a-zA-Z_][a-zA-Z0-9_]*$/,
+                                      with: /\A[a-zA-Z_][a-zA-Z0-9_]*\z/,
                                       message: 'letters should be first'
                                     }
 

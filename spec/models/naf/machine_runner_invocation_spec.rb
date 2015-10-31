@@ -12,28 +12,28 @@ module Naf
      :repository_name,
      :deployment_tag,
      :uuid].each do |a|
-      it { should allow_mass_assignment_of(a) }
+      it { is_expected.to allow_mass_assignment_of(a) }
     end
 
     [:id,
      :created_at,
      :updated_at].each do |a|
-      it { should_not allow_mass_assignment_of(a) }
+      it { is_expected.not_to allow_mass_assignment_of(a) }
     end
 
     #---------------------
     # *** Associations ***
     #+++++++++++++++++++++
 
-    it { should belong_to(:machine_runner) }
-    it { should have_many(:historical_jobs) }
+    it { is_expected.to belong_to(:machine_runner) }
+    it { is_expected.to have_many(:historical_jobs) }
 
     #--------------------
     # *** Validations ***
     #++++++++++++++++++++
 
-    it { should validate_presence_of(:machine_runner_id) }
-    it { should validate_presence_of(:pid) }
+    it { is_expected.to validate_presence_of(:machine_runner_id) }
+    it { is_expected.to validate_presence_of(:pid) }
 
     #----------------------
     # *** Class Methods ***
@@ -46,7 +46,7 @@ module Naf
       end
 
       it "return the correct invocation" do
-        ::Naf::MachineRunnerInvocation.recently_marked_dead(24.hours).should == [invocation]
+        expect(::Naf::MachineRunnerInvocation.recently_marked_dead(24.hours)).to eq([invocation])
       end
     end
 

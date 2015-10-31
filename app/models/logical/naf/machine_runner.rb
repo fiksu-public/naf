@@ -14,7 +14,7 @@ module Logical
       def self.to_array(column, order)
         machine_runners = []
         order_by = COLUMNS[column].to_s + ' ' + order
-        ::Naf::MachineRunner.enabled.order(order_by).all.each do |runner|
+        ::Naf::MachineRunner.enabled.order(order_by).to_a.each do |runner|
           values = []
           runner.attributes.each do |key, value|
             if key == 'created_at'

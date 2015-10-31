@@ -4,7 +4,7 @@ module Naf
     before_filter :set_cols_and_attributes
 
     def index
-      @affinities = ::Naf::Affinity.includes(:affinity_classification).all
+      @affinities = ::Naf::Affinity.includes(:affinity_classification).references(:affinity_classifications).load
     end
 
     def show
